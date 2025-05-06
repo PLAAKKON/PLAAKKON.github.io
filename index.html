@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="fi">
 <head>
@@ -6,30 +5,59 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Yoro Oy</title>
   <style>
-    body {
-      font-family: "Segoe UI", sans-serif;
-      background-color: #f4f7fa;
+    html, body {
       margin: 0;
       padding: 0;
-      color: #222;
-    }
-    header {
-      background-color: #005bbb;
+      height: 100%;
+      font-family: "Segoe UI", sans-serif;
       color: white;
-      padding: 2rem;
-      text-align: center;
+      background: transparent;
     }
+
+    .video-background {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      z-index: -2;
+    }
+
+    
+
+    header {
+      text-align: center;
+      padding: 2rem;
+      background: transparent;
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 3rem;
+    }
+
+    header p {
+      margin-top: 0.5rem;
+      font-size: 1.2rem;
+    }
+
     main {
       max-width: 900px;
       margin: auto;
       padding: 2rem;
+      background-color: rgba(0, 0, 0, 0.4);
+      border-radius: 10px;
     }
+
     section {
       margin-bottom: 2rem;
     }
-    h1, h2 {
-      margin-top: 0;
+
+    h2 {
+      color: #ffffff;
     }
+
     a.button {
       display: inline-block;
       background-color: #007acc;
@@ -39,19 +67,26 @@
       border-radius: 8px;
       margin-top: 1rem;
     }
+
     footer {
-      background: #e0e0e0;
       text-align: center;
-      padding: 1rem;
+      padding: 2rem;
       font-size: 0.9rem;
+      background: rgba(0,0,0,0.4);
     }
   </style>
 </head>
 <body>
+  <video autoplay muted loop playsinline class="video-background">
+    <source src="Yoro1_final_1080p_30s.mp4" type="video/mp4" />
+  </video>
+  
+
   <header>
     <h1>Yoro Oy</h1>
     <p>IT-konsultointi, IT-palvelut</p>
   </header>
+
   <main>
     <section>
       <h2>Tietoa meistä</h2>
@@ -74,7 +109,7 @@
         Vastaamalla 10 kysymykseen saat henkilökohtaisen profiilin ja suuntaa antavan arvion vahvuuksistasi ja sopivista työ- ja koulutusvaihtoehdoista.
       </p>
       <p><strong>Testaa nyt:</strong></p>
-      <a class="button" href="https://plaakkon.github.io/profiilitesti/" target="_blank">Avaa profiilitesti</a>
+      <a class="button" href="https://plaakkon.github.io/profiilitesti/" target="_blank">Aloita testi</a>
     </section>
 
     <section>
@@ -106,7 +141,7 @@
   </main>
 
   <footer>
-    &copy; 2025 Yoro Oy – www.yoro.fi – myynti@yoro.fi
+    &copy; 2025 Yoro Oy &ndash; www.yoro.fi &ndash; myynti@yoro.fi
   </footer>
 </body>
 </html>
