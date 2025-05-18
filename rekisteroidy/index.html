@@ -3,12 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rekisteröidy - Yoro.fi</title>
-    <script type="module" src="../firebaseConfig.js"></script>
-    <script type="module" src="../auth.js"></script>
+    <title>Yoro.fi - Kirjaudu tai Rekisteröidy</title>
+    <script defer src="https://www.gstatic.com/firebasejs/11.2.0/firebase-app.js"></script>
+    <script defer src="https://www.gstatic.com/firebasejs/11.2.0/firebase-auth.js"></script>
+    <script defer src="https://www.gstatic.com/firebasejs/11.2.0/firebase-firestore.js"></script>
+    <script defer src="/firebaseConfig.js"></script>
+    <script defer src="/auth.js"></script>
     <link rel="stylesheet" href="/styles.css">
 </head>
 <body>
+    <div class="form-container">
+        <h2>Kirjaudu sisään</h2>
+        <input type="email" id="loginEmail" placeholder="Sähköposti">
+        <input type="password" id="loginPassword" placeholder="Salasana">
+        <button onclick="loginUser()">Kirjaudu</button>
+    </div>
+
     <div class="form-container">
         <h2>Rekisteröidy käyttäjäksi</h2>
         <input type="email" id="registerEmail" placeholder="Sähköposti">
