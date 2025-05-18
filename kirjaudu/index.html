@@ -11,10 +11,14 @@
 <body>
     <div class="form-container">
         <h2>Kirjaudu sisään</h2>
-        <input type="email" id="loginEmail" placeholder="Sähköposti">
-        <input type="password" id="loginPassword" placeholder="Salasana">
-        <button onclick="loginUser()">Kirjaudu</button>
-        <button id="forgotPasswordBtn" onclick="forgotPassword()">Unohtuiko salasana?</button>
+        <form onsubmit="loginUser(); return false;">
+            <label for="loginEmail">Sähköposti</label>
+            <input type="email" id="loginEmail" placeholder="Sähköposti" required>
+            <label for="loginPassword">Salasana</label>
+            <input type="password" id="loginPassword" placeholder="Salasana" required>
+            <button type="submit">Kirjaudu</button>
+            <button type="button" id="forgotPasswordBtn" onclick="forgotPassword()">Unohtuiko salasana?</button>
+        </form>
     </div>
     <!-- Uloskirjautumisnappi, näytä vain jos käyttäjä on kirjautunut -->
     <button id="logoutBtn" onclick="logoutUser()" style="display:none;">Kirjaudu ulos</button>
