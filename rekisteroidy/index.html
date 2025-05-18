@@ -11,9 +11,13 @@
 <body>
     <div class="form-container">
         <h2>Rekisteröidy käyttäjäksi</h2>
-        <input type="email" id="registerEmail" placeholder="Sähköposti">
-        <input type="password" id="registerPassword" placeholder="Salasana">
-        <button onclick="registerUser()">Rekisteröidy</button>
+        <form onsubmit="registerUser(); return false;">
+            <label for="registerEmail">Sähköposti</label>
+            <input type="email" id="registerEmail" placeholder="Sähköposti" required>
+            <label for="registerPassword">Salasana</label>
+            <input type="password" id="registerPassword" placeholder="Salasana" required>
+            <button type="submit">Rekisteröidy</button>
+        </form>
     </div>
 </body>
 </html>
