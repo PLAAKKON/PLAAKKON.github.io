@@ -1,16 +1,12 @@
-import { auth, db } from './firebaseConfig';
-import { createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, sendPasswordResetEmail } from 'firebase/auth';
-import { setDoc, doc } from 'firebase/firestore';
-
 // Rekisteröidy käyttäjäksi
 window.registerUser = function() {
     const email = document.getElementById('registerEmail').value;
     const password = document.getElementById('registerPassword').value;
-    createUserWithEmailAndPassword(auth, email, password)
+    auth.createUserWithEmailAndPassword(email, password)
         .then((userCredential) => {
             alert('Rekisteröinti onnistui!');
             const user = userCredential.user;
-            setDoc(doc(db, 'users', user.uid), {
+            db.collection('users').doc(user.uid).set({
                 email: user.email,
                 createdAt: new Date()
             });
@@ -25,7 +21,7 @@ window.registerUser = function() {
 window.loginUser = function() {
     const email = document.getElementById('loginEmail').value;
     const password = document.getElementById('loginPassword').value;
-    signInWithEmailAndPassword(auth, email, password)
+    auth.signInWithEmailAndPassword(email, password)
         .then((userCredential) => {
             alert('Kirjautuminen onnistui!');
             window.location.href = 'https://plaakkon.github.io/profiilitesti/';
@@ -38,7 +34,7 @@ window.loginUser = function() {
 
 // Kirjaudu ulos
 window.logoutUser = function() {
-    signOut(auth)
+    auth.signOut()
         .then(() => {
             alert('Olet kirjautunut ulos.');
             window.location.href = '/kirjaudu/index.html'; // Vaihda tarvittaessa oikea osoite
@@ -56,7 +52,7 @@ window.forgotPassword = function() {
         alert('Syötä sähköpostiosoite salasanan palautusta varten.');
         return;
     }
-    sendPasswordResetEmail(auth, email)
+    auth.sendPasswordResetEmail(email)
         .then(() => {
             alert('Salasanan palautuslinkki on lähetetty sähköpostiisi.');
         })
