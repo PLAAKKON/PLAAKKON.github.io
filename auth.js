@@ -1,5 +1,5 @@
 import { auth, db } from './firebaseConfig';
-import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, sendPasswordResetEmail } from 'firebase/auth';
 import { setDoc, doc } from 'firebase/firestore';
 
 // Rekisteröidy käyttäjäksi
@@ -28,10 +28,40 @@ window.loginUser = function() {
     signInWithEmailAndPassword(auth, email, password)
         .then((userCredential) => {
             alert('Kirjautuminen onnistui!');
-            window.location.href = '/profiilitesti';
+            window.location.href = 'https://plaakkon.github.io/profiilitesti/';
         })
         .catch((error) => {
             console.error('Kirjautuminen epäonnistui:', error);
+            alert(error.message);
+        });
+};
+
+// Kirjaudu ulos
+window.logoutUser = function() {
+    signOut(auth)
+        .then(() => {
+            alert('Olet kirjautunut ulos.');
+            window.location.href = '/kirjaudu/index.html'; // Vaihda tarvittaessa oikea osoite
+        })
+        .catch((error) => {
+            console.error('Uloskirjautuminen epäonnistui:', error);
+            alert(error.message);
+        });
+};
+
+// Salasanan palautus
+window.forgotPassword = function() {
+    const email = document.getElementById('loginEmail').value;
+    if (!email) {
+        alert('Syötä sähköpostiosoite salasanan palautusta varten.');
+        return;
+    }
+    sendPasswordResetEmail(auth, email)
+        .then(() => {
+            alert('Salasanan palautuslinkki on lähetetty sähköpostiisi.');
+        })
+        .catch((error) => {
+            console.error('Salasanan palautus epäonnistui:', error);
             alert(error.message);
         });
 };
