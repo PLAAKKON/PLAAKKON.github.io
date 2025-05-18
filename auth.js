@@ -28,7 +28,7 @@ window.loginUser = function() {
     signInWithEmailAndPassword(auth, email, password)
         .then((userCredential) => {
             alert('Kirjautuminen onnistui!');
-            window.location.href = 'https://plaakkon.github.io/profiilitesti/';
+            window.location.href = '/profiilitesti';
         })
         .catch((error) => {
             console.error('Kirjautuminen epäonnistui:', error);
