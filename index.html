@@ -2,6 +2,9 @@
 
 <html lang="fi">
 <head>
+<script src="https://www.gstatic.com/firebasejs/10.11.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.11.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.11.1/firebase-firestore-compat.js"></script>
 <script defer src="/firebaseConfig.js"></script>
 <script defer src="/auth.js"></script>
 <meta charset="utf-8"/>
@@ -83,7 +86,19 @@
 <video autoplay="" class="video-background" loop="" muted="" playsinline="">
 <source src="Yoro1_final_1080p_30s.mp4" type="video/mp4"/>
 </video>
-<header><div style="display: flex; align-items: center; justify-content: center; gap: 2rem;"><img alt="Yoro Oy logo" src="logo_transparent.png" style="max-width: 140px; height: auto;"/><div><h1>Yoro Oy</h1><p>IT-konsultointi, IT-palvelut</p></div></div></header>
+<header>
+  <div style="display: flex; align-items: center; justify-content: center; gap: 2rem;">
+    <img alt="Yoro Oy logo" src="logo_transparent.png" style="max-width: 140px; height: auto;"/>
+    <div>
+      <h1>Yoro Oy</h1>
+      <p>IT-konsultointi, IT-palvelut</p>
+      <div id="userInfo" style="margin-top: 10px;">
+        <span id="userEmailDisplay" style="color: #222;"></span>
+        <button id="logoutBtn" onclick="logoutUser()" style="display:none; margin-left: 10px; background: #4CAF50; color: white; border: none; border-radius: 6px; padding: 8px 16px; cursor: pointer;">Kirjaudu ulos</button>
+      </div>
+    </div>
+  </div>
+</header>
 <main>
 <section>
 <h2>Tietoa meistä</h2>
@@ -136,5 +151,19 @@
 <footer>
     © 2025 Yoro Oy – www.yoro.fi – myynti@yoro.fi
   </footer>
+<script>
+window.addEventListener('DOMContentLoaded', function() {
+  const userEmail = localStorage.getItem('userEmail');
+  const emailDisplay = document.getElementById('userEmailDisplay');
+  const logoutBtn = document.getElementById('logoutBtn');
+  if (userEmail) {
+    emailDisplay.textContent = "Kirjautunut: " + userEmail;
+    logoutBtn.style.display = 'inline-block';
+  } else {
+    emailDisplay.textContent = '';
+    logoutBtn.style.display = 'none';
+  }
+});
+</script>	
 </body>
 </html>
