@@ -93,11 +93,12 @@
       <h1>Yoro Oy</h1>
       <p>IT-konsultointi, IT-palvelut</p>
       <div id="userInfo" style="margin-top: 10px;">
-  	<span id="userEmailDisplay" style="color: #fff; text-shadow: 0 1px 4px #000, 0 0 2px #000;">Kirjautunut: 
-    	<a id="userEmailLink" href="#" style="color: #8ecaff; text-decoration: underline; text-shadow: 0 1px 4px #000;">sähköposti</a>
-  	</span>
-  	<button id="logoutBtn" onclick="logoutUser()" style="display:none; margin-left: 10px; background: #4CAF50; color: white; border: none; border-radius: 6px; padding: 8px 16px; cursor: pointer;">Kirjaudu ulos</button>
-      </div>
+  <span id="userEmailDisplay" style="color: #fff; text-shadow: 0 1px 4px #000, 0 0 2px #000;">
+    Kirjautunut: 
+    <a id="userEmailLink" href="#" style="color: #8ecaff; text-decoration: underline; text-shadow: 0 1px 4px #000;">sähköposti</a>
+  </span>
+  <button id="logoutBtn" onclick="logoutUser()" style="display:none; margin-left: 10px; background: #4CAF50; color: white; border: none; border-radius: 6px; padding: 8px 16px; cursor: pointer;">Kirjaudu ulos</button>
+</div>
     </div>
   </div>
 </header>
@@ -128,8 +129,9 @@
     <a class="button" href="/kirjaudu" target="_self">Kirjaudu sisään</a>
 </div>
 <a id="goToTestBtn" class="button" href="/profiilitesti/index.html" style="display:none; background:#4CAF50; margin-top: 15px;">Siirry profiilitestiin</a>
-        Profiilitesti on tarkoitettu arviointikäyttöön ohjauksen tukena. Tuloksia ei tule käyttää ainoana perusteena koulutus- tai urapäätöksille.
-      </p>
+<p>
+  Profiilitesti on tarkoitettu arviointikäyttöön ohjauksen tukena. Tuloksia ei tule käyttää ainoana perusteena koulutus- tai urapäätöksille.
+</p>
 <p>
 <strong>Sallittu:</strong><br/>
 		<span style="color: #4CAF50;">✔</span> Käyttö yläkoulujen, lukioiden ja ammattiopistojen opinto-ohjauksessa<br/>
@@ -159,12 +161,20 @@ window.addEventListener('DOMContentLoaded', function() {
   const userEmail = localStorage.getItem('userEmail');
   const testButtons = document.getElementById('testButtons');
   const goToTestBtn = document.getElementById('goToTestBtn');
+  const emailDisplay = document.getElementById('userEmailDisplay');
+  const emailLink = document.getElementById('userEmailLink');
   if (userEmail) {
     if (testButtons) testButtons.style.display = 'none';
     if (goToTestBtn) goToTestBtn.style.display = 'inline-block';
+    if (emailLink) {
+      emailLink.textContent = userEmail;
+      emailLink.href = "mailto:" + userEmail;
+    }
+    if (emailDisplay) emailDisplay.style.display = 'inline';
   } else {
     if (testButtons) testButtons.style.display = 'flex';
     if (goToTestBtn) goToTestBtn.style.display = 'none';
+    if (emailDisplay) emailDisplay.style.display = 'none';
   }
 });
 </script>
