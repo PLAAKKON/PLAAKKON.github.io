@@ -74,12 +74,19 @@ const showUserEmail = (email) => {
     document.getElementById("userEmailDisplay").innerText = `Kirjautunut: ${maskedEmail}`;
 };
 
+// Navigointi Yoro.fi kotisivulle
+window.navigateToHome = function() {
+    window.location.href = 'https://yoro.fi/';
+};
+
 auth.onAuthStateChanged((user) => {
     if (user) {
         document.getElementById("logoutBtn").style.display = "block";
+        document.getElementById("homeBtn").style.display = "block";
         showUserEmail(user.email);
     } else {
         document.getElementById("logoutBtn").style.display = "none";
+        document.getElementById("homeBtn").style.display = "none";
         document.getElementById("userEmailDisplay").innerText = "";
     }
 });
