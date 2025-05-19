@@ -93,8 +93,10 @@
       <h1>Yoro Oy</h1>
       <p>IT-konsultointi, IT-palvelut</p>
       <div id="userInfo" style="margin-top: 10px;">
-        <span id="userEmailDisplay" style="color: #222;"></span>
-        <button id="logoutBtn" onclick="logoutUser()" style="display:none; margin-left: 10px; background: #4CAF50; color: white; border: none; border-radius: 6px; padding: 8px 16px; cursor: pointer;">Kirjaudu ulos</button>
+  	<span id="userEmailDisplay" style="color: #fff; text-shadow: 0 1px 4px #000, 0 0 2px #000;">Kirjautunut: 
+    	<a id="userEmailLink" href="#" style="color: #8ecaff; text-decoration: underline; text-shadow: 0 1px 4px #000;">sähköposti</a>
+  	</span>
+  	<button id="logoutBtn" onclick="logoutUser()" style="display:none; margin-left: 10px; background: #4CAF50; color: white; border: none; border-radius: 6px; padding: 8px 16px; cursor: pointer;">Kirjaudu ulos</button>
       </div>
     </div>
   </div>
@@ -155,12 +157,15 @@
 window.addEventListener('DOMContentLoaded', function() {
   const userEmail = localStorage.getItem('userEmail');
   const emailDisplay = document.getElementById('userEmailDisplay');
+  const emailLink = document.getElementById('userEmailLink');
   const logoutBtn = document.getElementById('logoutBtn');
   if (userEmail) {
-    emailDisplay.textContent = "Kirjautunut: " + userEmail;
+    emailLink.textContent = userEmail;
+    emailLink.href = "mailto:" + userEmail;
+    emailDisplay.style.display = 'inline';
     logoutBtn.style.display = 'inline-block';
   } else {
-    emailDisplay.textContent = '';
+    emailDisplay.style.display = 'none';
     logoutBtn.style.display = 'none';
   }
 });
