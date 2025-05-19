@@ -1,7 +1,3 @@
-<script src="https://www.gstatic.com/firebasejs/10.11.1/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.11.1/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.11.1/firebase-firestore-compat.js"></script>
-
 const firebaseConfig = {
     apiKey: "YOUR_API_KEY",
     authDomain: "urapolku-7780a.firebaseapp.com",
@@ -11,6 +7,7 @@ const firebaseConfig = {
     appId: "YOUR_APP_ID"
 };
 
-const app = initializeApp(firebaseConfig);
-export const auth = getAuth(app);
-export const db = getFirestore(app);
+// Initialize Firebase (only once)
+if (!firebase.apps.length) {
+    firebase.initializeApp(firebaseConfig);
+}
