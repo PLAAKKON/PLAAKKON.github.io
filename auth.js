@@ -27,6 +27,7 @@ window.loginUser = function() {
     auth.signInWithEmailAndPassword(email, password)
         .then((userCredential) => {
             alert('Kirjautuminen onnistui!');
+            showUserEmail(userCredential.user.email);
             window.location.href = 'https://plaakkon.github.io/profiilitesti/';
         })
         .catch((error) => {
@@ -40,7 +41,8 @@ window.logoutUser = function() {
     auth.signOut()
         .then(() => {
             alert('Olet kirjautunut ulos.');
-            window.location.href = '/kirjaudu/index.html'; // Vaihda tarvittaessa oikea osoite
+            document.getElementById("userEmailDisplay").innerText = "";
+            window.location.href = '/kirjaudu/index.html';
         })
         .catch((error) => {
             console.error('Uloskirjautuminen epäonnistui:', error);
@@ -64,3 +66,20 @@ window.forgotPassword = function() {
             alert(error.message);
         });
 };
+
+// Maskattu sähköpostin näyttö
+const showUserEmail = (email) => {
+    const [local, domain] = email.split('@');
+    const maskedEmail = `${local.slice(0, 3)}...${local.slice(-3)}@${domain}`;
+    document.getElementById("userEmailDisplay").innerText = `Kirjautunut: ${maskedEmail}`;
+};
+
+auth.onAuthStateChanged((user) => {
+    if (user) {
+        document.getElementById("logoutBtn").style.display = "block";
+        showUserEmail(user.email);
+    } else {
+        document.getElementById("logoutBtn").style.display = "none";
+        document.getElementById("userEmailDisplay").innerText = "";
+    }
+});
