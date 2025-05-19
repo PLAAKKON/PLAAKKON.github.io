@@ -122,11 +122,12 @@
     Vastaamalla 10 kysymykseen saat henkilökohtaisen profiilin ja suuntaa antavan arvion vahvuuksistasi ja sopivista työ- ja koulutusvaihtoehdoista.
 </p>
 
-<div style="display: flex; gap: 10px; margin-top: 15px;">
+<div id="testButtons" style="display: flex; gap: 10px; margin-top: 15px;">
     <a class="button" href="https://plaakkon.github.io/profiilitesti/" target="_blank">Kokeile kirjautumatta</a>
     <a class="button" href="/rekisteroidy" target="_self">Rekisteröidy käyttäjäksi</a>
     <a class="button" href="/kirjaudu" target="_self">Kirjaudu sisään</a>
 </div>
+<a id="goToTestBtn" class="button" href="/profiilitesti/index.html" style="display:none; background:#4CAF50; margin-top: 15px;">Siirry profiilitestiin</a>
         Profiilitesti on tarkoitettu arviointikäyttöön ohjauksen tukena. Tuloksia ei tule käyttää ainoana perusteena koulutus- tai urapäätöksille.
       </p>
 <p>
@@ -156,19 +157,16 @@
 <script>
 window.addEventListener('DOMContentLoaded', function() {
   const userEmail = localStorage.getItem('userEmail');
-  const emailDisplay = document.getElementById('userEmailDisplay');
-  const emailLink = document.getElementById('userEmailLink');
-  const logoutBtn = document.getElementById('logoutBtn');
+  const testButtons = document.getElementById('testButtons');
+  const goToTestBtn = document.getElementById('goToTestBtn');
   if (userEmail) {
-    emailLink.textContent = userEmail;
-    emailLink.href = "mailto:" + userEmail;
-    emailDisplay.style.display = 'inline';
-    logoutBtn.style.display = 'inline-block';
+    if (testButtons) testButtons.style.display = 'none';
+    if (goToTestBtn) goToTestBtn.style.display = 'inline-block';
   } else {
-    emailDisplay.style.display = 'none';
-    logoutBtn.style.display = 'none';
+    if (testButtons) testButtons.style.display = 'flex';
+    if (goToTestBtn) goToTestBtn.style.display = 'none';
   }
 });
-</script>	
+</script>
 </body>
 </html>
