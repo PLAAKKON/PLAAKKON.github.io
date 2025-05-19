@@ -27,8 +27,8 @@ window.loginUser = function() {
     auth.signInWithEmailAndPassword(email, password)
         .then((userCredential) => {
             alert('Kirjautuminen onnistui!');
-            showUserEmail(userCredential.user.email);
-            window.location.href = 'https://plaakkon.github.io/profiilitesti/';
+            localStorage.setItem('userEmail', email); // Tallenna sähköposti localStorageen
+            window.location.href = 'https://yoro.fi/profiilitesti/index.html'; // Ohjaa profiilitestiin
         })
         .catch((error) => {
             console.error('Kirjautuminen epäonnistui:', error);
@@ -41,8 +41,8 @@ window.logoutUser = function() {
     auth.signOut()
         .then(() => {
             alert('Olet kirjautunut ulos.');
-            document.getElementById("userEmailDisplay").innerText = "";
-            window.location.href = '/kirjaudu/index.html';
+            localStorage.removeItem('userEmail'); // Poista sähköposti localStoragesta
+            window.location.href = 'https://yoro.fi'; // Ohjaa kotisivulle
         })
         .catch((error) => {
             console.error('Uloskirjautuminen epäonnistui:', error);
