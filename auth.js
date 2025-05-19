@@ -1,3 +1,6 @@
+const auth = firebase.auth();
+const db = firebase.firestore();
+
 // Rekisteröidy käyttäjäksi
 window.registerUser = function() {
     const email = document.getElementById('registerEmail').value;
