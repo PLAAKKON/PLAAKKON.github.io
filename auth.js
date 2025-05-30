@@ -82,11 +82,9 @@ window.navigateToHome = function() {
 auth.onAuthStateChanged((user) => {
     if (user) {
         document.getElementById("logoutBtn").style.display = "block";
-        document.getElementById("homeBtn").style.display = "block";
         showUserEmail(user.email);
     } else {
         document.getElementById("logoutBtn").style.display = "none";
-        document.getElementById("homeBtn").style.display = "none";
         document.getElementById("userEmailDisplay").innerText = "";
     }
 });
