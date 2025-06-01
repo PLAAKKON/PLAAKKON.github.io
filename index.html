@@ -63,24 +63,39 @@
     }
 
     a.button {
-      display: inline-block;
-      background-color: #007acc;
-      color: white;
-      padding: 0.75rem 1.5rem;
-      text-decoration: none;
-      border-radius: 8px;
-      margin-top: 1rem;
-    }
+  display: inline-block;
+  color: white;
+  padding: 0.75rem 1.5rem;
+  text-decoration: none;
+  border-radius: 8px;
+  margin-top: 1rem;
+  font-weight: 500;
+  transition: background 0.2s, box-shadow 0.2s;
+}
 
-    a.button:hover {
-      background-color: #005fa3 !important;
-      color: #fff;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
-      text-decoration: none;
-      cursor: pointer;
-      transition: background 0.2s;
-    }
+/* Kokeile kirjautumatta - sininen */
+a.button.try-demo {
+  background-color: #007acc;
+}
+a.button.try-demo:hover {
+  background-color: #005fa3 !important;
+}
 
+/* Muut napit harmaaksi */
+a.button.gray {
+  background-color: #444;
+}
+a.button.gray:hover {
+  background-color: #222 !important;
+}
+
+/* Lisähuomio-teksti */
+.try-demo-note {
+  font-size: 0.95em;
+  color: #cccccc;
+  margin-top: 4px;
+  text-align: center;
+}
     footer {
       text-align: center;
       padding: 2rem;
@@ -131,9 +146,9 @@
 </p>
 
 <div id="testButtons" style="display: flex; gap: 10px; margin-top: 15px;">
-    <a class="button" href="https://plaakkon.github.io/profiilitesti/" target="_blank">Kokeile kirjautumatta</a>
-    <a class="button" href="/rekisteroidy" target="_self">Rekisteröidy käyttäjäksi</a>
-    <a class="button" href="/kirjaudu" target="_self">Kirjaudu sisään</a>
+    <a class="button try-demo" href="https://plaakkon.github.io/profiilitesti/" target="_blank">Kokeile kirjautumatta</a>
+    <a class="button gray" href="/rekisteroidy" target="_self">Rekisteröidy käyttäjäksi</a>
+    <a class="button gray" href="/kirjaudu" target="_self">Kirjaudu sisään</a>
 </div>
 <a id="goToTestBtn" class="button" href="/profiilitesti/index.html" style="display:none; background:#4CAF50; margin-top: 15px;">Siirry profiilitestiin</a>
 <p>
