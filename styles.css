@@ -45,5 +45,9 @@ a.button {
 }
 
 a.button:hover {
-    background-color: #005fa3;
+  background-color: #005fa3;
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  text-decoration: none;
+  transition: background 0.2s;
 }
