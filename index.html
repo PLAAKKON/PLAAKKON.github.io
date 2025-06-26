@@ -1,16 +1,15 @@
 <!DOCTYPE html>
-
 <html lang="fi">
 <head>
-<script src="https://www.gstatic.com/firebasejs/10.11.1/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.11.1/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.11.1/firebase-firestore-compat.js"></script>
-<script defer src="/firebaseConfig.js"></script>
-<script defer src="/auth.js"></script>
-<meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>Yoro Oy</title>
-<style>
+  <script src="https://www.gstatic.com/firebasejs/10.11.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.11.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.11.1/firebase-firestore-compat.js"></script>
+  <script defer src="/firebaseConfig.js"></script>
+  <script defer src="/auth.js"></script>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <title>Yoro Oy</title>
+  <style>
     html, body {
       margin: 0;
       padding: 0;
@@ -63,39 +62,39 @@
     }
 
     a.button {
-  display: inline-block;
-  color: white;
-  padding: 0.75rem 1.5rem;
-  text-decoration: none;
-  border-radius: 8px;
-  margin-top: 1rem;
-  font-weight: 500;
-  transition: background 0.2s, box-shadow 0.2s;
-}
+      display: inline-block;
+      color: white;
+      padding: 0.75rem 1.5rem;
+      text-decoration: none;
+      border-radius: 8px;
+      margin-top: 1rem;
+      font-weight: 500;
+      transition: background 0.2s, box-shadow 0.2s;
+    }
 
-/* Kokeile kirjautumatta - sininen */
-a.button.try-demo {
-  background-color: #007acc;
-}
-a.button.try-demo:hover {
-  background-color: #005fa3 !important;
-}
+    /* Kokeile kirjautumatta - sininen */
+    a.button.try-demo {
+      background-color: #007acc;
+    }
+    a.button.try-demo:hover {
+      background-color: #005fa3 !important;
+    }
 
-/* Muut napit harmaaksi */
-a.button.gray {
-  background-color: #444;
-}
-a.button.gray:hover {
-  background-color: #222 !important;
-}
+    /* Muut napit harmaaksi */
+    a.button.gray {
+      background-color: #444;
+    }
+    a.button.gray:hover {
+      background-color: #222 !important;
+    }
 
-/* Lisähuomio-teksti */
-.try-demo-note {
-  font-size: 0.95em;
-  color: #cccccc;
-  margin-top: 4px;
-  text-align: center;
-}
+    /* Lisähuomio-teksti */
+    .try-demo-note {
+      font-size: 0.95em;
+      color: #cccccc;
+      margin-top: 4px;
+      text-align: center;
+    }
     footer {
       text-align: center;
       padding: 2rem;
@@ -105,107 +104,117 @@ a.button.gray:hover {
   </style>
 </head>
 <body>
-<video autoplay="" class="video-background" loop="" muted="" playsinline="">
-<source src="Yoro1_final_1080p_30s.mp4" type="video/mp4"/>
-</video>
-<header>
-  <div style="display: flex; align-items: center; justify-content: center; gap: 2rem;">
-    <img alt="Yoro Oy logo" src="logo_transparent.png" style="max-width: 140px; height: auto;"/>
-    <div>
-      <h1>Yoro Oy</h1>
-      <p>IT-konsultointi, IT-palvelut</p>
-      <div id="userInfo" style="margin-top: 10px;">
-  <span id="userEmailDisplay" style="color: #fff; text-shadow: 0 1px 4px #000, 0 0 2px #000;">
-    Kirjautunut: 
-    <a id="userEmailLink" href="#" style="color: #8ecaff; text-decoration: underline; text-shadow: 0 1px 4px #000;">sähköposti</a>
-  </span>
-  <button id="logoutBtn" onclick="logoutUser()" style="display:none; margin-left: 10px; background: #4CAF50; color: white; border: none; border-radius: 6px; padding: 8px 16px; cursor: pointer;">Kirjaudu ulos</button>
-</div>
+  <video autoplay="" class="video-background" loop="" muted="" playsinline="">
+    <source src="Yoro1_final_1080p_30s.mp4" type="video/mp4"/>
+  </video>
+  <header>
+    <div style="display: flex; align-items: center; justify-content: center; gap: 2rem;">
+      <img alt="Yoro Oy logo" src="logo_transparent.png" style="max-width: 140px; height: auto;"/>
+      <div>
+        <h1>Yoro Oy</h1>
+        <p>IT-konsultointi, IT-palvelut</p>
+        <div id="userInfo" style="margin-top: 10px;">
+          <span id="userEmailDisplay" style="color: #fff; text-shadow: 0 1px 4px #000, 0 0 2px #000;">
+            Kirjautunut: 
+            <a id="userEmailLink" href="#" style="color: #8ecaff; text-decoration: underline; text-shadow: 0 1px 4px #000;">sähköposti</a>
+          </span>
+          <button id="logoutBtn" onclick="logoutUser()" style="display:none; margin-left: 10px; background: #4CAF50; color: white; border: none; border-radius: 6px; padding: 8px 16px; cursor: pointer;">Kirjaudu ulos</button>
+        </div>
+      </div>
     </div>
-  </div>
-</header>
-<main>
-<section>
-<h2>Tietoa meistä</h2>
-<p>
+  </header>
+  <main>
+    <section>
+      <h2>Tietoa meistä</h2>
+      <p>
         Yoro Oy on uuden sukupolven digipalveluyritys, joka auttaa kuntia ja oppilaitoksia kehittämään vaikuttavampaa työllisyyspolitiikkaa. Kehitämme ratkaisuja tekoälyn, automaation ja avoimen datan avulla.
       </p>
-<p><strong>Y-tunnus:</strong> 3529476-6<br/>
-<strong>Osoite:</strong> Itäkatu 1-5, 00930 Helsinki<br/>
-<strong>Puhelin:</strong> 050 522 7849<br/>
-<strong>Sähköposti:</strong> <a href="mailto:myynti@yoro.fi">myynti@yoro.fi</a>
-</p>
-</section>
-<section>
-<h2>LxP-profiilitesti</h2>
-<p>
-    LxP-profiilitesti on Yoro Oy:n kehittämä työkalu, joka tukee yksilöiden urasuunnittelua ja ammatillista suuntautumista. Testi soveltuu sekä opinto-ohjaukseen että työnvälityspalveluihin.
-</p>
-<p>
-    Vastaamalla 10 kysymykseen saat henkilökohtaisen profiilin ja suuntaa antavan arvion vahvuuksistasi ja sopivista työ- ja koulutusvaihtoehdoista.
-</p>
-
-<div id="testButtons" style="display: flex; gap: 10px; margin-top: 15px;">
-    <a class="button try-demo" href="https://plaakkon.github.io/profiilitesti/" target="_blank">Kokeile kirjautumatta</a>
-    <a class="button gray" href="/rekisteroidy" target="_self">Rekisteröidy käyttäjäksi</a>
-    <a class="button gray" href="/kirjaudu" target="_self">Kirjaudu sisään</a>
-</div>
-<a id="goToTestBtn" class="button" href="/profiilitesti/index.html" style="display:none; background:#4CAF50; margin-top: 15px;">Siirry profiilitestiin</a>
-<p>
-  Profiilitesti on tarkoitettu arviointikäyttöön ohjauksen tukena. Tuloksia ei tule käyttää ainoana perusteena koulutus- tai urapäätöksille.
-</p>
-
-<p>
-  <strong>Katso esimerkki LxP-profiilista:</strong>
-</p>
-<a class="button gray" href="LxP-Profiili_Esimerkki01.pdf" target="_blank" style="margin-top: 0;">Avaa PDF-esimerkki</a>
-
-<p>
-<strong>Sallittu:</strong><br/>
-  <span style="color: #4CAF50;">✔</span> Käyttö yläkoulujen, lukioiden ja ammattiopistojen opinto-ohjauksessa<br/>
-  <span style="color: #4CAF50;">✔</span> Oppilaiden ohjaus ilman rekisteröitymistä tai tietojen tallennusta<br/>
-  <span style="color: #4CAF50;">✔</span> Enintään yksi kouluyksikkö per lisenssi
-</p>
-	
-<p>
-<strong>Kielletty:</strong><br/>
-		<span style="color: #FFA500;">✘</span> Ohjelmiston muokkaaminen tai jälleenmyynti<br/>
-		<span style="color: #FFA500;">✘</span> Kaupallinen käyttö ilman maksullista lisenssiä<br/>
-		<span style="color: #FFA500;">✘</span> Osien kopiointi tai julkaiseminen muualla
+      <p><strong>Y-tunnus:</strong> 3529476-6<br/>
+      <strong>Osoite:</strong> Itäkatu 1-5, 00930 Helsinki<br/>
+      <strong>Puhelin:</strong> 050 522 7849<br/>
+      <strong>Sähköposti:</strong> <a href="mailto:myynti@yoro.fi">myynti@yoro.fi</a>
       </p>
-<p><strong>Lisenssimaksu:</strong> 290 € + alv / vuosi / kouluyksikkö</p>
-</section>
-<section>
-<h2>Tulossa: Laajennettu palvelupaketti</h2>
-<p>
+    </section>
+    <section>
+      <h2>LxP-profiilitesti</h2>
+      <p>
+        LxP-profiilitesti on Yoro Oy:n kehittämä työkalu, joka tukee yksilöiden urasuunnittelua ja ammatillista suuntautumista. Testi soveltuu sekä opinto-ohjaukseen että työnvälityspalveluihin.
+      </p>
+      <p>
+        Vastaamalla 10 kysymykseen saat henkilökohtaisen profiilin ja suuntaa antavan arvion vahvuuksistasi ja sopivista työ- ja koulutusvaihtoehdoista.
+      </p>
+
+      <div id="testButtons" style="display: flex; gap: 10px; margin-top: 15px;">
+        <a class="button try-demo" href="https://plaakkon.github.io/profiilitesti/" target="_blank">Kokeile kirjautumatta</a>
+        <a class="button gray" href="/rekisteroidy" target="_self">Rekisteröidy käyttäjäksi</a>
+        <a class="button gray" href="/kirjaudu" target="_self">Kirjaudu sisään</a>
+      </div>
+      <a id="goToTestBtn" class="button" href="/profiilitesti/index.html" style="display:none; background:#4CAF50; margin-top: 15px;">Siirry profiilitestiin</a>
+      <p>
+        Profiilitesti on tarkoitettu arviointikäyttöön ohjauksen tukena. Tuloksia ei tule käyttää ainoana perusteena koulutus- tai urapäätöksille.
+      </p>
+      <p>
+        <strong>Katso esimerkki LxP-profiilista:</strong>
+      </p>
+      <a class="button gray" href="LxP-Profiili_Esimerkki01.pdf" target="_blank" style="margin-top: 0;">Avaa PDF-esimerkki</a>
+
+      <p>
+        <strong>Sallittu:</strong><br/>
+        <span style="color: #4CAF50;">✔</span> Käyttö yläkoulujen, lukioiden ja ammattiopistojen opinto-ohjauksessa<br/>
+        <span style="color: #4CAF50;">✔</span> Oppilaiden ohjaus ilman rekisteröitymistä tai tietojen tallennusta<br/>
+        <span style="color: #4CAF50;">✔</span> Enintään yksi kouluyksikkö per lisenssi
+      </p>
+
+      <p>
+        <strong>Kielletty:</strong><br/>
+        <span style="color: #FFA500;">✘</span> Ohjelmiston muokkaaminen tai jälleenmyynti<br/>
+        <span style="color: #FFA500;">✘</span> Kaupallinen käyttö ilman maksullista lisenssiä<br/>
+        <span style="color: #FFA500;">✘</span> Osien kopiointi tai julkaiseminen muualla
+      </p>
+      <p><strong>Lisenssimaksu:</strong> 290 € + alv / vuosi / kouluyksikkö</p>
+    </section>
+    <section>
+      <h2>Luo LxP-avain työpaikkailmoituksesta</h2>
+      <p>
+        Yoro Oy tarjoaa kehittyneen työkalun, jonka avulla voit analysoida avoimen työpaikan tai työhakemuksesi sisällön ja purkaa sen LxP-avainkoodiksi. 
+        Tämä avainkuvaus mahdollistaa kohdennetumman osaamisen tunnistamisen ja sopivuuden arvioinnin olemassa oleviin profiileihin.
+      </p>
+      <p>
+        Työkalu hyödyntää luonnollisen kielen prosessointia (NLP) ja kansallisesti kehitettyä LxP-järjestelmää tuottaakseen yhdenmukaisia profiilitunnisteita työnkuvien perusteella.
+      </p>
+      <a class="button try-demo" href="https://lxp.yoro.fi/lxp-matcher/" target="_blank">Siirry LxP-matcher -työkaluun</a>
+    </section>
+    <section>
+      <h2>Tulossa: Laajennettu palvelupaketti</h2>
+      <p>
         Tulevassa palveluratkaisussa yhdistyy LxP-analyysi, ylikoulutustiedot ja alueelliset työmarkkina-analyysit. Palvelu sisältää yksilölliset työllistymissuunnitelmat, suositukset, raportoinnin sekä ohjaustyökalut.
       </p>
-</section>
-</main>
-<footer>
+    </section>
+  </main>
+  <footer>
     © 2025 Yoro Oy – www.yoro.fi – myynti@yoro.fi
   </footer>
-<script>
-window.addEventListener('DOMContentLoaded', function() {
-  const userEmail = localStorage.getItem('userEmail');
-  const testButtons = document.getElementById('testButtons');
-  const goToTestBtn = document.getElementById('goToTestBtn');
-  const emailDisplay = document.getElementById('userEmailDisplay');
-  const emailLink = document.getElementById('userEmailLink');
-  if (userEmail) {
-    if (testButtons) testButtons.style.display = 'none';
-    if (goToTestBtn) goToTestBtn.style.display = 'inline-block';
-    if (emailLink) {
-      emailLink.textContent = userEmail;
-      emailLink.href = "mailto:" + userEmail;
-    }
-    if (emailDisplay) emailDisplay.style.display = 'inline';
-  } else {
-    if (testButtons) testButtons.style.display = 'flex';
-    if (goToTestBtn) goToTestBtn.style.display = 'none';
-    if (emailDisplay) emailDisplay.style.display = 'none';
-  }
-});
-</script>
+  <script>
+    window.addEventListener('DOMContentLoaded', function() {
+      const userEmail = localStorage.getItem('userEmail');
+      const testButtons = document.getElementById('testButtons');
+      const goToTestBtn = document.getElementById('goToTestBtn');
+      const emailDisplay = document.getElementById('userEmailDisplay');
+      const emailLink = document.getElementById('userEmailLink');
+      if (userEmail) {
+        if (testButtons) testButtons.style.display = 'none';
+        if (goToTestBtn) goToTestBtn.style.display = 'inline-block';
+        if (emailLink) {
+          emailLink.textContent = userEmail;
+          emailLink.href = "mailto:" + userEmail;
+        }
+        if (emailDisplay) emailDisplay.style.display = 'inline';
+      } else {
+        if (testButtons) testButtons.style.display = 'flex';
+        if (goToTestBtn) goToTestBtn.style.display = 'none';
+        if (emailDisplay) emailDisplay.style.display = 'none';
+      }
+    });
+  </script>
 </body>
 </html>
