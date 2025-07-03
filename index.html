@@ -1,15 +1,23 @@
 <!DOCTYPE html>
+
 <html lang="fi">
 <head>
-  <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Yoro Oy</title>
-  <script src="https://www.gstatic.com/firebasejs/10.11.1/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.11.1/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.11.1/firebase-firestore-compat.js"></script>
-  <script defer src="/firebaseConfig.js"></script>
-  <script defer src="/auth.js"></script>
-  <style>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Yoro Oy - AI-pohjaiset työelämäpalvelut | LxP-profilointi ja rekrytointi</title>
+<meta name="description" content="Yoro.fi tarjoaa tekoälyä hyödyntäviä työelämäpalveluja: LxP-profiilitesti, työhakemus-analyysi, työpaikkailmoitusten analyysi ja rekrytointityökalut. Kunnille, kouluille ja yrityksille."/>
+<meta name="keywords" content="LxP, työelämäpalvelut, rekrytointi, profiilitesti, tekoäly, AI, työhakemus, henkilöprofiili, työhakemus-analyysi, työpaikkailmoitus"/>
+<meta name="author" content="Yoro Oy"/>
+<meta property="og:title" content="Yoro Oy - AI-pohjaiset työelämäpalvelut"/>
+<meta property="og:description" content="Tekoälyä hyödyntävät työelämäpalvelut: LxP-profilointi, työhakemus-analyysi ja rekrytointityökalut"/>
+<meta property="og:url" content="https://yoro.fi"/>
+<meta property="og:type" content="website"/>
+<script src="https://www.gstatic.com/firebasejs/10.11.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.11.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.11.1/firebase-firestore-compat.js"></script>
+<script defer="" src="/firebaseConfig.js"></script>
+<script defer="" src="/auth.js"></script>
+<style>
     html, body {
       margin: 0;
       padding: 0;
@@ -79,6 +87,13 @@
       background-color: #005fa3 !important;
     }
 
+    a.button.ai-tool {
+      background-color: #17a2b8;
+    }
+    a.button.ai-tool:hover {
+      background-color: #138496 !important;
+    }
+
     a.button.gray {
       background-color: #444;
     }
@@ -92,87 +107,134 @@
       font-size: 0.9rem;
       background: rgba(0,0,0,0.4);
     }
+
+    h3 {
+      color: #ffffff;
+      margin-top: 0;
+      margin-bottom: 0.5rem;
+    }
+
+    .contact-grid div {
+      background: rgba(255,255,255,0.1);
+      padding: 1rem;
+      border-radius: 8px;
+      border: 1px solid rgba(255,255,255,0.2);
+    }
   </style>
 </head>
 <body>
-  <video autoplay loop muted playsinline class="video-background">
-    <source src="Yoro1_final_1080p_30s.mp4" type="video/mp4" />
-  </video>
-  <header>
-    <div style="display: flex; align-items: center; justify-content: center; gap: 2rem;">
-      <img src="logo_transparent.png" alt="Yoro Oy logo" style="max-width: 140px; height: auto;"/>
-      <div>
-        <h1>Yoro Oy</h1>
-        <p>Uuden sukupolven työelämäpalvelut</p>
-        <div id="userInfo" style="margin-top: 10px;">
-          <span id="userEmailDisplay" style="color: #fff; text-shadow: 0 1px 4px #000, 0 0 2px #000;">
+<video autoplay="" class="video-background" loop="" muted="" playsinline="">
+<source src="Yoro1_final_1080p_30s.mp4" type="video/mp4"/>
+</video>
+<header>
+<div style="display: flex; align-items: center; justify-content: center; gap: 2rem;">
+<img alt="Yoro Oy logo" src="logo_transparent.png" style="max-width: 140px; height: auto;"/>
+<div>
+<h1>Yoro Oy</h1>
+<p>Uuden sukupolven työelämäpalvelut</p>
+<div id="userInfo" style="margin-top: 10px;">
+<span id="userEmailDisplay" style="color: #fff; text-shadow: 0 1px 4px #000, 0 0 2px #000;">
             Kirjautunut: 
-            <a id="userEmailLink" href="#" style="color: #8ecaff; text-decoration: underline; text-shadow: 0 1px 4px #000;">sähköposti</a>
-          </span>
-          <button id="logoutBtn" onclick="logoutUser()" style="display:none; margin-left: 10px; background: #4CAF50; color: white; border: none; border-radius: 6px; padding: 8px 16px; cursor: pointer;">Kirjaudu ulos</button>
-        </div>
-      </div>
-    </div>
-  </header>
-  <main>
-    <section>
-      <h2>Tietoa meistä</h2>
-      <p>
-        Yoro Oy on uuden sukupolven teknologiayritys, joka auttaa kuntia, kouluja ja työnhakijoita tekemään parempia urapäätöksiä. Hyödynnämme tekoälyä, automaatiota ja avointa dataa työllisyyden tukemiseksi.
-      </p>
-    </section>
-    <section>
-      <h2>LxP-profiilitesti</h2>
-      <p>
-        LxP-profiilitesti tukee yksilön urasuunnittelua ja työnhakua. Vastaa 10 kysymykseen ja saat henkilökohtaisen profiilin sekä suosituksia sopivista koulutus- ja työtehtävistä.
-      </p>
-      <div id="testButtons" style="display: flex; gap: 10px; margin-top: 15px;">
-        <a class="button try-demo" href="https://plaakkon.github.io/profiilitesti/" target="_blank">Kokeile kirjautumatta</a>
-        <a class="button gray" href="/rekisteroidy" target="_self">Rekisteröidy</a>
-        <a class="button gray" href="/kirjaudu" target="_self">Kirjaudu</a>
-      </div>
-      <a id="goToTestBtn" class="button" href="/profiilitesti/index.html" style="display:none; background:#4CAF50; margin-top: 15px;">Siirry profiilitestiin</a>
-      <p><strong>Esimerkki:</strong> <a class="button gray" href="LxP-Profiili_Esimerkki01.pdf" target="_blank">Avaa PDF</a></p>
-      <p><strong>Lisenssi:</strong> 290 € + alv / vuosi / kouluyksikkö</p>
-    </section>
-    <section>
-      <h2>LxP Matcher – työpaikkailmoituksesta profiilikoodiksi</h2>
-      <p>
-        LxP Matcher analysoi työpaikkailmoitukset ja tuottaa niistä LxP-avainkoodin. Näin löydät sopivimmat osaajat 29 000 profiilin joukosta.
-      </p>
-      <p>
-        Työkalu hyödyntää NLP-tekoälyä ja LxP-järjestelmää yhdenmukaistettuun profiililuokitukseen.
-      </p>
-      <a class="button try-demo" href="https://lxp.yoro.fi/lxp-matcher/" target="_blank">Avaa LxP Matcher</a>
-    </section>
-    <section>
-      <h2>Asiakkaille ja sijoittajille</h2>
-      <p>
-        Yoro Oy tarjoaa maksullisia ja mitattavia ratkaisuja työllisyyden ja ohjauksen tueksi. 
-        Emme hae epämääräistä yhteistyötä – tarjoamme valmiita tuotteita, hankintasopimuksia tai strategisia sijoitusmahdollisuuksia.
-      </p>
-      <p><strong>Ratkaisumme soveltuvat erityisesti:</strong></p>
-      <ul>
-        <li>Kunnille ja TE-toimistoille, jotka haluavat tuloksellisia työllisyyspalveluja</li>
-        <li>Oppilaitoksille, jotka tarvitsevat moderneja ohjaustyökaluja</li>
-        <li>Rekrytointi- ja henkilöstöpalveluyrityksille, jotka etsivät tarkempaa yhteensopivuutta</li>
-      </ul>
-      <p>
-        Tuotteemme ovat käytössä osoitteessa <a href="https://yoro.fi" target="_blank">yoro.fi</a> ja valmiita toimitettavaksi. 
-        Pyydä esittely tai tarjousta – rakennetaan tuloksia yhdessä.
-      </p>
-      <p>
-        📩 <a href="mailto:myynti@yoro.fi">myynti@yoro.fi</a><br/>
-        ☎ 050 522 7849<br/>
-        🧾 Y-tunnus: 3529476-6<br/>
-        📍 Itäkatu 1–5, 00930 Helsinki
-      </p>
-    </section>
-  </main>
-  <footer>
+            <a href="#" id="userEmailLink" style="color: #8ecaff; text-decoration: underline; text-shadow: 0 1px 4px #000;">sähköposti</a>
+</span>
+<button id="logoutBtn" onclick="logoutUser()" style="display:none; margin-left: 10px; background: #4CAF50; color: white; border: none; border-radius: 6px; padding: 8px 16px; cursor: pointer;">Kirjaudu ulos</button>
+</div>
+</div>
+</div>
+</header>
+<main>
+<section>
+<h2>🔧 1. Mikä tämä palvelu on?</h2>
+<p>Yoro.fi on älykäs urasuunnittelun ja rekrytoinnin verkkopalvelu. Käytä tekoälyä hyväksesi löytääksesi sopivat työntekijät, ammatit tai koulutuspolut – olitpa sitten työnhakija, työnantaja tai ohjaaja.</p>
+</section>
+<section>
+<h2>👤 2. Olen työnhakija tai opiskelija</h2>
+<ul>
+<li>✅ Tee maksuton <strong>LxP-profiilitesti</strong> – vastaa 10 kysymykseen ja saat ammatillisen profiilikoodin.</li>
+<li>✅ Saat ehdotuksia ammateista ja koulutusaloista.</li>
+<li>✅ Voit konelukea oman CV:n tai työhakemuksen ja vertailla sitä eri työpaikkoihin.</li>
+<li>🆕 <strong>AI-analyysi työhakemuksesta</strong> – lataa työhakemus tai liitä profiilitiedot, saat LxP-koodin automaattisesti.</li>
+</ul>
+<div style="display: flex; gap: 10px; flex-wrap: wrap;">
+<a class="button try-demo" href="https://plaakkon.github.io/profiilitesti/" target="_blank">🔵 Tee testi ilman kirjautumista</a>
+<a class="button ai-tool" href="https://lxp.yoro.fi/profile-analyzer/" target="_blank">🤖 AI-analyysi työhakemuksesta</a>
+<a class="button gray" href="/kirjaudu">🔐 Kirjaudu sisään</a>
+<a class="button gray" href="/rekisteroidy">Rekisteröidy</a>
+</div>
+</section>
+<section>
+<h2>🧑‍🏫 3. Olen opinto-ohjaaja, valmentaja tai kuntatoimija</h2>
+<ul>
+<li>✅ Suunnittele ohjausta tehokkaammin LxP-koodin avulla</li>
+<li>✅ Seuraa testituloksia ja soveltuvuutta koulutuspolkuihin</li>
+<li>✅ Käytä palvelua osana työhaastattelua tai valmennusta</li>
+</ul>
+<p>📎 <a class="button gray" href="LxP-Profiili_Esimerkki01.pdf" target="_blank">Esimerkkiraportti PDF</a></p>
+<p>💼 Lisenssi: 290 € + alv / koulu- tai kuntayksikkö</p>
+</section>
+<section>
+<h2>🏢 4. Olen työnantaja tai rekrytoija</h2>
+<ul>
+<li>✅ Käytä <strong>LxP Matcher</strong> -työkalua työpaikkailmoitusten analysointiin</li>
+<li>✅ Saat LxP-koodin, jolla voit hakea sopivia ehdokkaita 29 000 profiilin joukosta</li>
+<li>✅ Työkalu hyödyntää NLP-tekoälyä ja Yoron luokituksia</li>
+<li>🆕 <strong>Henkilöprofiili-analysaattori</strong> – analysoi työhakemukset ja henkilöprofiilit massatyönä</li>
+</ul>
+<div style="display: flex; gap: 10px; flex-wrap: wrap;">
+<a class="button try-demo" href="https://lxp.yoro.fi/" target="_blank">🔵 Avaa LxP Matcher (työpaikat)</a>
+<a class="button ai-tool" href="https://lxp.yoro.fi/profile-analyzer/" target="_blank">🤖 Henkilöprofiili-analysaattori</a>
+</div>
+<p>🌐 LxP-koodi toimii suoraan osoitteessa <a href="https://lxp.yoro.fi" target="_blank">lxp.yoro.fi</a></p>
+</section>
+<section>
+<h2>🔬 4b. Massatyöstö ja batch-analyysi</h2>
+<ul>
+<li>✅ Analysoi tuhansia henkilöprofiileja kerralla</li>
+<li>✅ PowerShell/Node.js -skriptit JSON-tiedostojen käsittelyyn</li>
+<li>✅ Automaattinen LxP-koodin generointi työhakemuksista</li>
+<li>✅ Kustannustehokas ratkaisu suurille henkilömäärille</li>
+</ul>
+<p>💻 <strong>Batch-prosessointi</strong>: ~$0.0015 per henkilöprofiili (29k henkilöä ≈ $43)</p>
+<p>📞 Ota yhteyttä massatyöstön ohjeistuksesta: <a href="mailto:myynti@yoro.fi?subject=Batch-analyysi">myynti@yoro.fi</a></p>
+</section>
+<section>
+<h2>💡 5. Teknologia ja taustajärjestelmä</h2>
+<p>Käytämme koneoppimista, NLP:tä ja avointa työvoimatietoa ohjaus- ja rekrytointiprosessin tueksi. Kaikki ratkaisumme perustuvat LxP-profiilijärjestelmään, joka yhdenmukaistaa työpaikkailmoitukset, työhakemukset ja urapolkuanalyysit.</p>
+<p><strong>Uudet AI-ominaisuudet 2025:</strong></p>
+<ul>
+<li>🤖 GPT-3.5-turbo integraatio LxP-analyysiin</li>
+<li>📊 Reaaliaikainen kustannusseuranta ja token-laskenta</li>
+<li>🛡️ Automaattinen validointi ja laadunvalvonta</li>
+<li>⚡ Batch-prosessointi suurille datamäärille</li>
+</ul>
+</section>
+<section>
+<h2>📬 6. Ota yhteyttä tai pyydä esittely</h2>
+<p>Palvelu on käytössä kunnissa, kouluissa ja valmennusorganisaatioissa. Haluatko esittelyn tai testilisenssin?</p>
+<div class="contact-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1rem; margin: 1rem 0;">
+<div>
+<h3>🏫 Koulut & Kunnat</h3>
+<p>📧 <a href="mailto:myynti@yoro.fi?subject=Koululisenssi">Pyydä koululisenssiä</a><br/>
+💼 290 € + alv / yksikkö<br/>
+📋 <a href="LxP-Profiili_Esimerkki01.pdf" target="_blank">Esimerkkiraportti</a></p>
+</div>
+<div>
+<h3>🏢 Yritykset & Rekrytoijat</h3>
+<p>📧 <a href="mailto:myynti@yoro.fi?subject=Yrityslisenssi">Pyydä yrityslisenssiä</a><br/>
+🤖 AI-työkalut käytössä<br/>
+📊 Batch-prosessointi saatavilla</p>
+</div>
+</div>
+<p style="text-align: center; margin-top: 2rem;">
+    📧 <strong>Yleinen yhteydenotto:</strong> <a href="mailto:myynti@yoro.fi">myynti@yoro.fi</a><br/>
+    📄 <a href="mailto:myynti@yoro.fi?subject=Koekäyttö">Pyydä koekäyttöä ja esittelyä</a>
+</p>
+</section>
+</main>
+<footer>
     © 2025 Yoro Oy – www.yoro.fi – myynti@yoro.fi
   </footer>
-  <script>
+<script>
     window.addEventListener('DOMContentLoaded', function() {
       const userEmail = localStorage.getItem('userEmail');
       const testButtons = document.getElementById('testButtons');
