@@ -51,32 +51,3 @@ export async function GET(request: NextRequest) {
     )
   }
 }
-      // Poista mahdolliset tunnisteet
-      email: undefined,
-      phone: undefined,
-      exactLocation: undefined
-    }))
-
-    return NextResponse.json({
-      profiles: sanitizedProfiles,
-      totalCount: result.profiles.length,
-      hasMore: result.hasMore,
-      lastDocId: result.lastDoc?.id || null
-    })
-
-  } catch (error) {
-    console.error('API Error:', error)
-    return NextResponse.json(
-      { error: 'Palvelinvirhe' },
-      { status: 500 }
-    )
-  }
-}
-
-// Estä GET-pyynnöt
-export async function GET() {
-  return NextResponse.json(
-    { error: 'Käytä POST-pyyntöjä' },
-    { status: 405 }
-  )
-}

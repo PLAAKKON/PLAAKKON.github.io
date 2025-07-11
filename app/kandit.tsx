@@ -172,9 +172,14 @@ const kaikkiKoulutusdata = järjestäLukumääränMukaan(
 const kaikkiOsaamisdata = järjestäLukumääränMukaan(laskeEsiintymät(profiilit, "osaamiset"));
 
   useEffect(() => {
-    fetch("/data/profiilit.json")
+    // Haetaan alkuperäinen data chunked API:sta
+    fetch("/api/profiles/chunked?limit=1000")
       .then((res) => res.json())
-      .then((data) => setProfiilit(data));
+      .then((data) => setProfiilit(data.profiles || []))
+      .catch((error) => {
+        console.error('Virhe datan haussa:', error);
+        setProfiilit([]);
+      });
   }, []);
 
   useEffect(() => {
@@ -195,56 +200,54 @@ const kaikkiOsaamisdata = järjestäLukumääränMukaan(laskeEsiintymät(profiil
       });
   }, []);
 
-  const hae = () => {
+  const hae = async () => {
     setLoading(true);
-    setTimeout(() => {
-      const tulos = profiilit.filter((p) => {
-        const hakuosuma =
-          haku.trim() === "" ||
-          JSON.stringify(p).toLowerCase().includes(haku.toLowerCase());
-  
-          const maakuntaosuma =
-          maakuntaValinta === "" ||
-          (p.työnhakualue || []).some((alue: string) =>
-            alue === maakuntaValinta ||
-            (maakuntaKaupungit[maakuntaValinta] || []).includes(alue)
-          );
-  
-          const kaupunkiOsuma =
-          kaupunkiValinta === "" ||
-          (p.työnhakualue || []).includes(kaupunkiValinta) ||
-          (p.kaupungit || []).includes(kaupunkiValinta);
-  
-        const ammattiosuma =
-          ammattivalinnat.length === 0 ||
-          ammattivalinnat.some((valinta) =>
-            (p.ammatit || []).includes(valinta) || (p.valitut_ammatit || []).includes(valinta)
-          );
-
-        const toiveosuma =
-          toivevalinnat.length === 0 ||
-          toivevalinnat.some((valinta) => (p.työtoiveet || []).includes(valinta));
-		  
-        const osaamisosuma =
-          osaamisvalinnat.length === 0 ||
-          osaamisvalinnat.some((valinta) =>
-            (p.osaamiset || []).some((osaaminen: string) =>
-              osaaminen.toLowerCase().includes(valinta.toLowerCase())
-            )
-          );
-
-        const koulutusosuma =
-          koulutusvalinnat.length === 0 ||
-          koulutusvalinnat.some((valinta) =>
-            Array.isArray(p.koulutus) &&
-            p.koulutus.some((k: any) => k[0]?.split(' / ')[0].toLowerCase().includes(valinta.toLowerCase()))
-          );
-
-        return hakuosuma && maakuntaosuma && kaupunkiOsuma && ammattiosuma && toiveosuma && koulutusosuma && osaamisosuma;;
-      });
-      setTulokset(tulos);
+    try {
+      // Rakenna hakuparametrit
+      const params = new URLSearchParams();
+      
+      if (haku.trim()) {
+        params.append('q', haku.trim());
+      }
+      
+      if (maakuntaValinta) {
+        params.append('työnhakualue', maakuntaValinta);
+      }
+      
+      if (kaupunkiValinta) {
+        params.append('työnhakualue', kaupunkiValinta);
+      }
+      
+      if (ammattivalinnat.length > 0) {
+        params.append('ammatit', ammattivalinnat.join(','));
+      }
+      
+      if (toivevalinnat.length > 0) {
+        params.append('työtoiveet', toivevalinnat.join(','));
+      }
+      
+      if (osaamisvalinnat.length > 0) {
+        params.append('osaamiset', osaamisvalinnat.join(','));
+      }
+      
+      if (koulutusvalinnat.length > 0) {
+        params.append('koulutus', koulutusvalinnat.join(','));
+      }
+      
+      params.append('limit', '200');
+      
+      const response = await fetch(`/api/profiles/chunked?${params}`);
+      const data = await response.json();
+      
+      setTulokset(data.profiles || []);
+      console.log(`Löytyi ${data.total} profiilia`);
+      
+    } catch (error) {
+      console.error('Hakuvirhe:', error);
+      setTulokset([]);
+    } finally {
       setLoading(false);
-    }, 400);
+    }
   };
 
   const skaalauskerroin = temTilasto && profiilit.length > 0

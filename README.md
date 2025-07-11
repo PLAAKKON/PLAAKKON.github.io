@@ -1,29 +1,142 @@
-# 🔒 Profiiliselain - Turvallinen Hakemustietojen Selaus
+# 🔒 Profiiliselain - Firebase/Firestore-pohjainen
+
+## Arkkitehtuuri
+
+### ☁️ **Pilvipalvelupohjaisuus**
+- **Firebase/Firestore**: Tietokanta ja autentikaatio
+- **Google AI**: Automaattinen anonymisointi
+- **Vercel**: Hosting ja serverless-funktiot
+- **Yoro.fi**: Käyttäjäautentikaatio
+
+### 🔄 **Dataflow**
+1. **Uudet hakemukset** → Firebase (raakadata)
+2. **Google AI** → Anonymisointi automaattisesti
+3. **Firestore** → Tallennus anonymisoituna
+4. **Profiiliselain** → Turvallinen haku
 
 ## Turvallisuusominaisuudet
 
 ### ✅ **Datatietoturva**
-- **Anonymisoitu data**: Kaikki arkaluontoiset tiedot poistettu
-- **Private-kansio**: Data ei ole julkisesti saatavilla
-- **Chunkkaus**: 75MB data jaettu pienempiin osiin
-- **Git-suojaus**: Datatiedostot eivät mene GitHubiin
+- **Firebase Security Rules**: Pääsyn hallinta
+- **Automaattinen anonymisointi**: Google AI:lla
+- **Reaaliaikainen käsittely**: Ei tallenneta raakatietoja
+- **Audit-loki**: Kaikki toiminnot lokitettu
 
-### ✅ **Käyttöoikeussuojaus**
-- **Yoro.fi autentikaatio**: Vain kirjautuneet käyttäjät
-- **API-suojaus**: Kaikki datahaut suojattu
-- **Rate limiting**: Estää massiivisen datan lataamisen
-- **Bot-suojaus**: Estää scrapperit ja imuroijat
+### ✅ **Pilvipalvelujen edut**
+- **24/7 käytettävyys**: Ei tarvitse omaa palvelinta
+- **Automaattinen skaalautuvuus**: Käsittelee tuhansia hakemuksia
+- **Varmuuskopiot**: Firebase hoitaa automaattisesti
+- **Maantieteellinen jakelu**: Nopea ympäri maailman
 
-### ✅ **Verkkotietoturva**
-- **Middleware-suojaus**: Estää suoran pääsyn datakansioon
-- **HTTPS pakollinen**: Tuotannossa vain salattu liikenne
-- **Autentikaatio-tokenien validointi**
+### 🔒 **Käyttöoikeussuojaus**
+- **Firebase Auth**: Integroitu Yoro.fi:n kanssa
+- **Security Rules**: Kentän tason käyttöoikeudet
+- **Real-time monitoring**: Epäilyttävän toiminnan seuranta
 
-## ⚠️ **KRIITTISTÄ - DATA EI SAA VUOTAA**
-1. **Älä koskaan commitoi datatiedostoja GitHubiin**
-2. **Käytä vain HTTPS-yhteyksiä tuotannossa**
-3. **Validoi kaikki API-tokenit**
-4. **Monitoroi epäilyttävää liikennettä**
+## Asennus ja käyttö
+
+### 1. **Firebase-projektin luominen**
+```bash
+# Mene https://console.firebase.google.com
+# Luo uusi projekti: "yoro-profiiliselain"
+# Ota käyttöön: Firestore, Authentication, Security Rules
+```
+
+### 2. **Kloonaa repo**
+```bash
+git clone https://github.com/yoro-oy/profiiliselain.git
+cd profiiliselain
+npm install
+```
+
+### 3. **Ympäristömuuttujat**
+```bash
+# .env.local
+NEXT_PUBLIC_FIREBASE_API_KEY=your_key
+NEXT_PUBLIC_FIREBASE_PROJECT_ID=yoro-profiiliselain
+GOOGLE_AI_API_KEY=your_google_ai_key
+```
+
+### 4. **Firestore Security Rules**
+```javascript
+// Firestore Rules
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Vain autentikoidut Yoro.fi käyttäjät
+    match /profiles/{document} {
+      allow read: if request.auth != null && 
+                     request.auth.token.email.matches('.*@yoro.fi');
+    }
+    
+    // Hakemukset - vain systeemi voi kirjoittaa
+    match /applications/{document} {
+      allow write: if request.auth != null;
+      allow read: if false; // Ei suoraa lukua
+    }
+  }
+}
+```
+
+### 5. **Käynnistä**
+```bash
+npm run dev
+```
+
+## Uusien hakemusten vastaanotto
+
+### 📝 **Hakemusflow**
+1. **Yoro.fi-sivusto** → lähettää hakemuksen
+2. **API** → vastaanottaa ja validoi
+3. **Google AI** → anonymisoi automaattisesti
+4. **Firestore** → tallentaa turvallisesti
+5. **Profiiliselain** → näyttää anonymisoidut profiilit
+
+### 🔗 **Integraatio yoro.fi:hin**
+```javascript
+// Yoro.fi:n hakemussivulla
+fetch('https://profiiliselain.vercel.app/api/applications/submit', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+    'Authorization': `Bearer ${yoroToken}`
+  },
+  body: JSON.stringify(applicationData)
+})
+```
+
+## Deployment
+
+### 🚀 **Vercel (automaattinen)**
+```bash
+# Linkitä GitHub repo
+vercel --prod
+
+# Environment variables (Vercel Dashboard):
+# NEXT_PUBLIC_FIREBASE_API_KEY
+# NEXT_PUBLIC_FIREBASE_PROJECT_ID
+# GOOGLE_AI_API_KEY
+```
+
+### 📊 **Monitorointi**
+- **Firebase Console**: Reaaliaikainen käyttö
+- **Vercel Analytics**: Sivuston suorituskyky
+- **Google AI Usage**: API-kutsut ja kustannukset
+
+## Kustannukset (arvio)
+
+### 💰 **Kuukausittaiset kustannukset**
+- **Firebase**: 0-50€ (riippuen käytöstä)
+- **Google AI**: 0-20€ (per 1000 hakemusta)
+- **Vercel**: 0€ (Pro: 20$ jos tarvitaan)
+- **Yhteensä**: ~20-90€/kk
+
+### 🔄 **Skaalautuvuus**
+- **1-1000 hakemusta/kk**: ~20€
+- **1000-10000 hakemusta/kk**: ~50€
+- **10000+ hakemusta/kk**: ~100€+
+
+**Ei tarvetta omille palvelimille tai ylläpidolle! 🎉**
 
 ---
 

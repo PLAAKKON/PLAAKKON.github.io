@@ -51,32 +51,34 @@ export async function GET(request: NextRequest) {
     )
   }
 }
-      // Poista mahdolliset tunnisteet
-      email: undefined,
-      phone: undefined,
-      exactLocation: undefined
-    }))
 
+// POST-metodi yhteensopivuuden vuoksi
+export async function POST(request: NextRequest) {
+  try {
+    const body = await request.json()
+    const { 
+      filters = {},
+      limit = 50,
+      searchTerm = ''
+    } = body
+
+    console.log('POST haku parametrit:', { searchTerm, filters, limit })
+    
+    // Hae profiilit
+    const profiles = await searchAllProfilesParallel(searchTerm, filters, limit)
+    
     return NextResponse.json({
-      profiles: sanitizedProfiles,
-      totalCount: result.profiles.length,
-      hasMore: result.hasMore,
-      lastDocId: result.lastDoc?.id || null
+      profiles,
+      total: profiles.length,
+      searchTerm,
+      filters
     })
-
+    
   } catch (error) {
-    console.error('API Error:', error)
+    console.error('Virhe profiilien haussa:', error)
     return NextResponse.json(
-      { error: 'Palvelinvirhe' },
+      { error: 'Virhe profiilien haussa: ' + (error as Error).message },
       { status: 500 }
     )
   }
-}
-
-// Estä GET-pyynnöt
-export async function GET() {
-  return NextResponse.json(
-    { error: 'Käytä POST-pyyntöjä' },
-    { status: 405 }
-  )
 }

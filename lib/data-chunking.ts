@@ -54,7 +54,7 @@ export async function chunkLargeJsonFile(
   return chunks
 }
 
-// Hae profiileita tehokkaasti
+// Hae profiileita tehokkaasti - tukee kaikkia parametreja
 export async function getProfilesChunk(
   chunkIndex: number,
   filters: any = {},
@@ -69,17 +69,65 @@ export async function getProfilesChunk(
   const rawData = fs.readFileSync(chunkPath, 'utf8')
   let profiles = JSON.parse(rawData)
   
-  // Suodata
+  // Tekstihaku kaikista kentistä
   if (searchTerm) {
-    profiles = profiles.filter((profile: any) => 
-      JSON.stringify(profile).toLowerCase().includes(searchTerm.toLowerCase())
-    )
+    const searchLower = searchTerm.toLowerCase()
+    profiles = profiles.filter((profile: any) => {
+      const searchableFields = [
+        'esittely', 'työnhakualue', 'aloitusajankohta', 'ammatit', 'osaamiset',
+        'työtoiveet', 'koulutus', 'työkokemus', 'muu_kokemus', 'osaamisteksti',
+        'kielitaito', 'ajokortit', 'ajotiedot', 'lupatiedot', 'some', 'esittely_10sanaa'
+      ]
+      
+      return searchableFields.some(field => {
+        const value = profile[field]
+        if (!value) return false
+        
+        if (Array.isArray(value)) {
+          return value.some(item => 
+            item && item.toString().toLowerCase().includes(searchLower)
+          )
+        } else {
+          return value.toString().toLowerCase().includes(searchLower)
+        }
+      })
+    })
   }
   
-  // Lisäsuodattimet
+  // Suodattimet - tukee monivalintoja
   Object.entries(filters).forEach(([key, value]) => {
-    if (value) {
-      profiles = profiles.filter((profile: any) => profile[key] === value)
+    if (value && (Array.isArray(value) ? value.length > 0 : value !== '')) {
+      profiles = profiles.filter((profile: any) => {
+        const profileValue = profile[key]
+        
+        if (!profileValue) return false
+        
+        // Jos suodatin on array (monivalinta)
+        if (Array.isArray(value)) {
+          if (Array.isArray(profileValue)) {
+            // Tarkista onko jokin valituista arvoista profiilissa
+            return value.some(filterVal => 
+              profileValue.some(profVal => 
+                profVal && profVal.toString().toLowerCase().includes(filterVal.toString().toLowerCase())
+              )
+            )
+          } else {
+            // Yksittäinen arvo profiilissa
+            return value.some(filterVal => 
+              profileValue.toString().toLowerCase().includes(filterVal.toString().toLowerCase())
+            )
+          }
+        } else {
+          // Yksittäinen suodatin
+          if (Array.isArray(profileValue)) {
+            return profileValue.some(profVal => 
+              profVal && profVal.toString().toLowerCase().includes(value.toString().toLowerCase())
+            )
+          } else {
+            return profileValue.toString().toLowerCase().includes(value.toString().toLowerCase())
+          }
+        }
+      })
     }
   })
   
