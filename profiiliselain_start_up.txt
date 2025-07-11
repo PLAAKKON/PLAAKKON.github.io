@@ -1,0 +1,12 @@
+Siirry projektin juureen:
+
+cd ..
+cd ..
+cd ..
+cd users
+cd pasil
+cd profiiliselain
+
+npm run dev
+
+http://localhost:3000

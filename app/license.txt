@@ -1,0 +1,25 @@
+PROFIILITESTI – KÄYTTÖOIKEUS JA LISENSSI
+
+© 2025 Yoro Oy. Kaikki oikeudet pidätetään.
+
+Tämä ohjelma on julkaistu vain arviointia ja testikäyttöä varten. Tämän ohjelmiston ja sen osien käyttö kaupalliseen tarkoitukseen on ehdottomasti kielletty ilman erillistä, kirjallista lupaa oikeudenhaltijalta.
+
+Sallittu käyttö:
+✔ Testaus ja arviointi yksityishenkilöille tai organisaatioille
+✔ Enintään 5 (viisi) yksittäistä ammatillista analyysiä testausympäristössä
+✔ Ei rekisteröitymistä, ei datan keruuta
+
+Kielletty:
+✘ Ohjelmiston muokkaaminen tai jälleenmyynti
+✘ Kaupallinen käyttö tai osittainenkin hyödyntäminen tuotteena/palveluna
+✘ Osien sisällyttäminen muihin järjestelmiin ilman lupaa
+✘ Tietojen tai logiikan kopiointi tai julkaisu muualla
+
+Tämä ohjelmisto ja sen pisteytyslogiikka on kehitetty osana suljettua, lisensoitavaa tuotetta. Mikäli olet kiinnostunut yhteistyöstä tai haluat käyttöoikeuden koko järjestelmään, ota yhteyttä:
+
+📧 [myynti@yoro.fi]  
+🌐 [www.yoro.fi]
+
+---
+
+Tämän lisenssin rikkominen johtaa oikeustoimiin, ja oikeudet pidätetään Suomen tekijänoikeuslain mukaisesti.

@@ -1,0 +1,10 @@
+{
+  "name": "profiiliselain-setup",
+  "scripts": {
+    "setup-chunks": "node -e \"require('./lib/setup-chunks.js').setupChunks()\"",
+    "rebuild-chunks": "node -e \"require('./lib/setup-chunks.js').rebuildChunks()\"",
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start"
+  }
+}
