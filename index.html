@@ -1,0 +1,810 @@
+<!DOCTYPE html>
+
+<html lang="fi">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Yoro Oy - AI-powered Career Services | LxP Profiling & Recruitment</title>
+<meta name="description" content="Yoro.fi tarjoaa tekoälyä hyödyntäviä työelämäpalveluja: LxP-profiilitesti, työhakemus-analyysi, työpaikkailmoitusten analyysi ja rekrytointityökalut. Kunnille, kouluille ja yrityksille."/>
+<meta name="keywords" content="LxP, työelämäpalvelut, rekrytointi, profiilitesti, tekoäly, AI, työhakemus, henkilöprofiili, työhakemus-analyysi, työpaikkailmoitus"/>
+<meta name="author" content="Yoro Oy"/>
+<meta property="og:title" content="Yoro Oy - AI-pohjaiset työelämäpalvelut"/>
+<meta property="og:description" content="Tekoälyä hyödyntävät työelämäpalvelut: LxP-profilointi, työhakemus-analyysi ja rekrytointityökalut"/>
+<meta property="og:url" content="https://yoro.fi"/>
+<meta property="og:type" content="website"/>
+<script src="https://www.gstatic.com/firebasejs/10.11.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.11.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.11.1/firebase-firestore-compat.js"></script>
+<script defer="" src="/firebaseConfig.js"></script>
+<script defer="" src="/auth.js"></script>
+<style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      color: white;
+      background: transparent;
+    }
+
+    .video-background {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      z-index: -2;
+    }
+
+    /* Language Selector */
+    .language-selector {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 1000;
+      background: rgba(0, 0, 0, 0.7);
+      border-radius: 25px;
+      padding: 8px 16px;
+      backdrop-filter: blur(10px);
+    }
+
+    .language-selector button {
+      background: none;
+      border: none;
+      color: white;
+      padding: 5px 10px;
+      cursor: pointer;
+      border-radius: 20px;
+      margin: 0 2px;
+      transition: all 0.3s ease;
+      font-weight: 500;
+    }
+
+    .language-selector button:hover {
+      background: rgba(255, 255, 255, 0.2);
+    }
+
+    .language-selector button.active {
+      background: #007acc;
+      color: white;
+    }
+
+    header {
+      text-align: center;
+      padding: 2rem;
+      background: transparent;
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 3rem;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+    }
+
+    header p {
+      margin-top: 0.5rem;
+      font-size: 1.2rem;
+      text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+    }
+
+    main {
+      max-width: 1000px;
+      margin: auto;
+      padding: 2rem;
+      background-color: rgba(0, 0, 0, 0.5);
+      border-radius: 15px;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    }
+
+    /* Navigation Cards */
+    .nav-cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 20px;
+      margin: 2rem 0;
+    }
+
+    .nav-card {
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 15px;
+      padding: 1.5rem;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      transition: all 0.3s ease;
+      backdrop-filter: blur(5px);
+    }
+
+    .nav-card:hover {
+      transform: translateY(-5px);
+      background: rgba(255, 255, 255, 0.15);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    }
+
+    section {
+      margin-bottom: 2rem;
+      background: rgba(255, 255, 255, 0.05);
+      padding: 1.5rem;
+      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    header p {
+      margin-top: 0.5rem;
+      font-size: 1.2rem;
+    }
+
+    main {
+      max-width: 900px;
+      margin: auto;
+      padding: 2rem;
+      background-color: rgba(0, 0, 0, 0.4);
+      border-radius: 10px;
+    }
+
+    section {
+      margin-bottom: 2rem;
+    }
+
+    h2 {
+      color: #ffffff;
+      font-size: 1.8rem;
+      margin-bottom: 1rem;
+      text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+      border-bottom: 2px solid rgba(255, 255, 255, 0.2);
+      padding-bottom: 0.5rem;
+    }
+
+    h3 {
+      color: #ffffff;
+      margin-top: 0;
+      margin-bottom: 0.5rem;
+      font-size: 1.3rem;
+    }
+
+    /* Button Styles */
+    .button-group {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-top: 1rem;
+    }
+
+    a.button {
+      display: inline-block;
+      color: white;
+      padding: 12px 24px;
+      text-decoration: none;
+      border-radius: 25px;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    a.button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+    }
+
+    a.button.primary {
+      background: linear-gradient(135deg, #007acc, #005fa3);
+    }
+    a.button.primary:hover {
+      background: linear-gradient(135deg, #005fa3, #004a82);
+    }
+
+    a.button.secondary {
+      background: linear-gradient(135deg, #17a2b8, #138496);
+    }
+    a.button.secondary:hover {
+      background: linear-gradient(135deg, #138496, #0f6674);
+    }
+
+    a.button.tertiary {
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+    }
+    a.button.tertiary:hover {
+      background: rgba(255, 255, 255, 0.2);
+    }
+
+    /* Quick Actions */
+    .quick-actions {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 15px;
+      margin: 2rem 0;
+    }
+
+    .quick-action {
+      background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05));
+      padding: 1.5rem;
+      border-radius: 12px;
+      text-align: center;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      transition: all 0.3s ease;
+    }
+
+    .quick-action:hover {
+      transform: translateY(-3px);
+      background: linear-gradient(135deg, rgba(255,255,255,0.15), rgba(255,255,255,0.1));
+    }
+
+    .quick-action .icon {
+      font-size: 2.5rem;
+      margin-bottom: 1rem;
+    }
+
+    /* Contact Grid */
+    .contact-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1rem;
+      margin: 1rem 0;
+    }
+
+    .contact-grid div {
+      background: rgba(255,255,255,0.1);
+      padding: 1.5rem;
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,0.2);
+      transition: all 0.3s ease;
+    }
+
+    .contact-grid div:hover {
+      background: rgba(255,255,255,0.15);
+      transform: translateY(-2px);
+    }
+
+    footer {
+      text-align: center;
+      padding: 2rem;
+      font-size: 0.9rem;
+      background: rgba(0,0,0,0.5);
+      backdrop-filter: blur(10px);
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    /* User Info Styles */
+    #userInfo {
+      background: rgba(0, 0, 0, 0.3);
+      padding: 10px 15px;
+      border-radius: 25px;
+      margin-top: 15px;
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    #logoutBtn {
+      background: linear-gradient(135deg, #dc3545, #c82333);
+      color: white;
+      border: none;
+      border-radius: 20px;
+      padding: 8px 16px;
+      cursor: pointer;
+      margin-left: 10px;
+      transition: all 0.3s ease;
+    }
+
+    #logoutBtn:hover {
+      background: linear-gradient(135deg, #c82333, #a71e2a);
+      transform: translateY(-1px);
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+      header h1 {
+        font-size: 2rem;
+      }
+      
+      main {
+        margin: 1rem;
+        padding: 1.5rem;
+      }
+      
+      .button-group {
+        flex-direction: column;
+      }
+      
+      .nav-cards {
+        grid-template-columns: 1fr;
+      }
+      
+      .language-selector {
+        top: 10px;
+        right: 10px;
+        padding: 6px 12px;
+      }
+    }
+
+    /* Hidden content for language switching */
+    .lang-content {
+      display: none;
+    }
+    
+    .lang-content.active {
+      display: block;
+    }
+  </style>
+</head>
+<body>
+<!-- Language Selector -->
+<div class="language-selector">
+  <button onclick="switchLanguage('fi')" id="langFi" class="active">FI</button>
+  <button onclick="switchLanguage('en')" id="langEn">EN</button>
+</div>
+
+<video autoplay="" class="video-background" loop="" muted="" playsinline="">
+<source src="Yoro1_final_1080p_30s.mp4" type="video/mp4"/>
+</video>
+
+<header>
+<div style="display: flex; align-items: center; justify-content: center; gap: 2rem; flex-wrap: wrap;">
+<img alt="Yoro Oy logo" src="logo_transparent.png" style="max-width: 140px; height: auto;"/>
+<div>
+<!-- Finnish Header -->
+<div class="lang-content active" data-lang="fi">
+  <h1>Yoro Oy</h1>
+  <p>Uuden sukupolven työelämäpalvelut</p>
+</div>
+<!-- English Header -->
+<div class="lang-content" data-lang="en">
+  <h1>Yoro Oy</h1>
+  <p>Next-generation career services</p>
+</div>
+
+<div id="userInfo" style="margin-top: 15px;">
+<span id="userEmailDisplay" class="lang-content active" data-lang="fi" style="color: #fff; text-shadow: 0 1px 4px #000, 0 0 2px #000;">
+  Kirjautunut: 
+  <a href="#" id="userEmailLink" style="color: #8ecaff; text-decoration: underline; text-shadow: 0 1px 4px #000;">sähköposti</a>
+</span>
+<span id="userEmailDisplayEn" class="lang-content" data-lang="en" style="color: #fff; text-shadow: 0 1px 4px #000, 0 0 2px #000;">
+  Logged in: 
+  <a href="#" id="userEmailLinkEn" style="color: #8ecaff; text-decoration: underline; text-shadow: 0 1px 4px #000;">email</a>
+</span>
+<button id="logoutBtn" onclick="logoutUser()" style="display:none;">
+  <span class="lang-content active" data-lang="fi">Kirjaudu ulos</span>
+  <span class="lang-content" data-lang="en">Logout</span>
+</button>
+</div>
+</div>
+</div>
+</header>
+
+<main>
+<!-- Quick Actions Cards -->
+<div class="quick-actions">
+  <!-- Finnish Quick Actions -->
+  <div class="lang-content active" data-lang="fi">
+    <div class="quick-action">
+      <div class="icon">👤</div>
+      <h3>Työnhakijalle</h3>
+      <p>Tee LxP-profiilitesti ja löydä sopiva ura</p>
+      <div class="button-group">
+        <a class="button primary" href="https://plaakkon.github.io/profiilitesti/" target="_blank">🔵 Tee testi</a>
+        <a class="button tertiary" href="/kirjaudu">🔐 Kirjaudu</a>
+      </div>
+    </div>
+    
+    <div class="quick-action">
+      <div class="icon">🏢</div>
+      <h3>Työnantajalle</h3>
+      <p>Löydä sopivia ehdokkaita 27k+ profiilista</p>
+      <div class="button-group">
+        <a class="button primary" href="https://lxp.yoro.fi/" target="_blank">🔵 LxP Matcher</a>
+        <a class="button secondary" href="/profiiliselain">👥 Selaa profiileja</a>
+      </div>
+    </div>
+    
+    <div class="quick-action">
+      <div class="icon">🎓</div>
+      <h3>Ohjaajalle</h3>
+      <p>Tue urasuunnittelua LxP-työkaluilla</p>
+      <div class="button-group">
+        <a class="button secondary" href="LxP-Profiili_Esimerkki01.pdf" target="_blank">📄 Esimerkki</a>
+        <a class="button tertiary" href="mailto:myynti@yoro.fi">📧 Ota yhteyttä</a>
+      </div>
+    </div>
+  </div>
+  
+  <!-- English Quick Actions -->
+  <div class="lang-content" data-lang="en">
+    <div class="quick-action">
+      <div class="icon">👤</div>
+      <h3>For Job Seekers</h3>
+      <p>Take LxP profile test and find your career path</p>
+      <div class="button-group">
+        <a class="button primary" href="https://plaakkon.github.io/profiilitesti/" target="_blank">🔵 Take Test</a>
+        <a class="button tertiary" href="/kirjaudu">🔐 Login</a>
+      </div>
+    </div>
+    
+    <div class="quick-action">
+      <div class="icon">🏢</div>
+      <h3>For Employers</h3>
+      <p>Find suitable candidates from 27k+ profiles</p>
+      <div class="button-group">
+        <a class="button primary" href="https://lxp.yoro.fi/" target="_blank">🔵 LxP Matcher</a>
+        <a class="button secondary" href="/profiiliselain">� Browse Profiles</a>
+      </div>
+    </div>
+    
+    <div class="quick-action">
+      <div class="icon">🎓</div>
+      <h3>For Counselors</h3>
+      <p>Support career planning with LxP tools</p>
+      <div class="button-group">
+        <a class="button secondary" href="LxP-Profiili_Esimerkki01.pdf" target="_blank">📄 Example</a>
+        <a class="button tertiary" href="mailto:myynti@yoro.fi">📧 Contact</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Finnish Content -->
+<div class="lang-content active" data-lang="fi">
+  <section>
+    <h2>🚀 AI-pohjaiset työelämäpalvelut</h2>
+    <p>Yoro.fi on älykäs urasuunnittelun ja rekrytoinnin verkkopalvelu. Käytä tekoälyä hyväksesi löytääksesi sopivat työntekijät, ammatit tai koulutuspolut.</p>
+    
+    <div class="button-group">
+      <a class="button secondary" href="https://lxp.yoro.fi/profile-analyzer/" target="_blank">🤖 AI-analyysi</a>
+      <a class="button tertiary" href="#technology">🔬 Teknologia</a>
+    </div>
+  </section>
+
+  <section>
+    <h2>🎯 Palvelut käyttäjäryhmittäin</h2>
+    
+    <div class="nav-cards">
+      <div class="nav-card">
+        <h3>👤 Työnhakijat & Opiskelijat</h3>
+        <ul>
+          <li>✅ Maksuton LxP-profiilitesti</li>
+          <li>✅ Ammattisuositukset tekoälyllä</li>
+          <li>✅ CV-analyysi ja työpaikkavertailu</li>
+          <li>🆕 Automaattinen LxP-koodin generointi</li>
+        </ul>
+        <div class="button-group">
+          <a class="button primary" href="https://plaakkon.github.io/profiilitesti/" target="_blank">Tee testi</a>
+        </div>
+      </div>
+      
+      <div class="nav-card">
+        <h3>🏢 Työnantajat & Rekrytoijat</h3>
+        <ul>
+          <li>✅ LxP Matcher -työpaikkailmoitusten analysointi</li>
+          <li>✅ 27,000+ henkilöprofiilin hakemisto</li>
+          <li>✅ NLP-tekoäly ja Yoro-luokitukset</li>
+          <li>🆕 Massatyöstö ja batch-analyysi</li>
+        </ul>
+        <div class="button-group">
+          <a class="button primary" href="https://lxp.yoro.fi/" target="_blank">LxP Matcher</a>
+          <a class="button secondary" href="/profiiliselain">Selaa profiileja</a>
+        </div>
+      </div>
+      
+      <div class="nav-card">
+        <h3>🎓 Ohjaajat & Kouluttajat</h3>
+        <ul>
+          <li>✅ Tehokas ohjaussuunnittelu</li>
+          <li>✅ Testitulosseuranta</li>
+          <li>✅ Koulutuspolkuanalyysi</li>
+          <li>💼 Lisenssi: 290€ + alv/yksikkö</li>
+        </ul>
+        <div class="button-group">
+          <a class="button secondary" href="LxP-Profiili_Esimerkki01.pdf" target="_blank">Esimerkkiraportti</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="technology">
+    <h2>🔬 Teknologia & AI-ominaisuudet</h2>
+    <div class="nav-cards">
+      <div class="nav-card">
+        <h3>🤖 Tekoälyintegraatiot</h3>
+        <ul>
+          <li>GPT-3.5-turbo LxP-analyysiin</li>
+          <li>Reaaliaikainen kustannusseuranta</li>
+          <li>Automaattinen laadunvalvonta</li>
+          <li>Batch-prosessointi suurille datamäärille</li>
+        </ul>
+      </div>
+      
+      <div class="nav-card">
+        <h3>� Massatyöstö</h3>
+        <p><strong>Batch-prosessointi:</strong> ~$0.0015 per profiili</p>
+        <p><strong>29k henkilöä ≈ $43</strong></p>
+        <div class="button-group">
+          <a class="button tertiary" href="mailto:myynti@yoro.fi?subject=Batch-analyysi">Pyydä ohjeita</a>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- English Content -->
+<div class="lang-content" data-lang="en">
+  <section>
+    <h2>� AI-powered Career Services</h2>
+    <p>Yoro.fi is an intelligent career planning and recruitment web service. Use artificial intelligence to find suitable employees, professions, or educational paths.</p>
+    
+    <div class="button-group">
+      <a class="button secondary" href="https://lxp.yoro.fi/profile-analyzer/" target="_blank">🤖 AI Analysis</a>
+      <a class="button tertiary" href="#technology-en">🔬 Technology</a>
+    </div>
+  </section>
+
+  <section>
+    <h2>🎯 Services by User Group</h2>
+    
+    <div class="nav-cards">
+      <div class="nav-card">
+        <h3>👤 Job Seekers & Students</h3>
+        <ul>
+          <li>✅ Free LxP profile test</li>
+          <li>✅ AI-powered career recommendations</li>
+          <li>✅ CV analysis and job comparison</li>
+          <li>🆕 Automatic LxP code generation</li>
+        </ul>
+        <div class="button-group">
+          <a class="button primary" href="https://plaakkon.github.io/profiilitesti/" target="_blank">Take Test</a>
+        </div>
+      </div>
+      
+      <div class="nav-card">
+        <h3>🏢 Employers & Recruiters</h3>
+        <ul>
+          <li>✅ LxP Matcher job posting analysis</li>
+          <li>✅ 27,000+ person profile directory</li>
+          <li>✅ NLP AI and Yoro classifications</li>
+          <li>🆕 Mass processing and batch analysis</li>
+        </ul>
+        <div class="button-group">
+          <a class="button primary" href="https://lxp.yoro.fi/" target="_blank">LxP Matcher</a>
+          <a class="button secondary" href="/profiiliselain">Browse Profiles</a>
+        </div>
+      </div>
+      
+      <div class="nav-card">
+        <h3>🎓 Counselors & Trainers</h3>
+        <ul>
+          <li>✅ Efficient guidance planning</li>
+          <li>✅ Test result tracking</li>
+          <li>✅ Educational path analysis</li>
+          <li>💼 License: €290 + VAT/unit</li>
+        </ul>
+        <div class="button-group">
+          <a class="button secondary" href="LxP-Profiili_Esimerkki01.pdf" target="_blank">Sample Report</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="technology-en">
+    <h2>🔬 Technology & AI Features</h2>
+    <div class="nav-cards">
+      <div class="nav-card">
+        <h3>🤖 AI Integrations</h3>
+        <ul>
+          <li>GPT-3.5-turbo for LxP analysis</li>
+          <li>Real-time cost tracking</li>
+          <li>Automatic quality control</li>
+          <li>Batch processing for large datasets</li>
+        </ul>
+      </div>
+      
+      <div class="nav-card">
+        <h3>📊 Mass Processing</h3>
+        <p><strong>Batch processing:</strong> ~$0.0015 per profile</p>
+        <p><strong>29k people ≈ $43</strong></p>
+        <div class="button-group">
+          <a class="button tertiary" href="mailto:myynti@yoro.fi?subject=Batch-analysis">Request Instructions</a>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- Contact Section (Bilingual) -->
+<section>
+  <!-- Finnish Contact -->
+  <div class="lang-content active" data-lang="fi">
+    <h2>📬 Ota yhteyttä</h2>
+    <p>Palvelu on käytössä kunnissa, kouluissa ja valmennusorganisaatioissa. Haluatko esittelyn tai testilisenssin?</p>
+    
+    <div class="contact-grid">
+      <div>
+        <h3>🏫 Koulut & Kunnat</h3>
+        <p>📧 <a href="mailto:myynti@yoro.fi?subject=Koululisenssi">Pyydä koululisenssiä</a><br/>
+        💼 290 € + alv / yksikkö<br/>
+        📋 <a href="LxP-Profiili_Esimerkki01.pdf" target="_blank">Esimerkkiraportti</a></p>
+      </div>
+      <div>
+        <h3>🏢 Yritykset & Rekrytoijat</h3>
+        <p>📧 <a href="mailto:myynti@yoro.fi?subject=Yrityslisenssi">Pyydä yrityslisenssiä</a><br/>
+        🤖 AI-työkalut käytössä<br/>
+        📊 Batch-prosessointi saatavilla</p>
+      </div>
+    </div>
+    
+    <p style="text-align: center; margin-top: 2rem;">
+      📧 <strong>Yleinen yhteydenotto:</strong> <a href="mailto:myynti@yoro.fi">myynti@yoro.fi</a><br/>
+      📄 <a href="mailto:myynti@yoro.fi?subject=Koekäyttö">Pyydä koekäyttöä ja esittelyä</a>
+    </p>
+  </div>
+  
+  <!-- English Contact -->
+  <div class="lang-content" data-lang="en">
+    <h2>📬 Contact Us</h2>
+    <p>The service is used by municipalities, schools, and training organizations. Would you like a demo or test license?</p>
+    
+    <div class="contact-grid">
+      <div>
+        <h3>🏫 Schools & Municipalities</h3>
+        <p>📧 <a href="mailto:myynti@yoro.fi?subject=School-license">Request school license</a><br/>
+        💼 €290 + VAT / unit<br/>
+        📋 <a href="LxP-Profiili_Esimerkki01.pdf" target="_blank">Sample report</a></p>
+      </div>
+      <div>
+        <h3>🏢 Companies & Recruiters</h3>
+        <p>📧 <a href="mailto:myynti@yoro.fi?subject=Business-license">Request business license</a><br/>
+        🤖 AI tools available<br/>
+        📊 Batch processing available</p>
+      </div>
+    </div>
+    
+    <p style="text-align: center; margin-top: 2rem;">
+      📧 <strong>General contact:</strong> <a href="mailto:myynti@yoro.fi">myynti@yoro.fi</a><br/>
+      📄 <a href="mailto:myynti@yoro.fi?subject=Trial-request">Request trial and demo</a>
+    </p>
+  </div>
+</section>
+</main>
+
+<footer>
+  <div class="lang-content active" data-lang="fi">
+    © 2025 Yoro Oy – www.yoro.fi – myynti@yoro.fi
+  </div>
+  <div class="lang-content" data-lang="en">
+    © 2025 Yoro Oy – www.yoro.fi – sales@yoro.fi
+  </div>
+</footer>
+<script>
+    // Language switching functionality
+    let currentLanguage = 'fi';
+    
+    function switchLanguage(lang) {
+      currentLanguage = lang;
+      
+      // Hide all language content
+      document.querySelectorAll('.lang-content').forEach(el => {
+        el.classList.remove('active');
+      });
+      
+      // Show selected language content
+      document.querySelectorAll(`.lang-content[data-lang="${lang}"]`).forEach(el => {
+        el.classList.add('active');
+      });
+      
+      // Update language selector buttons
+      document.getElementById('langFi').classList.toggle('active', lang === 'fi');
+      document.getElementById('langEn').classList.toggle('active', lang === 'en');
+      
+      // Update HTML lang attribute
+      document.documentElement.lang = lang;
+      
+      // Update page title
+      if (lang === 'en') {
+        document.title = 'Yoro Oy - AI-powered Career Services | LxP Profiling & Recruitment';
+      } else {
+        document.title = 'Yoro Oy - AI-pohjaiset työelämäpalvelut | LxP-profilointi ja rekrytointi';
+      }
+      
+      // Save language preference
+      localStorage.setItem('preferred-language', lang);
+    }
+    
+    // Load saved language preference
+    function loadLanguagePreference() {
+      const saved = localStorage.getItem('preferred-language');
+      if (saved && saved !== currentLanguage) {
+        switchLanguage(saved);
+      }
+    }
+    
+    // Enhanced user authentication display
+    function updateUserDisplay() {
+      const userEmail = localStorage.getItem('userEmail');
+      const userInfoFi = document.getElementById('userEmailDisplay');
+      const userInfoEn = document.getElementById('userEmailDisplayEn');
+      const emailLinkFi = document.getElementById('userEmailLink');
+      const emailLinkEn = document.getElementById('userEmailLinkEn');
+      const logoutBtn = document.getElementById('logoutBtn');
+      
+      if (userEmail) {
+        // Show user info for both languages
+        if (userInfoFi) userInfoFi.style.display = 'inline';
+        if (userInfoEn) userInfoEn.style.display = 'inline';
+        if (logoutBtn) logoutBtn.style.display = 'inline-block';
+        
+        // Set email links
+        if (emailLinkFi) {
+          emailLinkFi.textContent = userEmail;
+          emailLinkFi.href = "mailto:" + userEmail;
+        }
+        if (emailLinkEn) {
+          emailLinkEn.textContent = userEmail;
+          emailLinkEn.href = "mailto:" + userEmail;
+        }
+      } else {
+        // Hide user info
+        if (userInfoFi) userInfoFi.style.display = 'none';
+        if (userInfoEn) userInfoEn.style.display = 'none';
+        if (logoutBtn) logoutBtn.style.display = 'none';
+      }
+    }
+    
+    // Initialize on page load
+    window.addEventListener('DOMContentLoaded', function() {
+      loadLanguagePreference();
+      updateUserDisplay();
+      
+      // Add smooth scrolling for anchor links
+      document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function (e) {
+          e.preventDefault();
+          const target = document.querySelector(this.getAttribute('href'));
+          if (target) {
+            target.scrollIntoView({
+              behavior: 'smooth',
+              block: 'start'
+            });
+          }
+        });
+      });
+    });
+    
+    // Enhanced logout function
+    function logoutUser() {
+      if (firebase && firebase.auth) {
+        firebase.auth().signOut().then(() => {
+          localStorage.removeItem('userEmail');
+          updateUserDisplay();
+          
+          // Show success message based on current language
+          const message = currentLanguage === 'en' ? 
+            'Successfully logged out!' : 
+            'Kirjautuminen lopetettu!';
+          alert(message);
+          
+          // Redirect to login page
+          window.location.href = '/kirjaudu';
+        }).catch((error) => {
+          console.error('Logout error:', error);
+          const message = currentLanguage === 'en' ? 
+            'Error during logout. Please try again.' : 
+            'Virhe uloskirjautumisessa. Yritä uudelleen.';
+          alert(message);
+        });
+      }
+    }
+    
+    // Add loading animation for buttons
+    document.addEventListener('click', function(e) {
+      if (e.target.classList.contains('button') && e.target.href) {
+        e.target.style.opacity = '0.7';
+        e.target.style.transform = 'scale(0.98)';
+        
+        setTimeout(() => {
+          e.target.style.opacity = '';
+          e.target.style.transform = '';
+        }, 200);
+      }
+    });
+  </script>
+</body>
+</html>

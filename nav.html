@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="fi">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Navigation - Yoro Oy | Navigointi</title>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+        }
+        
+        .navigation-container {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 3rem;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            max-width: 800px;
+            width: 90%;
+        }
+        
+        .language-selector {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.7);
+            border-radius: 25px;
+            padding: 8px 16px;
+            backdrop-filter: blur(10px);
+        }
+
+        .language-selector button {
+            background: none;
+            border: none;
+            color: white;
+            padding: 5px 10px;
+            cursor: pointer;
+            border-radius: 20px;
+            margin: 0 2px;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .language-selector button:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .language-selector button.active {
+            background: #007acc;
+            color: white;
+        }
+        
+        h1 {
+            text-align: center;
+            margin-bottom: 2rem;
+            font-size: 2.5rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .nav-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 2rem;
+        }
+        
+        .nav-card {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 2rem;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+            text-decoration: none;
+            color: white;
+        }
+        
+        .nav-card:hover {
+            transform: translateY(-5px);
+            background: rgba(255, 255, 255, 0.2);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+        
+        .nav-card .icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+        
+        .nav-card h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        .nav-card p {
+            opacity: 0.9;
+            line-height: 1.6;
+        }
+        
+        .back-link {
+            text-align: center;
+            margin-top: 2rem;
+        }
+        
+        .back-link a {
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+            padding: 10px 20px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 25px;
+            transition: all 0.3s ease;
+        }
+        
+        .back-link a:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+        
+        .lang-content {
+            display: none;
+        }
+        
+        .lang-content.active {
+            display: block;
+        }
+        
+        @media (max-width: 768px) {
+            .navigation-container {
+                padding: 2rem;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .nav-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .language-selector {
+                top: 10px;
+                right: 10px;
+                padding: 6px 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Language Selector -->
+    <div class="language-selector">
+        <button onclick="switchLanguage('fi')" id="langFi" class="active">FI</button>
+        <button onclick="switchLanguage('en')" id="langEn">EN</button>
+    </div>
+
+    <div class="navigation-container">
+        <!-- Finnish Content -->
+        <div class="lang-content active" data-lang="fi">
+            <h1>🧭 Navigointi</h1>
+            
+            <div class="nav-grid">
+                <a href="/" class="nav-card">
+                    <div class="icon">🏠</div>
+                    <h3>Etusivu</h3>
+                    <p>Palaa pääsivulle ja tutustu Yoro.fi:n palveluihin</p>
+                </a>
+                
+                <a href="/profiiliselain" class="nav-card">
+                    <div class="icon">👥</div>
+                    <h3>Profiiliselain</h3>
+                    <p>Selaa 27,717 henkilöprofiilia ja löydä sopivat ehdokkaat</p>
+                </a>
+                
+                <a href="/kirjaudu" class="nav-card">
+                    <div class="icon">🔐</div>
+                    <h3>Kirjautuminen</h3>
+                    <p>Kirjaudu sisään Yoro.fi-tilillesi</p>
+                </a>
+                
+                <a href="https://lxp.yoro.fi/" target="_blank" class="nav-card">
+                    <div class="icon">🔧</div>
+                    <h3>LxP Matcher</h3>
+                    <p>Analysoi työpaikkailmoituksia ja löydä sopivia ehdokkaita</p>
+                </a>
+                
+                <a href="https://plaakkon.github.io/profiilitesti/" target="_blank" class="nav-card">
+                    <div class="icon">📋</div>
+                    <h3>Profiilitesti</h3>
+                    <p>Tee maksuton LxP-profiilitesti ja löydä sopiva ura</p>
+                </a>
+                
+                <a href="https://lxp.yoro.fi/profile-analyzer/" target="_blank" class="nav-card">
+                    <div class="icon">🤖</div>
+                    <h3>AI-analyysi</h3>
+                    <p>Analysoi työhakemuksia ja henkilöprofiileja tekoälyllä</p>
+                </a>
+            </div>
+        </div>
+        
+        <!-- English Content -->
+        <div class="lang-content" data-lang="en">
+            <h1>🧭 Navigation</h1>
+            
+            <div class="nav-grid">
+                <a href="/" class="nav-card">
+                    <div class="icon">🏠</div>
+                    <h3>Homepage</h3>
+                    <p>Return to main page and explore Yoro.fi services</p>
+                </a>
+                
+                <a href="/profiiliselain" class="nav-card">
+                    <div class="icon">👥</div>
+                    <h3>Profile Browser</h3>
+                    <p>Browse 27,717 person profiles and find suitable candidates</p>
+                </a>
+                
+                <a href="/kirjaudu" class="nav-card">
+                    <div class="icon">🔐</div>
+                    <h3>Login</h3>
+                    <p>Sign in to your Yoro.fi account</p>
+                </a>
+                
+                <a href="https://lxp.yoro.fi/" target="_blank" class="nav-card">
+                    <div class="icon">🔧</div>
+                    <h3>LxP Matcher</h3>
+                    <p>Analyze job postings and find suitable candidates</p>
+                </a>
+                
+                <a href="https://plaakkon.github.io/profiilitesti/" target="_blank" class="nav-card">
+                    <div class="icon">📋</div>
+                    <h3>Profile Test</h3>
+                    <p>Take free LxP profile test and find your career path</p>
+                </a>
+                
+                <a href="https://lxp.yoro.fi/profile-analyzer/" target="_blank" class="nav-card">
+                    <div class="icon">🤖</div>
+                    <h3>AI Analysis</h3>
+                    <p>Analyze job applications and personal profiles with AI</p>
+                </a>
+            </div>
+        </div>
+        
+        <div class="back-link">
+            <div class="lang-content active" data-lang="fi">
+                <a href="/">← Takaisin etusivulle</a>
+            </div>
+            <div class="lang-content" data-lang="en">
+                <a href="/">← Back to homepage</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentLanguage = 'fi';
+        
+        function switchLanguage(lang) {
+            currentLanguage = lang;
+            
+            // Hide all language content
+            document.querySelectorAll('.lang-content').forEach(el => {
+                el.classList.remove('active');
+            });
+            
+            // Show selected language content
+            document.querySelectorAll(`.lang-content[data-lang="${lang}"]`).forEach(el => {
+                el.classList.add('active');
+            });
+            
+            // Update language selector buttons
+            document.getElementById('langFi').classList.toggle('active', lang === 'fi');
+            document.getElementById('langEn').classList.toggle('active', lang === 'en');
+            
+            // Update HTML lang attribute
+            document.documentElement.lang = lang;
+            
+            // Update page title
+            if (lang === 'en') {
+                document.title = 'Navigation - Yoro Oy | Site Navigation';
+            } else {
+                document.title = 'Navigointi - Yoro Oy | Sivuston navigointi';
+            }
+            
+            // Save language preference
+            localStorage.setItem('preferred-language', lang);
+        }
+        
+        // Load saved language preference
+        function loadLanguagePreference() {
+            const saved = localStorage.getItem('preferred-language');
+            if (saved && saved !== currentLanguage) {
+                switchLanguage(saved);
+            }
+        }
+        
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            loadLanguagePreference();
+        });
+    </script>
+</body>
+</html>
