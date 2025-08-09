@@ -332,7 +332,7 @@
             let allProfilesTemp = [];
             
             function loadBatch(lastDoc = null) {
-                let query = db.collection('profiilit').limit(batchSize);
+                let query = db.collection('profiles').limit(batchSize);
                 
                 if (lastDoc) {
                     query = query.startAfter(lastDoc);
