@@ -4,7 +4,7 @@
     <meta charset="utf-8"/>
     <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
     <title>Profile Browser - Yoro Oy | Profiiliselain</title>
-    <meta name="description" content="Browse and search suitable candidates from 27,717 person profiles | Selaa ja etsi sopivia ehdokkaita 27,717 henkilöprofiilin joukosta"/>
+    <meta name="description" content="Browse and search suitable candidates from 27,717 person profiles"/>
     
     <!-- Firebase Scripts -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
@@ -23,24 +23,64 @@
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             line-height: 1.6;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
         }
 
         .header {
             background: rgba(255, 255, 255, 0.9);
             padding: 20px;
-            text-align: center;
-            margin: 20px;
             border-radius: 10px;
+            margin-bottom: 20px;
+            text-align: center;
             backdrop-filter: blur(10px);
         }
 
         .auth-section {
             background: rgba(255, 255, 255, 0.9);
             padding: 20px;
-            text-align: center;
-            margin: 20px;
             border-radius: 10px;
+            margin-bottom: 20px;
+            text-align: center;
             backdrop-filter: blur(10px);
+        }
+
+        .search-section {
+            background: rgba(255, 255, 255, 0.9);
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            backdrop-filter: blur(10px);
+        }
+
+        .search-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .search-field {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .search-field label {
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: #333;
+        }
+
+        .search-field input, .search-field select {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
         }
 
         .btn {
@@ -61,6 +101,16 @@
             background: #005c99;
         }
 
+        .btn-search {
+            background: #28a745;
+            font-size: 16px;
+            padding: 15px 30px;
+        }
+
+        .btn-search:hover {
+            background: #218838;
+        }
+
         .btn-logout {
             background: #dc3545;
         }
@@ -69,92 +119,167 @@
             background: #c82333;
         }
 
-        .iframe-container {
-            margin: 20px;
-            border-radius: 10px;
-            overflow: hidden;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        .profile-card {
             background: white;
-        }
-
-        .profile-iframe {
-            width: 100%;
-            height: 80vh;
-            border: none;
             border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            border-left: 4px solid #007acc;
         }
 
-        .loading, .error {
+        .profile-header {
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+        }
+
+        .profile-id {
+            font-size: 18px;
+            font-weight: bold;
+            color: #007acc;
+        }
+
+        .profile-field {
+            margin-bottom: 10px;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: flex-start;
+        }
+
+        .profile-field strong {
+            color: #007acc;
+            margin-right: 10px;
+            min-width: 120px;
+            font-weight: 600;
+        }
+
+        .profile-field span {
+            flex: 1;
+        }
+
+        .tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            margin-top: 5px;
+        }
+
+        .tag {
+            background: #f0f8ff;
+            color: #007acc;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            border: 1px solid #007acc;
+        }
+
+        .loading {
             text-align: center;
             padding: 40px;
             background: rgba(255, 255, 255, 0.9);
-            margin: 20px;
             border-radius: 10px;
+            margin-bottom: 20px;
         }
 
-        .error {
-            background: rgba(255, 100, 100, 0.1);
-            color: #d32f2f;
+        .results-info {
+            background: rgba(255, 255, 255, 0.9);
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-weight: 600;
+            color: #007acc;
         }
 
         @media (max-width: 768px) {
-            .profile-iframe {
-                height: 70vh;
+            .search-grid {
+                grid-template-columns: 1fr;
             }
             
-            .header, .auth-section, .iframe-container {
-                margin: 10px;
+            .profile-field {
+                flex-direction: column;
+            }
+            
+            .profile-field strong {
+                min-width: auto;
+                margin-bottom: 5px;
             }
         }
     </style>
 </head>
 <body>
-    <div class="header">
-        <h1>👥 Profiiliselain - Yoro Oy</h1>
-        <p>Selaa ja etsi sopivia ehdokkaita 27,717 henkilöprofiilin joukosta</p>
-        <p><small>Powered by Firebase Hosting</small></p>
-    </div>
+    <div class="container">
+        <div class="header">
+            <h1>👥 Profiiliselain - Yoro Oy</h1>
+            <p>Selaa ja etsi sopivia ehdokkaita 27,717 henkilöprofiilin joukosta</p>
+        </div>
 
-    <div class="auth-section" id="auth-section">
-        <div id="not-logged-in" style="display: none;">
-            <h2>🔐 Kirjautuminen vaaditaan</h2>
-            <p>Sinun täytyy kirjautua sisään nähdäksesi profiilit.</p>
-            <a href="/kirjaudu/" class="btn">Kirjaudu sisään</a>
-            <a href="/" class="btn">Takaisin etusivulle</a>
+        <div class="auth-section" id="auth-section">
+            <div id="not-logged-in" style="display: none;">
+                <h2>🔐 Kirjautuminen vaaditaan</h2>
+                <p>Sinun täytyy kirjautua sisään nähdäksesi profiilit.</p>
+                <a href="/kirjaudu/" class="btn">Kirjaudu sisään</a>
+                <a href="/" class="btn">Takaisin etusivulle</a>
+            </div>
+            <div id="logged-in" style="display: none;">
+                <p>Kirjautunut käyttäjä: <span id="user-email"></span></p>
+                <button onclick="logoutUser()" class="btn btn-logout">Kirjaudu ulos</button>
+                <a href="/" class="btn">Takaisin etusivulle</a>
+            </div>
         </div>
-        <div id="logged-in" style="display: none;">
-            <p>Kirjautunut käyttäjä: <span id="user-email"></span></p>
-            <button onclick="logoutUser()" class="btn btn-logout">Kirjaudu ulos</button>
-            <a href="/" class="btn">Takaisin etusivulle</a>
-            <a href="https://urapolku-7781a.web.app/" target="_blank" class="btn">Avaa Firebase Hosting</a>
-        </div>
-    </div>
 
-    <div id="main-content" style="display: none;">
-        <div class="iframe-container">
-            <iframe 
-                id="profile-iframe"
-                class="profile-iframe" 
-                src="https://urapolku-7781a.web.app/"
-                title="Profiiliselain"
-                allow="clipboard-read; clipboard-write">
-            </iframe>
-        </div>
-        
-        <div class="loading" id="iframe-loading">
-            <p>⏳ Ladataan profiiliselainta...</p>
-            <p><small>Jos lataus kestää kauan, <a href="https://urapolku-7781a.web.app/" target="_blank">avaa suoraan Firebase Hostingissa</a></small></p>
-        </div>
-        
-        <div class="error" id="iframe-error" style="display: none;">
-            <h3>❌ Latausvirhe</h3>
-            <p>Profiiliselainta ei voitu ladata. Kokeile avata se suoraan:</p>
-            <a href="https://urapolku-7781a.web.app/" target="_blank" class="btn">Avaa Firebase Hostingissa</a>
+        <div id="main-content" style="display: none;">
+            <div class="search-section">
+                <h2>🔍 Hae profiileja</h2>
+                <div class="search-grid">
+                    <div class="search-field">
+                        <label for="search-esittely">Esittely / Vapaa haku</label>
+                        <input type="text" id="search-esittely" placeholder="Hakusana...">
+                    </div>
+                    <div class="search-field">
+                        <label for="search-ammatti">Ammatti</label>
+                        <input type="text" id="search-ammatti" placeholder="Esim. sairaanhoitaja, insinööri...">
+                    </div>
+                    <div class="search-field">
+                        <label for="search-osaaminen">Osaaminen</label>
+                        <input type="text" id="search-osaaminen" placeholder="Esim. Excel, projektinhallinta...">
+                    </div>
+                    <div class="search-field">
+                        <label for="search-koulutus">Koulutus</label>
+                        <input type="text" id="search-koulutus" placeholder="Esim. tradenomi, yliopisto...">
+                    </div>
+                    <div class="search-field">
+                        <label for="search-alue">Työnhakualue</label>
+                        <input type="text" id="search-alue" placeholder="Esim. Helsinki, Tampere...">
+                    </div>
+                    <div class="search-field">
+                        <label for="search-kieli">Kielitaito</label>
+                        <input type="text" id="search-kieli" placeholder="Esim. englanti, saksa...">
+                    </div>
+                </div>
+                <div style="text-align: center;">
+                    <button onclick="searchProfiles()" class="btn btn-search" id="search-btn">🔍 Hae profiileja</button>
+                    <button onclick="clearSearch()" class="btn">🗑️ Tyhjennä haku</button>
+                </div>
+            </div>
+
+            <div id="loading" class="loading" style="display: none;">
+                <p>⏳ Ladataan profiileja...</p>
+            </div>
+
+            <div id="results-info" class="results-info" style="display: none;">
+                <span id="results-count"></span>
+            </div>
+
+            <div id="profiles-container">
+                <!-- Profiles will be loaded here -->
+            </div>
         </div>
     </div>
 
     <script>
-        // Firebase configuration
+        // Firebase configuration - käytetään urapolku-7780a datalle
         const firebaseConfig = {
             apiKey: "AIzaSyAnfsX522_ybXR7yhnAJbxDjuszVu4rZLE",
             authDomain: "urapolku-7780a.firebaseapp.com",
@@ -167,7 +292,9 @@
         // Initialize Firebase
         firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
+        const db = firebase.firestore();
 
+        let allProfiles = [];
         let currentUser = null;
 
         // Authentication state listener
@@ -179,12 +306,7 @@
                 document.getElementById('not-logged-in').style.display = 'none';
                 document.getElementById('logged-in').style.display = 'block';
                 document.getElementById('main-content').style.display = 'block';
-                
-                // Hide loading after iframe loads
-                setTimeout(() => {
-                    document.getElementById('iframe-loading').style.display = 'none';
-                }, 3000);
-                
+                loadProfiles();
             } else {
                 console.log('User not logged in');
                 document.getElementById('not-logged-in').style.display = 'block';
@@ -201,36 +323,263 @@
             });
         }
 
-        // Iframe error handling
-        document.addEventListener('DOMContentLoaded', function() {
-            const iframe = document.getElementById('profile-iframe');
+        // Load all profiles
+        function loadProfiles() {
+            document.getElementById('loading').style.display = 'block';
             
-            iframe.addEventListener('load', function() {
-                document.getElementById('iframe-loading').style.display = 'none';
-                console.log('Iframe loaded successfully');
-            });
+            // Load profiles in batches to avoid limit issues
+            const batchSize = 500;
+            let allProfilesTemp = [];
             
-            iframe.addEventListener('error', function() {
-                document.getElementById('iframe-loading').style.display = 'none';
-                document.getElementById('iframe-error').style.display = 'block';
-                console.error('Iframe failed to load');
-            });
-            
-            // Timeout fallback
-            setTimeout(() => {
-                if (document.getElementById('iframe-loading').style.display !== 'none') {
-                    document.getElementById('iframe-loading').style.display = 'none';
-                    console.log('Iframe loading timeout - assuming loaded');
+            function loadBatch(lastDoc = null) {
+                let query = db.collection('profiilit').limit(batchSize);
+                
+                if (lastDoc) {
+                    query = query.startAfter(lastDoc);
                 }
-            }, 10000);
-        });
-
-        // Message handling from iframe
-        window.addEventListener('message', function(event) {
-            // Handle messages from Firebase hosted app if needed
-            if (event.origin === 'https://urapolku-7781a.web.app') {
-                console.log('Message from Firebase app:', event.data);
+                
+                query.get().then((querySnapshot) => {
+                    const batch = [];
+                    let lastDocument = null;
+                    
+                    querySnapshot.forEach((doc) => {
+                        batch.push({
+                            id: doc.id,
+                            ...doc.data()
+                        });
+                        lastDocument = doc;
+                    });
+                    
+                    allProfilesTemp = allProfilesTemp.concat(batch);
+                    console.log(`Loaded batch: ${batch.length} profiles, total: ${allProfilesTemp.length}`);
+                    
+                    // If we got a full batch, there might be more
+                    if (batch.length === batchSize && allProfilesTemp.length < 30000) {
+                        loadBatch(lastDocument);
+                    } else {
+                        // Finished loading
+                        allProfiles = allProfilesTemp;
+                        console.log('✅ All profiles loaded:', allProfiles.length);
+                        
+                        document.getElementById('results-info').style.display = 'block';
+                        document.getElementById('results-count').textContent = `Yhteensä ${allProfiles.length} profiilia ladattu`;
+                        
+                        displayProfiles(allProfiles.slice(0, 20)); // Show first 20
+                        document.getElementById('loading').style.display = 'none';
+                    }
+                }).catch((error) => {
+                    console.error('❌ Error loading profiles:', error);
+                    document.getElementById('loading').style.display = 'none';
+                    alert('Virhe profiilien lataamisessa: ' + error.message);
+                });
             }
+            
+            loadBatch();
+        }
+
+        // Search profiles
+        function searchProfiles() {
+            const searchTerms = {
+                esittely: document.getElementById('search-esittely').value.toLowerCase().trim(),
+                ammatti: document.getElementById('search-ammatti').value.toLowerCase().trim(),
+                osaaminen: document.getElementById('search-osaaminen').value.toLowerCase().trim(),
+                koulutus: document.getElementById('search-koulutus').value.toLowerCase().trim(),
+                alue: document.getElementById('search-alue').value.toLowerCase().trim(),
+                kieli: document.getElementById('search-kieli').value.toLowerCase().trim()
+            };
+
+            // If no search terms, show first 20
+            if (Object.values(searchTerms).every(term => !term)) {
+                document.getElementById('results-count').textContent = `Näytetään 20 ensimmäistä profiilia (${allProfiles.length} yhteensä)`;
+                displayProfiles(allProfiles.slice(0, 20));
+                return;
+            }
+
+            document.getElementById('loading').style.display = 'block';
+            
+            const filtered = allProfiles.filter(profile => {
+                let matches = true;
+                
+                if (searchTerms.esittely) {
+                    matches = matches && (
+                        (profile.esittely && profile.esittely.toLowerCase().includes(searchTerms.esittely)) ||
+                        (profile.esittely_10sanaa && profile.esittely_10sanaa.toLowerCase().includes(searchTerms.esittely)) ||
+                        (profile.osaamisteksti && profile.osaamisteksti.toLowerCase().includes(searchTerms.esittely))
+                    );
+                }
+                
+                if (searchTerms.ammatti) {
+                    matches = matches && (
+                        profile.ammatit && profile.ammatit.some(ammatti => 
+                            ammatti.toLowerCase().includes(searchTerms.ammatti)
+                        )
+                    );
+                }
+                
+                if (searchTerms.osaaminen) {
+                    matches = matches && (
+                        profile.osaamiset && profile.osaamiset.some(osaaminen => 
+                            osaaminen.toLowerCase().includes(searchTerms.osaaminen)
+                        )
+                    );
+                }
+                
+                if (searchTerms.koulutus) {
+                    matches = matches && (
+                        profile.koulutus && profile.koulutus.some(koulutusItem => 
+                            koulutusItem.toLowerCase().includes(searchTerms.koulutus)
+                        )
+                    );
+                }
+                
+                if (searchTerms.alue) {
+                    matches = matches && (
+                        profile.tyonhakualue && profile.tyonhakualue.toLowerCase().includes(searchTerms.alue)
+                    );
+                }
+                
+                if (searchTerms.kieli) {
+                    matches = matches && (
+                        profile.kielitaito && profile.kielitaito.some(kieli => 
+                            kieli.toLowerCase().includes(searchTerms.kieli)
+                        )
+                    );
+                }
+                
+                return matches;
+            });
+
+            document.getElementById('results-count').textContent = `Löytyi ${filtered.length} profiilia hakuehdoilla`;
+            displayProfiles(filtered.slice(0, 100)); // Show max 100 results
+            document.getElementById('loading').style.display = 'none';
+        }
+
+        // Clear search
+        function clearSearch() {
+            document.getElementById('search-esittely').value = '';
+            document.getElementById('search-ammatti').value = '';
+            document.getElementById('search-osaaminen').value = '';
+            document.getElementById('search-koulutus').value = '';
+            document.getElementById('search-alue').value = '';
+            document.getElementById('search-kieli').value = '';
+            
+            document.getElementById('results-count').textContent = `Näytetään 20 ensimmäistä profiilia (${allProfiles.length} yhteensä)`;
+            displayProfiles(allProfiles.slice(0, 20));
+        }
+
+        // Display profiles
+        function displayProfiles(profiles) {
+            const container = document.getElementById('profiles-container');
+            container.innerHTML = '';
+
+            if (profiles.length === 0) {
+                container.innerHTML = '<div class="profile-card"><p>Ei tuloksia hakuehdoilla. Kokeile erilaisia hakusanoja.</p></div>';
+                return;
+            }
+
+            profiles.forEach((profile, index) => {
+                const card = document.createElement('div');
+                card.className = 'profile-card';
+                
+                let html = `
+                    <div class="profile-header">
+                        <div class="profile-id">Profiili #${profile.id || index + 1}</div>
+                    </div>
+                `;
+                
+                // All the profile fields
+                if (profile.esittely) html += `<div class="profile-field"><strong>Esittely:</strong><span>${profile.esittely}</span></div>`;
+                if (profile.esittely_10sanaa) html += `<div class="profile-field"><strong>Lyhyt esittely:</strong><span>${profile.esittely_10sanaa}</span></div>`;
+                if (profile.tyonhakualue) html += `<div class="profile-field"><strong>Työnhakualue:</strong><span>${profile.tyonhakualue}</span></div>`;
+                if (profile.aloitusajankohta) html += `<div class="profile-field"><strong>Aloitusajankohta:</strong><span>${profile.aloitusajankohta}</span></div>`;
+                
+                if (profile.ammatit && profile.ammatit.length > 0) {
+                    html += `<div class="profile-field"><strong>Ammatit:</strong><div class="tags">`;
+                    profile.ammatit.slice(0, 10).forEach(ammatti => {
+                        html += `<span class="tag">${ammatti}</span>`;
+                    });
+                    html += `</div></div>`;
+                }
+                
+                if (profile.osaamiset && profile.osaamiset.length > 0) {
+                    html += `<div class="profile-field"><strong>Osaamiset:</strong><div class="tags">`;
+                    profile.osaamiset.slice(0, 15).forEach(osaaminen => {
+                        html += `<span class="tag">${osaaminen}</span>`;
+                    });
+                    html += `</div></div>`;
+                }
+                
+                if (profile.työtoiveet && profile.työtoiveet.length > 0) {
+                    html += `<div class="profile-field"><strong>Työtoiveet:</strong><div class="tags">`;
+                    profile.työtoiveet.slice(0, 8).forEach(toive => {
+                        html += `<span class="tag">${toive}</span>`;
+                    });
+                    html += `</div></div>`;
+                }
+                
+                if (profile.koulutus && profile.koulutus.length > 0) {
+                    html += `<div class="profile-field"><strong>Koulutus:</strong><div class="tags">`;
+                    profile.koulutus.slice(0, 5).forEach(koulutusItem => {
+                        html += `<span class="tag">${koulutusItem}</span>`;
+                    });
+                    html += `</div></div>`;
+                }
+                
+                if (profile.muu_kokemus && profile.muu_kokemus.length > 0) {
+                    html += `<div class="profile-field"><strong>Muu kokemus:</strong><div class="tags">`;
+                    profile.muu_kokemus.slice(0, 5).forEach(kokemus => {
+                        html += `<span class="tag">${kokemus}</span>`;
+                    });
+                    html += `</div></div>`;
+                }
+                
+                if (profile.osaamisteksti) html += `<div class="profile-field"><strong>Osaamisteksti:</strong><span>${profile.osaamisteksti}</span></div>`;
+                
+                if (profile.kielitaito && profile.kielitaito.length > 0) {
+                    html += `<div class="profile-field"><strong>Kielitaito:</strong><div class="tags">`;
+                    profile.kielitaito.forEach(kieli => {
+                        html += `<span class="tag">${kieli}</span>`;
+                    });
+                    html += `</div></div>`;
+                }
+                
+                if (profile.ajokortit && profile.ajokortit.length > 0) {
+                    html += `<div class="profile-field"><strong>Ajokortit:</strong><div class="tags">`;
+                    profile.ajokortit.forEach(kortti => {
+                        html += `<span class="tag">${kortti}</span>`;
+                    });
+                    html += `</div></div>`;
+                }
+                
+                if (profile.ajotiedot) html += `<div class="profile-field"><strong>Ajotiedot:</strong><span>${profile.ajotiedot}</span></div>`;
+                
+                if (profile.lupatiedot && profile.lupatiedot.length > 0) {
+                    html += `<div class="profile-field"><strong>Lupatiedot:</strong><div class="tags">`;
+                    profile.lupatiedot.forEach(lupa => {
+                        html += `<span class="tag">${lupa}</span>`;
+                    });
+                    html += `</div></div>`;
+                }
+                
+                if (profile.some) html += `<div class="profile-field"><strong>Sosiaalinen media:</strong><span>${profile.some}</span></div>`;
+                if (profile.puhelin) html += `<div class="profile-field"><strong>Puhelin:</strong><span>${profile.puhelin}</span></div>`;
+                if (profile.sähköposti) html += `<div class="profile-field"><strong>Sähköposti:</strong><span>${profile.sähköposti}</span></div>`;
+                
+                card.innerHTML = html;
+                container.appendChild(card);
+            });
+        }
+
+        // Enter key support for search
+        document.addEventListener('DOMContentLoaded', function() {
+            const searchInputs = document.querySelectorAll('input[type="text"]');
+            searchInputs.forEach(input => {
+                input.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        searchProfiles();
+                    }
+                });
+            });
         });
     </script>
 </body>
