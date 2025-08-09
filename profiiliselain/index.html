@@ -362,9 +362,10 @@
                         console.log('✅ All profiles loaded:', allProfiles.length);
                         
                         document.getElementById('results-info').style.display = 'block';
-                        document.getElementById('results-count').textContent = `Yhteensä ${allProfiles.length} profiilia ladattu`;
+                        document.getElementById('results-count').textContent = `Yhteensä ${allProfiles.length} profiilia ladattu. Käytä hakua nähdäksesi profiilit.`;
                         
-                        displayProfiles(allProfiles.slice(0, 20)); // Show first 20
+                        // Don't display profiles automatically - only show counts
+                        updateParameterCounts();
                         document.getElementById('loading').style.display = 'none';
                     }
                 }).catch((error) => {
@@ -388,10 +389,10 @@
                 kieli: document.getElementById('search-kieli').value.toLowerCase().trim()
             };
 
-            // If no search terms, show first 20
+            // If no search terms, show message
             if (Object.values(searchTerms).every(term => !term)) {
-                document.getElementById('results-count').textContent = `Näytetään 20 ensimmäistä profiilia (${allProfiles.length} yhteensä)`;
-                displayProfiles(allProfiles.slice(0, 20));
+                document.getElementById('results-count').textContent = `Syötä hakuehdot nähdäksesi profiilit`;
+                document.getElementById('profiles-container').innerHTML = '<div class="profile-card"><p>Syötä hakuehdot kenttiin ja paina "Hae profiileja"</p></div>';
                 return;
             }
 
@@ -463,8 +464,38 @@
             document.getElementById('search-alue').value = '';
             document.getElementById('search-kieli').value = '';
             
-            document.getElementById('results-count').textContent = `Näytetään 20 ensimmäistä profiilia (${allProfiles.length} yhteensä)`;
-            displayProfiles(allProfiles.slice(0, 20));
+            document.getElementById('results-count').textContent = `Yhteensä ${allProfiles.length} profiilia ladattu. Käytä hakua nähdäksesi profiilit.`;
+            
+            // Clear profiles display
+            document.getElementById('profiles-container').innerHTML = '<div class="profile-card"><p>Käytä hakukenttiä etsiäksesi profiileja. Paina "Hae profiileja" nähdäksesi tulokset.</p></div>';
+        }
+
+        // Update parameter counts
+        function updateParameterCounts() {
+            // Count unique values for each parameter
+            const counts = {
+                ammatit: new Set(),
+                osaamiset: new Set(),
+                koulutus: new Set(),
+                tyonhakualue: new Set(),
+                kielitaito: new Set()
+            };
+
+            allProfiles.forEach(profile => {
+                if (profile.ammatit) profile.ammatit.forEach(item => counts.ammatit.add(item));
+                if (profile.osaamiset) profile.osaamiset.forEach(item => counts.osaamiset.add(item));
+                if (profile.koulutus) profile.koulutus.forEach(item => counts.koulutus.add(item));
+                if (profile.tyonhakualue) counts.tyonhakualue.add(profile.tyonhakualue);
+                if (profile.kielitaito) profile.kielitaito.forEach(item => counts.kielitaito.add(item));
+            });
+
+            console.log('Parameter counts:', {
+                ammatit: counts.ammatit.size,
+                osaamiset: counts.osaamiset.size,
+                koulutus: counts.koulutus.size,
+                tyonhakualue: counts.tyonhakualue.size,
+                kielitaito: counts.kielitaito.size
+            });
         }
 
         // Display profiles
