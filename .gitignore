@@ -1,0 +1,49 @@
+# Exclude unnecessary video files (keep only main background video)
+*.mp4
+!Yoro1_final_1080p_30s.mp4
+
+# Exclude test and development files
+koe*.html
+testi*.html
+index_*.html
+index_.html
+index_a.html
+index_b.html
+index_olde.html
+index_previous.html
+index_3_7_2025.html
+
+# Exclude development directories
+new/
+
+# Exclude unused images
+kuva.png
+Ski_Jumper.png
+
+# Exclude large video files
+city_2160_24fps.mp4
+*Stormy*Village*Scene*.mp4
+*rain*of*fish*.mp4
+*AVCLabs*.mp4
+Yoro1_final_1080p_30s_.mp4
+Yoro1_final_1080p_30s__.mp4
+Yoro1_final_1080p_30s_old.mp4
+"Yoro1_final_1080p_30s.mp4 (1).mp4"
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Logs
+*.log
