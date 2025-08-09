@@ -1,11 +1,12 @@
 // Firebase configuration
 const firebaseConfig = {
-    apiKey: "AIzaSyD8QDgmrE1N3oMY0PkX1VzH9XN8JfGfO-w",
+    apiKey: "AIzaSyAnfsX522_ybXR7yhnAJbxDjuszVu4rZLE",
     authDomain: "urapolku-7780a.firebaseapp.com",
     projectId: "urapolku-7780a",
-    storageBucket: "urapolku-7780a.appspot.com",
-    messagingSenderId: "123456789",
-    appId: "1:123456789:web:abcdef123456"
+    storageBucket: "urapolku-7780a.firebasestorage.app",
+    messagingSenderId: "314066598772",
+    appId: "1:314066598772:web:50183db006293290378a21",
+    measurementId: "G-83QWJEC5SS"
 };
 
 // Initialize Firebase

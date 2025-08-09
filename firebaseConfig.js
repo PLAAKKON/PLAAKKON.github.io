@@ -1,16 +1,17 @@
-import { initializeApp } from "firebase/app";
-import { getAuth } from "firebase/auth";
-import { getFirestore } from "firebase/firestore";
-
+// Firebase configuration
 const firebaseConfig = {
-    apiKey: "YOUR_API_KEY",
+    apiKey: "AIzaSyAnfsX522_ybXR7yhnAJbxDjuszVu4rZLE",
     authDomain: "urapolku-7780a.firebaseapp.com",
     projectId: "urapolku-7780a",
-    storageBucket: "urapolku-7780a.appspot.com",
-    messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-    appId: "YOUR_APP_ID"
+    storageBucket: "urapolku-7780a.firebasestorage.app",
+    messagingSenderId: "314066598772",
+    appId: "1:314066598772:web:50183db006293290378a21",
+    measurementId: "G-83QWJEC5SS"
 };
 
-const app = initializeApp(firebaseConfig);
-export const auth = getAuth(app);
-export const db = getFirestore(app);
+// Initialize Firebase
+firebase.initializeApp(firebaseConfig);
+
+// Initialize Firebase services
+const auth = firebase.auth();
+const db = firebase.firestore();
