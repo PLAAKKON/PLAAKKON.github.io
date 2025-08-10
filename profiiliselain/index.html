@@ -472,107 +472,13 @@
             }
 
             // Check if we need to load profiles for searching
-            if (!allProfiles || allProfiles.length === 0) {
-                console.log('🔍 Need to load profiles for search...');
-                document.getElementById('loading').style.display = 'block';
-                document.getElementById('results-count').textContent = 'Ladataan profiileja hakua varten...';
-                loadProfilesForSearch(freeSearch, selectedFilters);
-                return;
-            }
-
-            document.getElementById('loading').style.display = 'block';
+            console.log('🔍 Starting search. Current allProfiles length:', allProfiles ? allProfiles.length : 0);
             
-            const filtered = allProfiles.filter(profile => {
-                let matches = true;
-                
-                // Free text search - SAFE VERSION
-                if (freeSearch) {
-                    const safeIncludes = (data, searchTerm) => {
-                        try {
-                            if (!data) return false;
-                            if (Array.isArray(data)) {
-                                return data.some(item => String(item).toLowerCase().includes(searchTerm));
-                            }
-                            return String(data).toLowerCase().includes(searchTerm);
-                        } catch (e) {
-                            return false;
-                        }
-                    };
-                    
-                    const freeTextMatch = (
-                        safeIncludes(profile.esittely, freeSearch) ||
-                        safeIncludes(profile.esittely_10sanaa, freeSearch) ||
-                        safeIncludes(profile.osaamisteksti, freeSearch) ||
-                        safeIncludes(profile.ammatit, freeSearch) ||
-                        safeIncludes(profile.osaamiset, freeSearch) ||
-                        safeIncludes(profile.koulutus, freeSearch) ||
-                        safeIncludes(profile.kielitaito, freeSearch) ||
-                        // Enhanced location matching - SAFE VERSION
-                        (profile.tyonhakualue && (() => {
-                            try {
-                                const profileAlue = String(profile.tyonhakualue).toLowerCase();
-                                return profileAlue.includes(freeSearch) || freeSearch.includes(profileAlue);
-                            } catch (e) {
-                                return false;
-                            }
-                        })())
-                    );
-                    matches = matches && freeTextMatch;
-                }
-                
-                // Ammatti filter
-                if (selectedFilters.ammatti.length > 0) {
-                    const ammattiMatch = profile.ammatit && selectedFilters.ammatti.some(filter => 
-                        profile.ammatit.some(ammatti => ammatti.toLowerCase().includes(filter.toLowerCase()))
-                    );
-                    matches = matches && ammattiMatch;
-                }
-                
-                // Koulutus filter
-                if (selectedFilters.koulutus.length > 0) {
-                    const koulutusMatch = profile.koulutus && selectedFilters.koulutus.some(filter => 
-                        profile.koulutus.some(koulutusItem => koulutusItem.toLowerCase().includes(filter.toLowerCase()))
-                    );
-                    matches = matches && koulutusMatch;
-                }
-                
-                // Osaaminen filter
-                if (selectedFilters.osaaminen.length > 0) {
-                    const osaamisMatch = profile.osaamiset && selectedFilters.osaaminen.some(filter => 
-                        profile.osaamiset.some(osaaminen => osaaminen.toLowerCase().includes(filter.toLowerCase()))
-                    );
-                    matches = matches && osaamisMatch;
-                }
-                
-                // Alue filter - SAFE VERSION
-                if (selectedFilters.alue.length > 0) {
-                    const alueMatch = profile.tyonhakualue && selectedFilters.alue.some(filter => {
-                        try {
-                            const searchFilter = filter.toLowerCase();
-                            const profileAlue = String(profile.tyonhakualue).toLowerCase();
-                            // Two-way matching: normal and reverse
-                            return profileAlue.includes(searchFilter) || searchFilter.includes(profileAlue);
-                        } catch (e) {
-                            return false;
-                        }
-                    });
-                    matches = matches && alueMatch;
-                }
-                
-                // Kieli filter
-                if (selectedFilters.kieli.length > 0) {
-                    const kieliMatch = profile.kielitaito && selectedFilters.kieli.some(filter => 
-                        profile.kielitaito.some(kieli => kieli.toLowerCase().includes(filter.toLowerCase()))
-                    );
-                    matches = matches && kieliMatch;
-                }
-                
-                return matches;
-            });
-
-            document.getElementById('results-count').textContent = `Löytyi ${filtered.length} profiilia hakuehdoilla`;
-            displayProfiles(filtered.slice(0, 100)); // Show max 100 results
-            document.getElementById('loading').style.display = 'none';
+            // Always load fresh profiles for search to ensure up-to-date results
+            console.log('� Loading fresh profiles for search...');
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('results-count').textContent = 'Ladataan profiileja hakua varten...';
+            loadProfilesForSearch(freeSearch, selectedFilters);
         }
 
         // Get selected checkbox values for a category
@@ -938,10 +844,15 @@
             }
         }
         
-        // Build and cache index from loaded profiles
-        function buildAndCacheIndex() {
-            console.log('🔄 Building index from', allProfiles.length, 'profiles...');
+        // Build index only if needed (no cache or expired)
+        function buildIndexIfNeeded() {
+            console.log('🔄 Building checkbox index - loading profiles from Firebase...');
             
+            // Load profiles only for building the checkbox index (NOT storing full profiles)
+            const batchSize = 500;
+            let processedCount = 0;
+            
+            // Initialize counters for checkbox parameters
             const index = {
                 ammatti: new Map(),
                 koulutus: new Map(),
@@ -949,71 +860,6 @@
                 alue: new Map(),
                 kieli: new Map()
             };
-
-            // Process all profiles
-            allProfiles.forEach((profile) => {
-                try {
-                    const processField = (fieldData, targetMap) => {
-                        if (!fieldData) return;
-                        
-                        let items = [];
-                        if (Array.isArray(fieldData)) {
-                            items = fieldData;
-                        } else if (typeof fieldData === 'string') {
-                            items = [fieldData];
-                        } else {
-                            items = [String(fieldData)];
-                        }
-                        
-                        items.forEach(item => {
-                            try {
-                                if (item && String(item).trim()) {
-                                    const key = String(item).trim();
-                                    targetMap.set(key, (targetMap.get(key) || 0) + 1);
-                                }
-                            } catch (e) {
-                                console.warn('Error processing item:', item, e);
-                            }
-                        });
-                    };
-                    
-                    processField(profile.ammatit, index.ammatti);
-                    processField(profile.osaamiset, index.osaaminen);
-                    processField(profile.koulutus, index.koulutus);
-                    processField(profile.tyonhakualue, index.alue);
-                    processField(profile.kielitaito, index.kieli);
-                    
-                } catch (error) {
-                    console.error('Error processing profile:', error);
-                }
-            });
-
-            // Convert Maps to sorted arrays
-            categoryIndex = {};
-            Object.keys(index).forEach(category => {
-                const sorted = Array.from(index[category].entries())
-                    .sort((a, b) => a[0].localeCompare(b[0])) // Alphabetical order
-                    .map(([name, count]) => ({ name, count }));
-                categoryIndex[category] = sorted;
-            });
-
-            // Cache the index
-            try {
-                localStorage.setItem('profileIndex', JSON.stringify(categoryIndex));
-                localStorage.setItem('profileIndexDate', new Date().toISOString());
-                console.log('💾 Index cached successfully');
-            } catch (error) {
-                console.error('❌ Error caching index:', error);
-            }
-        }
-        
-        // Build index only if needed (no cache or expired)
-        function buildIndexIfNeeded() {
-            console.log('🔄 Building index - loading profiles from Firebase...');
-            
-            // Load profiles only for building the index
-            const batchSize = 500;
-            let allProfilesTemp = [];
             
             function loadBatch(lastDoc = null) {
                 let query = db.collection('profiles').limit(batchSize);
@@ -1023,42 +869,93 @@
                 }
                 
                 query.get().then((querySnapshot) => {
-                    const batch = [];
                     let lastDocument = null;
                     
                     querySnapshot.forEach((doc) => {
-                        batch.push({
-                            id: doc.id,
-                            ...doc.data()
-                        });
+                        const profile = doc.data();
                         lastDocument = doc;
+                        
+                        // Process ONLY the checkbox parameters (not full profile data)
+                        try {
+                            const processField = (fieldData, targetMap) => {
+                                if (!fieldData) return;
+                                
+                                let items = [];
+                                if (Array.isArray(fieldData)) {
+                                    items = fieldData;
+                                } else if (typeof fieldData === 'string') {
+                                    items = [fieldData];
+                                } else {
+                                    items = [String(fieldData)];
+                                }
+                                
+                                items.forEach(item => {
+                                    try {
+                                        if (item && String(item).trim()) {
+                                            const key = String(item).trim();
+                                            targetMap.set(key, (targetMap.get(key) || 0) + 1);
+                                        }
+                                    } catch (e) {
+                                        console.warn('Error processing item:', item, e);
+                                    }
+                                });
+                            };
+                            
+                            // Only process checkbox fields - NO full profile storage
+                            processField(profile.ammatit, index.ammatti);
+                            processField(profile.osaamiset, index.osaaminen);
+                            processField(profile.koulutus, index.koulutus);
+                            processField(profile.tyonhakualue, index.alue);
+                            processField(profile.kielitaito, index.kieli);
+                            
+                            processedCount++;
+                            
+                        } catch (error) {
+                            console.error('Error processing profile for index:', error);
+                        }
                     });
                     
-                    allProfilesTemp = allProfilesTemp.concat(batch);
-                    console.log(`📊 Building index: ${batch.length} profiles (total: ${allProfilesTemp.length})`);
+                    console.log(`📊 Building checkbox index: ${querySnapshot.size} profiles processed (total: ${processedCount})`);
                     
                     // Update status
-                    document.getElementById('results-count').textContent = `Rakennetaan indeksiä... ${allProfilesTemp.length} profiilia prosessoitu`;
+                    document.getElementById('results-count').textContent = `Rakennetaan checkbox-indeksiä... ${processedCount} profiilia prosessoitu`;
                     
                     // Load more if available
                     if (querySnapshot.size === batchSize) {
                         loadBatch(lastDocument);
                     } else {
-                        // All profiles loaded for indexing
-                        allProfiles = allProfilesTemp;
-                        console.log(`✅ All profiles loaded for indexing: ${allProfiles.length} total`);
+                        // All profiles processed for checkbox index - cache only parameters
+                        console.log(`✅ Checkbox index built from ${processedCount} profiles`);
                         
-                        // Build and cache the index
-                        buildAndCacheIndex();
+                        // Convert Maps to sorted arrays (only checkbox data)
+                        categoryIndex = {};
+                        Object.keys(index).forEach(category => {
+                            const sorted = Array.from(index[category].entries())
+                                .sort((a, b) => a[0].localeCompare(b[0])) // Alphabetical order
+                                .map(([name, count]) => ({ name, count }));
+                            categoryIndex[category] = sorted;
+                        });
+
+                        // Cache ONLY the checkbox parameters (not full profiles)
+                        try {
+                            localStorage.setItem('profileIndex', JSON.stringify(categoryIndex));
+                            localStorage.setItem('profileIndexDate', new Date().toISOString());
+                            console.log('💾 Checkbox index cached successfully - NO profile data stored');
+                        } catch (error) {
+                            console.error('❌ Error caching checkbox index:', error);
+                        }
                         
                         // Create checkboxes from the new index
                         createCheckboxesFromCache();
                         
-                        document.getElementById('results-count').textContent = `Hakuindeksi valmis! ${allProfiles.length} profiilista. Valitse hakuehdot.`;
+                        // DO NOT store allProfiles - they will be loaded fresh for each search
+                        allProfiles = [];
+                        
+                        document.getElementById('results-count').textContent = `Checkbox-parametrit valmiit ${processedCount} profiilista. Valitse hakuehdot.`;
                     }
                 }).catch((error) => {
-                    console.error('❌ Error loading profiles for index:', error);
-                    document.getElementById('results-count').textContent = 'Virhe rakentaessa hakuindeksiä.';
+                    console.error('❌ Error loading profiles for checkbox index:', error);
+                    document.getElementById('results-count').textContent = 'Virhe rakentaessa checkbox-indeksiä.';
                 });
             }
             
