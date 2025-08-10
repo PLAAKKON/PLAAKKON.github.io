@@ -633,6 +633,33 @@
             'Keski-Pohjanmaa': ['Kokkola', 'Ylivieska', 'Kalajoki', 'Kannus']
         };
 
+        // Tarkista onko työnhakualue maantieteellisesti yhteensopiva hakuehdon kanssa
+        function matchesGeographicArea(profileArea, selectedAreas) {
+            if (!profileArea || !selectedAreas || selectedAreas.length === 0) return false;
+            
+            const profileAreaLower = profileArea.toLowerCase().trim();
+            
+            return selectedAreas.some(selectedArea => {
+                const selectedLower = selectedArea.toLowerCase().trim();
+                
+                // Suora vastaavuus
+                if (profileAreaLower === selectedLower) return true;
+                
+                // Tarkista hierarkia: jos valittu maakunta, hyväksy sen kaupungit
+                const selectedCities = maakuntaKaupungit[selectedArea] || [];
+                if (selectedCities.some(city => city.toLowerCase() === profileAreaLower)) return true;
+                
+                // Tarkista käänteinen hierarkia: jos valittu kaupunki, hyväksy sen maakunta
+                for (const [maakunta, kaupungit] of Object.entries(maakuntaKaupungit)) {
+                    if (maakunta.toLowerCase() === profileAreaLower) {
+                        if (kaupungit.some(city => city.toLowerCase() === selectedLower)) return true;
+                    }
+                }
+                
+                return false;
+            });
+        }
+
         // Authentication state listener
         auth.onAuthStateChanged((user) => {
             currentUser = user;
@@ -897,19 +924,18 @@
                                 profileData.map(item => String(item).trim()) : 
                                 [String(profileData).trim()];
                             
-                            fieldMatches = selected.some(selectedValue => {
-                                // Special handling for geographic area
-                                if (filterKey === 'alue') {
-                                    return profileValues.some(profileValue => 
-                                        matchesGeographicArea(selectedValue, profileValue)
-                                    );
-                                }
-                                
-                                // Standard exact matching for other fields
-                                return profileValues.some(profileValue => 
-                                    profileValue.toLowerCase() === String(selectedValue).toLowerCase()
+                            // Erikseen käsittely alue-hakuehvoille maantieteellisen hierarkian takia
+                            if (filterKey === 'alue') {
+                                fieldMatches = profileValues.some(profileValue => 
+                                    matchesGeographicArea(profileValue, selected)
                                 );
-                            });
+                            } else {
+                                fieldMatches = selected.some(selectedValue => 
+                                    profileValues.some(profileValue => 
+                                        profileValue.toLowerCase() === String(selectedValue).toLowerCase()
+                                    )
+                                );
+                            }
                         } catch (error) {
                             console.warn(`Error checking ${filterKey}:`, error);
                         }
