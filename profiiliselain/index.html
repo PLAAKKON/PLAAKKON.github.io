@@ -689,6 +689,7 @@
         let allProfiles = [];
         let categoryIndex = null; // Cache for checkbox data
         let currentUser = null;
+        let buildingIndex = false; // Prevent multiple simultaneous index builds
         const CACHE_EXPIRY_HOURS = 24; // Rebuild index daily
 
         // Maantieteellinen hierarkia - maakunnat ja niiden kaupungit
@@ -752,7 +753,11 @@
                 document.getElementById('not-logged-in').style.display = 'none';
                 document.getElementById('logged-in').style.display = 'block';
                 document.getElementById('main-content').style.display = 'block';
-                loadCachedIndex();
+                
+                // Load cache only once per session
+                if (!buildingIndex && !categoryIndex) {
+                    loadCachedIndex();
+                }
             } else {
                 console.log('User not logged in');
                 document.getElementById('not-logged-in').style.display = 'block';
@@ -768,24 +773,15 @@
                 window.location.href = '/';
             });
         }
-
-        // Load all profiles
-        function loadProfiles() {
-            // Don't load profiles automatically - only load cache for checkboxes
-            console.log('📋 Loading only cached index for checkboxes...');
-            
-            // Show placeholder checkboxes immediately if no cache
-            const hasCache = localStorage.getItem('profileIndex');
-            if (!hasCache) {
-                console.log('⚡ No cache found, showing placeholder checkboxes...');
-                showPlaceholderCheckboxes();
-            }
-            
-            loadCachedIndex();
-        }
         
         // Load cached checkbox index
         function loadCachedIndex() {
+            // Prevent multiple simultaneous calls
+            if (buildingIndex) {
+                console.log('⏸️ Index building already in progress, skipping...');
+                return;
+            }
+            
             const cachedIndex = localStorage.getItem('profileIndex');
             const cachedDate = localStorage.getItem('profileIndexDate');
             const cachedVersion = localStorage.getItem('profileIndexVersion');
@@ -1263,7 +1259,17 @@
         
         // Build index only if needed (no cache or expired)
         function buildIndexIfNeeded() {
+            // Prevent multiple simultaneous builds
+            if (buildingIndex) {
+                console.log('⏸️ Index building already in progress, skipping...');
+                return;
+            }
+            
+            buildingIndex = true;
             console.log('🔄 Building checkbox index - loading profiles from Firebase...');
+            
+            // Show placeholder checkboxes immediately
+            showPlaceholderCheckboxes();
             
             // Load profiles only for building the checkbox index (NOT storing full profiles)
             const batchSize = 500;
@@ -1375,11 +1381,13 @@
                         // DO NOT store allProfiles - they will be loaded fresh for each search
                         allProfiles = [];
                         
+                        buildingIndex = false; // Reset flag
                         document.getElementById('results-count').textContent = `Checkbox-parametrit valmiit ${processedCount} profiilista. Valitse hakuehdot.`;
                     }
                 }).catch((error) => {
                     console.error('❌ Error loading profiles for checkbox index:', error);
                     document.getElementById('results-count').textContent = 'Virhe rakentaessa checkbox-indeksiä.';
+                    buildingIndex = false; // Reset flag on error
                 });
             }
             
@@ -1526,11 +1534,17 @@
         
         // Clear cache and rebuild checkbox index
         function clearCacheAndRebuild() {
+            if (buildingIndex) {
+                console.log('⏸️ Index building already in progress, skipping rebuild...');
+                return;
+            }
+            
             console.log('🔄 Clearing cache and rebuilding checkbox index...');
             
             // Clear localStorage cache
             localStorage.removeItem('profileIndex');
             localStorage.removeItem('profileIndexDate');
+            localStorage.removeItem('profileIndexVersion');
             
             // Reset global variables
             categoryIndex = null;
