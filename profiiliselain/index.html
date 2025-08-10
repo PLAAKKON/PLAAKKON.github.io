@@ -119,6 +119,95 @@
             background: #c82333;
         }
 
+        /* Checkbox search styles */
+        .search-categories {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .search-category {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 15px;
+            border: 1px solid #dee2e6;
+        }
+
+        .search-category h3 {
+            margin: 0 0 15px 0;
+            color: #495057;
+            font-size: 16px;
+            border-bottom: 2px solid #007acc;
+            padding-bottom: 5px;
+        }
+
+        .checkbox-container {
+            max-height: 200px;
+            overflow-y: auto;
+            margin-bottom: 10px;
+        }
+
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+            padding: 5px;
+            border-radius: 4px;
+            transition: background-color 0.2s;
+        }
+
+        .checkbox-item:hover {
+            background-color: #e9ecef;
+        }
+
+        .checkbox-item input[type="checkbox"] {
+            margin-right: 8px;
+            transform: scale(1.1);
+        }
+
+        .checkbox-item label {
+            flex: 1;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .checkbox-count {
+            background: #007acc;
+            color: white;
+            padding: 2px 6px;
+            border-radius: 10px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .show-more-btn {
+            background: none;
+            border: 1px solid #007acc;
+            color: #007acc;
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.2s;
+        }
+
+        .show-more-btn:hover {
+            background: #007acc;
+            color: white;
+        }
+
+        .free-search {
+            margin-bottom: 20px;
+        }
+
+        .free-search .search-field {
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
         .profile-card {
             background: white;
             border-radius: 10px;
@@ -232,33 +321,59 @@
         <div id="main-content" style="display: none;">
             <div class="search-section">
                 <h2>🔍 Hae profiileja</h2>
-                <div class="search-grid">
+                
+                <!-- Vapaa tekstihaku -->
+                <div class="free-search">
                     <div class="search-field">
-                        <label for="search-esittely">Esittely / Vapaa haku</label>
-                        <input type="text" id="search-esittely" placeholder="Hakusana...">
-                    </div>
-                    <div class="search-field">
-                        <label for="search-ammatti">Ammatti</label>
-                        <input type="text" id="search-ammatti" placeholder="Esim. sairaanhoitaja, insinööri...">
-                    </div>
-                    <div class="search-field">
-                        <label for="search-osaaminen">Osaaminen</label>
-                        <input type="text" id="search-osaaminen" placeholder="Esim. Excel, projektinhallinta...">
-                    </div>
-                    <div class="search-field">
-                        <label for="search-koulutus">Koulutus</label>
-                        <input type="text" id="search-koulutus" placeholder="Esim. tradenomi, yliopisto...">
-                    </div>
-                    <div class="search-field">
-                        <label for="search-alue">Työnhakualue</label>
-                        <input type="text" id="search-alue" placeholder="Esim. Helsinki, Tampere...">
-                    </div>
-                    <div class="search-field">
-                        <label for="search-kieli">Kielitaito</label>
-                        <input type="text" id="search-kieli" placeholder="Esim. englanti, saksa...">
+                        <label for="search-free">Vapaa haku</label>
+                        <input type="text" id="search-free" placeholder="Hakusana kaikista kentistä...">
                     </div>
                 </div>
-                <div style="text-align: center;">
+
+                <!-- Checkbox-pohjaiset hakuparametrit -->
+                <div class="search-categories">
+                    <div class="search-category">
+                        <h3>💼 Ammatti</h3>
+                        <div id="ammatti-checkboxes" class="checkbox-container">
+                            <!-- Ammatti checkboxit tulevat tähän -->
+                        </div>
+                        <button onclick="showMoreOptions('ammatti')" class="show-more-btn">Näytä lisää...</button>
+                    </div>
+
+                    <div class="search-category">
+                        <h3>🎓 Koulutus</h3>
+                        <div id="koulutus-checkboxes" class="checkbox-container">
+                            <!-- Koulutus checkboxit tulevat tähän -->
+                        </div>
+                        <button onclick="showMoreOptions('koulutus')" class="show-more-btn">Näytä lisää...</button>
+                    </div>
+
+                    <div class="search-category">
+                        <h3>🏢 Osaaminen</h3>
+                        <div id="osaaminen-checkboxes" class="checkbox-container">
+                            <!-- Osaaminen checkboxit tulevat tähän -->
+                        </div>
+                        <button onclick="showMoreOptions('osaaminen')" class="show-more-btn">Näytä lisää...</button>
+                    </div>
+
+                    <div class="search-category">
+                        <h3>📍 Työnhakualue</h3>
+                        <div id="alue-checkboxes" class="checkbox-container">
+                            <!-- Alue checkboxit tulevat tähän -->
+                        </div>
+                        <button onclick="showMoreOptions('alue')" class="show-more-btn">Näytä lisää...</button>
+                    </div>
+
+                    <div class="search-category">
+                        <h3>🌍 Kielitaito</h3>
+                        <div id="kieli-checkboxes" class="checkbox-container">
+                            <!-- Kieli checkboxit tulevat tähän -->
+                        </div>
+                        <button onclick="showMoreOptions('kieli')" class="show-more-btn">Näytä lisää...</button>
+                    </div>
+                </div>
+
+                <div style="text-align: center; margin-top: 20px;">
                     <button onclick="searchProfiles()" class="btn btn-search" id="search-btn">🔍 Hae profiileja</button>
                     <button onclick="clearSearch()" class="btn">🗑️ Tyhjennä haku</button>
                 </div>
@@ -380,19 +495,25 @@
 
         // Search profiles
         function searchProfiles() {
-            const searchTerms = {
-                esittely: document.getElementById('search-esittely').value.toLowerCase().trim(),
-                ammatti: document.getElementById('search-ammatti').value.toLowerCase().trim(),
-                osaaminen: document.getElementById('search-osaaminen').value.toLowerCase().trim(),
-                koulutus: document.getElementById('search-koulutus').value.toLowerCase().trim(),
-                alue: document.getElementById('search-alue').value.toLowerCase().trim(),
-                kieli: document.getElementById('search-kieli').value.toLowerCase().trim()
+            // Get free text search
+            const freeSearch = document.getElementById('search-free').value.toLowerCase().trim();
+            
+            // Get selected checkboxes
+            const selectedFilters = {
+                ammatti: getSelectedCheckboxes('ammatti'),
+                koulutus: getSelectedCheckboxes('koulutus'),
+                osaaminen: getSelectedCheckboxes('osaaminen'),
+                alue: getSelectedCheckboxes('alue'),
+                kieli: getSelectedCheckboxes('kieli')
             };
 
-            // If no search terms, show message
-            if (Object.values(searchTerms).every(term => !term)) {
-                document.getElementById('results-count').textContent = `Syötä hakuehdot nähdäksesi profiilit`;
-                document.getElementById('profiles-container').innerHTML = '<div class="profile-card"><p>Syötä hakuehdot kenttiin ja paina "Hae profiileja"</p></div>';
+            // Check if any search criteria is specified
+            const hasSearchCriteria = freeSearch || 
+                Object.values(selectedFilters).some(arr => arr.length > 0);
+
+            if (!hasSearchCriteria) {
+                document.getElementById('results-count').textContent = `Valitse hakuehdot nähdäksesi profiilit`;
+                document.getElementById('profiles-container').innerHTML = '<div class="profile-card"><p>Valitse checkboxeista hakuehdot tai käytä vapaata hakua</p></div>';
                 return;
             }
 
@@ -401,50 +522,59 @@
             const filtered = allProfiles.filter(profile => {
                 let matches = true;
                 
-                if (searchTerms.esittely) {
-                    matches = matches && (
-                        (profile.esittely && profile.esittely.toLowerCase().includes(searchTerms.esittely)) ||
-                        (profile.esittely_10sanaa && profile.esittely_10sanaa.toLowerCase().includes(searchTerms.esittely)) ||
-                        (profile.osaamisteksti && profile.osaamisteksti.toLowerCase().includes(searchTerms.esittely))
+                // Free text search
+                if (freeSearch) {
+                    const freeTextMatch = (
+                        (profile.esittely && profile.esittely.toLowerCase().includes(freeSearch)) ||
+                        (profile.esittely_10sanaa && profile.esittely_10sanaa.toLowerCase().includes(freeSearch)) ||
+                        (profile.osaamisteksti && profile.osaamisteksti.toLowerCase().includes(freeSearch)) ||
+                        (profile.ammatit && profile.ammatit.some(item => item.toLowerCase().includes(freeSearch))) ||
+                        (profile.osaamiset && profile.osaamiset.some(item => item.toLowerCase().includes(freeSearch))) ||
+                        (profile.koulutus && profile.koulutus.some(item => item.toLowerCase().includes(freeSearch))) ||
+                        (profile.tyonhakualue && profile.tyonhakualue.toLowerCase().includes(freeSearch)) ||
+                        (profile.kielitaito && profile.kielitaito.some(item => item.toLowerCase().includes(freeSearch)))
                     );
+                    matches = matches && freeTextMatch;
                 }
                 
-                if (searchTerms.ammatti) {
-                    matches = matches && (
-                        profile.ammatit && profile.ammatit.some(ammatti => 
-                            ammatti.toLowerCase().includes(searchTerms.ammatti)
-                        )
+                // Ammatti filter
+                if (selectedFilters.ammatti.length > 0) {
+                    const ammattiMatch = profile.ammatit && selectedFilters.ammatti.some(filter => 
+                        profile.ammatit.some(ammatti => ammatti.toLowerCase().includes(filter.toLowerCase()))
                     );
+                    matches = matches && ammattiMatch;
                 }
                 
-                if (searchTerms.osaaminen) {
-                    matches = matches && (
-                        profile.osaamiset && profile.osaamiset.some(osaaminen => 
-                            osaaminen.toLowerCase().includes(searchTerms.osaaminen)
-                        )
+                // Koulutus filter
+                if (selectedFilters.koulutus.length > 0) {
+                    const koulutusMatch = profile.koulutus && selectedFilters.koulutus.some(filter => 
+                        profile.koulutus.some(koulutusItem => koulutusItem.toLowerCase().includes(filter.toLowerCase()))
                     );
+                    matches = matches && koulutusMatch;
                 }
                 
-                if (searchTerms.koulutus) {
-                    matches = matches && (
-                        profile.koulutus && profile.koulutus.some(koulutusItem => 
-                            koulutusItem.toLowerCase().includes(searchTerms.koulutus)
-                        )
+                // Osaaminen filter
+                if (selectedFilters.osaaminen.length > 0) {
+                    const osaamisMatch = profile.osaamiset && selectedFilters.osaaminen.some(filter => 
+                        profile.osaamiset.some(osaaminen => osaaminen.toLowerCase().includes(filter.toLowerCase()))
                     );
+                    matches = matches && osaamisMatch;
                 }
                 
-                if (searchTerms.alue) {
-                    matches = matches && (
-                        profile.tyonhakualue && profile.tyonhakualue.toLowerCase().includes(searchTerms.alue)
+                // Alue filter
+                if (selectedFilters.alue.length > 0) {
+                    const alueMatch = profile.tyonhakualue && selectedFilters.alue.some(filter => 
+                        profile.tyonhakualue.toLowerCase().includes(filter.toLowerCase())
                     );
+                    matches = matches && alueMatch;
                 }
                 
-                if (searchTerms.kieli) {
-                    matches = matches && (
-                        profile.kielitaito && profile.kielitaito.some(kieli => 
-                            kieli.toLowerCase().includes(searchTerms.kieli)
-                        )
+                // Kieli filter
+                if (selectedFilters.kieli.length > 0) {
+                    const kieliMatch = profile.kielitaito && selectedFilters.kieli.some(filter => 
+                        profile.kielitaito.some(kieli => kieli.toLowerCase().includes(filter.toLowerCase()))
                     );
+                    matches = matches && kieliMatch;
                 }
                 
                 return matches;
@@ -455,47 +585,171 @@
             document.getElementById('loading').style.display = 'none';
         }
 
+        // Get selected checkbox values for a category
+        function getSelectedCheckboxes(category) {
+            const checkboxes = document.querySelectorAll(`input[name="${category}"]:checked`);
+            return Array.from(checkboxes).map(cb => cb.value);
+        }
+
         // Clear search
         function clearSearch() {
-            document.getElementById('search-esittely').value = '';
-            document.getElementById('search-ammatti').value = '';
-            document.getElementById('search-osaaminen').value = '';
-            document.getElementById('search-koulutus').value = '';
-            document.getElementById('search-alue').value = '';
-            document.getElementById('search-kieli').value = '';
+            // Clear free text search
+            document.getElementById('search-free').value = '';
+            
+            // Clear all checkboxes
+            const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+            checkboxes.forEach(cb => cb.checked = false);
+            
+            // Show all "Näytä lisää" buttons again
+            const showMoreBtns = document.querySelectorAll('.show-more-btn');
+            showMoreBtns.forEach(btn => btn.style.display = 'block');
+            
+            // Recreate checkboxes to restore original state
+            updateParameterCounts();
             
             document.getElementById('results-count').textContent = `Yhteensä ${allProfiles.length} profiilia ladattu. Käytä hakua nähdäksesi profiilit.`;
             
             // Clear profiles display
-            document.getElementById('profiles-container').innerHTML = '<div class="profile-card"><p>Käytä hakukenttiä etsiäksesi profiileja. Paina "Hae profiileja" nähdäksesi tulokset.</p></div>';
+            document.getElementById('profiles-container').innerHTML = '<div class="profile-card"><p>Valitse checkboxeista hakuehdot tai käytä vapaata hakua. Paina "Hae profiileja" nähdäksesi tulokset.</p></div>';
         }
 
-        // Update parameter counts
+        // Update parameter counts and create checkboxes
         function updateParameterCounts() {
             // Count unique values for each parameter
             const counts = {
-                ammatit: new Set(),
-                osaamiset: new Set(),
-                koulutus: new Set(),
-                tyonhakualue: new Set(),
-                kielitaito: new Set()
+                ammatit: new Map(),
+                osaamiset: new Map(),
+                koulutus: new Map(),
+                tyonhakualue: new Map(),
+                kielitaito: new Map()
             };
 
             allProfiles.forEach(profile => {
-                if (profile.ammatit) profile.ammatit.forEach(item => counts.ammatit.add(item));
-                if (profile.osaamiset) profile.osaamiset.forEach(item => counts.osaamiset.add(item));
-                if (profile.koulutus) profile.koulutus.forEach(item => counts.koulutus.add(item));
-                if (profile.tyonhakualue) counts.tyonhakualue.add(profile.tyonhakualue);
-                if (profile.kielitaito) profile.kielitaito.forEach(item => counts.kielitaito.add(item));
+                if (profile.ammatit) {
+                    profile.ammatit.forEach(item => {
+                        if (item && item.trim()) {
+                            const key = item.trim().toLowerCase();
+                            counts.ammatit.set(key, (counts.ammatit.get(key) || 0) + 1);
+                        }
+                    });
+                }
+                if (profile.osaamiset) {
+                    profile.osaamiset.forEach(item => {
+                        if (item && item.trim()) {
+                            const key = item.trim().toLowerCase();
+                            counts.osaamiset.set(key, (counts.osaamiset.get(key) || 0) + 1);
+                        }
+                    });
+                }
+                if (profile.koulutus) {
+                    profile.koulutus.forEach(item => {
+                        if (item && item.trim()) {
+                            const key = item.trim().toLowerCase();
+                            counts.koulutus.set(key, (counts.koulutus.get(key) || 0) + 1);
+                        }
+                    });
+                }
+                if (profile.tyonhakualue && profile.tyonhakualue.trim()) {
+                    const key = profile.tyonhakualue.trim().toLowerCase();
+                    counts.tyonhakualue.set(key, (counts.tyonhakualue.get(key) || 0) + 1);
+                }
+                if (profile.kielitaito) {
+                    profile.kielitaito.forEach(item => {
+                        if (item && item.trim()) {
+                            const key = item.trim().toLowerCase();
+                            counts.kielitaito.set(key, (counts.kielitaito.get(key) || 0) + 1);
+                        }
+                    });
+                }
             });
 
-            console.log('Parameter counts:', {
-                ammatit: counts.ammatit.size,
-                osaamiset: counts.osaamiset.size,
-                koulutus: counts.koulutus.size,
-                tyonhakualue: counts.tyonhakualue.size,
-                kielitaito: counts.kielitaito.size
+            // Create checkboxes for each category
+            createCheckboxes('ammatti', counts.ammatit);
+            createCheckboxes('koulutus', counts.koulutus);
+            createCheckboxes('osaaminen', counts.osaamiset);
+            createCheckboxes('alue', counts.tyonhakualue);
+            createCheckboxes('kieli', counts.kielitaito);
+
+            console.log('Parameter counts created');
+        }
+
+        // Create checkboxes for a category
+        function createCheckboxes(category, countMap) {
+            const container = document.getElementById(`${category}-checkboxes`);
+            if (!container) return;
+
+            // Sort by count (descending) and then alphabetically
+            const sortedEntries = Array.from(countMap.entries())
+                .sort((a, b) => {
+                    if (b[1] !== a[1]) return b[1] - a[1]; // Sort by count first
+                    return a[0].localeCompare(b[0]); // Then alphabetically
+                });
+
+            container.innerHTML = '';
+
+            // Show top 10 initially
+            const initialShow = 10;
+            sortedEntries.slice(0, initialShow).forEach(([key, count], index) => {
+                const item = createCheckboxItem(category, key, count);
+                container.appendChild(item);
             });
+
+            // Store remaining items for "show more" functionality
+            if (sortedEntries.length > initialShow) {
+                container.setAttribute('data-remaining', JSON.stringify(sortedEntries.slice(initialShow)));
+            }
+        }
+
+        // Create individual checkbox item
+        function createCheckboxItem(category, value, count) {
+            const div = document.createElement('div');
+            div.className = 'checkbox-item';
+
+            const checkbox = document.createElement('input');
+            checkbox.type = 'checkbox';
+            checkbox.id = `${category}-${value.replace(/\s+/g, '-')}`;
+            checkbox.value = value;
+            checkbox.name = category;
+
+            const label = document.createElement('label');
+            label.htmlFor = checkbox.id;
+            label.innerHTML = `
+                <span>${capitalizeFirst(value)}</span>
+                <span class="checkbox-count">${count}</span>
+            `;
+
+            div.appendChild(checkbox);
+            div.appendChild(label);
+
+            return div;
+        }
+
+        // Show more options for a category
+        function showMoreOptions(category) {
+            const container = document.getElementById(`${category}-checkboxes`);
+            const remaining = container.getAttribute('data-remaining');
+            
+            if (remaining) {
+                const remainingItems = JSON.parse(remaining);
+                
+                remainingItems.forEach(([key, count]) => {
+                    const item = createCheckboxItem(category, key, count);
+                    container.appendChild(item);
+                });
+
+                container.removeAttribute('data-remaining');
+                
+                // Hide the "show more" button
+                const showMoreBtn = container.parentNode.querySelector('.show-more-btn');
+                if (showMoreBtn) {
+                    showMoreBtn.style.display = 'none';
+                }
+            }
+        }
+
+        // Capitalize first letter
+        function capitalizeFirst(str) {
+            return str.charAt(0).toUpperCase() + str.slice(1);
         }
 
         // Display profiles
