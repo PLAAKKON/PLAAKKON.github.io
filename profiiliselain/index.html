@@ -505,7 +505,7 @@
                 <!-- Checkbox-pohjaiset hakuparametrit -->
                 <div class="search-categories">
                     <div class="search-category">
-                        <h3>💼 Ammatti</h3>
+                        <h3>💼 Ammatit</h3>
                         <div id="ammatti-checkboxes" class="checkbox-container">
                             <!-- Ammatti checkboxit tulevat tähän -->
                         </div>
@@ -513,19 +513,19 @@
                     </div>
 
                     <div class="search-category">
-                        <h3>🎓 Koulutus</h3>
-                        <div id="koulutus-checkboxes" class="checkbox-container">
-                            <!-- Koulutus checkboxit tulevat tähän -->
-                        </div>
-                        <button onclick="showMoreOptions('koulutus')" class="show-more-btn">Näytä lisää...</button>
-                    </div>
-
-                    <div class="search-category">
-                        <h3>🏢 Osaaminen</h3>
+                        <h3>� Osaamiset</h3>
                         <div id="osaaminen-checkboxes" class="checkbox-container">
                             <!-- Osaaminen checkboxit tulevat tähän -->
                         </div>
                         <button onclick="showMoreOptions('osaaminen')" class="show-more-btn">Näytä lisää...</button>
+                    </div>
+
+                    <div class="search-category">
+                        <h3>💼 Työtoiveet</h3>
+                        <div id="työtoiveet-checkboxes" class="checkbox-container">
+                            <!-- Työtoiveet checkboxit tulevat tähän -->
+                        </div>
+                        <button onclick="showMoreOptions('työtoiveet')" class="show-more-btn">Näytä lisää...</button>
                     </div>
 
                     <div class="search-category">
@@ -545,11 +545,11 @@
                     </div>
 
                     <div class="search-category">
-                        <h3>💼 Työtoiveet</h3>
-                        <div id="työtoiveet-checkboxes" class="checkbox-container">
-                            <!-- Työtoiveet checkboxit tulevat tähän -->
+                        <h3>🎓 Koulutus</h3>
+                        <div id="koulutus-checkboxes" class="checkbox-container">
+                            <!-- Koulutus checkboxit tulevat tähän -->
                         </div>
-                        <button onclick="showMoreOptions('työtoiveet')" class="show-more-btn">Näytä lisää...</button>
+                        <button onclick="showMoreOptions('koulutus')" class="show-more-btn">Näytä lisää...</button>
                     </div>
 
                     <div class="search-category">
@@ -558,6 +558,14 @@
                             <!-- Ajokortit checkboxit tulevat tähän -->
                         </div>
                         <button onclick="showMoreOptions('ajokortit')" class="show-more-btn">Näytä lisää...</button>
+                    </div>
+
+                    <div class="search-category">
+                        <h3>📋 Lupatiedot</h3>
+                        <div id="lupatiedot-checkboxes" class="checkbox-container">
+                            <!-- Lupatiedot checkboxit tulevat tähän -->
+                        </div>
+                        <button onclick="showMoreOptions('lupatiedot')" class="show-more-btn">Näytä lisää...</button>
                     </div>
                 </div>
 
@@ -603,6 +611,28 @@
         let currentUser = null;
         const CACHE_EXPIRY_HOURS = 24; // Rebuild index daily
 
+        // Maantieteellinen hierarkia - maakunnat ja niiden kaupungit
+        const maakuntaKaupungit = {
+            'Uusimaa': ['Helsinki', 'Espoo', 'Vantaa', 'Kauniainen', 'Järvenpää', 'Hyvinkää', 'Porvoo', 'Kerava', 'Tuusula', 'Nurmijärvi', 'Loviisa', 'Vihti', 'Sipoo', 'Karkkila', 'Askola', 'Mäntsälä', 'Pornainen', 'Pukkila'],
+            'Varsinais-Suomi': ['Turku', 'Kaarina', 'Raisio', 'Naantali', 'Mynämäki', 'Loimaa', 'Salo', 'Somero', 'Paimio', 'Lieto', 'Masku'],
+            'Pirkanmaa': ['Tampere', 'Nokia', 'Ylöjärvi', 'Kangasala', 'Lempäälä', 'Orivesi', 'Ikaalinen', 'Valkeakoski', 'Mänttä-Vilppula', 'Akaa', 'Sastamala'],
+            'Pohjois-Pohjanmaa': ['Oulu', 'Kempele', 'Muhos', 'Oulunsalo', 'Haukipudas', 'Kiiminki', 'Ylivieska', 'Raahe', 'Ii', 'Pudasjärvi'],
+            'Keski-Suomi': ['Jyväskylä', 'Äänekoski', 'Jämsä', 'Keuruu', 'Saarijärvi', 'Viitasaari', 'Muurame', 'Laukaa', 'Petäjävesi'],
+            'Pohjois-Savo': ['Kuopio', 'Iisalmi', 'Varkaus', 'Siilinjärvi', 'Suonenjoki', 'Kiuruvesi', 'Nilsiä', 'Lapinlahti'],
+            'Etelä-Savo': ['Mikkeli', 'Savonlinna', 'Pieksämäki', 'Heinola', 'Imatra'],
+            'Pohjois-Karjala': ['Joensuu', 'Kitee', 'Lieksa', 'Nurmes', 'Outokumpu'],
+            'Etelä-Karjala': ['Lappeenranta', 'Imatra', 'Hamina', 'Kotka', 'Kouvola'],
+            'Kymenlaakso': ['Kotka', 'Kouvola', 'Hamina', 'Pyhtää', 'Virolahti'],
+            'Päijät-Häme': ['Lahti', 'Heinola', 'Hollola', 'Nastola', 'Orimattila', 'Asikkala'],
+            'Kanta-Häme': ['Hämeenlinna', 'Riihimäki', 'Forssa', 'Hattula', 'Janakkala'],
+            'Satakunta': ['Pori', 'Rauma', 'Ulvila', 'Kankaanpää', 'Harjavalta', 'Kokemäki', 'Huittinen'],
+            'Kainuu': ['Kajaani', 'Kuhmo', 'Sotkamo', 'Suomussalmi'],
+            'Lappi': ['Rovaniemi', 'Tornio', 'Kemi', 'Kemijärvi', 'Sodankylä', 'Inari'],
+            'Etelä-Pohjanmaa': ['Seinäjoki', 'Kurikka', 'Lapua', 'Ilmajoki', 'Alavus', 'Kauhava'],
+            'Pohjanmaa': ['Vaasa', 'Pietarsaari', 'Kokkola', 'Kristiinankaupunki', 'Närpiö'],
+            'Keski-Pohjanmaa': ['Kokkola', 'Ylivieska', 'Kalajoki', 'Kannus']
+        };
+
         // Authentication state listener
         auth.onAuthStateChanged((user) => {
             currentUser = user;
@@ -644,9 +674,44 @@
             loadCachedIndex();
         }
         
+        // Load cached checkbox index
+        function loadCachedIndex() {
+            const cachedIndex = localStorage.getItem('profileIndex');
+            const cachedDate = localStorage.getItem('profileIndexDate');
+            const cachedVersion = localStorage.getItem('profileIndexVersion');
+            const expectedVersion = 'v2.0';
+            
+            if (cachedIndex && cachedDate && cachedVersion === expectedVersion) {
+                const cacheAge = Date.now() - new Date(cachedDate).getTime();
+                const maxAge = 24 * 60 * 60 * 1000; // 24 hours
+                
+                if (cacheAge < maxAge) {
+                    console.log('⚡ Loading checkboxes from cache (v2.0)');
+                    try {
+                        categoryIndex = JSON.parse(cachedIndex);
+                        createCheckboxesFromCache();
+                        document.getElementById('results-count').textContent = `Checkbox-parametrit ladattu välimuistista. Valitse hakuehdot.`;
+                        return;
+                    } catch (error) {
+                        console.error('❌ Error parsing cached index:', error);
+                    }
+                } else {
+                    console.log('🕒 Cache expired, rebuilding...');
+                }
+            } else {
+                console.log('🔄 Cache version mismatch or missing, rebuilding...');
+                if (cachedVersion && cachedVersion !== expectedVersion) {
+                    console.log(`Version change: ${cachedVersion} → ${expectedVersion}`);
+                }
+            }
+            
+            // If cache is invalid, build fresh index
+            buildIndexIfNeeded();
+        }
+        
         // Show placeholder checkboxes while building cache
         function showPlaceholderCheckboxes() {
-            const categories = ['ammatti', 'koulutus', 'osaaminen', 'alue', 'kieli', 'työtoiveet', 'ajokortit'];
+            const categories = ['ammatti', 'osaaminen', 'työtoiveet', 'alue', 'kieli', 'koulutus', 'ajokortit', 'lupatiedot'];
             categories.forEach(category => {
                 const container = document.getElementById(`${category}-checkboxes`);
                 if (container) {
@@ -669,7 +734,8 @@
                 alue: getSelectedCheckboxes('alue'),
                 kieli: getSelectedCheckboxes('kieli'),
                 työtoiveet: getSelectedCheckboxes('työtoiveet'),
-                ajokortit: getSelectedCheckboxes('ajokortit')
+                ajokortit: getSelectedCheckboxes('ajokortit'),
+                lupatiedot: getSelectedCheckboxes('lupatiedot')
             };
 
             // Check if any search criteria is specified
@@ -789,10 +855,18 @@
                     const textMatches = safeIncludes(profile.esittely, freeSearch) ||
                                        safeIncludes(profile.esittely_10sanaa, freeSearch) ||
                                        safeIncludes(profile.tyonhakualue, freeSearch) ||
+                                       safeIncludes(profile.aloitusajankohta, freeSearch) ||
+                                       safeIncludes(profile.muu_kokemus, freeSearch) ||
+                                       safeIncludes(profile.tyokokemus, freeSearch) ||
+                                       safeIncludes(profile.osaamisteksti, freeSearch) ||
+                                       safeIncludes(profile.ajotiedot, freeSearch) ||
                                        (profile.ammatit && profile.ammatit.some(a => safeIncludes(a, freeSearch))) ||
                                        (profile.osaamiset && profile.osaamiset.some(o => safeIncludes(o, freeSearch))) ||
+                                       (profile.tyotoiveet && profile.tyotoiveet.some(t => safeIncludes(t, freeSearch))) ||
                                        (profile.koulutus && profile.koulutus.some(k => safeIncludes(k, freeSearch))) ||
-                                       (profile.kielitaito && profile.kielitaito.some(k => safeIncludes(k, freeSearch)));
+                                       (profile.kielitaito && profile.kielitaito.some(k => safeIncludes(k, freeSearch))) ||
+                                       (profile.ajokortit && profile.ajokortit.some(a => safeIncludes(a, freeSearch))) ||
+                                       (profile.lupatiedot && profile.lupatiedot.some(l => safeIncludes(l, freeSearch)));
                     
                     if (!textMatches) matches = false;
                 }
@@ -811,8 +885,9 @@
                                     case 'osaaminen': return profile.osaamiset || [];
                                     case 'alue': return profile.tyonhakualue ? [profile.tyonhakualue] : [];
                                     case 'kieli': return profile.kielitaito || [];
-                                    case 'työtoiveet': return profile.työtoiveet || [];
+                                    case 'työtoiveet': return profile.tyotoiveet || [];
                                     case 'ajokortit': return profile.ajokortit || [];
+                                    case 'lupatiedot': return profile.lupatiedot || [];
                                     default: return [];
                                 }
                             };
@@ -822,11 +897,19 @@
                                 profileData.map(item => String(item).trim()) : 
                                 [String(profileData).trim()];
                             
-                            fieldMatches = selected.some(selectedValue => 
-                                profileValues.some(profileValue => 
+                            fieldMatches = selected.some(selectedValue => {
+                                // Special handling for geographic area
+                                if (filterKey === 'alue') {
+                                    return profileValues.some(profileValue => 
+                                        matchesGeographicArea(selectedValue, profileValue)
+                                    );
+                                }
+                                
+                                // Standard exact matching for other fields
+                                return profileValues.some(profileValue => 
                                     profileValue.toLowerCase() === String(selectedValue).toLowerCase()
-                                )
-                            );
+                                );
+                            });
                         } catch (error) {
                             console.warn(`Error checking ${filterKey}:`, error);
                         }
@@ -924,6 +1007,10 @@
                 if (profile.esittely_10sanaa) html += `<div class="profile-field"><strong>Lyhyt esittely:</strong><span>${profile.esittely_10sanaa}</span></div>`;
                 if (profile.tyonhakualue) html += `<div class="profile-field"><strong>Työnhakualue:</strong><span>${profile.tyonhakualue}</span></div>`;
                 if (profile.aloitusajankohta) html += `<div class="profile-field"><strong>Aloitusajankohta:</strong><span>${profile.aloitusajankohta}</span></div>`;
+                if (profile.tyokokemus) html += `<div class="profile-field"><strong>Työkokemus:</strong><span>${profile.tyokokemus}</span></div>`;
+                if (profile.osaamisteksti) html += `<div class="profile-field"><strong>Osaamisteksti:</strong><span>${profile.osaamisteksti}</span></div>`;
+                if (profile.createdAt) html += `<div class="profile-field"><strong>Luotu:</strong><span>${new Date(profile.createdAt.toDate ? profile.createdAt.toDate() : profile.createdAt).toLocaleDateString('fi-FI')}</span></div>`;
+                if (profile.id) html += `<div class="profile-field"><strong>ID:</strong><span>${profile.id}</span></div>`;
                 
                 if (profile.ammatit && profile.ammatit.length > 0) {
                     html += `<div class="profile-field"><strong>Ammatit:</strong><div class="tags">`;
@@ -941,9 +1028,9 @@
                     html += `</div></div>`;
                 }
                 
-                if (profile.työtoiveet && profile.työtoiveet.length > 0) {
+                if (profile.tyotoiveet && profile.tyotoiveet.length > 0) {
                     html += `<div class="profile-field"><strong>Työtoiveet:</strong><div class="tags">`;
-                    profile.työtoiveet.slice(0, 8).forEach(toive => {
+                    profile.tyotoiveet.slice(0, 8).forEach(toive => {
                         html += `<span class="tag">${toive}</span>`;
                     });
                     html += `</div></div>`;
@@ -993,10 +1080,6 @@
                     html += `</div></div>`;
                 }
                 
-                if (profile.some) html += `<div class="profile-field"><strong>Sosiaalinen media:</strong><span>${profile.some}</span></div>`;
-                if (profile.puhelin) html += `<div class="profile-field"><strong>Puhelin:</strong><span>${profile.puhelin}</span></div>`;
-                if (profile.sähköposti) html += `<div class="profile-field"><strong>Sähköposti:</strong><span>${profile.sähköposti}</span></div>`;
-                
                 card.innerHTML = html;
                 container.appendChild(card);
             });
@@ -1026,15 +1109,23 @@
             try {
                 const cached = localStorage.getItem('profileIndex');
                 const cacheDate = localStorage.getItem('profileIndexDate');
+                const cacheVersion = localStorage.getItem('profileIndexVersion');
+                const expectedVersion = 'v2.0'; // Update this when changing category order
                 
                 console.log('Cache check:', { 
                     cached: !!cached, 
                     cacheDate: cacheDate,
+                    cacheVersion: cacheVersion,
+                    expectedVersion: expectedVersion,
                     cachedSize: cached ? cached.length : 0
                 });
                 
-                if (!cached || !cacheDate) {
-                    console.log('❌ No cache found, building index now...');
+                if (!cached || !cacheDate || cacheVersion !== expectedVersion) {
+                    if (cacheVersion !== expectedVersion) {
+                        console.log('🔄 Cache version mismatch, rebuilding...');
+                    } else {
+                        console.log('❌ No cache found, building index now...');
+                    }
                     document.getElementById('results-count').textContent = 'Rakennetaan hakuindeksiä ensimmäistä kertaa... Tämä voi kestää hetken.';
                     buildIndexIfNeeded();
                     return false;
@@ -1082,12 +1173,13 @@
             // Initialize counters for checkbox parameters
             const index = {
                 ammatti: new Map(),
-                koulutus: new Map(),
                 osaaminen: new Map(),
+                työtoiveet: new Map(),
                 alue: new Map(),
                 kieli: new Map(),
-                työtoiveet: new Map(),
-                ajokortit: new Map()
+                koulutus: new Map(),
+                ajokortit: new Map(),
+                lupatiedot: new Map()
             };
             
             function loadBatch(lastDoc = null) {
@@ -1136,8 +1228,9 @@
                             processField(profile.koulutus, index.koulutus);
                             processField(profile.tyonhakualue, index.alue);
                             processField(profile.kielitaito, index.kieli);
-                            processField(profile.työtoiveet, index.työtoiveet);
+                            processField(profile.tyotoiveet, index.työtoiveet);
                             processField(profile.ajokortit, index.ajokortit);
+                            processField(profile.lupatiedot, index.lupatiedot);
                             
                             processedCount++;
                             
@@ -1171,6 +1264,7 @@
                         try {
                             localStorage.setItem('profileIndex', JSON.stringify(categoryIndex));
                             localStorage.setItem('profileIndexDate', new Date().toISOString());
+                            localStorage.setItem('profileIndexVersion', 'v2.0');
                             console.log('💾 Checkbox index cached successfully - NO profile data stored');
                         } catch (error) {
                             console.error('❌ Error caching checkbox index:', error);
@@ -1204,17 +1298,41 @@
             
             const categoryMap = {
                 'ammatti': 'ammatti',
-                'koulutus': 'koulutus', 
                 'osaaminen': 'osaaminen',
+                'työtoiveet': 'työtoiveet',
                 'alue': 'alue',
                 'kieli': 'kieli',
-                'työtoiveet': 'työtoiveet',
-                'ajokortit': 'ajokortit'
+                'koulutus': 'koulutus', 
+                'ajokortit': 'ajokortit',
+                'lupatiedot': 'lupatiedot'
             };
             
             Object.keys(categoryMap).forEach(category => {
-                const items = categoryIndex[category] || [];
+                const categoryData = categoryIndex[category];
+                let items = [];
+                
+                if (categoryData) {
+                    // If it's a Map (from fresh build), convert to array
+                    if (categoryData instanceof Map) {
+                        items = Array.from(categoryData.entries()).map(([key, count]) => ({ value: key, count }));
+                    }
+                    // If it's cached data with { name, count } structure
+                    else if (Array.isArray(categoryData)) {
+                        items = categoryData.map(item => ({ 
+                            value: item.name || item.value, 
+                            count: item.count 
+                        }));
+                    }
+                    // If it's an object, convert to array
+                    else if (typeof categoryData === 'object') {
+                        items = Object.entries(categoryData).map(([key, count]) => ({ value: key, count }));
+                    }
+                }
+                
                 console.log(`📋 Creating checkboxes for ${category}:`, items.length, 'items');
+                if (category === 'työtoiveet') {
+                    console.log('🎯 TYÖTOIVEET DEBUG:', { categoryData, items: items.slice(0, 5) });
+                }
                 createCheckboxesWithSearch(categoryMap[category], items);
             });
             
@@ -1293,7 +1411,7 @@
         
         // Show placeholder checkboxes while loading
         function showPlaceholderCheckboxes() {
-            const categories = ['ammatti', 'koulutus', 'osaaminen', 'alue', 'kieli', 'työtoiveet', 'ajokortit'];
+            const categories = ['ammatti', 'osaaminen', 'työtoiveet', 'alue', 'kieli', 'koulutus', 'ajokortit', 'lupatiedot'];
             categories.forEach(category => {
                 const container = document.getElementById(`${category}-checkboxes`);
                 if (container) {
@@ -1304,6 +1422,33 @@
                         <p style="color: rgba(255,255,255,0.7); font-style: italic; padding: 10px;">⏳ Ladataan hakuparametreja...</p>
                     `;
                 }
+            });
+        }
+        
+        // Tarkista onko työnhakualue maantieteellisesti yhteensopiva hakuehdon kanssa
+        function matchesGeographicArea(profileArea, selectedAreas) {
+            if (!profileArea || !selectedAreas || selectedAreas.length === 0) return false;
+            
+            const profileAreaLower = profileArea.toLowerCase().trim();
+            
+            return selectedAreas.some(selectedArea => {
+                const selectedLower = selectedArea.toLowerCase().trim();
+                
+                // Suora vastaavuus
+                if (profileAreaLower === selectedLower) return true;
+                
+                // Tarkista hierarkia: jos valittu maakunta, hyväksy sen kaupungit
+                const selectedCities = maakuntaKaupungit[selectedArea] || [];
+                if (selectedCities.some(city => city.toLowerCase() === profileAreaLower)) return true;
+                
+                // Tarkista käänteinen hierarkia: jos valittu kaupunki, hyväksy sen maakunta
+                for (const [maakunta, kaupungit] of Object.entries(maakuntaKaupungit)) {
+                    if (maakunta.toLowerCase() === profileAreaLower) {
+                        if (kaupungit.some(city => city.toLowerCase() === selectedLower)) return true;
+                    }
+                }
+                
+                return false;
             });
         }
         
@@ -1320,7 +1465,7 @@
             allProfiles = [];
             
             // Clear all checkbox containers
-            const categories = ['ammatti', 'koulutus', 'osaaminen', 'alue', 'kieli', 'työtoiveet', 'ajokortit'];
+            const categories = ['ammatti', 'osaaminen', 'työtoiveet', 'alue', 'kieli', 'koulutus', 'ajokortit', 'lupatiedot'];
             categories.forEach(category => {
                 const container = document.getElementById(`${category}-checkboxes`);
                 if (container) {
