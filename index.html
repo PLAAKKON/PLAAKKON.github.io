@@ -16,7 +16,6 @@
 <script src="https://www.gstatic.com/firebasejs/10.11.1/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.11.1/firebase-firestore-compat.js"></script>
 <script defer="" src="/firebaseConfig.js"></script>
-<script defer="" src="/auth.js"></script>
 <style>
     html, body {
       margin: 0;
@@ -716,16 +715,20 @@
       }
     }
     
+    // Auto-logout timer variables
+    let logoutTimer;
+    let lastActivity = Date.now();
+    const LOGOUT_TIME = 15 * 60 * 1000; // 15 minutes
+
     // Enhanced user authentication display
-    function updateUserDisplay() {
-      const userEmail = localStorage.getItem('userEmail');
+    function updateUserDisplay(user = null) {
       const userInfoFi = document.getElementById('userEmailDisplay');
       const userInfoEn = document.getElementById('userEmailDisplayEn');
       const emailLinkFi = document.getElementById('userEmailLink');
       const emailLinkEn = document.getElementById('userEmailLinkEn');
       const logoutBtn = document.getElementById('logoutBtn');
       
-      if (userEmail) {
+      if (user && user.email) {
         // Show user info for both languages
         if (userInfoFi) userInfoFi.style.display = 'inline';
         if (userInfoEn) userInfoEn.style.display = 'inline';
@@ -733,25 +736,91 @@
         
         // Set email links
         if (emailLinkFi) {
-          emailLinkFi.textContent = userEmail;
-          emailLinkFi.href = "mailto:" + userEmail;
+          emailLinkFi.textContent = user.email;
+          emailLinkFi.href = "mailto:" + user.email;
         }
         if (emailLinkEn) {
-          emailLinkEn.textContent = userEmail;
-          emailLinkEn.href = "mailto:" + userEmail;
+          emailLinkEn.textContent = user.email;
+          emailLinkEn.href = "mailto:" + user.email;
         }
+        
+        // Start auto-logout timer
+        startLogoutTimer();
+        
+        // Store email for other uses
+        localStorage.setItem('userEmail', user.email);
       } else {
         // Hide user info
         if (userInfoFi) userInfoFi.style.display = 'none';
         if (userInfoEn) userInfoEn.style.display = 'none';
         if (logoutBtn) logoutBtn.style.display = 'none';
+        
+        // Clear stored email
+        localStorage.removeItem('userEmail');
+        
+        // Clear auto-logout timer
+        clearTimeout(logoutTimer);
+      }
+    }
+
+    // Auto-logout functionality
+    function startLogoutTimer() {
+      clearTimeout(logoutTimer);
+      logoutTimer = setTimeout(() => {
+        if (firebase && firebase.auth && firebase.auth().currentUser) {
+          const message = currentLanguage === 'en' ? 
+            'Session expired due to inactivity. Please log in again.' : 
+            'Istunto päättyi passiivisuuden vuoksi. Kirjaudu uudelleen sisään.';
+          alert(message);
+          logoutUser();
+        }
+      }, LOGOUT_TIME);
+    }
+
+    // Reset activity timer
+    function resetActivity() {
+      lastActivity = Date.now();
+      if (firebase && firebase.auth && firebase.auth().currentUser) {
+        startLogoutTimer();
+      }
+    }
+
+    // Firebase auth state listener
+    function initAuthListener() {
+      if (firebase && firebase.auth) {
+        firebase.auth().onAuthStateChanged((user) => {
+          console.log('Auth state changed:', user ? user.email : 'not logged in');
+          updateUserDisplay(user);
+        });
       }
     }
     
     // Initialize on page load
     window.addEventListener('DOMContentLoaded', function() {
       loadLanguagePreference();
-      updateUserDisplay();
+      
+      // Wait for Firebase to load before initializing auth
+      const checkFirebase = () => {
+        if (window.firebase && window.firebase.auth) {
+          initAuthListener();
+        } else {
+          setTimeout(checkFirebase, 100);
+        }
+      };
+      checkFirebase();
+      
+      // Add activity listeners for auto-logout
+      ['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart', 'click'].forEach(event => {
+        document.addEventListener(event, resetActivity, true);
+      });
+      
+      // Auto-logout on page refresh/unload
+      window.addEventListener('beforeunload', () => {
+        if (firebase && firebase.auth && firebase.auth().currentUser) {
+          // Don't logout on refresh, just reset activity
+          resetActivity();
+        }
+      });
       
       // Add smooth scrolling for anchor links
       document.querySelectorAll('a[href^="#"]').forEach(anchor => {
@@ -773,7 +842,7 @@
       if (firebase && firebase.auth) {
         firebase.auth().signOut().then(() => {
           localStorage.removeItem('userEmail');
-          updateUserDisplay();
+          updateUserDisplay(null);
           
           // Show success message based on current language
           const message = currentLanguage === 'en' ? 
