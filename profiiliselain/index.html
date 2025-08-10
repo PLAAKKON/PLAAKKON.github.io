@@ -603,6 +603,55 @@
         let currentUser = null;
         const CACHE_EXPIRY_HOURS = 24; // Rebuild index daily
 
+        // Maantieteellinen hierarkia - maakunnat ja niiden kaupungit
+        const maakuntaKaupungit = {
+            'Uusimaa': ['Helsinki', 'Espoo', 'Vantaa', 'Kauniainen', 'Järvenpää', 'Hyvinkää', 'Porvoo', 'Kerava', 'Tuusula', 'Nurmijärvi', 'Loviisa', 'Vihti', 'Sipoo', 'Karkkila', 'Askola', 'Mäntsälä', 'Pornainen', 'Pukkila'],
+            'Varsinais-Suomi': ['Turku', 'Kaarina', 'Raisio', 'Naantali', 'Mynämäki', 'Loimaa', 'Salo', 'Somero', 'Paimio', 'Lieto', 'Masku'],
+            'Pirkanmaa': ['Tampere', 'Nokia', 'Ylöjärvi', 'Kangasala', 'Lempäälä', 'Orivesi', 'Ikaalinen', 'Valkeakoski', 'Mänttä-Vilppula', 'Akaa', 'Sastamala'],
+            'Pohjois-Pohjanmaa': ['Oulu', 'Kempele', 'Muhos', 'Oulunsalo', 'Haukipudas', 'Kiiminki', 'Ylivieska', 'Raahe', 'Ii', 'Pudasjärvi'],
+            'Keski-Suomi': ['Jyväskylä', 'Äänekoski', 'Jämsä', 'Keuruu', 'Saarijärvi', 'Viitasaari', 'Muurame', 'Laukaa', 'Petäjävesi'],
+            'Pohjois-Savo': ['Kuopio', 'Iisalmi', 'Varkaus', 'Siilinjärvi', 'Suonenjoki', 'Kiuruvesi', 'Nilsiä', 'Lapinlahti'],
+            'Etelä-Savo': ['Mikkeli', 'Savonlinna', 'Pieksämäki', 'Heinola', 'Imatra'],
+            'Pohjois-Karjala': ['Joensuu', 'Kitee', 'Lieksa', 'Nurmes', 'Outokumpu'],
+            'Etelä-Karjala': ['Lappeenranta', 'Imatra', 'Hamina', 'Kotka', 'Kouvola'],
+            'Kymenlaakso': ['Kotka', 'Kouvola', 'Hamina', 'Pyhtää', 'Virolahti'],
+            'Päijät-Häme': ['Lahti', 'Heinola', 'Hollola', 'Nastola', 'Orimattila', 'Asikkala'],
+            'Kanta-Häme': ['Hämeenlinna', 'Riihimäki', 'Forssa', 'Hattula', 'Janakkala'],
+            'Satakunta': ['Pori', 'Rauma', 'Ulvila', 'Kankaanpää', 'Harjavalta', 'Kokemäki', 'Huittinen'],
+            'Kainuu': ['Kajaani', 'Kuhmo', 'Sotkamo', 'Suomussalmi'],
+            'Lappi': ['Rovaniemi', 'Tornio', 'Kemi', 'Kemijärvi', 'Sodankylä', 'Inari'],
+            'Etelä-Pohjanmaa': ['Seinäjoki', 'Kurikka', 'Lapua', 'Ilmajoki', 'Alavus', 'Kauhava'],
+            'Pohjanmaa': ['Vaasa', 'Pietarsaari', 'Kokkola', 'Kristiinankaupunki', 'Närpiö'],
+            'Keski-Pohjanmaa': ['Kokkola', 'Ylivieska', 'Kalajoki', 'Kannus']
+        };
+
+        // Tarkista onko työnhakualue maantieteellisesti yhteensopiva hakuehdon kanssa
+        function matchesGeographicArea(profileArea, selectedAreas) {
+            if (!profileArea || !selectedAreas || selectedAreas.length === 0) return false;
+            
+            const profileAreaLower = profileArea.toLowerCase().trim();
+            
+            return selectedAreas.some(selectedArea => {
+                const selectedLower = selectedArea.toLowerCase().trim();
+                
+                // Suora vastaavuus
+                if (profileAreaLower === selectedLower) return true;
+                
+                // Tarkista hierarkia: jos valittu maakunta, hyväksy sen kaupungit
+                const selectedCities = maakuntaKaupungit[selectedArea] || [];
+                if (selectedCities.some(city => city.toLowerCase() === profileAreaLower)) return true;
+                
+                // Tarkista käänteinen hierarkia: jos valittu kaupunki, hyväksy sen maakunta
+                for (const [maakunta, kaupungit] of Object.entries(maakuntaKaupungit)) {
+                    if (maakunta.toLowerCase() === profileAreaLower) {
+                        if (kaupungit.some(city => city.toLowerCase() === selectedLower)) return true;
+                    }
+                }
+                
+                return false;
+            });
+        }
+
         // Authentication state listener
         auth.onAuthStateChanged((user) => {
             currentUser = user;
@@ -822,11 +871,18 @@
                                 profileData.map(item => String(item).trim()) : 
                                 [String(profileData).trim()];
                             
-                            fieldMatches = selected.some(selectedValue => 
-                                profileValues.some(profileValue => 
-                                    profileValue.toLowerCase() === String(selectedValue).toLowerCase()
-                                )
-                            );
+                            // Erikseen käsittely alue-hakuehvoille maantieteellisen hierarkian takia
+                            if (filterKey === 'alue') {
+                                fieldMatches = profileValues.some(profileValue => 
+                                    matchesGeographicArea(profileValue, selected)
+                                );
+                            } else {
+                                fieldMatches = selected.some(selectedValue => 
+                                    profileValues.some(profileValue => 
+                                        profileValue.toLowerCase() === String(selectedValue).toLowerCase()
+                                    )
+                                );
+                            }
                         } catch (error) {
                             console.warn(`Error checking ${filterKey}:`, error);
                         }
