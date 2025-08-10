@@ -45,23 +45,23 @@ body {
 
 /* Form containers */
 .form-container {
-    background: rgba(255, 255, 255, 0.1);
+    background: rgba(0, 0, 0, 0.5);
     backdrop-filter: blur(10px);
     border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: 20px;
+    border-radius: 15px;
     padding: 40px;
     display: flex;
     flex-direction: column;
     gap: 20px;
     transition: all 0.3s ease;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
     min-height: 350px;
 }
 
 .form-container:hover {
     transform: translateY(-5px);
-    background: rgba(255, 255, 255, 0.15);
-    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.2);
+    background: rgba(0, 0, 0, 0.6);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
 }
 
 /* Headings */
@@ -112,15 +112,15 @@ input::placeholder {
 }
 
 .btn-primary {
-    background: linear-gradient(135deg, #1e90ff, #0066cc);
+    background: #007acc;
     color: white;
-    box-shadow: 0 4px 15px rgba(30, 144, 255, 0.4);
+    box-shadow: 0 4px 15px rgba(0, 122, 204, 0.4);
 }
 
 .btn-primary:hover {
     transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(30, 144, 255, 0.6);
-    background: linear-gradient(135deg, #0080ff, #0056b3);
+    box-shadow: 0 6px 20px rgba(0, 122, 204, 0.6);
+    background: #005a9e;
 }
 
 .btn-primary:active {
