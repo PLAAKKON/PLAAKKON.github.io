@@ -1038,20 +1038,32 @@
 
         // Create individual checkbox item
         function createCheckboxItem(category, value, count) {
+            // Null/undefined check
+            if (!value || value === null || value === undefined) {
+                console.warn('Skipping invalid checkbox item:', { category, value, count });
+                return null;
+            }
+            
+            const safeValue = String(value).trim();
+            if (!safeValue) {
+                console.warn('Skipping empty checkbox item:', { category, value, count });
+                return null;
+            }
+            
             const div = document.createElement('div');
             div.className = 'checkbox-item';
 
             const checkbox = document.createElement('input');
             checkbox.type = 'checkbox';
-            checkbox.id = `${category}-${value.replace(/\s+/g, '-')}`;
-            checkbox.value = value;
+            checkbox.id = `${category}-${safeValue.replace(/\s+/g, '-')}`;
+            checkbox.value = safeValue;
             checkbox.name = category;
 
             const label = document.createElement('label');
             label.htmlFor = checkbox.id;
             label.innerHTML = `
-                <span>${capitalizeFirst(value)}</span>
-                <span class="checkbox-count">${count}</span>
+                <span>${capitalizeFirst(safeValue)}</span>
+                <span class="checkbox-count">${count || 0}</span>
             `;
 
             div.appendChild(checkbox);
@@ -1070,7 +1082,9 @@
                 
                 remainingItems.forEach(([key, count]) => {
                     const item = createCheckboxItem(category, key, count);
-                    container.appendChild(item);
+                    if (item) { // Only append if item is valid
+                        container.appendChild(item);
+                    }
                 });
 
                 container.removeAttribute('data-remaining');
@@ -1421,18 +1435,24 @@
                 if (categoryData) {
                     // If it's a Map (from fresh build), convert to array
                     if (categoryData instanceof Map) {
-                        items = Array.from(categoryData.entries()).map(([key, count]) => ({ value: key, count }));
+                        items = Array.from(categoryData.entries())
+                            .filter(([key, count]) => key && String(key).trim()) // Filter out invalid items
+                            .map(([key, count]) => ({ value: key, count }));
                     }
                     // If it's cached data with { name, count } structure
                     else if (Array.isArray(categoryData)) {
-                        items = categoryData.map(item => ({ 
-                            value: item.name || item.value, 
-                            count: item.count 
-                        }));
+                        items = categoryData
+                            .filter(item => item && (item.name || item.value)) // Filter out invalid items
+                            .map(item => ({ 
+                                value: item.name || item.value, 
+                                count: item.count || 0
+                            }));
                     }
                     // If it's an object, convert to array
                     else if (typeof categoryData === 'object') {
-                        items = Object.entries(categoryData).map(([key, count]) => ({ value: key, count }));
+                        items = Object.entries(categoryData)
+                            .filter(([key, count]) => key && String(key).trim()) // Filter out invalid items
+                            .map(([key, count]) => ({ value: key, count }));
                     }
                 }
                 
@@ -1476,7 +1496,9 @@
             const initialItems = items.slice(0, 50);
             initialItems.forEach(item => {
                 const checkboxItem = createCheckboxItem(category, item.name, item.count);
-                checkboxContainer.appendChild(checkboxItem);
+                if (checkboxItem) { // Only append if item is valid
+                    checkboxContainer.appendChild(checkboxItem);
+                }
             });
             
             container.appendChild(checkboxContainer);
@@ -1503,7 +1525,9 @@
             const itemsToShow = filtered.slice(0, 100);
             itemsToShow.forEach(item => {
                 const checkboxItem = createCheckboxItem(category, item.name, item.count);
-                checkboxList.appendChild(checkboxItem);
+                if (checkboxItem) { // Only append if item is valid
+                    checkboxList.appendChild(checkboxItem);
+                }
             });
             
             if (filtered.length > 100) {
