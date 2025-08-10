@@ -1029,6 +1029,10 @@
         // Load cached index from localStorage
         function loadCachedIndex() {
             console.log('🔍 Checking for cached index...');
+            
+            // Show loading placeholders immediately
+            showPlaceholderCheckboxes();
+            
             try {
                 const cached = localStorage.getItem('profileIndex');
                 const cacheDate = localStorage.getItem('profileIndexDate');
@@ -1041,7 +1045,7 @@
                 
                 if (!cached || !cacheDate) {
                     console.log('❌ No cache found, building index now...');
-                    document.getElementById('results-count').textContent = 'Rakennetaan hakuindeksiä ensimmäistä kertaa...';
+                    document.getElementById('results-count').textContent = 'Rakennetaan hakuindeksiä ensimmäistä kertaa... Tämä voi kestää hetken.';
                     buildIndexIfNeeded();
                     return false;
                 }
@@ -1054,7 +1058,7 @@
                 
                 if (hoursDiff > CACHE_EXPIRY_HOURS) {
                     console.log('🕒 Cache expired, rebuilding...');
-                    document.getElementById('results-count').textContent = 'Päivitetään hakuindeksiä...';
+                    document.getElementById('results-count').textContent = 'Päivitetään hakuindeksiä... Tämä voi kestää hetken.';
                     buildIndexIfNeeded();
                     return false;
                 }
@@ -1071,7 +1075,7 @@
                 return true;
             } catch (error) {
                 console.error('❌ Error loading cache:', error);
-                document.getElementById('results-count').textContent = 'Rakennetaan hakuindeksiä...';
+                document.getElementById('results-count').textContent = 'Virhe ladatessa hakuindeksiä. Yritetään uudelleen...';
                 buildIndexIfNeeded();
                 return false;
             }
@@ -1298,6 +1302,22 @@
                 moreDiv.textContent = `... ja ${filtered.length - 100} muuta tulosta`;
                 checkboxList.appendChild(moreDiv);
             }
+        }
+        
+        // Show placeholder checkboxes while loading
+        function showPlaceholderCheckboxes() {
+            const categories = ['ammatti', 'koulutus', 'osaaminen', 'alue', 'kieli', 'työtoiveet', 'ajokortit', 'muu_kokemus'];
+            categories.forEach(category => {
+                const container = document.getElementById(`${category}-checkboxes`);
+                if (container) {
+                    container.innerHTML = `
+                        <div class="checkbox-search">
+                            <input type="text" placeholder="Ladataan..." disabled>
+                        </div>
+                        <p style="color: rgba(255,255,255,0.7); font-style: italic; padding: 10px;">⏳ Ladataan hakuparametreja...</p>
+                    `;
+                }
+            });
         }
         
         // Clear cache and rebuild checkbox index
