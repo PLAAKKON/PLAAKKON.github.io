@@ -715,9 +715,12 @@
 
         // Tarkista onko työnhakualue maantieteellisesti yhteensopiva hakuehdon kanssa
         function matchesGeographicArea(profileArea, selectedAreas) {
-            if (!profileArea || !selectedAreas || selectedAreas.length === 0) return false;
+            if (!selectedAreas || selectedAreas.length === 0) return false;
             
+            // Jos profiilin työnhakualue on tyhjä, "Suomi" tai "suomi", näy kaikissa hauissa
+            if (!profileArea || !profileArea.trim()) return true;
             const profileAreaLower = profileArea.toLowerCase().trim();
+            if (profileAreaLower === 'suomi' || profileAreaLower === 'koko suomi' || profileAreaLower === 'koko maa') return true;
             
             return selectedAreas.some(selectedArea => {
                 const selectedLower = selectedArea.toLowerCase().trim();
@@ -1518,33 +1521,6 @@
                         <p style="color: rgba(255,255,255,0.7); font-style: italic; padding: 10px;">⏳ Ladataan hakuparametreja...</p>
                     `;
                 }
-            });
-        }
-        
-        // Tarkista onko työnhakualue maantieteellisesti yhteensopiva hakuehdon kanssa
-        function matchesGeographicArea(profileArea, selectedAreas) {
-            if (!profileArea || !selectedAreas || selectedAreas.length === 0) return false;
-            
-            const profileAreaLower = profileArea.toLowerCase().trim();
-            
-            return selectedAreas.some(selectedArea => {
-                const selectedLower = selectedArea.toLowerCase().trim();
-                
-                // Suora vastaavuus
-                if (profileAreaLower === selectedLower) return true;
-                
-                // Tarkista hierarkia: jos valittu maakunta, hyväksy sen kaupungit
-                const selectedCities = maakuntaKaupungit[selectedArea] || [];
-                if (selectedCities.some(city => city.toLowerCase() === profileAreaLower)) return true;
-                
-                // Tarkista käänteinen hierarkia: jos valittu kaupunki, hyväksy sen maakunta
-                for (const [maakunta, kaupungit] of Object.entries(maakuntaKaupungit)) {
-                    if (maakunta.toLowerCase() === profileAreaLower) {
-                        if (kaupungit.some(city => city.toLowerCase() === selectedLower)) return true;
-                    }
-                }
-                
-                return false;
             });
         }
         
