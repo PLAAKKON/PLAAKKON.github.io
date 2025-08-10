@@ -371,6 +371,38 @@
                         </div>
                         <button onclick="showMoreOptions('kieli')" class="show-more-btn">Näytä lisää...</button>
                     </div>
+
+                    <div class="search-category">
+                        <h3>💼 Työtoiveet</h3>
+                        <div id="työtoiveet-checkboxes" class="checkbox-container">
+                            <!-- Työtoiveet checkboxit tulevat tähän -->
+                        </div>
+                        <button onclick="showMoreOptions('työtoiveet')" class="show-more-btn">Näytä lisää...</button>
+                    </div>
+
+                    <div class="search-category">
+                        <h3>🚗 Ajokortit</h3>
+                        <div id="ajokortit-checkboxes" class="checkbox-container">
+                            <!-- Ajokortit checkboxit tulevat tähän -->
+                        </div>
+                        <button onclick="showMoreOptions('ajokortit')" class="show-more-btn">Näytä lisää...</button>
+                    </div>
+
+                    <div class="search-category">
+                        <h3>📅 Aloitusajankohta</h3>
+                        <div id="aloitusajankohta-checkboxes" class="checkbox-container">
+                            <!-- Aloitusajankohta checkboxit tulevat tähän -->
+                        </div>
+                        <button onclick="showMoreOptions('aloitusajankohta')" class="show-more-btn">Näytä lisää...</button>
+                    </div>
+
+                    <div class="search-category">
+                        <h3>🔧 Muu kokemus</h3>
+                        <div id="muu_kokemus-checkboxes" class="checkbox-container">
+                            <!-- Muu kokemus checkboxit tulevat tähän -->
+                        </div>
+                        <button onclick="showMoreOptions('muu_kokemus')" class="show-more-btn">Näytä lisää...</button>
+                    </div>
                 </div>
 
                 <div style="text-align: center; margin-top: 20px;">
@@ -457,7 +489,7 @@
         
         // Show placeholder checkboxes while building cache
         function showPlaceholderCheckboxes() {
-            const categories = ['ammatti', 'koulutus', 'osaaminen', 'alue', 'kieli'];
+            const categories = ['ammatti', 'koulutus', 'osaaminen', 'alue', 'kieli', 'työtoiveet', 'ajokortit', 'aloitusajankohta', 'muu_kokemus'];
             categories.forEach(category => {
                 const container = document.getElementById(`${category}-checkboxes`);
                 if (container) {
@@ -478,7 +510,11 @@
                 koulutus: getSelectedCheckboxes('koulutus'),
                 osaaminen: getSelectedCheckboxes('osaaminen'),
                 alue: getSelectedCheckboxes('alue'),
-                kieli: getSelectedCheckboxes('kieli')
+                kieli: getSelectedCheckboxes('kieli'),
+                työtoiveet: getSelectedCheckboxes('työtoiveet'),
+                ajokortit: getSelectedCheckboxes('ajokortit'),
+                aloitusajankohta: getSelectedCheckboxes('aloitusajankohta'),
+                muu_kokemus: getSelectedCheckboxes('muu_kokemus')
             };
 
             // Check if any search criteria is specified
@@ -620,6 +656,10 @@
                                     case 'osaaminen': return profile.osaamiset || [];
                                     case 'alue': return profile.tyonhakualue ? [profile.tyonhakualue] : [];
                                     case 'kieli': return profile.kielitaito || [];
+                                    case 'työtoiveet': return profile.työtoiveet || [];
+                                    case 'ajokortit': return profile.ajokortit || [];
+                                    case 'aloitusajankohta': return profile.aloitusajankohta ? [profile.aloitusajankohta] : [];
+                                    case 'muu_kokemus': return profile.muu_kokemus ? [profile.muu_kokemus] : [];
                                     default: return [];
                                 }
                             };
@@ -888,7 +928,11 @@
                 koulutus: new Map(),
                 osaaminen: new Map(),
                 alue: new Map(),
-                kieli: new Map()
+                kieli: new Map(),
+                työtoiveet: new Map(),
+                ajokortit: new Map(),
+                aloitusajankohta: new Map(),
+                muu_kokemus: new Map()
             };
             
             function loadBatch(lastDoc = null) {
@@ -937,6 +981,10 @@
                             processField(profile.koulutus, index.koulutus);
                             processField(profile.tyonhakualue, index.alue);
                             processField(profile.kielitaito, index.kieli);
+                            processField(profile.työtoiveet, index.työtoiveet);
+                            processField(profile.ajokortit, index.ajokortit);
+                            processField(profile.aloitusajankohta, index.aloitusajankohta);
+                            processField(profile.muu_kokemus, index.muu_kokemus);
                             
                             processedCount++;
                             
@@ -1006,7 +1054,11 @@
                 'koulutus': 'koulutus', 
                 'osaaminen': 'osaaminen',
                 'alue': 'alue',
-                'kieli': 'kieli'
+                'kieli': 'kieli',
+                'työtoiveet': 'työtoiveet',
+                'ajokortit': 'ajokortit',
+                'aloitusajankohta': 'aloitusajankohta',
+                'muu_kokemus': 'muu_kokemus'
             };
             
             Object.keys(categoryMap).forEach(category => {
