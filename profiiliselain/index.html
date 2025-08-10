@@ -522,7 +522,7 @@
             const filtered = allProfiles.filter(profile => {
                 let matches = true;
                 
-                // Free text search
+                // Free text search - enhanced with two-way matching for locations
                 if (freeSearch) {
                     const freeTextMatch = (
                         (profile.esittely && profile.esittely.toLowerCase().includes(freeSearch)) ||
@@ -531,8 +531,16 @@
                         (profile.ammatit && profile.ammatit.some(item => item.toLowerCase().includes(freeSearch))) ||
                         (profile.osaamiset && profile.osaamiset.some(item => item.toLowerCase().includes(freeSearch))) ||
                         (profile.koulutus && profile.koulutus.some(item => item.toLowerCase().includes(freeSearch))) ||
-                        (profile.tyonhakualue && profile.tyonhakualue.toLowerCase().includes(freeSearch)) ||
-                        (profile.kielitaito && profile.kielitaito.some(item => item.toLowerCase().includes(freeSearch)))
+                        (profile.kielitaito && profile.kielitaito.some(item => item.toLowerCase().includes(freeSearch))) ||
+                        // Enhanced location matching - two-way, with type checking
+                        (profile.tyonhakualue && (
+                            (typeof profile.tyonhakualue === 'string' && (
+                                profile.tyonhakualue.toLowerCase().includes(freeSearch) ||
+                                freeSearch.includes(profile.tyonhakualue.toLowerCase())
+                            )) ||
+                            (typeof profile.tyonhakualue !== 'string' && 
+                             profile.tyonhakualue.toString().toLowerCase().includes(freeSearch))
+                        ))
                     );
                     matches = matches && freeTextMatch;
                 }
@@ -561,11 +569,23 @@
                     matches = matches && osaamisMatch;
                 }
                 
-                // Alue filter
+                // Alue filter - SPECIAL LOGIC for geographical searches with type checking
                 if (selectedFilters.alue.length > 0) {
-                    const alueMatch = profile.tyonhakualue && selectedFilters.alue.some(filter => 
-                        profile.tyonhakualue.toLowerCase().includes(filter.toLowerCase())
-                    );
+                    const alueMatch = profile.tyonhakualue && selectedFilters.alue.some(filter => {
+                        const searchFilter = filter.toLowerCase();
+                        
+                        if (typeof profile.tyonhakualue === 'string') {
+                            const profileAlue = profile.tyonhakualue.toLowerCase();
+                            // Two-way matching: 
+                            // 1. Normal: profile contains search term (e.g., "Helsinki" contains "hel")
+                            // 2. Reverse: search term contains profile value (e.g., "uusimaa" contains "vantaa")
+                            return profileAlue.includes(searchFilter) || searchFilter.includes(profileAlue);
+                        } else {
+                            // Handle non-string data
+                            const profileAlue = profile.tyonhakualue.toString().toLowerCase();
+                            return profileAlue.includes(searchFilter);
+                        }
+                    });
                     matches = matches && alueMatch;
                 }
                 
@@ -615,52 +635,96 @@
 
         // Update parameter counts and create checkboxes
         function updateParameterCounts() {
-            // Count unique values for each parameter
+            console.log('🔍 Starting updateParameterCounts with', allProfiles.length, 'profiles');
+            
+            if (allProfiles.length === 0) {
+                console.log('❌ No profiles to process');
+                return;
+            }
+            
+            // Debug: Check first profile structure
+            console.log('📋 First profile structure:', allProfiles[0]);
+            
+            // Count unique values for each parameter - SIMPLIFIED VERSION
             const counts = {
                 ammatit: new Map(),
-                osaamiset: new Map(),
+                osaamiset: new Map(), 
                 koulutus: new Map(),
                 tyonhakualue: new Map(),
                 kielitaito: new Map()
             };
 
-            allProfiles.forEach(profile => {
-                if (profile.ammatit) {
-                    profile.ammatit.forEach(item => {
-                        if (item && item.trim()) {
-                            const key = item.trim().toLowerCase();
-                            counts.ammatit.set(key, (counts.ammatit.get(key) || 0) + 1);
+            allProfiles.forEach((profile, index) => {
+                // Process all data types more flexibly
+                try {
+                    // Ammatit - could be string or array
+                    if (profile.ammatit) {
+                        const ammatitData = Array.isArray(profile.ammatit) ? profile.ammatit : [profile.ammatit];
+                        ammatitData.forEach(item => {
+                            if (item && typeof item === 'string' && item.trim()) {
+                                const key = item.trim();
+                                counts.ammatit.set(key, (counts.ammatit.get(key) || 0) + 1);
+                            }
+                        });
+                    }
+                    
+                    // Osaaminen - could be string or array  
+                    if (profile.osaamiset) {
+                        const osaamisetData = Array.isArray(profile.osaamiset) ? profile.osaamiset : [profile.osaamiset];
+                        osaamisetData.forEach(item => {
+                            if (item && typeof item === 'string' && item.trim()) {
+                                const key = item.trim();
+                                counts.osaamiset.set(key, (counts.osaamiset.get(key) || 0) + 1);
+                            }
+                        });
+                    }
+                    
+                    // Koulutus - could be string or array
+                    if (profile.koulutus) {
+                        const koulutusData = Array.isArray(profile.koulutus) ? profile.koulutus : [profile.koulutus];
+                        koulutusData.forEach(item => {
+                            if (item && typeof item === 'string' && item.trim()) {
+                                const key = item.trim();
+                                counts.koulutus.set(key, (counts.koulutus.get(key) || 0) + 1);
+                            }
+                        });
+                    }
+                    
+                    // Työnhakualue - usually a string, but check type first
+                    if (profile.tyonhakualue) {
+                        let alueValue = profile.tyonhakualue;
+                        if (typeof alueValue === 'string' && alueValue.trim()) {
+                            const key = alueValue.trim();
+                            counts.tyonhakualue.set(key, (counts.tyonhakualue.get(key) || 0) + 1);
+                        } else if (typeof alueValue === 'object' && alueValue.toString) {
+                            const key = alueValue.toString().trim();
+                            if (key && key !== '[object Object]') {
+                                counts.tyonhakualue.set(key, (counts.tyonhakualue.get(key) || 0) + 1);
+                            }
                         }
-                    });
+                    }
+                    
+                    // Kielitaito - could be string or array
+                    if (profile.kielitaito) {
+                        const kielitaitoData = Array.isArray(profile.kielitaito) ? profile.kielitaito : [profile.kielitaito];
+                        kielitaitoData.forEach(item => {
+                            if (item && typeof item === 'string' && item.trim()) {
+                                const key = item.trim();
+                                counts.kielitaito.set(key, (counts.kielitaito.get(key) || 0) + 1);
+                            }
+                        });
+                    }
+                } catch (error) {
+                    console.error('Error processing profile', index, ':', error);
                 }
-                if (profile.osaamiset) {
-                    profile.osaamiset.forEach(item => {
-                        if (item && item.trim()) {
-                            const key = item.trim().toLowerCase();
-                            counts.osaamiset.set(key, (counts.osaamiset.get(key) || 0) + 1);
-                        }
-                    });
-                }
-                if (profile.koulutus) {
-                    profile.koulutus.forEach(item => {
-                        if (item && item.trim()) {
-                            const key = item.trim().toLowerCase();
-                            counts.koulutus.set(key, (counts.koulutus.get(key) || 0) + 1);
-                        }
-                    });
-                }
-                if (profile.tyonhakualue && profile.tyonhakualue.trim()) {
-                    const key = profile.tyonhakualue.trim().toLowerCase();
-                    counts.tyonhakualue.set(key, (counts.tyonhakualue.get(key) || 0) + 1);
-                }
-                if (profile.kielitaito) {
-                    profile.kielitaito.forEach(item => {
-                        if (item && item.trim()) {
-                            const key = item.trim().toLowerCase();
-                            counts.kielitaito.set(key, (counts.kielitaito.get(key) || 0) + 1);
-                        }
-                    });
-                }
+            });
+
+            console.log('📊 Final counts:', {
+                ammatit: counts.ammatit.size,
+                osaamiset: counts.osaamiset.size, 
+                koulutus: counts.koulutus.size,
+                tyonhakualue: counts.tyonhakualue.size,
+                kielitaito: counts.kielitaito.size
             });
 
             // Create checkboxes for each category
@@ -670,13 +734,18 @@
             createCheckboxes('alue', counts.tyonhakualue);
             createCheckboxes('kieli', counts.kielitaito);
 
-            console.log('Parameter counts created');
+            console.log('✅ Parameter counts created');
         }
 
         // Create checkboxes for a category
         function createCheckboxes(category, countMap) {
+            console.log(`🏷️ Creating checkboxes for ${category}:`, countMap.size, 'items');
+            
             const container = document.getElementById(`${category}-checkboxes`);
-            if (!container) return;
+            if (!container) {
+                console.error(`❌ Container not found: ${category}-checkboxes`);
+                return;
+            }
 
             // Sort by count (descending) and then alphabetically
             const sortedEntries = Array.from(countMap.entries())
@@ -685,18 +754,31 @@
                     return a[0].localeCompare(b[0]); // Then alphabetically
                 });
 
+            console.log(`📋 Sorted entries for ${category}:`, sortedEntries.slice(0, 5));
+
             container.innerHTML = '';
 
             // Show top 10 initially
             const initialShow = 10;
-            sortedEntries.slice(0, initialShow).forEach(([key, count], index) => {
+            const itemsToShow = sortedEntries.slice(0, initialShow);
+            
+            itemsToShow.forEach(([key, count], index) => {
                 const item = createCheckboxItem(category, key, count);
                 container.appendChild(item);
             });
 
+            console.log(`✅ Added ${itemsToShow.length} checkboxes to ${category}`);
+
             // Store remaining items for "show more" functionality
             if (sortedEntries.length > initialShow) {
                 container.setAttribute('data-remaining', JSON.stringify(sortedEntries.slice(initialShow)));
+                console.log(`📦 Stored ${sortedEntries.length - initialShow} remaining items for ${category}`);
+            } else {
+                // Hide "show more" button if no more items
+                const showMoreBtn = container.parentNode.querySelector('.show-more-btn');
+                if (showMoreBtn) {
+                    showMoreBtn.style.display = 'none';
+                }
             }
         }
 
