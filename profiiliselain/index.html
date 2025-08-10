@@ -904,7 +904,8 @@
                 const cacheDate = localStorage.getItem('profileIndexDate');
                 
                 if (!cached || !cacheDate) {
-                    console.log('❌ No cache found, need to build index first');
+                    console.log('❌ No cache found, building index now...');
+                    document.getElementById('results-count').textContent = 'Rakennetaan hakuindeksiä ensimmäistä kertaa...';
                     buildIndexIfNeeded();
                     return false;
                 }
@@ -915,6 +916,7 @@
                 
                 if (hoursDiff > CACHE_EXPIRY_HOURS) {
                     console.log('🕒 Cache expired, rebuilding...');
+                    document.getElementById('results-count').textContent = 'Päivitetään hakuindeksiä...';
                     buildIndexIfNeeded();
                     return false;
                 }
@@ -925,9 +927,12 @@
                 // Create checkboxes from cache
                 createCheckboxesFromCache();
                 
+                document.getElementById('results-count').textContent = 'Hakuparametrit ladattu välimuistista. Valitse hakuehdot.';
+                
                 return true;
             } catch (error) {
                 console.error('❌ Error loading cache:', error);
+                document.getElementById('results-count').textContent = 'Rakennetaan hakuindeksiä...';
                 buildIndexIfNeeded();
                 return false;
             }
@@ -1005,10 +1010,59 @@
         // Build index only if needed (no cache or expired)
         function buildIndexIfNeeded() {
             console.log('🔄 Building index - loading profiles from Firebase...');
-            document.getElementById('results-count').textContent = 'Ladataan hakuparametreja...';
             
             // Load profiles only for building the index
-            loadProfilesForIndex();
+            const batchSize = 500;
+            let allProfilesTemp = [];
+            
+            function loadBatch(lastDoc = null) {
+                let query = db.collection('profiles').limit(batchSize);
+                
+                if (lastDoc) {
+                    query = query.startAfter(lastDoc);
+                }
+                
+                query.get().then((querySnapshot) => {
+                    const batch = [];
+                    let lastDocument = null;
+                    
+                    querySnapshot.forEach((doc) => {
+                        batch.push({
+                            id: doc.id,
+                            ...doc.data()
+                        });
+                        lastDocument = doc;
+                    });
+                    
+                    allProfilesTemp = allProfilesTemp.concat(batch);
+                    console.log(`📊 Building index: ${batch.length} profiles (total: ${allProfilesTemp.length})`);
+                    
+                    // Update status
+                    document.getElementById('results-count').textContent = `Rakennetaan indeksiä... ${allProfilesTemp.length} profiilia prosessoitu`;
+                    
+                    // Load more if available
+                    if (querySnapshot.size === batchSize) {
+                        loadBatch(lastDocument);
+                    } else {
+                        // All profiles loaded for indexing
+                        allProfiles = allProfilesTemp;
+                        console.log(`✅ All profiles loaded for indexing: ${allProfiles.length} total`);
+                        
+                        // Build and cache the index
+                        buildAndCacheIndex();
+                        
+                        // Create checkboxes from the new index
+                        createCheckboxesFromCache();
+                        
+                        document.getElementById('results-count').textContent = `Hakuindeksi valmis! ${allProfiles.length} profiilista. Valitse hakuehdot.`;
+                    }
+                }).catch((error) => {
+                    console.error('❌ Error loading profiles for index:', error);
+                    document.getElementById('results-count').textContent = 'Virhe rakentaessa hakuindeksiä.';
+                });
+            }
+            
+            loadBatch();
         }
         
         // Create checkboxes from cached index
