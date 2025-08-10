@@ -580,6 +580,7 @@
                 <div style="text-align: center; margin-top: 20px;">
                     <button onclick="searchProfiles()" class="btn btn-search" id="search-btn">🔍 Hae profiileja</button>
                     <button onclick="clearSearch()" class="btn">🗑️ Tyhjennä haku</button>
+                    <button onclick="clearCacheAndRebuild()" class="btn btn-secondary" style="margin-left: 10px;">🔄 Päivitä hakuehdot</button>
                 </div>
             </div>
 
@@ -1310,6 +1311,34 @@
                 moreDiv.textContent = `... ja ${filtered.length - 100} muuta tulosta`;
                 checkboxList.appendChild(moreDiv);
             }
+        }
+        
+        // Clear cache and rebuild checkbox index
+        function clearCacheAndRebuild() {
+            console.log('🔄 Clearing cache and rebuilding checkbox index...');
+            
+            // Clear localStorage cache
+            localStorage.removeItem('profileIndex');
+            localStorage.removeItem('profileIndexDate');
+            
+            // Reset global variables
+            categoryIndex = null;
+            allProfiles = [];
+            
+            // Clear all checkbox containers
+            const categories = ['ammatti', 'koulutus', 'osaaminen', 'alue', 'kieli', 'työtoiveet', 'ajokortit', 'aloitusajankohta', 'muu_kokemus'];
+            categories.forEach(category => {
+                const container = document.getElementById(`${category}-checkboxes`);
+                if (container) {
+                    container.innerHTML = '<div class="checkbox-search"><input type="text" placeholder="Ladataan..." disabled></div><p style="color: #666; font-style: italic;">Ladataan parametreja...</p>';
+                }
+            });
+            
+            // Show loading message
+            document.getElementById('results-count').textContent = 'Päivitetään hakuehtoja...';
+            
+            // Rebuild from scratch
+            buildIndexIfNeeded();
         }
     </script>
 </body>
