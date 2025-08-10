@@ -522,25 +522,37 @@
             const filtered = allProfiles.filter(profile => {
                 let matches = true;
                 
-                // Free text search - enhanced with two-way matching for locations
+                // Free text search - SAFE VERSION
                 if (freeSearch) {
+                    const safeIncludes = (data, searchTerm) => {
+                        try {
+                            if (!data) return false;
+                            if (Array.isArray(data)) {
+                                return data.some(item => String(item).toLowerCase().includes(searchTerm));
+                            }
+                            return String(data).toLowerCase().includes(searchTerm);
+                        } catch (e) {
+                            return false;
+                        }
+                    };
+                    
                     const freeTextMatch = (
-                        (profile.esittely && profile.esittely.toLowerCase().includes(freeSearch)) ||
-                        (profile.esittely_10sanaa && profile.esittely_10sanaa.toLowerCase().includes(freeSearch)) ||
-                        (profile.osaamisteksti && profile.osaamisteksti.toLowerCase().includes(freeSearch)) ||
-                        (profile.ammatit && profile.ammatit.some(item => item.toLowerCase().includes(freeSearch))) ||
-                        (profile.osaamiset && profile.osaamiset.some(item => item.toLowerCase().includes(freeSearch))) ||
-                        (profile.koulutus && profile.koulutus.some(item => item.toLowerCase().includes(freeSearch))) ||
-                        (profile.kielitaito && profile.kielitaito.some(item => item.toLowerCase().includes(freeSearch))) ||
-                        // Enhanced location matching - two-way, with type checking
-                        (profile.tyonhakualue && (
-                            (typeof profile.tyonhakualue === 'string' && (
-                                profile.tyonhakualue.toLowerCase().includes(freeSearch) ||
-                                freeSearch.includes(profile.tyonhakualue.toLowerCase())
-                            )) ||
-                            (typeof profile.tyonhakualue !== 'string' && 
-                             profile.tyonhakualue.toString().toLowerCase().includes(freeSearch))
-                        ))
+                        safeIncludes(profile.esittely, freeSearch) ||
+                        safeIncludes(profile.esittely_10sanaa, freeSearch) ||
+                        safeIncludes(profile.osaamisteksti, freeSearch) ||
+                        safeIncludes(profile.ammatit, freeSearch) ||
+                        safeIncludes(profile.osaamiset, freeSearch) ||
+                        safeIncludes(profile.koulutus, freeSearch) ||
+                        safeIncludes(profile.kielitaito, freeSearch) ||
+                        // Enhanced location matching - SAFE VERSION
+                        (profile.tyonhakualue && (() => {
+                            try {
+                                const profileAlue = String(profile.tyonhakualue).toLowerCase();
+                                return profileAlue.includes(freeSearch) || freeSearch.includes(profileAlue);
+                            } catch (e) {
+                                return false;
+                            }
+                        })())
                     );
                     matches = matches && freeTextMatch;
                 }
@@ -569,21 +581,16 @@
                     matches = matches && osaamisMatch;
                 }
                 
-                // Alue filter - SPECIAL LOGIC for geographical searches with type checking
+                // Alue filter - SAFE VERSION
                 if (selectedFilters.alue.length > 0) {
                     const alueMatch = profile.tyonhakualue && selectedFilters.alue.some(filter => {
-                        const searchFilter = filter.toLowerCase();
-                        
-                        if (typeof profile.tyonhakualue === 'string') {
-                            const profileAlue = profile.tyonhakualue.toLowerCase();
-                            // Two-way matching: 
-                            // 1. Normal: profile contains search term (e.g., "Helsinki" contains "hel")
-                            // 2. Reverse: search term contains profile value (e.g., "uusimaa" contains "vantaa")
+                        try {
+                            const searchFilter = filter.toLowerCase();
+                            const profileAlue = String(profile.tyonhakualue).toLowerCase();
+                            // Two-way matching: normal and reverse
                             return profileAlue.includes(searchFilter) || searchFilter.includes(profileAlue);
-                        } else {
-                            // Handle non-string data
-                            const profileAlue = profile.tyonhakualue.toString().toLowerCase();
-                            return profileAlue.includes(searchFilter);
+                        } catch (e) {
+                            return false;
                         }
                     });
                     matches = matches && alueMatch;
@@ -633,7 +640,7 @@
             document.getElementById('profiles-container').innerHTML = '<div class="profile-card"><p>Valitse checkboxeista hakuehdot tai käytä vapaata hakua. Paina "Hae profiileja" nähdäksesi tulokset.</p></div>';
         }
 
-        // Update parameter counts and create checkboxes
+        // Update parameter counts and create checkboxes - SAFE VERSION
         function updateParameterCounts() {
             console.log('🔍 Starting updateParameterCounts with', allProfiles.length, 'profiles');
             
@@ -642,10 +649,6 @@
                 return;
             }
             
-            // Debug: Check first profile structure
-            console.log('📋 First profile structure:', allProfiles[0]);
-            
-            // Count unique values for each parameter - SIMPLIFIED VERSION
             const counts = {
                 ammatit: new Map(),
                 osaamiset: new Map(), 
@@ -655,65 +658,39 @@
             };
 
             allProfiles.forEach((profile, index) => {
-                // Process all data types more flexibly
                 try {
-                    // Ammatit - could be string or array
-                    if (profile.ammatit) {
-                        const ammatitData = Array.isArray(profile.ammatit) ? profile.ammatit : [profile.ammatit];
-                        ammatitData.forEach(item => {
-                            if (item && typeof item === 'string' && item.trim()) {
-                                const key = item.trim();
-                                counts.ammatit.set(key, (counts.ammatit.get(key) || 0) + 1);
-                            }
-                        });
-                    }
-                    
-                    // Osaaminen - could be string or array  
-                    if (profile.osaamiset) {
-                        const osaamisetData = Array.isArray(profile.osaamiset) ? profile.osaamiset : [profile.osaamiset];
-                        osaamisetData.forEach(item => {
-                            if (item && typeof item === 'string' && item.trim()) {
-                                const key = item.trim();
-                                counts.osaamiset.set(key, (counts.osaamiset.get(key) || 0) + 1);
-                            }
-                        });
-                    }
-                    
-                    // Koulutus - could be string or array
-                    if (profile.koulutus) {
-                        const koulutusData = Array.isArray(profile.koulutus) ? profile.koulutus : [profile.koulutus];
-                        koulutusData.forEach(item => {
-                            if (item && typeof item === 'string' && item.trim()) {
-                                const key = item.trim();
-                                counts.koulutus.set(key, (counts.koulutus.get(key) || 0) + 1);
-                            }
-                        });
-                    }
-                    
-                    // Työnhakualue - usually a string, but check type first
-                    if (profile.tyonhakualue) {
-                        let alueValue = profile.tyonhakualue;
-                        if (typeof alueValue === 'string' && alueValue.trim()) {
-                            const key = alueValue.trim();
-                            counts.tyonhakualue.set(key, (counts.tyonhakualue.get(key) || 0) + 1);
-                        } else if (typeof alueValue === 'object' && alueValue.toString) {
-                            const key = alueValue.toString().trim();
-                            if (key && key !== '[object Object]') {
-                                counts.tyonhakualue.set(key, (counts.tyonhakualue.get(key) || 0) + 1);
-                            }
+                    // Safe processing - handle any data type
+                    const processField = (fieldData, targetMap) => {
+                        if (!fieldData) return;
+                        
+                        let items = [];
+                        if (Array.isArray(fieldData)) {
+                            items = fieldData;
+                        } else if (typeof fieldData === 'string') {
+                            items = [fieldData];
+                        } else {
+                            items = [String(fieldData)];
                         }
-                    }
-                    
-                    // Kielitaito - could be string or array
-                    if (profile.kielitaito) {
-                        const kielitaitoData = Array.isArray(profile.kielitaito) ? profile.kielitaito : [profile.kielitaito];
-                        kielitaitoData.forEach(item => {
-                            if (item && typeof item === 'string' && item.trim()) {
-                                const key = item.trim();
-                                counts.kielitaito.set(key, (counts.kielitaito.get(key) || 0) + 1);
+                        
+                        items.forEach(item => {
+                            try {
+                                if (item && String(item).trim()) {
+                                    const key = String(item).trim();
+                                    targetMap.set(key, (targetMap.get(key) || 0) + 1);
+                                }
+                            } catch (e) {
+                                console.warn('Error processing item:', item, e);
                             }
                         });
-                    }
+                    };
+                    
+                    // Process each field safely
+                    processField(profile.ammatit, counts.ammatit);
+                    processField(profile.osaamiset, counts.osaamiset);
+                    processField(profile.koulutus, counts.koulutus);
+                    processField(profile.tyonhakualue, counts.tyonhakualue);
+                    processField(profile.kielitaito, counts.kielitaito);
+                    
                 } catch (error) {
                     console.error('Error processing profile', index, ':', error);
                 }
@@ -728,13 +705,16 @@
             });
 
             // Create checkboxes for each category
-            createCheckboxes('ammatti', counts.ammatit);
-            createCheckboxes('koulutus', counts.koulutus);
-            createCheckboxes('osaaminen', counts.osaamiset);
-            createCheckboxes('alue', counts.tyonhakualue);
-            createCheckboxes('kieli', counts.kielitaito);
-
-            console.log('✅ Parameter counts created');
+            try {
+                createCheckboxes('ammatti', counts.ammatit);
+                createCheckboxes('koulutus', counts.koulutus);
+                createCheckboxes('osaaminen', counts.osaamiset);
+                createCheckboxes('alue', counts.tyonhakualue);
+                createCheckboxes('kieli', counts.kielitaito);
+                console.log('✅ Parameter counts created');
+            } catch (error) {
+                console.error('❌ Error creating checkboxes:', error);
+            }
         }
 
         // Create checkboxes for a category
