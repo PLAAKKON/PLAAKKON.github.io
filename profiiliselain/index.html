@@ -410,7 +410,9 @@
         const db = firebase.firestore();
 
         let allProfiles = [];
+        let categoryIndex = null; // Cache for checkbox data
         let currentUser = null;
+        const CACHE_EXPIRY_HOURS = 24; // Rebuild index daily
 
         // Authentication state listener
         auth.onAuthStateChanged((user) => {
@@ -442,6 +444,18 @@
         function loadProfiles() {
             document.getElementById('loading').style.display = 'block';
             
+            // Try to load cached index first
+            if (loadCachedIndex()) {
+                console.log('✅ Using cached index');
+                createCheckboxesFromCache();
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('results-info').style.display = 'block';
+                document.getElementById('results-count').textContent = `Indeksi ladattu välimuistista. Käytä hakua nähdäksesi profiilit.`;
+                return;
+            }
+            
+            console.log('🔄 Building new index from Firebase...');
+            
             // Load profiles in batches to avoid limit issues
             const batchSize = 500;
             let allProfilesTemp = [];
@@ -472,17 +486,26 @@
                     if (batch.length === batchSize && allProfilesTemp.length < 30000) {
                         loadBatch(lastDocument);
                     } else {
-                        // Finished loading
+                        // Finished loading - build and cache index
                         allProfiles = allProfilesTemp;
                         console.log('✅ All profiles loaded:', allProfiles.length);
                         
+                        buildAndCacheIndex();
+                        createCheckboxesFromCache();
+                        
                         document.getElementById('results-info').style.display = 'block';
                         document.getElementById('results-count').textContent = `Yhteensä ${allProfiles.length} profiilia ladattu. Käytä hakua nähdäksesi profiilit.`;
-                        
-                        // Don't display profiles automatically - only show counts
-                        updateParameterCounts();
                         document.getElementById('loading').style.display = 'none';
                     }
+                }).catch((error) => {
+                    console.error('❌ Error loading profiles:', error);
+                    document.getElementById('loading').style.display = 'none';
+                    alert('Virhe profiilien lataamisessa: ' + error.message);
+                });
+            }
+
+            loadBatch();
+        }
                 }).catch((error) => {
                     console.error('❌ Error loading profiles:', error);
                     document.getElementById('loading').style.display = 'none';
@@ -627,140 +650,22 @@
             const checkboxes = document.querySelectorAll('input[type="checkbox"]');
             checkboxes.forEach(cb => cb.checked = false);
             
-            // Show all "Näytä lisää" buttons again
-            const showMoreBtns = document.querySelectorAll('.show-more-btn');
-            showMoreBtns.forEach(btn => btn.style.display = 'block');
+            // Clear all category search fields
+            const searchFields = document.querySelectorAll('.checkbox-search input');
+            searchFields.forEach(field => {
+                field.value = '';
+                // Trigger filter to show all items
+                const category = field.getAttribute('onkeyup').match(/'([^']+)'/)[1];
+                filterCheckboxes(category, '');
+            });
             
-            // Recreate checkboxes to restore original state
-            updateParameterCounts();
-            
-            document.getElementById('results-count').textContent = `Yhteensä ${allProfiles.length} profiilia ladattu. Käytä hakua nähdäksesi profiilit.`;
-            
-            // Clear profiles display
+            document.getElementById('results-count').textContent = `Valitse hakuehdot nähdäksesi profiilit.`;
             document.getElementById('profiles-container').innerHTML = '<div class="profile-card"><p>Valitse checkboxeista hakuehdot tai käytä vapaata hakua. Paina "Hae profiileja" nähdäksesi tulokset.</p></div>';
         }
 
-        // Update parameter counts and create checkboxes - SAFE VERSION
-        function updateParameterCounts() {
-            console.log('🔍 Starting updateParameterCounts with', allProfiles.length, 'profiles');
-            
-            if (allProfiles.length === 0) {
-                console.log('❌ No profiles to process');
-                return;
-            }
-            
-            const counts = {
-                ammatit: new Map(),
-                osaamiset: new Map(), 
-                koulutus: new Map(),
-                tyonhakualue: new Map(),
-                kielitaito: new Map()
-            };
 
-            allProfiles.forEach((profile, index) => {
-                try {
-                    // Safe processing - handle any data type
-                    const processField = (fieldData, targetMap) => {
-                        if (!fieldData) return;
-                        
-                        let items = [];
-                        if (Array.isArray(fieldData)) {
-                            items = fieldData;
-                        } else if (typeof fieldData === 'string') {
-                            items = [fieldData];
-                        } else {
-                            items = [String(fieldData)];
-                        }
-                        
-                        items.forEach(item => {
-                            try {
-                                if (item && String(item).trim()) {
-                                    const key = String(item).trim();
-                                    targetMap.set(key, (targetMap.get(key) || 0) + 1);
-                                }
-                            } catch (e) {
-                                console.warn('Error processing item:', item, e);
-                            }
-                        });
-                    };
-                    
-                    // Process each field safely
-                    processField(profile.ammatit, counts.ammatit);
-                    processField(profile.osaamiset, counts.osaamiset);
-                    processField(profile.koulutus, counts.koulutus);
-                    processField(profile.tyonhakualue, counts.tyonhakualue);
-                    processField(profile.kielitaito, counts.kielitaito);
-                    
-                } catch (error) {
-                    console.error('Error processing profile', index, ':', error);
-                }
-            });
 
-            console.log('📊 Final counts:', {
-                ammatit: counts.ammatit.size,
-                osaamiset: counts.osaamiset.size, 
-                koulutus: counts.koulutus.size,
-                tyonhakualue: counts.tyonhakualue.size,
-                kielitaito: counts.kielitaito.size
-            });
 
-            // Create checkboxes for each category
-            try {
-                createCheckboxes('ammatti', counts.ammatit);
-                createCheckboxes('koulutus', counts.koulutus);
-                createCheckboxes('osaaminen', counts.osaamiset);
-                createCheckboxes('alue', counts.tyonhakualue);
-                createCheckboxes('kieli', counts.kielitaito);
-                console.log('✅ Parameter counts created');
-            } catch (error) {
-                console.error('❌ Error creating checkboxes:', error);
-            }
-        }
-
-        // Create checkboxes for a category
-        function createCheckboxes(category, countMap) {
-            console.log(`🏷️ Creating checkboxes for ${category}:`, countMap.size, 'items');
-            
-            const container = document.getElementById(`${category}-checkboxes`);
-            if (!container) {
-                console.error(`❌ Container not found: ${category}-checkboxes`);
-                return;
-            }
-
-            // Sort by count (descending) and then alphabetically
-            const sortedEntries = Array.from(countMap.entries())
-                .sort((a, b) => {
-                    if (b[1] !== a[1]) return b[1] - a[1]; // Sort by count first
-                    return a[0].localeCompare(b[0]); // Then alphabetically
-                });
-
-            console.log(`📋 Sorted entries for ${category}:`, sortedEntries.slice(0, 5));
-
-            container.innerHTML = '';
-
-            // Show top 10 initially
-            const initialShow = 10;
-            const itemsToShow = sortedEntries.slice(0, initialShow);
-            
-            itemsToShow.forEach(([key, count], index) => {
-                const item = createCheckboxItem(category, key, count);
-                container.appendChild(item);
-            });
-
-            console.log(`✅ Added ${itemsToShow.length} checkboxes to ${category}`);
-
-            // Store remaining items for "show more" functionality
-            if (sortedEntries.length > initialShow) {
-                container.setAttribute('data-remaining', JSON.stringify(sortedEntries.slice(initialShow)));
-                console.log(`📦 Stored ${sortedEntries.length - initialShow} remaining items for ${category}`);
-            } else {
-                // Hide "show more" button if no more items
-                const showMoreBtn = container.parentNode.querySelector('.show-more-btn');
-                if (showMoreBtn) {
-                    showMoreBtn.style.display = 'none';
-                }
-            }
-        }
 
         // Create individual checkbox item
         function createCheckboxItem(category, value, count) {
@@ -928,6 +833,191 @@
                 });
             });
         });
+
+        // CACHE MANAGEMENT FUNCTIONS
+        
+        // Load cached index from localStorage
+        function loadCachedIndex() {
+            try {
+                const cached = localStorage.getItem('profileIndex');
+                const cacheDate = localStorage.getItem('profileIndexDate');
+                
+                if (!cached || !cacheDate) return false;
+                
+                const cacheTime = new Date(cacheDate);
+                const now = new Date();
+                const hoursDiff = (now - cacheTime) / (1000 * 60 * 60);
+                
+                if (hoursDiff > CACHE_EXPIRY_HOURS) {
+                    console.log('🕒 Cache expired, rebuilding...');
+                    return false;
+                }
+                
+                categoryIndex = JSON.parse(cached);
+                console.log('✅ Loaded cached index:', Object.keys(categoryIndex).map(k => `${k}: ${categoryIndex[k].length}`));
+                return true;
+            } catch (error) {
+                console.error('❌ Error loading cache:', error);
+                return false;
+            }
+        }
+        
+        // Build and cache index from loaded profiles
+        function buildAndCacheIndex() {
+            console.log('🔄 Building index from', allProfiles.length, 'profiles...');
+            
+            const index = {
+                ammatti: new Map(),
+                koulutus: new Map(),
+                osaaminen: new Map(),
+                alue: new Map(),
+                kieli: new Map()
+            };
+
+            // Process all profiles
+            allProfiles.forEach((profile) => {
+                try {
+                    const processField = (fieldData, targetMap) => {
+                        if (!fieldData) return;
+                        
+                        let items = [];
+                        if (Array.isArray(fieldData)) {
+                            items = fieldData;
+                        } else if (typeof fieldData === 'string') {
+                            items = [fieldData];
+                        } else {
+                            items = [String(fieldData)];
+                        }
+                        
+                        items.forEach(item => {
+                            try {
+                                if (item && String(item).trim()) {
+                                    const key = String(item).trim();
+                                    targetMap.set(key, (targetMap.get(key) || 0) + 1);
+                                }
+                            } catch (e) {
+                                console.warn('Error processing item:', item, e);
+                            }
+                        });
+                    };
+                    
+                    processField(profile.ammatit, index.ammatti);
+                    processField(profile.osaamiset, index.osaaminen);
+                    processField(profile.koulutus, index.koulutus);
+                    processField(profile.tyonhakualue, index.alue);
+                    processField(profile.kielitaito, index.kieli);
+                    
+                } catch (error) {
+                    console.error('Error processing profile:', error);
+                }
+            });
+
+            // Convert Maps to sorted arrays
+            categoryIndex = {};
+            Object.keys(index).forEach(category => {
+                const sorted = Array.from(index[category].entries())
+                    .sort((a, b) => a[0].localeCompare(b[0])) // Alphabetical order
+                    .map(([name, count]) => ({ name, count }));
+                categoryIndex[category] = sorted;
+            });
+
+            // Cache the index
+            try {
+                localStorage.setItem('profileIndex', JSON.stringify(categoryIndex));
+                localStorage.setItem('profileIndexDate', new Date().toISOString());
+                console.log('💾 Index cached successfully');
+            } catch (error) {
+                console.error('❌ Error caching index:', error);
+            }
+        }
+        
+        // Create checkboxes from cached index
+        function createCheckboxesFromCache() {
+            if (!categoryIndex) return;
+            
+            const categoryMap = {
+                'ammatti': 'ammatti',
+                'koulutus': 'koulutus', 
+                'osaaminen': 'osaaminen',
+                'alue': 'alue',
+                'kieli': 'kieli'
+            };
+            
+            Object.keys(categoryMap).forEach(category => {
+                const items = categoryIndex[category] || [];
+                createCheckboxesWithSearch(categoryMap[category], items);
+            });
+        }
+        
+        // Create checkboxes with search functionality
+        function createCheckboxesWithSearch(category, items) {
+            const container = document.getElementById(`${category}-checkboxes`);
+            if (!container) return;
+            
+            // Clear container
+            container.innerHTML = '';
+            
+            // Add search field
+            const searchDiv = document.createElement('div');
+            searchDiv.className = 'checkbox-search';
+            searchDiv.innerHTML = `
+                <input type="text" 
+                       placeholder="Hae ${category}..." 
+                       onkeyup="filterCheckboxes('${category}', this.value)"
+                       style="width: 100%; padding: 8px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 4px;">
+            `;
+            container.appendChild(searchDiv);
+            
+            // Add scrollable checkbox container
+            const checkboxContainer = document.createElement('div');
+            checkboxContainer.className = 'checkbox-list';
+            checkboxContainer.id = `${category}-list`;
+            checkboxContainer.style.maxHeight = '200px';
+            checkboxContainer.style.overflowY = 'auto';
+            
+            // Show first 50 items initially
+            const initialItems = items.slice(0, 50);
+            initialItems.forEach(item => {
+                const checkboxItem = createCheckboxItem(category, item.name, item.count);
+                checkboxContainer.appendChild(checkboxItem);
+            });
+            
+            container.appendChild(checkboxContainer);
+            
+            // Store all items for filtering
+            container.setAttribute('data-all-items', JSON.stringify(items));
+            
+            console.log(`✅ Created ${initialItems.length}/${items.length} checkboxes for ${category}`);
+        }
+        
+        // Filter checkboxes based on search
+        function filterCheckboxes(category, searchTerm) {
+            const container = document.getElementById(`${category}-checkboxes`);
+            const checkboxList = document.getElementById(`${category}-list`);
+            const allItems = JSON.parse(container.getAttribute('data-all-items') || '[]');
+            
+            const filtered = allItems.filter(item => 
+                item.name.toLowerCase().includes(searchTerm.toLowerCase())
+            );
+            
+            checkboxList.innerHTML = '';
+            
+            // Show max 100 filtered results
+            const itemsToShow = filtered.slice(0, 100);
+            itemsToShow.forEach(item => {
+                const checkboxItem = createCheckboxItem(category, item.name, item.count);
+                checkboxList.appendChild(checkboxItem);
+            });
+            
+            if (filtered.length > 100) {
+                const moreDiv = document.createElement('div');
+                moreDiv.style.padding = '5px';
+                moreDiv.style.fontStyle = 'italic';
+                moreDiv.style.color = '#666';
+                moreDiv.textContent = `... ja ${filtered.length - 100} muuta tulosta`;
+                checkboxList.appendChild(moreDiv);
+            }
+        }
     </script>
 </body>
 </html>
