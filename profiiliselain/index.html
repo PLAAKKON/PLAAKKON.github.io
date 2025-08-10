@@ -805,9 +805,16 @@
         
         // Load cached index from localStorage
         function loadCachedIndex() {
+            console.log('🔍 Checking for cached index...');
             try {
                 const cached = localStorage.getItem('profileIndex');
                 const cacheDate = localStorage.getItem('profileIndexDate');
+                
+                console.log('Cache check:', { 
+                    cached: !!cached, 
+                    cacheDate: cacheDate,
+                    cachedSize: cached ? cached.length : 0
+                });
                 
                 if (!cached || !cacheDate) {
                     console.log('❌ No cache found, building index now...');
@@ -820,6 +827,8 @@
                 const now = new Date();
                 const hoursDiff = (now - cacheTime) / (1000 * 60 * 60);
                 
+                console.log(`⏰ Cache age: ${hoursDiff.toFixed(1)} hours (expires at ${CACHE_EXPIRY_HOURS} hours)`);
+                
                 if (hoursDiff > CACHE_EXPIRY_HOURS) {
                     console.log('🕒 Cache expired, rebuilding...');
                     document.getElementById('results-count').textContent = 'Päivitetään hakuindeksiä...';
@@ -828,9 +837,10 @@
                 }
                 
                 categoryIndex = JSON.parse(cached);
-                console.log('✅ Loaded cached index:', Object.keys(categoryIndex).map(k => `${k}: ${categoryIndex[k].length}`));
+                console.log('✅ Loaded cached index:', Object.keys(categoryIndex).map(k => `${k}: ${categoryIndex[k] ? categoryIndex[k].length : 0}`));
                 
-                // Create checkboxes from cache
+                // Create checkboxes from cache IMMEDIATELY
+                console.log('🎯 Creating checkboxes from cached index...');
                 createCheckboxesFromCache();
                 
                 document.getElementById('results-count').textContent = 'Hakuparametrit ladattu välimuistista. Valitse hakuehdot.';
@@ -964,7 +974,12 @@
         
         // Create checkboxes from cached index
         function createCheckboxesFromCache() {
-            if (!categoryIndex) return;
+            console.log('🏷️ Creating checkboxes from cache, categoryIndex:', categoryIndex);
+            
+            if (!categoryIndex) {
+                console.log('❌ No categoryIndex available');
+                return;
+            }
             
             const categoryMap = {
                 'ammatti': 'ammatti',
@@ -976,8 +991,11 @@
             
             Object.keys(categoryMap).forEach(category => {
                 const items = categoryIndex[category] || [];
+                console.log(`📋 Creating checkboxes for ${category}:`, items.length, 'items');
                 createCheckboxesWithSearch(categoryMap[category], items);
             });
+            
+            console.log('✅ All checkboxes created from cache');
         }
         
         // Create checkboxes with search functionality
