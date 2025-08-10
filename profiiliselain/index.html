@@ -423,7 +423,7 @@
                 document.getElementById('not-logged-in').style.display = 'none';
                 document.getElementById('logged-in').style.display = 'block';
                 document.getElementById('main-content').style.display = 'block';
-                loadProfiles();
+                loadCachedIndex();
             } else {
                 console.log('User not logged in');
                 document.getElementById('not-logged-in').style.display = 'block';
@@ -442,78 +442,9 @@
 
         // Load all profiles
         function loadProfiles() {
-            document.getElementById('loading').style.display = 'block';
-            
-            // Try to load cached index first
-            if (loadCachedIndex()) {
-                console.log('✅ Using cached index');
-                createCheckboxesFromCache();
-                document.getElementById('loading').style.display = 'none';
-                document.getElementById('results-info').style.display = 'block';
-                document.getElementById('results-count').textContent = `Indeksi ladattu välimuistista. Käytä hakua nähdäksesi profiilit.`;
-                return;
-            }
-            
-            console.log('🔄 Building new index from Firebase...');
-            
-            // Load profiles in batches to avoid limit issues
-            const batchSize = 500;
-            let allProfilesTemp = [];
-            
-            function loadBatch(lastDoc = null) {
-                let query = db.collection('profiles').limit(batchSize);
-                
-                if (lastDoc) {
-                    query = query.startAfter(lastDoc);
-                }
-                
-                query.get().then((querySnapshot) => {
-                    const batch = [];
-                    let lastDocument = null;
-                    
-                    querySnapshot.forEach((doc) => {
-                        batch.push({
-                            id: doc.id,
-                            ...doc.data()
-                        });
-                        lastDocument = doc;
-                    });
-                    
-                    allProfilesTemp = allProfilesTemp.concat(batch);
-                    console.log(`Loaded batch: ${batch.length} profiles, total: ${allProfilesTemp.length}`);
-                    
-                    // If we got a full batch, there might be more
-                    if (batch.length === batchSize && allProfilesTemp.length < 30000) {
-                        loadBatch(lastDocument);
-                    } else {
-                        // Finished loading - build and cache index
-                        allProfiles = allProfilesTemp;
-                        console.log('✅ All profiles loaded:', allProfiles.length);
-                        
-                        buildAndCacheIndex();
-                        createCheckboxesFromCache();
-                        
-                        document.getElementById('results-info').style.display = 'block';
-                        document.getElementById('results-count').textContent = `Yhteensä ${allProfiles.length} profiilia ladattu. Käytä hakua nähdäksesi profiilit.`;
-                        document.getElementById('loading').style.display = 'none';
-                    }
-                }).catch((error) => {
-                    console.error('❌ Error loading profiles:', error);
-                    document.getElementById('loading').style.display = 'none';
-                    alert('Virhe profiilien lataamisessa: ' + error.message);
-                });
-            }
-
-            loadBatch();
-        }
-                }).catch((error) => {
-                    console.error('❌ Error loading profiles:', error);
-                    document.getElementById('loading').style.display = 'none';
-                    alert('Virhe profiilien lataamisessa: ' + error.message);
-                });
-            }
-            
-            loadBatch();
+            // Don't load profiles automatically - only load cache for checkboxes
+            console.log('📋 Loading only cached index for checkboxes...');
+            loadCachedIndex();
         }
 
         // Search profiles
@@ -537,6 +468,15 @@
             if (!hasSearchCriteria) {
                 document.getElementById('results-count').textContent = `Valitse hakuehdot nähdäksesi profiilit`;
                 document.getElementById('profiles-container').innerHTML = '<div class="profile-card"><p>Valitse checkboxeista hakuehdot tai käytä vapaata hakua</p></div>';
+                return;
+            }
+
+            // Check if we need to load profiles for searching
+            if (!allProfiles || allProfiles.length === 0) {
+                console.log('🔍 Need to load profiles for search...');
+                document.getElementById('loading').style.display = 'block';
+                document.getElementById('results-count').textContent = 'Ladataan profiileja hakua varten...';
+                loadProfilesForSearch(freeSearch, selectedFilters);
                 return;
             }
 
@@ -662,10 +602,131 @@
             document.getElementById('results-count').textContent = `Valitse hakuehdot nähdäksesi profiilit.`;
             document.getElementById('profiles-container').innerHTML = '<div class="profile-card"><p>Valitse checkboxeista hakuehdot tai käytä vapaata hakua. Paina "Hae profiileja" nähdäksesi tulokset.</p></div>';
         }
-
-
-
-
+        
+        // Load profiles for search when needed
+        function loadProfilesForSearch(freeSearch, selectedFilters) {
+            console.log('🔍 Loading profiles for search...');
+            
+            const batchSize = 500;
+            let allProfilesTemp = [];
+            
+            function loadBatch(lastDoc = null) {
+                let query = db.collection('profiles').limit(batchSize);
+                
+                if (lastDoc) {
+                    query = query.startAfter(lastDoc);
+                }
+                
+                query.get().then((querySnapshot) => {
+                    const batch = [];
+                    let lastDocument = null;
+                    
+                    querySnapshot.forEach((doc) => {
+                        batch.push({
+                            id: doc.id,
+                            ...doc.data()
+                        });
+                        lastDocument = doc;
+                    });
+                    
+                    allProfilesTemp = allProfilesTemp.concat(batch);
+                    console.log(`📊 Loaded batch: ${batch.length} profiles (total: ${allProfilesTemp.length})`);
+                    
+                    // Load more if available
+                    if (querySnapshot.size === batchSize) {
+                        loadBatch(lastDocument);
+                    } else {
+                        // All profiles loaded, now perform search
+                        allProfiles = allProfilesTemp;
+                        console.log(`✅ All profiles loaded for search: ${allProfiles.length} total`);
+                        
+                        // Now perform the search with the loaded profiles
+                        performSearchWithProfiles(freeSearch, selectedFilters);
+                    }
+                }).catch((error) => {
+                    console.error('❌ Error loading profiles for search:', error);
+                    document.getElementById('loading').style.display = 'none';
+                    document.getElementById('results-count').textContent = 'Virhe ladattaessa profiileja.';
+                });
+            }
+            
+            loadBatch();
+        }
+        
+        // Perform search with loaded profiles
+        function performSearchWithProfiles(freeSearch, selectedFilters) {
+            const filtered = allProfiles.filter(profile => {
+                let matches = true;
+                
+                // Free text search - SAFE VERSION
+                if (freeSearch) {
+                    const safeIncludes = (data, searchTerm) => {
+                        try {
+                            if (!data) return false;
+                            return String(data).toLowerCase().includes(searchTerm);
+                        } catch (e) {
+                            return false;
+                        }
+                    };
+                    
+                    const textMatches = safeIncludes(profile.esittely, freeSearch) ||
+                                       safeIncludes(profile.esittely_10sanaa, freeSearch) ||
+                                       safeIncludes(profile.tyonhakualue, freeSearch) ||
+                                       (profile.ammatit && profile.ammatit.some(a => safeIncludes(a, freeSearch))) ||
+                                       (profile.osaamiset && profile.osaamiset.some(o => safeIncludes(o, freeSearch))) ||
+                                       (profile.koulutus && profile.koulutus.some(k => safeIncludes(k, freeSearch))) ||
+                                       (profile.kielitaito && profile.kielitaito.some(k => safeIncludes(k, freeSearch)));
+                    
+                    if (!textMatches) matches = false;
+                }
+                
+                // Filter by selected checkboxes
+                Object.keys(selectedFilters).forEach(filterKey => {
+                    const selected = selectedFilters[filterKey];
+                    if (selected.length > 0) {
+                        let fieldMatches = false;
+                        
+                        try {
+                            const getProfileField = (key) => {
+                                switch(key) {
+                                    case 'ammatti': return profile.ammatit || [];
+                                    case 'koulutus': return profile.koulutus || [];
+                                    case 'osaaminen': return profile.osaamiset || [];
+                                    case 'alue': return profile.tyonhakualue ? [profile.tyonhakualue] : [];
+                                    case 'kieli': return profile.kielitaito || [];
+                                    default: return [];
+                                }
+                            };
+                            
+                            const profileData = getProfileField(filterKey);
+                            const profileValues = Array.isArray(profileData) ? 
+                                profileData.map(item => String(item).trim()) : 
+                                [String(profileData).trim()];
+                            
+                            fieldMatches = selected.some(selectedValue => 
+                                profileValues.some(profileValue => 
+                                    profileValue.toLowerCase() === String(selectedValue).toLowerCase()
+                                )
+                            );
+                        } catch (error) {
+                            console.warn(`Error checking ${filterKey}:`, error);
+                        }
+                        
+                        if (!fieldMatches) matches = false;
+                    }
+                });
+                
+                return matches;
+            });
+            
+            console.log(`✅ Search completed: ${filtered.length} matches out of ${allProfiles.length} profiles`);
+            
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('results-info').style.display = 'block';
+            document.getElementById('results-count').textContent = `Löytyi ${filtered.length} profiilia hakuehdoilla.`;
+            
+            displayProfiles(filtered.slice(0, 50)); // Show first 50 results
+        }
 
         // Create individual checkbox item
         function createCheckboxItem(category, value, count) {
@@ -842,7 +903,11 @@
                 const cached = localStorage.getItem('profileIndex');
                 const cacheDate = localStorage.getItem('profileIndexDate');
                 
-                if (!cached || !cacheDate) return false;
+                if (!cached || !cacheDate) {
+                    console.log('❌ No cache found, need to build index first');
+                    buildIndexIfNeeded();
+                    return false;
+                }
                 
                 const cacheTime = new Date(cacheDate);
                 const now = new Date();
@@ -850,14 +915,20 @@
                 
                 if (hoursDiff > CACHE_EXPIRY_HOURS) {
                     console.log('🕒 Cache expired, rebuilding...');
+                    buildIndexIfNeeded();
                     return false;
                 }
                 
                 categoryIndex = JSON.parse(cached);
                 console.log('✅ Loaded cached index:', Object.keys(categoryIndex).map(k => `${k}: ${categoryIndex[k].length}`));
+                
+                // Create checkboxes from cache
+                createCheckboxesFromCache();
+                
                 return true;
             } catch (error) {
                 console.error('❌ Error loading cache:', error);
+                buildIndexIfNeeded();
                 return false;
             }
         }
@@ -929,6 +1000,15 @@
             } catch (error) {
                 console.error('❌ Error caching index:', error);
             }
+        }
+        
+        // Build index only if needed (no cache or expired)
+        function buildIndexIfNeeded() {
+            console.log('🔄 Building index - loading profiles from Firebase...');
+            document.getElementById('results-count').textContent = 'Ladataan hakuparametreja...';
+            
+            // Load profiles only for building the index
+            loadProfilesForIndex();
         }
         
         // Create checkboxes from cached index
