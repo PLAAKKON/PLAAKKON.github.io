@@ -444,7 +444,27 @@
         function loadProfiles() {
             // Don't load profiles automatically - only load cache for checkboxes
             console.log('📋 Loading only cached index for checkboxes...');
+            
+            // Show placeholder checkboxes immediately if no cache
+            const hasCache = localStorage.getItem('profileIndex');
+            if (!hasCache) {
+                console.log('⚡ No cache found, showing placeholder checkboxes...');
+                showPlaceholderCheckboxes();
+            }
+            
             loadCachedIndex();
+        }
+        
+        // Show placeholder checkboxes while building cache
+        function showPlaceholderCheckboxes() {
+            const categories = ['ammatti', 'koulutus', 'osaaminen', 'alue', 'kieli'];
+            categories.forEach(category => {
+                const container = document.getElementById(`${category}-checkboxes`);
+                if (container) {
+                    container.innerHTML = '<div class="checkbox-search"><input type="text" placeholder="Ladataan..." disabled></div><p style="color: #666; font-style: italic;">Ladataan parametreja...</p>';
+                }
+            });
+            document.getElementById('results-count').textContent = 'Ladataan hakuparametreja ensimmäistä kertaa...';
         }
 
         // Search profiles
