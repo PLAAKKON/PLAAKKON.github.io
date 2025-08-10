@@ -561,15 +561,7 @@
                     </div>
 
                     <div class="search-category">
-                        <h3>📅 Aloitusajankohta</h3>
-                        <div id="aloitusajankohta-checkboxes" class="checkbox-container">
-                            <!-- Aloitusajankohta checkboxit tulevat tähän -->
-                        </div>
-                        <button onclick="showMoreOptions('aloitusajankohta')" class="show-more-btn">Näytä lisää...</button>
-                    </div>
-
-                    <div class="search-category">
-                        <h3>🔧 Muu kokemus</h3>
+                        <h3> Muu kokemus</h3>
                         <div id="muu_kokemus-checkboxes" class="checkbox-container">
                             <!-- Muu kokemus checkboxit tulevat tähän -->
                         </div>
@@ -662,7 +654,7 @@
         
         // Show placeholder checkboxes while building cache
         function showPlaceholderCheckboxes() {
-            const categories = ['ammatti', 'koulutus', 'osaaminen', 'alue', 'kieli', 'työtoiveet', 'ajokortit', 'aloitusajankohta', 'muu_kokemus'];
+            const categories = ['ammatti', 'koulutus', 'osaaminen', 'alue', 'kieli', 'työtoiveet', 'ajokortit', 'muu_kokemus'];
             categories.forEach(category => {
                 const container = document.getElementById(`${category}-checkboxes`);
                 if (container) {
@@ -686,7 +678,6 @@
                 kieli: getSelectedCheckboxes('kieli'),
                 työtoiveet: getSelectedCheckboxes('työtoiveet'),
                 ajokortit: getSelectedCheckboxes('ajokortit'),
-                aloitusajankohta: getSelectedCheckboxes('aloitusajankohta'),
                 muu_kokemus: getSelectedCheckboxes('muu_kokemus')
             };
 
@@ -831,7 +822,6 @@
                                     case 'kieli': return profile.kielitaito || [];
                                     case 'työtoiveet': return profile.työtoiveet || [];
                                     case 'ajokortit': return profile.ajokortit || [];
-                                    case 'aloitusajankohta': return profile.aloitusajankohta ? [profile.aloitusajankohta] : [];
                                     case 'muu_kokemus': return profile.muu_kokemus ? [profile.muu_kokemus] : [];
                                     default: return [];
                                 }
@@ -1104,7 +1094,6 @@
                 kieli: new Map(),
                 työtoiveet: new Map(),
                 ajokortit: new Map(),
-                aloitusajankohta: new Map(),
                 muu_kokemus: new Map()
             };
             
@@ -1156,7 +1145,6 @@
                             processField(profile.kielitaito, index.kieli);
                             processField(profile.työtoiveet, index.työtoiveet);
                             processField(profile.ajokortit, index.ajokortit);
-                            processField(profile.aloitusajankohta, index.aloitusajankohta);
                             processField(profile.muu_kokemus, index.muu_kokemus);
                             
                             processedCount++;
@@ -1230,7 +1218,6 @@
                 'kieli': 'kieli',
                 'työtoiveet': 'työtoiveet',
                 'ajokortit': 'ajokortit',
-                'aloitusajankohta': 'aloitusajankohta',
                 'muu_kokemus': 'muu_kokemus'
             };
             
@@ -1326,7 +1313,7 @@
             allProfiles = [];
             
             // Clear all checkbox containers
-            const categories = ['ammatti', 'koulutus', 'osaaminen', 'alue', 'kieli', 'työtoiveet', 'ajokortit', 'aloitusajankohta', 'muu_kokemus'];
+            const categories = ['ammatti', 'koulutus', 'osaaminen', 'alue', 'kieli', 'työtoiveet', 'ajokortit', 'muu_kokemus'];
             categories.forEach(category => {
                 const container = document.getElementById(`${category}-checkboxes`);
                 if (container) {
