@@ -448,6 +448,86 @@
             border: 1px solid rgba(255, 255, 255, 0.2);
         }
 
+        /* GDPR Privacy Protection Styles */
+        .gdpr-blurred {
+            filter: blur(8px);
+            user-select: none;
+            pointer-events: none;
+            position: relative;
+        }
+
+        .gdpr-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 122, 204, 0.9);
+            color: white;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            border-radius: 10px;
+            z-index: 10;
+            backdrop-filter: blur(3px);
+        }
+
+        .gdpr-overlay h3 {
+            margin: 0 0 10px 0;
+            font-size: 18px;
+            text-align: center;
+        }
+
+        .gdpr-overlay p {
+            margin: 0 0 15px 0;
+            text-align: center;
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .premium-notice {
+            background: linear-gradient(135deg, #007acc 0%, #0066cc 100%);
+            padding: 20px;
+            border-radius: 15px;
+            margin: 20px 0;
+            text-align: center;
+            color: white;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            backdrop-filter: blur(10px);
+        }
+
+        .premium-notice h3 {
+            margin: 0 0 10px 0;
+            font-size: 24px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .premium-notice p {
+            margin: 0 0 15px 0;
+            font-size: 16px;
+            opacity: 0.9;
+        }
+
+        .contact-btn {
+            display: inline-block;
+            padding: 12px 30px;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            text-decoration: none;
+            border-radius: 25px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            border: 2px solid rgba(255, 255, 255, 0.5);
+            backdrop-filter: blur(5px);
+        }
+
+        .contact-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
         @media (max-width: 768px) {
             .search-grid {
                 grid-template-columns: 1fr;
@@ -472,8 +552,8 @@
 
     <div class="container">
         <div class="header">
-            <h1>👥 Profiiliselain - Yoro Oy</h1>
-            <p>Selaa ja etsi sopivia ehdokkaita 27,717 henkilöprofiilin joukosta</p>
+            <h1>👥 Profiiliselain - Yoro Oy (Työnantajapalvelu)</h1>
+            <p>GDPR-suojattu ehdokashaku 27,717 henkilöprofiilin joukosta • Maksullinen palvelu työnantajille</p>
         </div>
 
         <div class="auth-section" id="auth-section">
@@ -953,7 +1033,8 @@
             document.getElementById('results-info').style.display = 'block';
             document.getElementById('results-count').textContent = `Löytyi ${filtered.length} profiilia hakuehdoilla.`;
             
-            displayProfiles(filtered.slice(0, 50)); // Show first 50 results
+            // GDPR: Rajoita tulokset kolmeen ja blur-efekti (maksullinen palvelu työnantajille)
+            displayProfiles(filtered.slice(0, 3)); // Show only first 3 results with blur
         }
 
         // Create individual checkbox item
@@ -1008,7 +1089,7 @@
             return str.charAt(0).toUpperCase() + str.slice(1);
         }
 
-        // Display profiles
+        // Display profiles with GDPR privacy protection and premium service notice
         function displayProfiles(profiles) {
             const container = document.getElementById('profiles-container');
             container.innerHTML = '';
@@ -1018,9 +1099,22 @@
                 return;
             }
 
+            // Add premium service notice at the top
+            const premiumNotice = document.createElement('div');
+            premiumNotice.className = 'premium-notice';
+            premiumNotice.innerHTML = `
+                <h3>🏢 Työnantajapalvelu</h3>
+                <p>Profiilitiedot ovat GDPR-suojattuja. Täydet tiedot ja yhteystiedot ovat saatavilla maksullisessa työnantajapalvelussa.</p>
+                <a href="mailto:info@yoro.fi?subject=Työnantajapalvelu - Profiiliselain" class="contact-btn">
+                    📧 Ota yhteyttä työnantajapalvelusta
+                </a>
+            `;
+            container.appendChild(premiumNotice);
+
             profiles.forEach((profile, index) => {
                 const card = document.createElement('div');
-                card.className = 'profile-card';
+                card.className = 'profile-card gdpr-blurred';
+                card.style.position = 'relative';
                 
                 let html = `
                     <div class="profile-header">
@@ -1028,19 +1122,13 @@
                     </div>
                 `;
                 
-                // All the profile fields
-                if (profile.esittely) html += `<div class="profile-field"><strong>Esittely:</strong><span>${profile.esittely}</span></div>`;
-                if (profile.esittely_10sanaa) html += `<div class="profile-field"><strong>Lyhyt esittely:</strong><span>${profile.esittely_10sanaa}</span></div>`;
+                // GDPR: Show only basic non-identifying information with heavy blur
                 if (profile.tyonhakualue) html += `<div class="profile-field"><strong>Työnhakualue:</strong><span>${profile.tyonhakualue}</span></div>`;
                 if (profile.aloitusajankohta) html += `<div class="profile-field"><strong>Aloitusajankohta:</strong><span>${profile.aloitusajankohta}</span></div>`;
-                if (profile.tyokokemus) html += `<div class="profile-field"><strong>Työkokemus:</strong><span>${profile.tyokokemus}</span></div>`;
-                if (profile.osaamisteksti) html += `<div class="profile-field"><strong>Osaamisteksti:</strong><span>${profile.osaamisteksti}</span></div>`;
-                if (profile.createdAt) html += `<div class="profile-field"><strong>Luotu:</strong><span>${new Date(profile.createdAt.toDate ? profile.createdAt.toDate() : profile.createdAt).toLocaleDateString('fi-FI')}</span></div>`;
-                if (profile.id) html += `<div class="profile-field"><strong>ID:</strong><span>${profile.id}</span></div>`;
                 
                 if (profile.ammatit && profile.ammatit.length > 0) {
                     html += `<div class="profile-field"><strong>Ammatit:</strong><div class="tags">`;
-                    profile.ammatit.slice(0, 10).forEach(ammatti => {
+                    profile.ammatit.slice(0, 3).forEach(ammatti => {
                         html += `<span class="tag">${ammatti}</span>`;
                     });
                     html += `</div></div>`;
@@ -1048,67 +1136,49 @@
                 
                 if (profile.osaamiset && profile.osaamiset.length > 0) {
                     html += `<div class="profile-field"><strong>Osaamiset:</strong><div class="tags">`;
-                    profile.osaamiset.slice(0, 15).forEach(osaaminen => {
+                    profile.osaamiset.slice(0, 5).forEach(osaaminen => {
                         html += `<span class="tag">${osaaminen}</span>`;
-                    });
-                    html += `</div></div>`;
-                }
-                
-                if (profile.tyotoiveet && profile.tyotoiveet.length > 0) {
-                    html += `<div class="profile-field"><strong>Työtoiveet:</strong><div class="tags">`;
-                    profile.tyotoiveet.slice(0, 8).forEach(toive => {
-                        html += `<span class="tag">${toive}</span>`;
                     });
                     html += `</div></div>`;
                 }
                 
                 if (profile.koulutus && profile.koulutus.length > 0) {
                     html += `<div class="profile-field"><strong>Koulutus:</strong><div class="tags">`;
-                    profile.koulutus.slice(0, 5).forEach(koulutusItem => {
+                    profile.koulutus.slice(0, 2).forEach(koulutusItem => {
                         html += `<span class="tag">${koulutusItem}</span>`;
                     });
                     html += `</div></div>`;
                 }
                 
-                if (profile.muu_kokemus && profile.muu_kokemus.length > 0) {
-                    html += `<div class="profile-field"><strong>Muu kokemus:</strong><div class="tags">`;
-                    profile.muu_kokemus.slice(0, 5).forEach(kokemus => {
-                        html += `<span class="tag">${kokemus}</span>`;
-                    });
-                    html += `</div></div>`;
-                }
-                
-                if (profile.osaamisteksti) html += `<div class="profile-field"><strong>Osaamisteksti:</strong><span>${profile.osaamisteksti}</span></div>`;
-                
-                if (profile.kielitaito && profile.kielitaito.length > 0) {
-                    html += `<div class="profile-field"><strong>Kielitaito:</strong><div class="tags">`;
-                    profile.kielitaito.forEach(kieli => {
-                        html += `<span class="tag">${kieli}</span>`;
-                    });
-                    html += `</div></div>`;
-                }
-                
-                if (profile.ajokortit && profile.ajokortit.length > 0) {
-                    html += `<div class="profile-field"><strong>Ajokortit:</strong><div class="tags">`;
-                    profile.ajokortit.forEach(kortti => {
-                        html += `<span class="tag">${kortti}</span>`;
-                    });
-                    html += `</div></div>`;
-                }
-                
-                if (profile.ajotiedot) html += `<div class="profile-field"><strong>Ajotiedot:</strong><span>${profile.ajotiedot}</span></div>`;
-                
-                if (profile.lupatiedot && profile.lupatiedot.length > 0) {
-                    html += `<div class="profile-field"><strong>Lupatiedot:</strong><div class="tags">`;
-                    profile.lupatiedot.forEach(lupa => {
-                        html += `<span class="tag">${lupa}</span>`;
-                    });
-                    html += `</div></div>`;
-                }
-                
                 card.innerHTML = html;
+                
+                // Add GDPR overlay to each card
+                const overlay = document.createElement('div');
+                overlay.className = 'gdpr-overlay';
+                overlay.innerHTML = `
+                    <h3>🔒 GDPR-suojattu profiili</h3>
+                    <p>Henkilötiedot on suojattu tietosuoja-asetuksen mukaisesti.</p>
+                    <p><strong>Työnantajille:</strong> Täydet tiedot ja yhteystiedot saatavilla maksullisessa palvelussa.</p>
+                `;
+                card.appendChild(overlay);
+                
                 container.appendChild(card);
             });
+
+            // Add additional notice if more profiles were found
+            if (profiles.length >= 3) {
+                const moreResults = document.createElement('div');
+                moreResults.className = 'premium-notice';
+                moreResults.style.marginTop = '30px';
+                moreResults.innerHTML = `
+                    <h3>📊 Lisää tuloksia saatavilla</h3>
+                    <p>Hakuehdoillasi löytyi yhteensä profiileja. Työnantajapalvelussa näet kaikki tulokset ja täydet yhteystiedot.</p>
+                    <a href="mailto:info@yoro.fi?subject=Työnantajapalvelu - Lisää tuloksia" class="contact-btn">
+                        🚀 Tilaa työnantajapalvelu
+                    </a>
+                `;
+                container.appendChild(moreResults);
+            }
         }
 
         // Enter key support for search
