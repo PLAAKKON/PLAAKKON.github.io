@@ -1497,9 +1497,11 @@
             
             const container = document.getElementById(`${category}-checkboxes`);
             if (!container) {
-                console.log(`❌ Container not found for ${category}`);
+                console.error(`❌ Container not found for ${category}-checkboxes`);
                 return;
             }
+            
+            console.log(`✅ Container found for ${category}:`, container);
             
             // Clear container
             container.innerHTML = '';
@@ -1515,6 +1517,7 @@
                        style="width: 100%; padding: 8px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 4px;">
             `;
             container.appendChild(searchDiv);
+            console.log(`✅ Search field added for ${category}`);
             
             // Add scrollable checkbox container
             const checkboxContainer = document.createElement('div');
@@ -1522,17 +1525,27 @@
             checkboxContainer.id = `${category}-list`;
             checkboxContainer.style.maxHeight = '200px';
             checkboxContainer.style.overflowY = 'auto';
+            checkboxContainer.style.border = '1px solid red'; // DEBUG: red border to see container
+            
+            console.log(`📦 About to create ${items.length} items for ${category}`);
             
             // Show first 50 items initially
             const initialItems = items.slice(0, 50);
-            initialItems.forEach(item => {
+            console.log(`📦 Creating ${initialItems.length} initial items for ${category}`);
+            
+            initialItems.forEach((item, index) => {
+                console.log(`🔍 Item ${index}:`, { category, value: item.value, count: item.count });
                 const checkboxItem = createCheckboxItem(category, item.value, item.count);
-                if (checkboxItem) { // Only append if item is valid
+                if (checkboxItem) {
                     checkboxContainer.appendChild(checkboxItem);
+                    console.log(`✅ Added checkbox ${index} for ${category}: ${item.value}`);
+                } else {
+                    console.warn(`❌ Failed to create checkbox ${index} for ${category}: ${item.value}`);
                 }
             });
             
             container.appendChild(checkboxContainer);
+            console.log(`✅ Checkbox container appended to ${category}`);
             
             // Store all items for filtering
             container.setAttribute('data-all-items', JSON.stringify(items));
