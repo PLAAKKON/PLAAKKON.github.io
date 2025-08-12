@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="fi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Yoro Oy - Kirjautuminen</title>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+    <link rel="stylesheet" href="./styles.css">
+    <script defer src="./firebaseConfig.js"></script>
+    <script defer src="./auth.js"></script>
+</head>
+<body>
+    <!-- Video background -->
+    <video autoplay muted loop class="video-background">
+        <source src="/city_2160_24fps.mp4" type="video/mp4">
+    </video>
+
+    <div class="container">
+        <div class="auth-forms">
+            <div class="form-container">
+                <h2>Rekisteröidy käyttäjäksi</h2>
+                <input type="email" id="registerEmail" placeholder="Sähköposti">
+                <input type="password" id="registerPassword" placeholder="Salasana">
+                <button onclick="registerUser()" class="btn btn-primary">Rekisteröidy</button>
+            </div>
+
+            <div class="form-container">
+                <h2>Kirjaudu sisään</h2>
+                <input type="email" id="loginEmail" placeholder="Sähköposti">
+                <input type="password" id="loginPassword" placeholder="Salasana">
+                <button onclick="loginUser()" class="btn btn-primary">Kirjaudu</button>
+                <a href="/" class="back-link">← Takaisin etusivulle</a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
