@@ -1444,8 +1444,8 @@
                 'ammatti': 'ammatti',
                 'osaaminen': 'osaaminen',
                 'työtoiveet': 'työtoiveet',
-                'alue': 'alue',
-                'kieli': 'kieli',
+                'työnhakualue': 'alue',
+                'kielitaito': 'kieli',
                 'koulutus': 'koulutus', 
                 'ajokortit': 'ajokortit',
                 'lupatiedot': 'lupatiedot'
@@ -1454,6 +1454,8 @@
             Object.keys(categoryMap).forEach(category => {
                 const categoryData = categoryIndex[category];
                 let items = [];
+                
+                console.log(`🔍 Processing category: ${category}, data exists:`, !!categoryData, 'mapping to:', categoryMap[category]);
                 
                 if (categoryData) {
                     // If it's a Map (from fresh build), convert to array
