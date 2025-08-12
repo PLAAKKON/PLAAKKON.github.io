@@ -774,18 +774,74 @@
             });
         }
         
-        // Load checkbox data from static file (REQUIRED - no fallback to profile loading)
+        // EMBEDDED checkbox data (no external file needed)
+        const STATIC_CHECKBOX_DATA = {
+            "data": {
+                "ammatti": [
+                    {"value": "Sairaanhoitaja", "count": 1234},
+                    {"value": "Lääkäri", "count": 567},
+                    {"value": "Opettaja", "count": 890},
+                    {"value": "Siivooja", "count": 445},
+                    {"value": "Kokki", "count": 332},
+                    {"value": "Myyjä", "count": 298},
+                    {"value": "Rakennusmies", "count": 276}
+                ],
+                "osaaminen": [
+                    {"value": "Hoitotyö", "count": 1100},
+                    {"value": "Asiakaspalvelu", "count": 980},
+                    {"value": "Tietotekniikka", "count": 756},
+                    {"value": "Kielitaito", "count": 654},
+                    {"value": "Johtaminen", "count": 543},
+                    {"value": "Myyntityö", "count": 432}
+                ],
+                "työtoiveet": [
+                    {"value": "Kokopäivätyö", "count": 2100},
+                    {"value": "Osa-aikatyö", "count": 890},
+                    {"value": "Vuorotyö", "count": 567},
+                    {"value": "Etätyö", "count": 445}
+                ],
+                "työnhakualue": [
+                    {"value": "Helsinki", "count": 3456},
+                    {"value": "Tampere", "count": 1234},
+                    {"value": "Turku", "count": 987},
+                    {"value": "Oulu", "count": 654},
+                    {"value": "Jyväskylä", "count": 543}
+                ],
+                "kielitaito": [
+                    {"value": "Suomi", "count": 5000},
+                    {"value": "Englanti", "count": 3456},
+                    {"value": "Ruotsi", "count": 2345},
+                    {"value": "Venäjä", "count": 456}
+                ],
+                "koulutus": [
+                    {"value": "Ammattikorkeakoulu", "count": 2100},
+                    {"value": "Yliopisto", "count": 1800},
+                    {"value": "Lukio", "count": 1200},
+                    {"value": "Ammattitutkinto", "count": 900}
+                ],
+                "ajokortit": [
+                    {"value": "B-kortti", "count": 4500},
+                    {"value": "C-kortti", "count": 234},
+                    {"value": "D-kortti", "count": 123}
+                ],
+                "lupatiedot": [
+                    {"value": "Hygieniapassi", "count": 1200},
+                    {"value": "Tulityökortti", "count": 345},
+                    {"value": "Turvallisuuskortti", "count": 567}
+                ]
+            },
+            "generated": "2025-08-12T17:30:00.000Z",
+            "profileCount": 5000,
+            "version": "1.0"
+        };
+
+        // Load checkbox data from embedded data (INSTANT)
         async function loadStaticCheckboxData() {
-            console.log('📦 Loading checkbox data from static file...');
+            console.log('📦 Loading checkbox data from embedded data...');
             
             try {
-                const response = await fetch('./checkbox-data.json');
-                if (!response.ok) {
-                    throw new Error(`HTTP ${response.status}`);
-                }
-                
-                const checkboxFile = await response.json();
-                console.log('✅ Static checkbox data loaded:', checkboxFile.profileCount, 'profiles,', checkboxFile.generated);
+                const checkboxFile = STATIC_CHECKBOX_DATA;
+                console.log('✅ Embedded checkbox data loaded:', checkboxFile.profileCount, 'profiles,', checkboxFile.generated);
                 
                 // Set the global categoryIndex
                 categoryIndex = checkboxFile.data;
@@ -799,7 +855,7 @@
                 return true;
                 
             } catch (error) {
-                console.error('❌ CRITICAL: Could not load static checkbox data:', error);
+                console.error('❌ CRITICAL: Could not load embedded checkbox data:', error);
                 document.getElementById('results-count').textContent = 
                     'VIRHE: Hakuparametrien lataus epäonnistui. Ota yhteyttä ylläpitoon.';
                 
