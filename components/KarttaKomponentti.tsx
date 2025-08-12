@@ -54,7 +54,7 @@ export default function KarttaKomponentti({
       const alueet = p.työnhakualue || [];
       const maakuntaSet = new Set<string>();
 
-      alueet.forEach((alue) => {
+      alueet.forEach((alue: string) => {
         const mk = Object.entries(kaupungitMaakunnittain).find(
           ([maakunta, kaupungit]) =>
             maakunta === alue || kaupungit.includes(alue)

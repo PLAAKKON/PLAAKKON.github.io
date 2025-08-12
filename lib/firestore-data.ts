@@ -69,7 +69,7 @@ export async function searchProfilesFromFirestore(
     const q = query(profilesRef, ...queryConstraints)
     const querySnapshot = await getDocs(q)
     
-    const profiles = []
+    const profiles: any[] = []
     querySnapshot.forEach((doc) => {
       const data = doc.data()
       
@@ -129,7 +129,7 @@ export async function getPendingApplications(limitCount: number = 10) {
     )
     
     const querySnapshot = await getDocs(q)
-    const applications = []
+    const applications: any[] = []
     
     querySnapshot.forEach((doc) => {
       applications.push({

@@ -6,8 +6,8 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Card, CardContent } from '@/components/ui/card';
 import { Loader2 } from 'lucide-react';
 import KarttaKomponentti from "@/components/KarttaKomponentti";
-import TEMYhteenveto from "./TEMYhteenveto";
-import YlikoulutetutYhteenveto from "./YlikoulutetutYhteenveto";
+// import TEMYhteenveto from "./TEMYhteenveto";
+// import YlikoulutetutYhteenveto from "./YlikoulutetutYhteenveto";
 import { RadioGroup, RadioGroupItem } from '../components/ui/radio-group';
 import TyoymparistoProfiili from './profilointi'; // tai '../profilointi' riippuen tiedostopolusta
 
@@ -437,15 +437,15 @@ const skaalatutAmmatit = skaalaaAmmatit();
 
     {(() => {
       const maakunnat = temTilasto.maakunnat || {};
-      const summa = Object.values(maakunnat).reduce((acc, val) => acc + val, 0);
+      const summa = Object.values(maakunnat).reduce((acc: number, val) => acc + (val as number), 0);
       const kerroin = temTilasto.kokonaismaara / summa;
 
       // Skaalaa ja säilytä desimaalit tarkasti
       const skaalatutRaw = Object.entries(maakunnat).map(([nimi, lkm]) => ({
         nimi,
         alkuperainen: lkm,
-        skaalaamaton: lkm * kerroin,
-        pyoristetty: Math.round(lkm * kerroin)
+        skaalaamaton: (lkm as number) * kerroin,
+        pyoristetty: Math.round((lkm as number) * kerroin)
       }));
 
       // Korjaa mahdollinen pyöristysvirhe tarkalleen 326400:aan
@@ -476,11 +476,9 @@ const skaalatutAmmatit = skaalaaAmmatit();
   </div>
 )}
 
-<TEMYhteenveto />
-
-<YlikoulutetutYhteenveto/>
-
-{skaalatutAmmatit.length > 0 && (
+        {/* Yhteenveto-komponentit poistettu väliaikaisesti */}
+        {/* <TEMYhteenveto /> */}
+        {/* <YlikoulutetutYhteenveto/> */}{skaalatutAmmatit.length > 0 && (
   <div className="mt-10">
     <button
       onClick={() => setNäytäAmmattijakauma(!näytäAmmattijakauma)}
@@ -509,8 +507,8 @@ const skaalatutAmmatit = skaalaaAmmatit();
       <Input
         placeholder="Vapaa sanahaku..."
         value={haku}
-        onChange={(e) => setHaku(e.target.value)}
-        onKeyDown={(e) => e.key === "Enter" && hae()}
+        onChange={(e: React.ChangeEvent<HTMLInputElement>) => setHaku(e.target.value)}
+        onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => e.key === "Enter" && hae()}
         className="max-w-md"
       />
   
@@ -724,6 +722,11 @@ const skaalatutAmmatit = skaalaaAmmatit();
             </CardContent>
           </Card>
         ))}
+      </div>
+      
+      {/* TESTI TUNNISTE - URAPOLKU-7781A PROJEKTI */}
+      <div className="bg-red-100 text-red-800 text-sm p-2 text-center fixed bottom-0 left-0 right-0 z-50">
+        🔧 TESTI: Tämä on urapolku-7781a.web.app projekti - {new Date().toLocaleString()}
       </div>
     </div>
   );

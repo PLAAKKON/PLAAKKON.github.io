@@ -1,0 +1,35 @@
+          // Create checkboxes from cached data
+        function createCheckboxesFromCache() {
+            console.log('🎯 createCheckboxesFromCache called, categoryIndex:', !!categoryIndex);
+            
+            if (!categoryIndex) {
+                console.error('❌ No categoryIndex available for creating checkboxes');
+                return;
+            }
+            
+            const categoryMapping = {
+                ammatti: 'ammatti',
+                osaaminen: 'osaaminen', 
+                työtoiveet: 'työtoiveet',
+                työnhakualue: 'alue',
+                kielitaito: 'kieli',
+                koulutus: 'koulutus',
+                ajokortit: 'ajokortit',
+                lupatiedot: 'lupatiedot'
+            };
+            
+            Object.keys(categoryMapping).forEach(indexKey => {
+                const containerId = categoryMapping[indexKey];
+                const items = categoryIndex[indexKey] || [];
+                
+                console.log(`📋 Creating checkboxes for ${indexKey} (${containerId}): ${items.length} items`);
+                
+                if (items.length > 0) {
+                    createCheckboxesWithSearch(containerId, items);
+                }
+            });
+            
+            console.log('✅ All checkboxes created from cache');
+        }
+
+          // Create checkboxes with search functionality

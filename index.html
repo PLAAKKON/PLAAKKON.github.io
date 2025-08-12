@@ -1,0 +1,3215 @@
+<!DOCTYPE html>
+<html lang="fi">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Profile Browser - Yoro Oy | Profiiliselain</title>
+    <meta name="description" content="Browse and search suitable candidates from 27,717 person profiles"/>
+    
+    <!-- Firebase Scripts -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        html, body {
+            height: 100%;
+            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+            color: white;
+            background: transparent;
+        }
+
+        .video-background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: -2;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: rgba(0, 0, 0, 0.4);
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
+        }
+
+        .header {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            text-align: center;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .header h1 {
+            color: white;
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        .auth-section {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            text-align: center;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            min-height: 200px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .search-section {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .search-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .search-field {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .search-field label {
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: white;
+        }
+
+        .search-field input, .search-field select {
+            padding: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 8px;
+            font-size: 14px;
+            background: rgba(255, 255, 255, 0.9);
+            color: #333;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 12px 24px;
+            background: rgba(30, 144, 255, 0.8);
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            margin: 8px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+            backdrop-filter: blur(10px);
+        }
+
+        .btn:hover {
+            background: rgba(30, 144, 255, 1);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .btn-search {
+            background: rgba(40, 167, 69, 0.8);
+            font-size: 16px;
+            padding: 15px 30px;
+        }
+
+        .btn-search:hover {
+            background: rgba(40, 167, 69, 1);
+        }
+
+        .btn-logout {
+            background: rgba(220, 53, 69, 0.8);
+        }
+
+        .btn-logout:hover {
+            background: rgba(220, 53, 69, 1);
+        }
+
+        /* Checkbox search styles */
+        .search-categories {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .search-category {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(5px);
+            transition: all 0.3s ease;
+        }
+
+        .search-category:hover {
+            transform: translateY(-2px);
+            background: rgba(255, 255, 255, 0.15);
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .search-category h3 {
+            margin: 0 0 15px 0;
+            color: white;
+            font-size: 18px;
+            border-bottom: 2px solid rgba(30, 144, 255, 0.8);
+            padding-bottom: 8px;
+        }
+
+        .checkbox-container {
+            max-height: 250px;
+            overflow-y: auto;
+            margin-bottom: 15px;
+            padding-right: 5px;
+        }
+
+        .checkbox-container::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .checkbox-container::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+        }
+
+        .checkbox-container::-webkit-scrollbar-thumb {
+            background: rgba(30, 144, 255, 0.8);
+            border-radius: 3px;
+        }
+
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+            padding: 8px;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+        }
+
+        .checkbox-item:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .checkbox-item input[type="checkbox"] {
+            margin-right: 8px;
+            transform: scale(1.2);
+            accent-color: #1e90ff;
+        }
+
+        .checkbox-item label {
+            flex: 1;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: white;
+        }
+
+        .checkbox-count {
+            background: rgba(30, 144, 255, 0.8);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: bold;
+            backdrop-filter: blur(5px);
+        }
+
+        .checkbox-search {
+            margin-bottom: 15px;
+        }
+
+        .checkbox-search input {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.9);
+            color: #333;
+            font-size: 14px;
+        }
+
+        .show-more-btn {
+            background: rgba(30, 144, 255, 0.2);
+            border: 1px solid rgba(30, 144, 255, 0.8);
+            color: white;
+            padding: 8px 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(5px);
+        }
+
+        .show-more-btn:hover {
+            background: rgba(30, 144, 255, 0.8);
+            transform: translateY(-1px);
+        }
+
+        /* Results section */
+        .results-section {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .profile-card {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+            backdrop-filter: blur(5px);
+        }
+
+        .profile-card:hover {
+            transform: translateY(-2px);
+            background: rgba(255, 255, 255, 0.15);
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .profile-header {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+        }
+
+        .profile-id {
+            font-weight: bold;
+            color: #1e90ff;
+            font-size: 16px;
+        }
+
+        .profile-field {
+            margin-bottom: 12px;
+            color: white;
+        }
+
+        .profile-field strong {
+            color: #1e90ff;
+            display: inline-block;
+            min-width: 120px;
+        }
+
+        .tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            margin-top: 5px;
+        }
+
+        .tag {
+            background: rgba(30, 144, 255, 0.8);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            backdrop-filter: blur(5px);
+        }
+
+        #loading {
+            text-align: center;
+            padding: 20px;
+            color: white;
+            font-style: italic;
+        }
+
+        /* Responsive design */
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+                margin: 10px;
+            }
+            
+            .search-categories {
+                grid-template-columns: 1fr;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .auth-section {
+                padding: 20px;
+                min-height: 150px;
+            }
+        }
+    </style>
+
+        .free-search {
+            margin-bottom: 20px;
+        }
+
+        .free-search .search-field {
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        .profile-card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            border-left: 4px solid #007acc;
+        }
+
+        .profile-header {
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+        }
+
+        .profile-id {
+            font-size: 18px;
+            font-weight: bold;
+            color: #007acc;
+        }
+
+        .profile-field {
+            margin-bottom: 10px;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: flex-start;
+        }
+
+        .profile-field strong {
+            color: #007acc;
+            margin-right: 10px;
+            min-width: 120px;
+            font-weight: 600;
+        }
+
+        .profile-field span {
+            flex: 1;
+        }
+
+        .tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            margin-top: 5px;
+        }
+
+        .tag {
+            background: #f0f8ff;
+            color: #007acc;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            border: 1px solid #007acc;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .results-info {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-weight: 600;
+            color: white;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        /* GDPR Privacy Protection Styles */
+        .gdpr-blurred {
+            filter: blur(8px);
+            user-select: none;
+            pointer-events: none;
+            position: relative;
+        }
+
+        .gdpr-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 122, 204, 0.9);
+            color: white;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            border-radius: 10px;
+            z-index: 10;
+            backdrop-filter: blur(3px);
+        }
+
+        .gdpr-overlay h3 {
+            margin: 0 0 10px 0;
+            font-size: 18px;
+            text-align: center;
+        }
+
+        .gdpr-overlay p {
+            margin: 0 0 15px 0;
+            text-align: center;
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .premium-notice {
+            background: linear-gradient(135deg, #007acc 0%, #0066cc 100%);
+            padding: 20px;
+            border-radius: 15px;
+            margin: 20px 0;
+            text-align: center;
+            color: white;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            backdrop-filter: blur(10px);
+        }
+
+        .premium-notice h3 {
+            margin: 0 0 10px 0;
+            font-size: 24px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .premium-notice p {
+            margin: 0 0 15px 0;
+            font-size: 16px;
+            opacity: 0.9;
+        }
+
+        .contact-btn {
+            display: inline-block;
+            padding: 12px 30px;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            text-decoration: none;
+            border-radius: 25px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            border: 2px solid rgba(255, 255, 255, 0.5);
+            backdrop-filter: blur(5px);
+        }
+
+        .contact-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        @media (max-width: 768px) {
+            .search-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .profile-field {
+                flex-direction: column;
+            }
+            
+            .profile-field strong {
+                min-width: auto;
+                margin-bottom: 5px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Video Background -->
+    <video autoplay muted loop class="video-background">
+        <source src="/city_2160_24fps.mp4" type="video/mp4">
+    </video>
+
+    <div class="container">
+        <div class="header">
+            <h1>👥 Profiiliselain - Yoro Oy (Työnantajapalvelu)</h1>
+            <p>GDPR-suojattu ehdokashaku 27,717 henkilöprofiilin joukosta • Maksullinen palvelu työnantajille</p>
+        </div>
+
+        <div class="auth-section" id="auth-section">
+            <div id="not-logged-in" style="display: none;">
+                <h2>🔐 Kirjautuminen vaaditaan</h2>
+                <p>Sinun täytyy kirjautua sisään nähdäksesi profiilit.</p>
+                <a href="/kirjaudu/" class="btn">Kirjaudu sisään</a>
+                <a href="/" class="btn">Takaisin etusivulle</a>
+            </div>
+            <div id="logged-in" style="display: none;">
+                <p>Kirjautunut käyttäjä: <span id="user-email"></span></p>
+                <button onclick="logoutUser()" class="btn btn-logout">Kirjaudu ulos</button>
+                <a href="/" class="btn">Takaisin etusivulle</a>
+            </div>
+        </div>
+
+        <div id="main-content" style="display: none;">
+            <div class="search-section">
+                <h2>🔍 Hae profiileja</h2>
+                
+                <!-- Vapaa tekstihaku -->
+                <div class="free-search">
+                    <div class="search-field">
+                        <label for="search-free">Vapaa haku</label>
+                        <input type="text" id="search-free" placeholder="Hakusana kaikista kentistä...">
+                    </div>
+                </div>
+
+                <!-- Checkbox-pohjaiset hakuparametrit -->
+                <div class="search-categories">
+                    <div class="search-category">
+                        <h3>💼 Ammatit</h3>
+                        <div id="ammatti-checkboxes" class="checkbox-container">
+                            <!-- Ammatti checkboxit tulevat tähän -->
+                        </div>
+                        <button onclick="showMoreOptions('ammatti')" class="show-more-btn">Näytä lisää...</button>
+                    </div>
+
+                    <div class="search-category">
+                        <h3>� Osaamiset</h3>
+                        <div id="osaaminen-checkboxes" class="checkbox-container">
+                            <!-- Osaaminen checkboxit tulevat tähän -->
+                        </div>
+                        <button onclick="showMoreOptions('osaaminen')" class="show-more-btn">Näytä lisää...</button>
+                    </div>
+
+                    <div class="search-category">
+                        <h3>💼 Työtoiveet</h3>
+                        <div id="työtoiveet-checkboxes" class="checkbox-container">
+                            <!-- Työtoiveet checkboxit tulevat tähän -->
+                        </div>
+                        <button onclick="showMoreOptions('työtoiveet')" class="show-more-btn">Näytä lisää...</button>
+                    </div>
+
+                    <div class="search-category">
+                        <h3>📍 Työnhakualue</h3>
+                        <div id="alue-checkboxes" class="checkbox-container">
+                            <!-- Alue checkboxit tulevat tähän -->
+                        </div>
+                        <button onclick="showMoreOptions('alue')" class="show-more-btn">Näytä lisää...</button>
+                    </div>
+
+                    <div class="search-category">
+                        <h3>🌍 Kielitaito</h3>
+                        <div id="kieli-checkboxes" class="checkbox-container">
+                            <!-- Kieli checkboxit tulevat tähän -->
+                        </div>
+                        <button onclick="showMoreOptions('kieli')" class="show-more-btn">Näytä lisää...</button>
+                    </div>
+
+                    <div class="search-category">
+                        <h3>🎓 Koulutus</h3>
+                        <div id="koulutus-checkboxes" class="checkbox-container">
+                            <!-- Koulutus checkboxit tulevat tähän -->
+                        </div>
+                        <button onclick="showMoreOptions('koulutus')" class="show-more-btn">Näytä lisää...</button>
+                    </div>
+
+                    <div class="search-category">
+                        <h3>🚗 Ajokortit</h3>
+                        <div id="ajokortit-checkboxes" class="checkbox-container">
+                            <!-- Ajokortit checkboxit tulevat tähän -->
+                        </div>
+                        <button onclick="showMoreOptions('ajokortit')" class="show-more-btn">Näytä lisää...</button>
+                    </div>
+
+                    <div class="search-category">
+                        <h3>📋 Lupatiedot</h3>
+                        <div id="lupatiedot-checkboxes" class="checkbox-container">
+                            <!-- Lupatiedot checkboxit tulevat tähän -->
+                        </div>
+                        <button onclick="showMoreOptions('lupatiedot')" class="show-more-btn">Näytä lisää...</button>
+                    </div>
+                </div>
+
+                <div style="text-align: center; margin-top: 20px;">
+                    <button onclick="searchProfiles()" class="btn btn-search" id="search-btn">🔍 Hae profiileja</button>
+                    <button onclick="clearSearch()" class="btn">🗑️ Tyhjennä haku</button>
+                    <button onclick="clearCacheAndRebuild()" class="btn btn-secondary" style="margin-left: 10px;">🔄 Päivitä hakuehdot</button>
+                </div>
+            </div>
+
+            <div id="loading" class="loading" style="display: none;">
+                <p>⏳ Ladataan profiileja...</p>
+            </div>
+
+            <div id="results-info" class="results-info" style="display: none;">
+                <span id="results-count"></span>
+            </div>
+
+            <div id="profiles-container">
+                <!-- Profiles will be loaded here -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Firebase configuration - käytetään urapolku-7780a datalle
+        const firebaseConfig = {
+            apiKey: "AIzaSyAnfsX522_ybXR7yhnAJbxDjuszVu4rZLE",
+            authDomain: "urapolku-7780a.firebaseapp.com",
+            projectId: "urapolku-7780a",
+            storageBucket: "urapolku-7780a.firebasestorage.app",
+            messagingSenderId: "314066598772",
+            appId: "1:314066598772:web:50183db006293290378a21"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+
+        let allProfiles = [];
+        let categoryIndex = null; // Cache for checkbox data
+        let currentUser = null;
+        let buildingIndex = false; // Prevent multiple simultaneous index builds
+        const CACHE_EXPIRY_HOURS = 24; // Rebuild index daily
+
+        // Maantieteellinen hierarkia - maakunnat ja niiden kaupungit
+        const maakuntaKaupungit = {
+            'Uusimaa': ['Helsinki', 'Espoo', 'Vantaa', 'Kauniainen', 'Järvenpää', 'Hyvinkää', 'Porvoo', 'Kerava', 'Tuusula', 'Nurmijärvi', 'Loviisa', 'Vihti', 'Sipoo', 'Karkkila', 'Askola', 'Mäntsälä', 'Pornainen', 'Pukkila'],
+            'Varsinais-Suomi': ['Turku', 'Kaarina', 'Raisio', 'Naantali', 'Mynämäki', 'Loimaa', 'Salo', 'Somero', 'Paimio', 'Lieto', 'Masku'],
+            'Pirkanmaa': ['Tampere', 'Nokia', 'Ylöjärvi', 'Kangasala', 'Lempäälä', 'Orivesi', 'Ikaalinen', 'Valkeakoski', 'Mänttä-Vilppula', 'Akaa', 'Sastamala'],
+            'Pohjois-Pohjanmaa': ['Oulu', 'Kempele', 'Muhos', 'Oulunsalo', 'Haukipudas', 'Kiiminki', 'Ylivieska', 'Raahe', 'Ii', 'Pudasjärvi'],
+            'Keski-Suomi': ['Jyväskylä', 'Äänekoski', 'Jämsä', 'Keuruu', 'Saarijärvi', 'Viitasaari', 'Muurame', 'Laukaa', 'Petäjävesi'],
+            'Pohjois-Savo': ['Kuopio', 'Iisalmi', 'Varkaus', 'Siilinjärvi', 'Suonenjoki', 'Kiuruvesi', 'Nilsiä', 'Lapinlahti'],
+            'Etelä-Savo': ['Mikkeli', 'Savonlinna', 'Pieksämäki', 'Heinola', 'Imatra'],
+            'Pohjois-Karjala': ['Joensuu', 'Kitee', 'Lieksa', 'Nurmes', 'Outokumpu'],
+            'Etelä-Karjala': ['Lappeenranta', 'Imatra', 'Hamina', 'Kotka', 'Kouvola'],
+            'Kymenlaakso': ['Kotka', 'Kouvola', 'Hamina', 'Pyhtää', 'Virolahti'],
+            'Päijät-Häme': ['Lahti', 'Heinola', 'Hollola', 'Nastola', 'Orimattila', 'Asikkala'],
+            'Kanta-Häme': ['Hämeenlinna', 'Riihimäki', 'Forssa', 'Hattula', 'Janakkala'],
+            'Satakunta': ['Pori', 'Rauma', 'Ulvila', 'Kankaanpää', 'Harjavalta', 'Kokemäki', 'Huittinen'],
+            'Kainuu': ['Kajaani', 'Kuhmo', 'Sotkamo', 'Suomussalmi'],
+            'Lappi': ['Rovaniemi', 'Tornio', 'Kemi', 'Kemijärvi', 'Sodankylä', 'Inari'],
+            'Etelä-Pohjanmaa': ['Seinäjoki', 'Kurikka', 'Lapua', 'Ilmajoki', 'Alavus', 'Kauhava'],
+            'Pohjanmaa': ['Vaasa', 'Pietarsaari', 'Kokkola', 'Kristiinankaupunki', 'Närpiö'],
+            'Keski-Pohjanmaa': ['Kokkola', 'Ylivieska', 'Kalajoki', 'Kannus']
+        };
+
+        // Tarkista onko työnhakualue maantieteellisesti yhteensopiva hakuehdon kanssa
+        function matchesGeographicArea(profileArea, selectedAreas) {
+            if (!selectedAreas || selectedAreas.length === 0) return false;
+            
+            // Jos profiilin työnhakualue on tyhjä, "Suomi" tai "suomi", näy kaikissa hauissa
+            if (!profileArea || !profileArea.trim()) return true;
+            const profileAreaLower = profileArea.toLowerCase().trim();
+            if (profileAreaLower === 'suomi' || profileAreaLower === 'koko suomi' || profileAreaLower === 'koko maa') return true;
+            
+            return selectedAreas.some(selectedArea => {
+                const selectedLower = selectedArea.toLowerCase().trim();
+                
+                // Suora vastaavuus
+                if (profileAreaLower === selectedLower) return true;
+                
+                // Tarkista hierarkia: jos valittu maakunta, hyväksy sen kaupungit
+                const selectedCities = maakuntaKaupungit[selectedArea] || [];
+                if (selectedCities.some(city => city.toLowerCase() === profileAreaLower)) return true;
+                
+                // Tarkista käänteinen hierarkia: jos valittu kaupunki, hyväksy sen maakunta
+                for (const [maakunta, kaupungit] of Object.entries(maakuntaKaupungit)) {
+                    if (maakunta.toLowerCase() === profileAreaLower) {
+                        if (kaupungit.some(city => city.toLowerCase() === selectedLower)) return true;
+                    }
+                }
+                
+                return false;
+            });
+        }
+
+        // Authentication state listener
+        auth.onAuthStateChanged((user) => {
+            currentUser = user;
+            if (user) {
+                console.log('User logged in:', user.email);
+                document.getElementById('user-email').textContent = user.email;
+                document.getElementById('not-logged-in').style.display = 'none';
+                document.getElementById('logged-in').style.display = 'block';
+                document.getElementById('main-content').style.display = 'block';
+                
+                // ONLY load static checkbox data - no fallback to profile loading
+                if (!buildingIndex && !categoryIndex) {
+                    loadStaticCheckboxData();
+                }
+            } else {
+                console.log('User not logged in');
+                document.getElementById('not-logged-in').style.display = 'block';
+                document.getElementById('logged-in').style.display = 'none';
+                document.getElementById('main-content').style.display = 'none';
+            }
+        });
+
+        // Logout function
+        function logoutUser() {
+            auth.signOut().then(() => {
+                console.log('User logged out');
+                window.location.href = '/';
+            });
+        }
+        
+        // EMBEDDED checkbox data (no external file needed)
+        const STATIC_CHECKBOX_DATA = {
+  "data": {
+    "ammatti": [
+      {
+        "value": "ohjelmistokehittäjä",
+        "count": 804
+      },
+      {
+        "value": "varastotyöntekijä",
+        "count": 621
+      },
+      {
+        "value": "asiakaspalvelupäällikkö",
+        "count": 523
+      },
+      {
+        "value": "markkinointipäällikkö",
+        "count": 494
+      },
+      {
+        "value": "asiakaspalveluneuvoja",
+        "count": 479
+      },
+      {
+        "value": "myyjä",
+        "count": 458
+      },
+      {
+        "value": "hankepäällikkö",
+        "count": 397
+      },
+      {
+        "value": "graafinen suunnittelija",
+        "count": 391
+      },
+      {
+        "value": "myyntijohtaja",
+        "count": 336
+      },
+      {
+        "value": "sihteeri",
+        "count": 324
+      },
+      {
+        "value": "talonrakentaja",
+        "count": 303
+      },
+      {
+        "value": "verkkokehittäjä",
+        "count": 290
+      },
+      {
+        "value": "toimistoavustaja",
+        "count": 273
+      },
+      {
+        "value": "lähihoitaja",
+        "count": 261
+      },
+      {
+        "value": "tarjoilija",
+        "count": 257
+      },
+      {
+        "value": "markkinointikonsultti",
+        "count": 250
+      },
+      {
+        "value": "tavaraliikenteen kuljettaja",
+        "count": 248
+      },
+      {
+        "value": "taloushallinnon assistentti",
+        "count": 234
+      },
+      {
+        "value": "kokki",
+        "count": 231
+      },
+      {
+        "value": "markkinointiassistentti",
+        "count": 230
+      },
+      {
+        "value": "kirjanpitäjä",
+        "count": 229
+      },
+      {
+        "value": "laitossiivooja",
+        "count": 228
+      },
+      {
+        "value": "sähköasentaja",
+        "count": 227
+      },
+      {
+        "value": "lastenhoitaja",
+        "count": 225
+      },
+      {
+        "value": "tilausten keräilijä, varasto",
+        "count": 223
+      },
+      {
+        "value": "liiketoimintajohtaja",
+        "count": 220
+      },
+      {
+        "value": "käyttöliittymäkehittäjä",
+        "count": 219
+      },
+      {
+        "value": "puhelinpalveluneuvoja",
+        "count": 219
+      },
+      {
+        "value": "myyntiedustaja",
+        "count": 209
+      },
+      {
+        "value": "digimarkkinointipäällikkö",
+        "count": 208
+      },
+      {
+        "value": "koneinsinööri",
+        "count": 203
+      },
+      {
+        "value": "rakennustyömaan avustava työntekijä",
+        "count": 190
+      },
+      {
+        "value": "palvelujohtaja, yhteiskunnan peruspalvelut",
+        "count": 190
+      },
+      {
+        "value": "kotisiivooja",
+        "count": 181
+      },
+      {
+        "value": "valokuvaaja",
+        "count": 180
+      },
+      {
+        "value": "kotihoidon lähihoitaja",
+        "count": 176
+      },
+      {
+        "value": "digitaalisen median suunnittelija",
+        "count": 174
+      },
+      {
+        "value": "hallintoassistentti",
+        "count": 169
+      },
+      {
+        "value": "ICT-projektipäällikkö",
+        "count": 168
+      },
+      {
+        "value": "tiedottaja",
+        "count": 168
+      },
+      {
+        "value": "henkilöstöjohtaja",
+        "count": 168
+      },
+      {
+        "value": "hitsaaja",
+        "count": 166
+      },
+      {
+        "value": "ICT-ohjelmistokehittäjä",
+        "count": 164
+      },
+      {
+        "value": "rakennusinsinööri",
+        "count": 163
+      },
+      {
+        "value": "avustava ruoanvalmistaja",
+        "count": 161
+      },
+      {
+        "value": "rakennusmaalari",
+        "count": 156
+      },
+      {
+        "value": "varhaiskasvatuksen lastenhoitaja",
+        "count": 155
+      },
+      {
+        "value": "avustava hankepäällikkö",
+        "count": 154
+      },
+      {
+        "value": "henkilöstösuunnittelija",
+        "count": 154
+      },
+      {
+        "value": "ICT-järjestelmän ylläpitäjä",
+        "count": 150
+      }
+    ],
+    "osaaminen": [
+      {
+        "value": "viestiä asiakkaiden kanssa",
+        "count": 1638
+      },
+      {
+        "value": "ratkaista ongelmia",
+        "count": 1630
+      },
+      {
+        "value": "tunnistaa asiakkaan tarpeet",
+        "count": 1616
+      },
+      {
+        "value": "asiakaspalvelu",
+        "count": 1514
+      },
+      {
+        "value": "toimia esimiehenä",
+        "count": 1367
+      },
+      {
+        "value": "hallita budjetteja",
+        "count": 1210
+      },
+      {
+        "value": "kouluttaa työntekijöitä",
+        "count": 1101
+      },
+      {
+        "value": "suorittaa projektinhallintaa",
+        "count": 1078
+      },
+      {
+        "value": "varmistaa asiakastyytyväisyys",
+        "count": 1068
+      },
+      {
+        "value": "keskustella esimiesten kanssa",
+        "count": 1012
+      },
+      {
+        "value": "käyttää eri viestintäkanavia",
+        "count": 977
+      },
+      {
+        "value": "projektinhallinta",
+        "count": 771
+      },
+      {
+        "value": "kuunnella aktiivisesti",
+        "count": 767
+      },
+      {
+        "value": "rekrytoida työntekijöitä",
+        "count": 664
+      },
+      {
+        "value": "työskennellä rakennustiimissä",
+        "count": 631
+      },
+      {
+        "value": "ottaa yhteyttä asiakkaisiin",
+        "count": 597
+      },
+      {
+        "value": "käyttää suojavarusteita rakennustyömaalla",
+        "count": 595
+      },
+      {
+        "value": "ylläpitää asiakaspalvelua",
+        "count": 590
+      },
+      {
+        "value": "tuotetietous",
+        "count": 563
+      },
+      {
+        "value": "kehittää liikekumppanuuksia",
+        "count": 560
+      },
+      {
+        "value": "pitää kirjaa työn edistymisestä",
+        "count": 547
+      },
+      {
+        "value": "noudattaa terveys- ja turvallisuuskäytäntöjä rakennustyömaalla",
+        "count": 540
+      },
+      {
+        "value": "käsitellä asiakasvalituksia",
+        "count": 532
+      },
+      {
+        "value": "noudattaa yrityksen vaatimustasoa",
+        "count": 529
+      },
+      {
+        "value": "asiakassuhteiden hallinta",
+        "count": 520
+      },
+      {
+        "value": "kehittää ammatillinen verkosto",
+        "count": 515
+      },
+      {
+        "value": "yrityksen käytännöt",
+        "count": 505
+      },
+      {
+        "value": "puhua eri kieliä",
+        "count": 500
+      },
+      {
+        "value": "tunnistaa ongelmia",
+        "count": 493
+      },
+      {
+        "value": "antaa rakentavaa palautetta",
+        "count": 477
+      },
+      {
+        "value": "edistää osallisuutta",
+        "count": 476
+      },
+      {
+        "value": "suunnitella markkinointikampanja",
+        "count": 475
+      },
+      {
+        "value": "JavaScript",
+        "count": 470
+      },
+      {
+        "value": "tehdä markkinatutkimusta",
+        "count": 460
+      },
+      {
+        "value": "käyttää tietokoneavusteisia suunnitteluohjelmia",
+        "count": 450
+      },
+      {
+        "value": "noudattaa elintarvikkeisiin liittyvää terveys- turvallisuus- hygienia- ja muuta asiaankuuluvaa lainsäädäntöä",
+        "count": 448
+      },
+      {
+        "value": "ylläpitää suhteita asiakkaisiin",
+        "count": 447
+      },
+      {
+        "value": "tietokoneohjelmointi",
+        "count": 445
+      },
+      {
+        "value": "ylläpitää suhteita tavarantoimittajiin",
+        "count": 437
+      },
+      {
+        "value": "teknisen suunnittelun periaatteet",
+        "count": 437
+      },
+      {
+        "value": "hallinnoida sopimuksia",
+        "count": 424
+      },
+      {
+        "value": "myyntistrategia",
+        "count": 422
+      },
+      {
+        "value": "avustaa opiskelijoita opinnoissa",
+        "count": 413
+      },
+      {
+        "value": "käyttää toimistojärjestelmiä",
+        "count": 408
+      },
+      {
+        "value": "hallita tietotekniikan käyttö",
+        "count": 393
+      },
+      {
+        "value": "sisältömarkkinointistrategia",
+        "count": 384
+      },
+      {
+        "value": "tehdä tieteellistä tutkimusta",
+        "count": 382
+      },
+      {
+        "value": "laatustandardit",
+        "count": 380
+      },
+      {
+        "value": "Python (tietokoneohjelmointi)",
+        "count": 378
+      },
+      {
+        "value": "hallita projektitietoja",
+        "count": 369
+      }
+    ],
+    "työtoiveet": [
+      {
+        "value": "Henkilöauto (B)",
+        "count": 5052
+      },
+      {
+        "value": "Moottoripyörä (A1, A2 tai A)",
+        "count": 1338
+      },
+      {
+        "value": "Henkilöauto ja perävaunu (B96 tai BE)",
+        "count": 1050
+      },
+      {
+        "value": "Kuorma-auto (C1 tai C)",
+        "count": 986
+      },
+      {
+        "value": "ohjelmistokehittäjä",
+        "count": 801
+      },
+      {
+        "value": "varastotyöntekijä",
+        "count": 631
+      },
+      {
+        "value": "markkinointipäällikkö",
+        "count": 481
+      },
+      {
+        "value": "asiakaspalvelupäällikkö",
+        "count": 474
+      },
+      {
+        "value": "asiakaspalveluneuvoja",
+        "count": 469
+      },
+      {
+        "value": "Asiointi",
+        "count": 460
+      },
+      {
+        "value": "Oma työpolku",
+        "count": 460
+      },
+      {
+        "value": "Työnhakuprofiili",
+        "count": 460
+      },
+      {
+        "value": "Avoimet työpaikat",
+        "count": 460
+      },
+      {
+        "value": "Tietoa muilla kielillä",
+        "count": 460
+      },
+      {
+        "value": "TE24, KOTO24, KEHA24 – kolme mittavaa uudistusta",
+        "count": 460
+      },
+      {
+        "value": "toimistoavustaja",
+        "count": 414
+      },
+      {
+        "value": "graafinen suunnittelija",
+        "count": 413
+      },
+      {
+        "value": "hankepäällikkö",
+        "count": 408
+      },
+      {
+        "value": "sihteeri",
+        "count": 399
+      },
+      {
+        "value": "Kuorma-auto ja perävaunu (C1E tai CE)",
+        "count": 355
+      },
+      {
+        "value": "myyntijohtaja",
+        "count": 338
+      },
+      {
+        "value": "verkkokehittäjä",
+        "count": 320
+      },
+      {
+        "value": "markkinointikonsultti",
+        "count": 310
+      },
+      {
+        "value": "myyjä",
+        "count": 296
+      },
+      {
+        "value": "Hygieniapassi",
+        "count": 276
+      },
+      {
+        "value": "markkinointiassistentti",
+        "count": 254
+      },
+      {
+        "value": "hallintoassistentti",
+        "count": 252
+      },
+      {
+        "value": "assistentti",
+        "count": 242
+      },
+      {
+        "value": "ratkaista ongelmia",
+        "count": 242
+      },
+      {
+        "value": "käyttöliittymäkehittäjä",
+        "count": 235
+      },
+      {
+        "value": "taloushallinnon assistentti",
+        "count": 232
+      },
+      {
+        "value": "digimarkkinointipäällikkö",
+        "count": 224
+      },
+      {
+        "value": "tavaraliikenteen kuljettaja",
+        "count": 224
+      },
+      {
+        "value": "talonrakentaja",
+        "count": 222
+      },
+      {
+        "value": "laitossiivooja",
+        "count": 222
+      },
+      {
+        "value": "kirjanpitäjä",
+        "count": 216
+      },
+      {
+        "value": "koneinsinööri",
+        "count": 214
+      },
+      {
+        "value": "ICT-ohjelmistokehittäjä",
+        "count": 214
+      },
+      {
+        "value": "asiakaspalvelu",
+        "count": 208
+      },
+      {
+        "value": "tarjoilija",
+        "count": 208
+      },
+      {
+        "value": "myyntiedustaja",
+        "count": 203
+      },
+      {
+        "value": "tiedottaja",
+        "count": 193
+      },
+      {
+        "value": "lastenhoitaja",
+        "count": 193
+      },
+      {
+        "value": "henkilöstösuunnittelija",
+        "count": 193
+      },
+      {
+        "value": "digitaalisten pelien kehittäjä",
+        "count": 191
+      },
+      {
+        "value": "avustava hankepäällikkö",
+        "count": 189
+      },
+      {
+        "value": "puhelinpalveluneuvoja",
+        "count": 188
+      },
+      {
+        "value": "ICT-projektipäällikkö",
+        "count": 187
+      },
+      {
+        "value": "liiketoimintajohtaja",
+        "count": 187
+      },
+      {
+        "value": "tilausten keräilijä, varasto",
+        "count": 187
+      }
+    ],
+    "työnhakualue": [
+      {
+        "value": "Uusimaa",
+        "count": 7722
+      },
+      {
+        "value": "Helsinki",
+        "count": 5941
+      },
+      {
+        "value": "Espoo",
+        "count": 3300
+      },
+      {
+        "value": "Vantaa",
+        "count": 2960
+      },
+      {
+        "value": "Keski-Suomi",
+        "count": 2776
+      },
+      {
+        "value": "Pirkanmaa",
+        "count": 2241
+      },
+      {
+        "value": "Varsinais-Suomi",
+        "count": 2092
+      },
+      {
+        "value": "Päijät-Häme",
+        "count": 1618
+      },
+      {
+        "value": "Kanta-Häme",
+        "count": 1573
+      },
+      {
+        "value": "Pohjois-Savo",
+        "count": 1502
+      },
+      {
+        "value": "Suomi",
+        "count": 1374
+      },
+      {
+        "value": "Kymenlaakso",
+        "count": 1285
+      },
+      {
+        "value": "Satakunta",
+        "count": 1238
+      },
+      {
+        "value": "Tampere",
+        "count": 1179
+      },
+      {
+        "value": "Etelä-Karjala",
+        "count": 1101
+      },
+      {
+        "value": "Etelä-Pohjanmaa",
+        "count": 1058
+      },
+      {
+        "value": "Etelä-Savo",
+        "count": 926
+      },
+      {
+        "value": "Turku",
+        "count": 885
+      },
+      {
+        "value": "Keski-Pohjanmaa",
+        "count": 822
+      },
+      {
+        "value": "Pohjanmaa",
+        "count": 763
+      },
+      {
+        "value": "Lappi",
+        "count": 686
+      },
+      {
+        "value": "Pohjois-Pohjanmaa",
+        "count": 678
+      },
+      {
+        "value": "Pohjois-Karjala",
+        "count": 639
+      },
+      {
+        "value": "Kainuu",
+        "count": 502
+      },
+      {
+        "value": "Jyväskylä",
+        "count": 448
+      },
+      {
+        "value": "Kerava",
+        "count": 443
+      },
+      {
+        "value": "Oulu",
+        "count": 431
+      },
+      {
+        "value": "Lahti",
+        "count": 386
+      },
+      {
+        "value": "Järvenpää",
+        "count": 334
+      },
+      {
+        "value": "Ahvenanmaa - Åland",
+        "count": 307
+      },
+      {
+        "value": "Kauniainen",
+        "count": 305
+      },
+      {
+        "value": "Tuusula",
+        "count": 272
+      },
+      {
+        "value": "Kuopio",
+        "count": 270
+      },
+      {
+        "value": "Hyvinkää",
+        "count": 266
+      },
+      {
+        "value": "Ruotsi",
+        "count": 257
+      },
+      {
+        "value": "Kirkkonummi",
+        "count": 224
+      },
+      {
+        "value": "Hämeenlinna",
+        "count": 224
+      },
+      {
+        "value": "Porvoo",
+        "count": 217
+      },
+      {
+        "value": "Vaasa",
+        "count": 214
+      },
+      {
+        "value": "Saksa",
+        "count": 205
+      },
+      {
+        "value": "Norja",
+        "count": 203
+      },
+      {
+        "value": "Lappeenranta",
+        "count": 168
+      },
+      {
+        "value": "Pori",
+        "count": 167
+      },
+      {
+        "value": "Sipoo",
+        "count": 160
+      },
+      {
+        "value": "Riihimäki",
+        "count": 154
+      },
+      {
+        "value": "Tanska",
+        "count": 150
+      },
+      {
+        "value": "Seinäjoki",
+        "count": 149
+      },
+      {
+        "value": "Kouvola",
+        "count": 147
+      },
+      {
+        "value": "Espanja",
+        "count": 135
+      },
+      {
+        "value": "Alankomaat",
+        "count": 130
+      }
+    ],
+    "kielitaito": [
+      {
+        "value": "Suomi – Äidinkieli",
+        "count": 15238
+      },
+      {
+        "value": "Englanti – Erittäin hyvä",
+        "count": 9958
+      },
+      {
+        "value": "Englanti – Hyvä",
+        "count": 7012
+      },
+      {
+        "value": "Ruotsi – Tyydyttävä",
+        "count": 5038
+      },
+      {
+        "value": "Englanti – Tyydyttävä",
+        "count": 2545
+      },
+      {
+        "value": "Ruotsi – Alkeet",
+        "count": 2076
+      },
+      {
+        "value": "Ruotsi – Hyvä",
+        "count": 1733
+      },
+      {
+        "value": "Suomi – Erittäin hyvä",
+        "count": 1575
+      },
+      {
+        "value": "Saksa – Alkeet",
+        "count": 1408
+      },
+      {
+        "value": "Suomi – Hyvä",
+        "count": 1388
+      },
+      {
+        "value": "Suomi – Alkeet",
+        "count": 1169
+      },
+      {
+        "value": "Saksa – Tyydyttävä",
+        "count": 1037
+      },
+      {
+        "value": "Suomi – Tyydyttävä",
+        "count": 845
+      },
+      {
+        "value": "Venäjä – Äidinkieli",
+        "count": 843
+      },
+      {
+        "value": "Englanti – Äidinkieli",
+        "count": 718
+      },
+      {
+        "value": "Espanja – Alkeet",
+        "count": 634
+      },
+      {
+        "value": "Ranska – Alkeet",
+        "count": 621
+      },
+      {
+        "value": "Ruotsi – Äidinkieli",
+        "count": 608
+      },
+      {
+        "value": "Venäjä – Alkeet",
+        "count": 460
+      },
+      {
+        "value": "Englanti – Alkeet",
+        "count": 444
+      },
+      {
+        "value": "Ruotsi – Erittäin hyvä",
+        "count": 411
+      },
+      {
+        "value": "Ranska – Tyydyttävä",
+        "count": 382
+      },
+      {
+        "value": "Saksa – Hyvä",
+        "count": 303
+      },
+      {
+        "value": "Viro – Äidinkieli",
+        "count": 290
+      },
+      {
+        "value": "Espanja – Tyydyttävä",
+        "count": 279
+      },
+      {
+        "value": "Venäjä – Erittäin hyvä",
+        "count": 227
+      },
+      {
+        "value": "Hindi – Erittäin hyvä",
+        "count": 216
+      },
+      {
+        "value": "Espanja – Hyvä",
+        "count": 202
+      },
+      {
+        "value": "Ranska – Hyvä",
+        "count": 195
+      },
+      {
+        "value": "Italia – Alkeet",
+        "count": 195
+      },
+      {
+        "value": "Espanja – Äidinkieli",
+        "count": 187
+      },
+      {
+        "value": "Arabia – Äidinkieli",
+        "count": 181
+      },
+      {
+        "value": "Japani – Alkeet",
+        "count": 179
+      },
+      {
+        "value": "Venäjä – Tyydyttävä",
+        "count": 169
+      },
+      {
+        "value": "Venäjä – Hyvä",
+        "count": 168
+      },
+      {
+        "value": "Ukraina – Äidinkieli",
+        "count": 142
+      },
+      {
+        "value": "Bengali – Äidinkieli",
+        "count": 134
+      },
+      {
+        "value": "Ranska – Erittäin hyvä",
+        "count": 133
+      },
+      {
+        "value": "Farsi – Äidinkieli",
+        "count": 126
+      },
+      {
+        "value": "Hindi – Äidinkieli",
+        "count": 126
+      },
+      {
+        "value": "Saksa – Erittäin hyvä",
+        "count": 120
+      },
+      {
+        "value": "Turkki – Äidinkieli",
+        "count": 113
+      },
+      {
+        "value": "Hindi – Hyvä",
+        "count": 111
+      },
+      {
+        "value": "Nepali – Äidinkieli",
+        "count": 109
+      },
+      {
+        "value": "Italia – Tyydyttävä",
+        "count": 106
+      },
+      {
+        "value": "Portugali – Äidinkieli",
+        "count": 100
+      },
+      {
+        "value": "Tagalog – Äidinkieli",
+        "count": 99
+      },
+      {
+        "value": "Ranska – Äidinkieli",
+        "count": 99
+      },
+      {
+        "value": "Espanja – Erittäin hyvä",
+        "count": 98
+      },
+      {
+        "value": "Urdu – Äidinkieli",
+        "count": 92
+      }
+    ],
+    "koulutus": [
+      {
+        "value": "",
+        "count": 9080
+      },
+      {
+        "value": "Ei tutkinnon nimeä tai oppilaitosta,",
+        "count": 63
+      },
+      {
+        "value": "Peruskoulu,",
+        "count": 17
+      },
+      {
+        "value": "Kansakoulu,",
+        "count": 5
+      },
+      {
+        "value": "opetuksen suunnittelija,",
+        "count": 4
+      },
+      {
+        "value": "Ylioppilastutkinto,",
+        "count": 4
+      },
+      {
+        "value": "Medianomi (AMK) / Tampereen ammattikorkeakoulu,8/2012 –",
+        "count": 4
+      },
+      {
+        "value": "koulutusohjelmakoordinaattori,,opetuksen suunnittelija,",
+        "count": 4
+      },
+      {
+        "value": "Sosiaali- ja terveysalan perustutkinto, lähihoitaja / Omnia,8/2019 –",
+        "count": 3
+      },
+      {
+        "value": "hankepäällikkö,",
+        "count": 3
+      },
+      {
+        "value": "yrityksen koulutuspäällikkö,",
+        "count": 3
+      },
+      {
+        "value": "Perusopetuksen lisäopetus,",
+        "count": 3
+      },
+      {
+        "value": "Sosionomi (AMK), sosiaaliala / Turun ammattikorkeakoulu,1/2021 –",
+        "count": 3
+      },
+      {
+        "value": "Ei tutkinnon nimeä tai oppilaitosta,,Ei tutkinnon nimeä tai oppilaitosta,",
+        "count": 3
+      },
+      {
+        "value": "Tieto- ja viestintätekniikan perustutkinto / Saimaan ammattiopisto Sampo,8/2021 –",
+        "count": 3
+      },
+      {
+        "value": "Merkonomi (opisto), liiketalous ja markkinointi / Omnia,8/2019 –",
+        "count": 2
+      },
+      {
+        "value": "Insinööri (AMK), tietotekniikka / Turun ammattikorkeakoulu,8/2020 –",
+        "count": 2
+      },
+      {
+        "value": "Liiketalouden perustutkinto, merkonomi / Business College Helsinki,8/2019 –",
+        "count": 2
+      },
+      {
+        "value": "Ylioppilastutkinto / Schildtin lukio,8/2021 –",
+        "count": 2
+      },
+      {
+        "value": "Kulttuurituottaja (AMK) / HUMAK,8/2018 –",
+        "count": 2
+      },
+      {
+        "value": "toimistoavustaja,",
+        "count": 2
+      },
+      {
+        "value": "Tradenomi (AMK), talous, hallinto ja markkinointi / Haaga-Helian ammattikorkeakoulu,8/2020 –",
+        "count": 2
+      },
+      {
+        "value": "Ylioppilastutkinto / Viherlaakson lukio,8/2021 –",
+        "count": 2
+      },
+      {
+        "value": "Media-alan ja kuvallisen ilmaisun perustutkinto / Stadin ammatti- ja aikuisopisto,8/2020 –",
+        "count": 2
+      },
+      {
+        "value": "projektinhallinta,",
+        "count": 2
+      },
+      {
+        "value": "koulutusohjelmakoordinaattori,",
+        "count": 2
+      },
+      {
+        "value": "Tradenomi (AMK), tietojenkäsittely / Haaga-Helia,1/2021 –",
+        "count": 2
+      },
+      {
+        "value": "Kauppat. maist., liiketaloustieteet / Vaasan yliopisto,8/2013 –",
+        "count": 2
+      },
+      {
+        "value": "Tradenomi (AMK), talous, hallinto ja markkinointi / Haaga-Helia,8/2020 –",
+        "count": 2
+      },
+      {
+        "value": "Kauppat. maist., liiketaloustieteet / Helsingin kauppakorkeakoulu,9/2002 –",
+        "count": 2
+      },
+      {
+        "value": "Insinööri, sähkötekniikka / Aalto yliopisto,9/2004 –",
+        "count": 2
+      },
+      {
+        "value": "Tradenomi (AMK), talous, hallinto ja markkinointi / Satakunnan ammattikorkeakoulu,8/2019 –",
+        "count": 2
+      },
+      {
+        "value": "Tradenomi (AMK), tietojenkäsittely / Kajaanin ammattikorkeakoulu,8/2020 –",
+        "count": 2
+      },
+      {
+        "value": "Tradenomi (AMK), tietojenkäsittely / Haaga-Helia Ammattikorkeakoulu,8/2013 –",
+        "count": 2
+      },
+      {
+        "value": "Tradenomi (AMK), talous, hallinto ja markkinointi / Haaga-Helia ammattikorkeakoulu,8/2017 –",
+        "count": 2
+      },
+      {
+        "value": "Ylioppilastutkinto / Matinkylän lukio,8/2021 –",
+        "count": 2
+      },
+      {
+        "value": "Media-alan ja kuvallisen ilmaisun perustutkinto / Stadin AO,8/2021 –",
+        "count": 2
+      },
+      {
+        "value": "Liiketalouden perustutkinto, merkonomi / Omnia,8/2022 –",
+        "count": 2
+      },
+      {
+        "value": "Kauppat. maist., liiketaloustieteet / Tampereen yliopisto,8/1986 –",
+        "count": 2
+      },
+      {
+        "value": "Liiketalouden perustutkinto, merkonomi / Gradia Jyväskylä,8/2021 –",
+        "count": 2
+      },
+      {
+        "value": "koulutusohjelmakoordinaattori,,yrityksen koulutuspäällikkö,",
+        "count": 2
+      },
+      {
+        "value": "Puutarhatalouden perustutkinto, puutarhuri / Kiipulan ammattiopisto,8/2018 –",
+        "count": 2
+      },
+      {
+        "value": "Insinööri (AMK), tietotekniikka / Metropolia Ammattikorkeakoulu,1/2019 –",
+        "count": 2
+      },
+      {
+        "value": "Insinööri (AMK), tietotekniikka / Metropolia,8/2015 –",
+        "count": 2
+      },
+      {
+        "value": "Insinööri, kuljetustekniikka / Riga Technical university,9/2011 –",
+        "count": 2
+      },
+      {
+        "value": "Elintarviketieteiden maisteri / Helsingin yliopisto,9/2019 –",
+        "count": 2
+      },
+      {
+        "value": "Tieto- ja viestintätekniikan perustutkinto / Business College Helsinki,8/2021 –",
+        "count": 2
+      },
+      {
+        "value": "Kulttuurituottaja (AMK) / Seinäjoen Ammattikorkeakoulu,9/2016 –",
+        "count": 2
+      },
+      {
+        "value": "Valokuvausalan ammattikoulutus / Online School \"White\",3/2021 –,Valokuvausalan ammattikoulutus / Medvedev Photo School,1/2020 –,Varanotaari / Police academy of Latvia,8/1999 –",
+        "count": 2
+      },
+      {
+        "value": "Sähkö- ja automaatiotekniikan perustutkinto / Saimaan ammattiopisto Sampo,8/2021 –",
+        "count": 2
+      }
+    ],
+    "ajokortit": [
+      {
+        "value": "Henkilöauto (B)",
+        "count": 16815
+      },
+      {
+        "value": "Moottoripyörä (A1, A2 tai A)",
+        "count": 4403
+      },
+      {
+        "value": "Henkilöauto ja perävaunu (B96 tai BE)",
+        "count": 3499
+      },
+      {
+        "value": "Kuorma-auto (C1 tai C)",
+        "count": 2925
+      },
+      {
+        "value": "Kuorma-auto ja perävaunu (C1E tai CE)",
+        "count": 970
+      },
+      {
+        "value": "Linja-auto (D1 tai D)",
+        "count": 220
+      },
+      {
+        "value": "Linja-auto ja perävaunu (D1E tai DE)",
+        "count": 118
+      }
+    ],
+    "lupatiedot": [
+      {
+        "value": "Hygieniapassi",
+        "count": 6654
+      },
+      {
+        "value": "Työturvallisuuskortti",
+        "count": 6404
+      },
+      {
+        "value": "Ensiapu 1",
+        "count": 4608
+      },
+      {
+        "value": "Tulityökortti",
+        "count": 2909
+      },
+      {
+        "value": "Anniskelupassi",
+        "count": 1561
+      },
+      {
+        "value": "Trukkikortti",
+        "count": 1159
+      },
+      {
+        "value": "Sähkötyöturvallisuuskortti SFS 6002",
+        "count": 643
+      },
+      {
+        "value": "Tieturvakortti 1 ja 2",
+        "count": 535
+      },
+      {
+        "value": "Kuljettajan ammattipätevyyskortti",
+        "count": 378
+      },
+      {
+        "value": "Ikärajapassi",
+        "count": 316
+      },
+      {
+        "value": "Ensiapu 2",
+        "count": 252
+      },
+      {
+        "value": "ADR-ajolupa",
+        "count": 214
+      },
+      {
+        "value": "Järjestyksenvalvojakortti",
+        "count": 196
+      },
+      {
+        "value": "Alkusammutuskortti AS1",
+        "count": 136
+      },
+      {
+        "value": "Työhyvinvointikortti",
+        "count": 112
+      },
+      {
+        "value": "Henkilönostinkortti",
+        "count": 111
+      },
+      {
+        "value": "Vesityökortti",
+        "count": 93
+      },
+      {
+        "value": "Vartijakortti",
+        "count": 93
+      },
+      {
+        "value": "Taksinkuljettajan ajolupa",
+        "count": 92
+      },
+      {
+        "value": "Henkilöauton ammattiajolupa",
+        "count": 82
+      },
+      {
+        "value": "Sähköturvallisuustutkinto 1, 2 ja 3",
+        "count": 72
+      },
+      {
+        "value": "Siltanosturikortti",
+        "count": 61
+      },
+      {
+        "value": "Hitsauspätevyydet / -luokat",
+        "count": 56
+      },
+      {
+        "value": "Vaaralliset aineet (VAK tai ADR-koulutus)",
+        "count": 55
+      },
+      {
+        "value": "Kuljettajankirja I",
+        "count": 54
+      },
+      {
+        "value": "Konemiehen pätevyyskirja",
+        "count": 53
+      },
+      {
+        "value": "A/T-pätevyys, Antenniverkkotyöt-pätevyys",
+        "count": 53
+      },
+      {
+        "value": "Matupa - matkailualan turvallisuuspassi",
+        "count": 45
+      },
+      {
+        "value": "Asbestipurkutyövaltuutus",
+        "count": 39
+      },
+      {
+        "value": "AT-pätevyys, Antenni- ja tietoverkkotyöt -pätevyys",
+        "count": 33
+      },
+      {
+        "value": "STCW-95 Basic",
+        "count": 30
+      },
+      {
+        "value": "Kattotulityökortti",
+        "count": 29
+      },
+      {
+        "value": "Märkätilojen vedeneristäjän sertifikaatti",
+        "count": 26
+      },
+      {
+        "value": "Pelastautumiskurssi",
+        "count": 26
+      },
+      {
+        "value": "Vesihygieniapassi",
+        "count": 25
+      },
+      {
+        "value": "Kaasusumutinlupa",
+        "count": 24
+      },
+      {
+        "value": "Asunnon välittäjä LKV",
+        "count": 21
+      },
+      {
+        "value": "Kuljettajankirja II",
+        "count": 17
+      },
+      {
+        "value": "Turvasuojaajakortti",
+        "count": 16
+      },
+      {
+        "value": "Soster - sosiaali- ja terveydenhuollon turvakortti",
+        "count": 16
+      },
+      {
+        "value": "Asiakirjahallinnon ja arkistotoimen perustutkinto",
+        "count": 15
+      },
+      {
+        "value": "Kotimaan laivurinkirja",
+        "count": 15
+      },
+      {
+        "value": "Turvallisuusneuvonantajakoulutus",
+        "count": 14
+      },
+      {
+        "value": "Pelastusvenemiehen pätevyyskirja",
+        "count": 13
+      },
+      {
+        "value": "Konehoitajankirja",
+        "count": 12
+      },
+      {
+        "value": "Vaarallisten aineiden ilmakulj. Peruskrs. (DGR)",
+        "count": 12
+      },
+      {
+        "value": "Vaarall. Kem. Teoll. Käsittelyn, varast. Käytönval",
+        "count": 12
+      },
+      {
+        "value": "ARPA-kurssi (Automatic radar plotting aid)",
+        "count": 11
+      },
+      {
+        "value": "Auktorisoitu kääntäjä",
+        "count": 11
+      },
+      {
+        "value": "Kansimiehen pätevyyskirja",
+        "count": 10
+      }
+    ]
+  },
+  "generated": "2025-08-12T19:38:06.715Z",
+  "profileCount": 27717,
+  "version": "CHUNKED_INITIAL_1.0"
+};
+    
+    // Full data ladataan dynaamisesti hakua varten
+    let FULL_CHECKBOX_DATA = null;
+    
+    // Lataa full data (KAIKKI ammatit myös 1-2 henkilön)
+    async function loadFullData() {
+        if (FULL_CHECKBOX_DATA) return FULL_CHECKBOX_DATA;
+        
+        try {
+            const response = await fetch('./checkbox-data-full.json');
+            FULL_CHECKBOX_DATA = await response.json();
+            console.log('✅ Full data ladattu:', FULL_CHECKBOX_DATA.profileCount, 'profiilia, KAIKKI ammatit');
+            return FULL_CHECKBOX_DATA;
+        } catch (error) {
+            console.error('❌ Virhe ladattaessa full dataa:', error);
+            return STATIC_CHECKBOX_DATA; // Fallback initial dataan
+        }
+    }
+    
+    // Full data ladataan dynaamisesti hakua varten
+    let FULL_CHECKBOX_DATA = null;
+    
+    // Lataa full data (KAIKKI ammatit myös 1-2 henkilön)
+    async function loadFullData() {
+        if (FULL_CHECKBOX_DATA) return FULL_CHECKBOX_DATA;
+        
+        try {
+            const response = await fetch('./checkbox-data-full.json');
+            FULL_CHECKBOX_DATA = await response.json();
+            console.log('✅ Full data ladattu:', FULL_CHECKBOX_DATA.profileCount, 'profiilia, KAIKKI ammatit');
+            return FULL_CHECKBOX_DATA;
+        } catch (error) {
+            console.error('❌ Virhe ladattaessa full dataa:', error);
+            return STATIC_CHECKBOX_DATA; // Fallback initial dataan
+        }
+    }
+
+        // Load checkbox data from embedded data (INSTANT)
+        async function loadStaticCheckboxData() {
+            console.log('📦 Loading checkbox data from embedded data...');
+            
+            try {
+                const checkboxFile = STATIC_CHECKBOX_DATA;
+                console.log('✅ Embedded checkbox data loaded:', checkboxFile.profileCount, 'profiles,', checkboxFile.generated);
+                
+                // Set the global categoryIndex
+                categoryIndex = checkboxFile.data;
+                
+                // Create checkboxes immediately
+                createCheckboxesFromCache();
+                
+                document.getElementById('results-count').textContent = 
+                    `Hakuparametrit ladattu (${checkboxFile.profileCount} profiilia, päivitetty ${new Date(checkboxFile.generated).toLocaleDateString('fi-FI')})`;
+                
+                return true;
+                
+            } catch (error) {
+                console.error('❌ CRITICAL: Could not load embedded checkbox data:', error);
+                document.getElementById('results-count').textContent = 
+                    'VIRHE: Hakuparametrien lataus epäonnistui. Ota yhteyttä ylläpitoon.';
+                
+                // Show error message instead of loading profiles
+                showCheckboxError();
+                return false;
+            }
+        }
+        
+        // Show error message when static data fails
+        function showCheckboxError() {
+            const categories = ['ammatti', 'osaaminen', 'työtoiveet', 'alue', 'kieli', 'koulutus', 'ajokortit', 'lupatiedot'];
+            
+            categories.forEach(category => {
+                const container = document.getElementById(`${category}-checkboxes`);
+                if (container) {
+                    container.innerHTML = '<div style="color: red; padding: 10px;">❌ Hakuparametrien lataus epäonnistui</div>';
+                }
+            });
+        }
+        
+        // Load cached checkbox index
+        function loadCachedIndex() {
+            console.log('🔍 loadCachedIndex called. buildingIndex:', buildingIndex, 'categoryIndex:', !!categoryIndex);
+            
+            // Prevent multiple simultaneous calls
+            if (buildingIndex) {
+                console.log('⏸️ Index building already in progress, skipping...');
+                return;
+            }
+            
+            const cachedIndex = localStorage.getItem('profileIndex');
+            const cachedDate = localStorage.getItem('profileIndexDate');
+            const cachedVersion = localStorage.getItem('profileIndexVersion');
+            const expectedVersion = 'v2.0';
+            
+            console.log('📦 Cache check:', { 
+                hasCachedIndex: !!cachedIndex, 
+                hasCachedDate: !!cachedDate, 
+                cachedVersion: cachedVersion,
+                expectedVersion: expectedVersion,
+                cacheSize: cachedIndex ? cachedIndex.length : 0
+            });
+            
+            if (cachedIndex && cachedDate && cachedVersion === expectedVersion) {
+                const cacheAge = Date.now() - new Date(cachedDate).getTime();
+                const maxAge = 24 * 60 * 60 * 1000; // 24 hours
+                
+                if (cacheAge < maxAge) {
+                    console.log('⚡ Loading checkboxes from cache (v2.0)');
+                    try {
+                        categoryIndex = JSON.parse(cachedIndex);
+                        createCheckboxesFromCache();
+                        document.getElementById('results-count').textContent = `Checkbox-parametrit ladattu välimuistista. Valitse hakuehdot.`;
+                        return;
+                    } catch (error) {
+                        console.error('❌ Error parsing cached index:', error);
+                    }
+                } else {
+                    console.log('🕒 Cache expired, rebuilding...');
+                }
+            } else {
+                console.log('🔄 Cache version mismatch or missing, rebuilding...');
+                if (cachedVersion && cachedVersion !== expectedVersion) {
+                    console.log(`Version change: ${cachedVersion} → ${expectedVersion}`);
+                }
+            }
+            
+            // If cache is invalid, build fresh index
+            buildIndexIfNeeded();
+        }
+        
+        // Show placeholder checkboxes while building cache
+        function showPlaceholderCheckboxes() {
+            const categories = ['ammatti', 'osaaminen', 'työtoiveet', 'alue', 'kieli', 'koulutus', 'ajokortit', 'lupatiedot'];
+            categories.forEach(category => {
+                const container = document.getElementById(`${category}-checkboxes`);
+                if (container) {
+                    container.innerHTML = '<div class="checkbox-search"><input type="text" placeholder="Ladataan..." disabled></div><p style="color: #666; font-style: italic;">Ladataan parametreja...</p>';
+                }
+            });
+            document.getElementById('results-count').textContent = 'Ladataan hakuparametreja ensimmäistä kertaa...';
+        }
+
+        // Search profiles
+        function searchProfiles() {
+            // Get free text search
+            const freeSearch = document.getElementById('search-free').value.toLowerCase().trim();
+            
+            // Get selected checkboxes
+            const selectedFilters = {
+                ammatti: getSelectedCheckboxes('ammatti'),
+                koulutus: getSelectedCheckboxes('koulutus'),
+                osaaminen: getSelectedCheckboxes('osaaminen'),
+                alue: getSelectedCheckboxes('alue'),
+                kieli: getSelectedCheckboxes('kieli'),
+                työtoiveet: getSelectedCheckboxes('työtoiveet'),
+                ajokortit: getSelectedCheckboxes('ajokortit'),
+                lupatiedot: getSelectedCheckboxes('lupatiedot')
+            };
+
+            // Check if any search criteria is specified
+            const hasSearchCriteria = freeSearch || 
+                Object.values(selectedFilters).some(arr => arr.length > 0);
+
+            if (!hasSearchCriteria) {
+                document.getElementById('results-count').textContent = `Valitse hakuehdot nähdäksesi profiilit`;
+                document.getElementById('profiles-container').innerHTML = '<div class="profile-card"><p>Valitse checkboxeista hakuehdot tai käytä vapaata hakua</p></div>';
+                return;
+            }
+
+            // NOW load profiles for search (only when user actually searches)
+            console.log('🔍 User initiated search - loading profiles from Firebase...');
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('results-count').textContent = 'Ladataan profiileja hakua varten...';
+            loadProfilesForSearch(freeSearch, selectedFilters);
+        }
+
+        // Get selected checkbox values for a category
+        function getSelectedCheckboxes(category) {
+            const checkboxes = document.querySelectorAll(`input[name="${category}"]:checked`);
+            return Array.from(checkboxes).map(cb => cb.value);
+        }
+
+        // Clear search
+        function clearSearch() {
+            // Clear free text search
+            document.getElementById('search-free').value = '';
+            
+            // Clear all checkboxes
+            const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+            checkboxes.forEach(cb => cb.checked = false);
+            
+            // Clear all category search fields
+            const searchFields = document.querySelectorAll('.checkbox-search input');
+            searchFields.forEach(field => {
+                field.value = '';
+                // Trigger filter to show all items
+                const category = field.getAttribute('onkeyup').match(/'([^']+)'/)[1];
+                filterCheckboxes(category, '');
+            });
+            
+            document.getElementById('results-count').textContent = `Valitse hakuehdot nähdäksesi profiilit.`;
+            document.getElementById('profiles-container').innerHTML = '<div class="profile-card"><p>Valitse checkboxeista hakuehdot tai käytä vapaata hakua. Paina "Hae profiileja" nähdäksesi tulokset.</p></div>';
+        }
+        
+        // Load profiles for search when needed
+        function loadProfilesForSearch(freeSearch, selectedFilters) {
+            console.log('🔍 Loading profiles for search...');
+            
+            const batchSize = 500;
+            let allProfilesTemp = [];
+            
+            function loadBatch(lastDoc = null) {
+                let query = db.collection('profiles').limit(batchSize);
+                
+                if (lastDoc) {
+                    query = query.startAfter(lastDoc);
+                }
+                
+                query.get().then((querySnapshot) => {
+                    const batch = [];
+                    let lastDocument = null;
+                    
+                    querySnapshot.forEach((doc) => {
+                        batch.push({
+                            id: doc.id,
+                            ...doc.data()
+                        });
+                        lastDocument = doc;
+                    });
+                    
+                    allProfilesTemp = allProfilesTemp.concat(batch);
+                    console.log(`📊 Loaded batch: ${batch.length} profiles (total: ${allProfilesTemp.length})`);
+                    
+                    // Load more if available
+                    if (querySnapshot.size === batchSize) {
+                        loadBatch(lastDocument);
+                    } else {
+                        // All profiles loaded, now perform search
+                        allProfiles = allProfilesTemp;
+                        console.log(`✅ All profiles loaded for search: ${allProfiles.length} total`);
+                        
+                        // Now perform the search with the loaded profiles
+                        performSearchWithProfiles(freeSearch, selectedFilters);
+                    }
+                }).catch((error) => {
+                    console.error('❌ Error loading profiles for search:', error);
+                    document.getElementById('loading').style.display = 'none';
+                    document.getElementById('results-count').textContent = 'Virhe ladattaessa profiileja.';
+                });
+            }
+            
+            loadBatch();
+        }
+        
+        // Perform search with loaded profiles
+        function performSearchWithProfiles(freeSearch, selectedFilters) {
+            const filtered = allProfiles.filter(profile => {
+                let matches = true;
+                
+                // Free text search - SAFE VERSION
+                if (freeSearch) {
+                    const safeIncludes = (data, searchTerm) => {
+                        try {
+                            if (!data) return false;
+                            return String(data).toLowerCase().includes(searchTerm);
+                        } catch (e) {
+                            return false;
+                        }
+                    };
+                    
+                    const textMatches = safeIncludes(profile.esittely, freeSearch) ||
+                                       safeIncludes(profile.esittely_10sanaa, freeSearch) ||
+                                       safeIncludes(profile.tyonhakualue, freeSearch) ||
+                                       safeIncludes(profile.aloitusajankohta, freeSearch) ||
+                                       safeIncludes(profile.muu_kokemus, freeSearch) ||
+                                       safeIncludes(profile.tyokokemus, freeSearch) ||
+                                       safeIncludes(profile.osaamisteksti, freeSearch) ||
+                                       safeIncludes(profile.ajotiedot, freeSearch) ||
+                                       (profile.ammatit && profile.ammatit.some(a => safeIncludes(a, freeSearch))) ||
+                                       (profile.osaamiset && profile.osaamiset.some(o => safeIncludes(o, freeSearch))) ||
+                                       (profile.tyotoiveet && profile.tyotoiveet.some(t => safeIncludes(t, freeSearch))) ||
+                                       (profile.koulutus && profile.koulutus.some(k => safeIncludes(k, freeSearch))) ||
+                                       (profile.kielitaito && profile.kielitaito.some(k => safeIncludes(k, freeSearch))) ||
+                                       (profile.ajokortit && profile.ajokortit.some(a => safeIncludes(a, freeSearch))) ||
+                                       (profile.lupatiedot && profile.lupatiedot.some(l => safeIncludes(l, freeSearch)));
+                    
+                    if (!textMatches) matches = false;
+                }
+                
+                // Filter by selected checkboxes
+                Object.keys(selectedFilters).forEach(filterKey => {
+                    const selected = selectedFilters[filterKey];
+                    if (selected.length > 0) {
+                        let fieldMatches = false;
+                        
+                        try {
+                            const getProfileField = (key) => {
+                                switch(key) {
+                                    case 'ammatti': return profile.ammatit || [];
+                                    case 'koulutus': return profile.koulutus || [];
+                                    case 'osaaminen': return profile.osaamiset || [];
+                                    case 'alue': return profile.tyonhakualue ? [profile.tyonhakualue] : [];
+                                    case 'kieli': return profile.kielitaito || [];
+                                    case 'työtoiveet': return profile.tyotoiveet || [];
+                                    case 'ajokortit': return profile.ajokortit || [];
+                                    case 'lupatiedot': return profile.lupatiedot || [];
+                                    default: return [];
+                                }
+                            };
+                            
+                            const profileData = getProfileField(filterKey);
+                            const profileValues = Array.isArray(profileData) ? 
+                                profileData.map(item => String(item).trim()) : 
+                                [String(profileData).trim()];
+                            
+                            // Erikseen käsittely alue-hakuehvoille maantieteellisen hierarkian takia
+                            if (filterKey === 'alue') {
+                                fieldMatches = profileValues.some(profileValue => 
+                                    matchesGeographicArea(profileValue, selected)
+                                );
+                            } else {
+                                fieldMatches = selected.some(selectedValue => 
+                                    profileValues.some(profileValue => 
+                                        profileValue.toLowerCase() === String(selectedValue).toLowerCase()
+                                    )
+                                );
+                            }
+                        } catch (error) {
+                            console.warn(`Error checking ${filterKey}:`, error);
+                        }
+                        
+                        if (!fieldMatches) matches = false;
+                    }
+                });
+                
+                return matches;
+            });
+            
+            console.log(`✅ Search completed: ${filtered.length} matches out of ${allProfiles.length} profiles`);
+            
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('results-info').style.display = 'block';
+            document.getElementById('results-count').textContent = `Löytyi ${filtered.length} profiilia hakuehdoilla.`;
+            
+            // GDPR: Rajoita tulokset kolmeen ja blur-efekti (maksullinen palvelu työnantajille)
+            displayProfiles(filtered.slice(0, 3)); // Show only first 3 results with blur
+        }
+
+        // Create individual checkbox item
+        function createCheckboxItem(category, value, count) {
+            // Null/undefined check
+            if (!value || value === null || value === undefined) {
+                console.warn('Skipping invalid checkbox item:', { category, value, count });
+                return null;
+            }
+            
+            const safeValue = String(value).trim();
+            if (!safeValue) {
+                console.warn('Skipping empty checkbox item:', { category, value, count });
+                return null;
+            }
+            
+            const div = document.createElement('div');
+            div.className = 'checkbox-item';
+
+            const checkbox = document.createElement('input');
+            checkbox.type = 'checkbox';
+            checkbox.id = `${category}-${safeValue.replace(/\s+/g, '-')}`;
+            checkbox.value = safeValue;
+            checkbox.name = category;
+
+            const label = document.createElement('label');
+            label.htmlFor = checkbox.id;
+            label.innerHTML = `
+                <span>${capitalizeFirst(safeValue)}</span>
+                <span class="checkbox-count">${count || 0}</span>
+            `;
+
+            div.appendChild(checkbox);
+            div.appendChild(label);
+
+            return div;
+        }
+
+        // Show more options for a category
+        function showMoreOptions(category) {
+            const container = document.getElementById(`${category}-checkboxes`);
+            const remaining = container.getAttribute('data-remaining');
+            
+            if (remaining) {
+                const remainingItems = JSON.parse(remaining);
+                
+                remainingItems.forEach(([key, count]) => {
+                    const item = createCheckboxItem(category, key, count);
+                    if (item) { // Only append if item is valid
+                        container.appendChild(item);
+                    }
+                });
+
+                container.removeAttribute('data-remaining');
+                
+                // Hide the "show more" button
+                const showMoreBtn = container.parentNode.querySelector('.show-more-btn');
+                if (showMoreBtn) {
+                    showMoreBtn.style.display = 'none';
+                }
+            }
+        }
+
+        // Capitalize first letter
+        function capitalizeFirst(str) {
+            return str.charAt(0).toUpperCase() + str.slice(1);
+        }
+
+        // Display profiles with GDPR privacy protection and premium service notice
+        function displayProfiles(profiles) {
+            const container = document.getElementById('profiles-container');
+            container.innerHTML = '';
+
+            if (profiles.length === 0) {
+                container.innerHTML = '<div class="profile-card"><p>Ei tuloksia hakuehdoilla. Kokeile erilaisia hakusanoja.</p></div>';
+                return;
+            }
+
+            // Add premium service notice at the top
+            const premiumNotice = document.createElement('div');
+            premiumNotice.className = 'premium-notice';
+            premiumNotice.innerHTML = `
+                <h3>🏢 Työnantajapalvelu</h3>
+                <p>Profiilitiedot ovat GDPR-suojattuja. Täydet tiedot ja yhteystiedot ovat saatavilla maksullisessa työnantajapalvelussa.</p>
+                <a href="mailto:info@yoro.fi?subject=Työnantajapalvelu - Profiiliselain" class="contact-btn">
+                    📧 Ota yhteyttä työnantajapalvelusta
+                </a>
+            `;
+            container.appendChild(premiumNotice);
+
+            profiles.forEach((profile, index) => {
+                const card = document.createElement('div');
+                card.className = 'profile-card gdpr-blurred';
+                card.style.position = 'relative';
+                
+                let html = `
+                    <div class="profile-header">
+                        <div class="profile-id">Profiili #${profile.id || index + 1}</div>
+                    </div>
+                `;
+                
+                // GDPR: Show only basic non-identifying information with heavy blur
+                if (profile.tyonhakualue) html += `<div class="profile-field"><strong>Työnhakualue:</strong><span>${profile.tyonhakualue}</span></div>`;
+                if (profile.aloitusajankohta) html += `<div class="profile-field"><strong>Aloitusajankohta:</strong><span>${profile.aloitusajankohta}</span></div>`;
+                
+                if (profile.ammatit && profile.ammatit.length > 0) {
+                    html += `<div class="profile-field"><strong>Ammatit:</strong><div class="tags">`;
+                    profile.ammatit.slice(0, 3).forEach(ammatti => {
+                        html += `<span class="tag">${ammatti}</span>`;
+                    });
+                    html += `</div></div>`;
+                }
+                
+                if (profile.osaamiset && profile.osaamiset.length > 0) {
+                    html += `<div class="profile-field"><strong>Osaamiset:</strong><div class="tags">`;
+                    profile.osaamiset.slice(0, 5).forEach(osaaminen => {
+                        html += `<span class="tag">${osaaminen}</span>`;
+                    });
+                    html += `</div></div>`;
+                }
+                
+                if (profile.koulutus && profile.koulutus.length > 0) {
+                    html += `<div class="profile-field"><strong>Koulutus:</strong><div class="tags">`;
+                    profile.koulutus.slice(0, 2).forEach(koulutusItem => {
+                        html += `<span class="tag">${koulutusItem}</span>`;
+                    });
+                    html += `</div></div>`;
+                }
+                
+                card.innerHTML = html;
+                
+                // Add GDPR overlay to each card
+                const overlay = document.createElement('div');
+                overlay.className = 'gdpr-overlay';
+                overlay.innerHTML = `
+                    <h3>🔒 GDPR-suojattu profiili</h3>
+                    <p>Henkilötiedot on suojattu tietosuoja-asetuksen mukaisesti.</p>
+                    <p><strong>Työnantajille:</strong> Täydet tiedot ja yhteystiedot saatavilla maksullisessa palvelussa.</p>
+                `;
+                card.appendChild(overlay);
+                
+                container.appendChild(card);
+            });
+
+            // Add additional notice if more profiles were found
+            if (profiles.length >= 3) {
+                const moreResults = document.createElement('div');
+                moreResults.className = 'premium-notice';
+                moreResults.style.marginTop = '30px';
+                moreResults.innerHTML = `
+                    <h3>📊 Lisää tuloksia saatavilla</h3>
+                    <p>Hakuehdoillasi löytyi yhteensä profiileja. Työnantajapalvelussa näet kaikki tulokset ja täydet yhteystiedot.</p>
+                    <a href="mailto:info@yoro.fi?subject=Työnantajapalvelu - Lisää tuloksia" class="contact-btn">
+                        🚀 Tilaa työnantajapalvelu
+                    </a>
+                `;
+                container.appendChild(moreResults);
+            }
+        }
+
+        // Enter key support for search
+        document.addEventListener('DOMContentLoaded', function() {
+            const searchInputs = document.querySelectorAll('input[type="text"]');
+            searchInputs.forEach(input => {
+                input.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        searchProfiles();
+                    }
+                });
+            });
+        });
+
+        // CACHE MANAGEMENT FUNCTIONS
+        
+        // Load cached index from localStorage
+        function loadCachedIndex() {
+            console.log('🔍 Checking for cached index...');
+            
+            // Show loading placeholders immediately
+            showPlaceholderCheckboxes();
+            
+            try {
+                const cached = localStorage.getItem('profileIndex');
+                const cacheDate = localStorage.getItem('profileIndexDate');
+                const cacheVersion = localStorage.getItem('profileIndexVersion');
+                const expectedVersion = 'v2.0'; // Update this when changing category order
+                
+                console.log('Cache check:', { 
+                    cached: !!cached, 
+                    cacheDate: cacheDate,
+                    cacheVersion: cacheVersion,
+                    expectedVersion: expectedVersion,
+                    cachedSize: cached ? cached.length : 0
+                });
+                
+                if (!cached || !cacheDate || cacheVersion !== expectedVersion) {
+                    if (cacheVersion !== expectedVersion) {
+                        console.log('🔄 Cache version mismatch, rebuilding...');
+                    } else {
+                        console.log('❌ No cache found, building index now...');
+                    }
+                    document.getElementById('results-count').textContent = 'Rakennetaan hakuindeksiä ensimmäistä kertaa... Tämä voi kestää hetken.';
+                    buildIndexIfNeeded();
+                    return false;
+                }
+                
+                const cacheTime = new Date(cacheDate);
+                const now = new Date();
+                const hoursDiff = (now - cacheTime) / (1000 * 60 * 60);
+                
+                console.log(`⏰ Cache age: ${hoursDiff.toFixed(1)} hours (expires at ${CACHE_EXPIRY_HOURS} hours)`);
+                
+                if (hoursDiff > CACHE_EXPIRY_HOURS) {
+                    console.log('🕒 Cache expired, rebuilding...');
+                    document.getElementById('results-count').textContent = 'Päivitetään hakuindeksiä... Tämä voi kestää hetken.';
+                    buildIndexIfNeeded();
+                    return false;
+                }
+                
+                categoryIndex = JSON.parse(cached);
+                console.log('✅ Loaded cached index:', Object.keys(categoryIndex).map(k => `${k}: ${categoryIndex[k] ? categoryIndex[k].length : 0}`));
+                
+                // Create checkboxes from cache IMMEDIATELY
+                console.log('🎯 Creating checkboxes from cached index...');
+                createCheckboxesFromCache();
+                
+                document.getElementById('results-count').textContent = 'Hakuparametrit ladattu välimuistista. Valitse hakuehdot.';
+                
+                return true;
+            } catch (error) {
+                console.error('❌ Error loading cache:', error);
+                document.getElementById('results-count').textContent = 'Virhe ladatessa hakuindeksiä. Yritetään uudelleen...';
+                buildIndexIfNeeded();
+                return false;
+            }
+        }
+        
+        // Build index only if needed (no cache or expired)
+        function buildIndexIfNeeded() {
+            console.log('🔧 buildIndexIfNeeded called. buildingIndex:', buildingIndex);
+            
+            // Prevent multiple simultaneous builds
+            if (buildingIndex) {
+                console.log('⏸️ Index building already in progress, skipping...');
+                return;
+            }
+            
+            buildingIndex = true;
+            console.log('🔄 Building checkbox index - loading profiles from Firebase...');
+            
+            // Safety timeout - reset buildingIndex after 5 minutes
+            setTimeout(() => {
+                if (buildingIndex) {
+                    console.log('⚠️ Timeout reached, resetting buildingIndex flag');
+                    buildingIndex = false;
+                }
+            }, 5 * 60 * 1000); // 5 minutes
+            
+            // Show placeholder checkboxes immediately
+            showPlaceholderCheckboxes();
+            
+            // Load profiles only for building the checkbox index (NOT storing full profiles)
+            const batchSize = 500;
+            let processedCount = 0;
+            
+            // Initialize counters for checkbox parameters
+            const index = {
+                ammatti: new Map(),
+                osaaminen: new Map(),
+                työtoiveet: new Map(),
+                alue: new Map(),
+                kieli: new Map(),
+                koulutus: new Map(),
+                ajokortit: new Map(),
+                lupatiedot: new Map()
+            };
+            
+            function loadBatch(lastDoc = null) {
+                let query = db.collection('profiles').limit(batchSize);
+                
+                if (lastDoc) {
+                    query = query.startAfter(lastDoc);
+                }
+                
+                query.get().then((querySnapshot) => {
+                    let lastDocument = null;
+                    
+                    querySnapshot.forEach((doc) => {
+                        const profile = doc.data();
+                        lastDocument = doc;
+                        
+                        // Process ONLY the checkbox parameters (not full profile data)
+                        try {
+                            const processField = (fieldData, targetMap) => {
+                                if (!fieldData) return;
+                                
+                                let items = [];
+                                if (Array.isArray(fieldData)) {
+                                    items = fieldData;
+                                } else if (typeof fieldData === 'string') {
+                                    items = [fieldData];
+                                } else {
+                                    items = [String(fieldData)];
+                                }
+                                
+                                items.forEach(item => {
+                                    try {
+                                        if (item && String(item).trim()) {
+                                            const key = String(item).trim();
+                                            targetMap.set(key, (targetMap.get(key) || 0) + 1);
+                                        }
+                                    } catch (e) {
+                                        console.warn('Error processing item:', item, e);
+                                    }
+                                });
+                            };
+                            
+                            // Only process checkbox fields - NO full profile storage
+                            processField(profile.ammatit, index.ammatti);
+                            processField(profile.osaamiset, index.osaaminen);
+                            processField(profile.koulutus, index.koulutus);
+                            processField(profile.tyonhakualue, index.alue);
+                            processField(profile.kielitaito, index.kieli);
+                            processField(profile.tyotoiveet, index.työtoiveet);
+                            processField(profile.ajokortit, index.ajokortit);
+                            processField(profile.lupatiedot, index.lupatiedot);
+                            
+                            processedCount++;
+                            
+                        } catch (error) {
+                            console.error('Error processing profile for index:', error);
+                        }
+                    });
+                    
+                    console.log(`📊 Building checkbox index: ${querySnapshot.size} profiles processed (total: ${processedCount})`);
+                    
+                    // Update status
+                    document.getElementById('results-count').textContent = `Rakennetaan checkbox-indeksiä... ${processedCount} profiilia prosessoitu`;
+                    
+                    // Load more if available
+                    if (querySnapshot.size === batchSize) {
+                        loadBatch(lastDocument);
+                    } else {
+                        // All profiles processed for checkbox index - cache only parameters
+                        console.log(`✅ Checkbox index built from ${processedCount} profiles`);
+                        
+                        // Convert Maps to sorted arrays (only checkbox data)
+                        categoryIndex = {};
+                        Object.keys(index).forEach(category => {
+                            const sorted = Array.from(index[category].entries())
+                                .sort((a, b) => a[0].localeCompare(b[0])) // Alphabetical order
+                                .map(([name, count]) => ({ name, count }));
+                            categoryIndex[category] = sorted;
+                        });
+
+                        // Cache ONLY the checkbox parameters (not full profiles)
+                        try {
+                            localStorage.setItem('profileIndex', JSON.stringify(categoryIndex));
+                            localStorage.setItem('profileIndexDate', new Date().toISOString());
+                            localStorage.setItem('profileIndexVersion', 'v2.0');
+                            console.log('💾 Checkbox index cached successfully - NO profile data stored');
+                        } catch (error) {
+                            console.error('❌ Error caching checkbox index:', error);
+                        }
+                        
+                        // Create checkboxes from the new index
+                        createCheckboxesFromCache();
+                        
+                        // DO NOT store allProfiles - they will be loaded fresh for each search
+                        allProfiles = [];
+                        
+                        buildingIndex = false; // Reset flag
+                        document.getElementById('results-count').textContent = `Checkbox-parametrit valmiit ${processedCount} profiilista. Valitse hakuehdot.`;
+                    }
+                }).catch((error) => {
+                    console.error('❌ Error loading profiles for checkbox index:', error);
+                    document.getElementById('results-count').textContent = 'Virhe rakentaessa checkbox-indeksiä.';
+                    buildingIndex = false; // Reset flag on error
+                });
+            }
+            
+            loadBatch();
+        }
+        
+        // Create checkboxes from cached index (ONLY from static data)
+        function createCheckboxesFromCache() {
+            console.log('🏷️ Creating checkboxes from static data, categoryIndex exists:', !!categoryIndex);
+            
+            if (!categoryIndex) {
+                console.error('❌ No categoryIndex available - static data loading failed');
+                showCheckboxError();
+                return;
+            }
+            
+            console.log('📋 Category index keys:', Object.keys(categoryIndex));
+            
+            const categoryMap = {
+                'ammatti': 'ammatti',
+                'osaaminen': 'osaaminen',
+                'työtoiveet': 'työtoiveet',
+                'työnhakualue': 'alue',
+                'kielitaito': 'kieli',
+                'koulutus': 'koulutus', 
+                'ajokortit': 'ajokortit',
+                'lupatiedot': 'lupatiedot'
+            };
+            
+            Object.keys(categoryMap).forEach(category => {
+                const categoryData = categoryIndex[category];
+                let items = [];
+                
+                console.log(`🔍 Processing category: ${category}, data exists:`, !!categoryData, 'mapping to:', categoryMap[category]);
+                
+                if (categoryData && Array.isArray(categoryData)) {
+                    items = categoryData.filter(item => item && item.value);
+                    console.log(`📋 Creating checkboxes for ${category}:`, items.length, 'items');
+                    createCheckboxesWithSearch(categoryMap[category], items);
+                } else {
+                    console.warn(`⚠️ No data for category: ${category}`);
+                }
+            });
+            
+            console.log('✅ All checkboxes created from static data');
+        }
+        
+        // Build checkboxes directly from loaded profiles (fallback when no cache)
+        function buildCheckboxesFromProfiles() {
+            console.log('🏗️ Building checkboxes directly from loaded profiles...');
+            
+            if (profileCount === 0) {
+                console.log('⏳ No profiles loaded yet, showing placeholders...');
+                showPlaceholderCheckboxes();
+                return;
+            }
+            
+            console.log(`📊 Building checkboxes from ${profileCount} profiles`);
+            
+            // Build category index from loaded profiles
+            const tempCategoryIndex = {
+                ammatti: new Map(),
+                osaaminen: new Map(),
+                työtoiveet: new Map(),
+                työnhakualue: new Map(),
+                kielitaito: new Map(),
+                koulutus: new Map(),
+                ajokortit: new Map(),
+                lupatiedot: new Map()
+            };
+            
+            // Process all loaded profiles
+            Object.values(allProfiles).forEach(profile => {
+                // Process each category
+                if (profile.ammatti) tempCategoryIndex.ammatti.set(profile.ammatti, (tempCategoryIndex.ammatti.get(profile.ammatti) || 0) + 1);
+                if (profile.osaaminen && Array.isArray(profile.osaaminen)) {
+                    profile.osaaminen.forEach(skill => {
+                        if (skill) tempCategoryIndex.osaaminen.set(skill, (tempCategoryIndex.osaaminen.get(skill) || 0) + 1);
+                    });
+                }
+                if (profile.työtoiveet && Array.isArray(profile.työtoiveet)) {
+                    profile.työtoiveet.forEach(wish => {
+                        if (wish) tempCategoryIndex.työtoiveet.set(wish, (tempCategoryIndex.työtoiveet.get(wish) || 0) + 1);
+                    });
+                }
+                if (profile.työnhakualue) tempCategoryIndex.työnhakualue.set(profile.työnhakualue, (tempCategoryIndex.työnhakualue.get(profile.työnhakualue) || 0) + 1);
+                if (profile.kielitaito && Array.isArray(profile.kielitaito)) {
+                    profile.kielitaito.forEach(lang => {
+                        if (lang) tempCategoryIndex.kielitaito.set(lang, (tempCategoryIndex.kielitaito.get(lang) || 0) + 1);
+                    });
+                }
+                if (profile.koulutus) tempCategoryIndex.koulutus.set(profile.koulutus, (tempCategoryIndex.koulutus.get(profile.koulutus) || 0) + 1);
+                if (profile.ajokortit && Array.isArray(profile.ajokortit)) {
+                    profile.ajokortit.forEach(license => {
+                        if (license) tempCategoryIndex.ajokortit.set(license, (tempCategoryIndex.ajokortit.get(license) || 0) + 1);
+                    });
+                }
+                if (profile.lupatiedot && Array.isArray(profile.lupatiedot)) {
+                    profile.lupatiedot.forEach(permit => {
+                        if (permit) tempCategoryIndex.lupatiedot.set(permit, (tempCategoryIndex.lupatiedot.get(permit) || 0) + 1);
+                    });
+                }
+            });
+            
+            // Convert Maps to sorted arrays
+            categoryIndex = {};
+            Object.keys(tempCategoryIndex).forEach(category => {
+                categoryIndex[category] = Array.from(tempCategoryIndex[category].entries())
+                    .map(([value, count]) => ({ value, count }))
+                    .sort((a, b) => b.count - a.count);
+                console.log(`📋 Built ${category}: ${categoryIndex[category].length} unique items`);
+            });
+            
+            console.log('✅ Category index built, creating checkboxes...');
+            createCheckboxesFromCache(); // Now call with the built categoryIndex
+        }
+        
+        // Create checkboxes with search functionality
+        function createCheckboxesWithSearch(category, items) {
+            console.log(`🔧 createCheckboxesWithSearch for ${category}, items:`, items.length);
+            
+            const container = document.getElementById(`${category}-checkboxes`);
+            if (!container) {
+                console.error(`❌ Container not found for ${category}-checkboxes`);
+                return;
+            }
+            
+            console.log(`✅ Container found for ${category}:`, container);
+            
+            // Clear container
+            container.innerHTML = '';
+            console.log(`✅ Container cleared for ${category}`);
+            
+            // Add search field
+            const searchDiv = document.createElement('div');
+            searchDiv.className = 'checkbox-search';
+            searchDiv.innerHTML = `
+                <input type="text" 
+                       placeholder="Hae ${category}..." 
+                       onkeyup="filterCheckboxes('${category}', this.value)"
+                       style="width: 100%; padding: 8px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 4px;">
+            `;
+            container.appendChild(searchDiv);
+            console.log(`✅ Search field added for ${category}`);
+            
+            // Add scrollable checkbox container
+            const checkboxContainer = document.createElement('div');
+            checkboxContainer.className = 'checkbox-list';
+            checkboxContainer.id = `${category}-list`;
+            checkboxContainer.style.maxHeight = '200px';
+            checkboxContainer.style.overflowY = 'auto';
+            checkboxContainer.style.border = '1px solid red'; // DEBUG: red border to see container
+            
+            console.log(`📦 About to create ${items.length} items for ${category}`);
+            
+            // Show first 50 items initially
+            const initialItems = items.slice(0, 50);
+            console.log(`📦 Creating ${initialItems.length} initial items for ${category}`);
+            
+            initialItems.forEach((item, index) => {
+                console.log(`🔍 Item ${index}:`, { category, value: item.value, count: item.count });
+                const checkboxItem = createCheckboxItem(category, item.value, item.count);
+                if (checkboxItem) {
+                    checkboxContainer.appendChild(checkboxItem);
+                    console.log(`✅ Added checkbox ${index} for ${category}: ${item.value}`);
+                } else {
+                    console.warn(`❌ Failed to create checkbox ${index} for ${category}: ${item.value}`);
+                }
+            });
+            
+            container.appendChild(checkboxContainer);
+            console.log(`✅ Checkbox container appended to ${category}`);
+            
+            // Store all items for filtering
+            container.setAttribute('data-all-items', JSON.stringify(items));
+            
+            console.log(`✅ Created ${initialItems.length}/${items.length} checkboxes for ${category}`);
+        }
+        
+        // Filter checkboxes based on search
+        function filterCheckboxes(category, searchTerm) {
+            const container = document.getElementById(`${category}-checkboxes`);
+            const checkboxList = document.getElementById(`${category}-list`);
+            const allItems = JSON.parse(container.getAttribute('data-all-items') || '[]');
+            
+            const filtered = allItems.filter(item => 
+                item.name.toLowerCase().includes(searchTerm.toLowerCase())
+            );
+            
+            checkboxList.innerHTML = '';
+            
+            // Show max 100 filtered results
+            const itemsToShow = filtered.slice(0, 100);
+            itemsToShow.forEach(item => {
+                const checkboxItem = createCheckboxItem(category, item.name, item.count);
+                if (checkboxItem) { // Only append if item is valid
+                    checkboxList.appendChild(checkboxItem);
+                }
+            });
+            
+            if (filtered.length > 100) {
+                const moreDiv = document.createElement('div');
+                moreDiv.style.padding = '5px';
+                moreDiv.style.fontStyle = 'italic';
+                moreDiv.style.color = '#666';
+                moreDiv.textContent = `... ja ${filtered.length - 100} muuta tulosta`;
+                checkboxList.appendChild(moreDiv);
+            }
+        }
+        
+        // Show placeholder checkboxes while loading
+        function showPlaceholderCheckboxes() {
+            const categories = ['ammatti', 'osaaminen', 'työtoiveet', 'alue', 'kieli', 'koulutus', 'ajokortit', 'lupatiedot'];
+            categories.forEach(category => {
+                const container = document.getElementById(`${category}-checkboxes`);
+                if (container) {
+                    container.innerHTML = `
+                        <div class="checkbox-search">
+                            <input type="text" placeholder="Ladataan..." disabled>
+                        </div>
+                        <p style="color: rgba(255,255,255,0.7); font-style: italic; padding: 10px;">⏳ Ladataan hakuparametreja...</p>
+                    `;
+                }
+            });
+        }
+        
+        // Clear cache and rebuild checkbox index
+        function clearCacheAndRebuild() {
+            if (buildingIndex) {
+                console.log('⏸️ Index building already in progress, skipping rebuild...');
+                return;
+            }
+            
+            console.log('🔄 Clearing cache and rebuilding checkbox index...');
+            
+            // Clear localStorage cache
+            localStorage.removeItem('profileIndex');
+            localStorage.removeItem('profileIndexDate');
+            localStorage.removeItem('profileIndexVersion');
+            
+            // Reset global variables
+            categoryIndex = null;
+            allProfiles = [];
+            
+            // Clear all checkbox containers
+            const categories = ['ammatti', 'osaaminen', 'työtoiveet', 'alue', 'kieli', 'koulutus', 'ajokortit', 'lupatiedot'];
+            categories.forEach(category => {
+                const container = document.getElementById(`${category}-checkboxes`);
+                if (container) {
+                    container.innerHTML = '<div class="checkbox-search"><input type="text" placeholder="Ladataan..." disabled></div><p style="color: #666; font-style: italic;">Ladataan parametreja...</p>';
+                }
+            });
+            
+            // Show loading message
+            document.getElementById('results-count').textContent = 'Päivitetään hakuehtoja...';
+            
+            // Rebuild from scratch
+            buildIndexIfNeeded();
+        }
+    </script>
+</body>
+</html>
+

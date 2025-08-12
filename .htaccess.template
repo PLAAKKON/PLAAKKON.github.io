@@ -1,0 +1,11 @@
+# Apache .htaccess CSP configuration
+# Uncomment the lines below if you're using Apache server
+
+# For development (permissive CSP)
+# Header set Content-Security-Policy "default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob:; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; connect-src 'self' https://*.firebaseio.com https://*.googleapis.com; img-src 'self' data: https:; object-src 'none';"
+
+# For production (secure CSP)
+# Header set Content-Security-Policy "default-src 'self'; script-src 'self' https://trusted-cdn.com; style-src 'self' 'unsafe-inline'; connect-src 'self' https://*.firebaseio.com https://*.googleapis.com; img-src 'self' data: https:; object-src 'none';"
+
+# To completely disable CSP (for development only):
+# Header unset Content-Security-Policy
