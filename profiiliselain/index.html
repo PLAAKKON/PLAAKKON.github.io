@@ -1524,7 +1524,7 @@
             // Show first 50 items initially
             const initialItems = items.slice(0, 50);
             initialItems.forEach(item => {
-                const checkboxItem = createCheckboxItem(category, item.name, item.count);
+                const checkboxItem = createCheckboxItem(category, item.value, item.count);
                 if (checkboxItem) { // Only append if item is valid
                     checkboxContainer.appendChild(checkboxItem);
                 }
