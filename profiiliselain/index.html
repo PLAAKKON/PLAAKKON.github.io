@@ -911,11 +911,8 @@
                 return;
             }
 
-            // Check if we need to load profiles for searching
-            console.log('🔍 Starting search. Current allProfiles length:', allProfiles ? allProfiles.length : 0);
-            
-            // Always load fresh profiles for search to ensure up-to-date results
-            console.log('� Loading fresh profiles for search...');
+            // NOW load profiles for search (only when user actually searches)
+            console.log('🔍 User initiated search - loading profiles from Firebase...');
             document.getElementById('loading').style.display = 'block';
             document.getElementById('results-count').textContent = 'Ladataan profiileja hakua varten...';
             loadProfilesForSearch(freeSearch, selectedFilters);
