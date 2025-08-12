@@ -754,13 +754,9 @@
                 document.getElementById('logged-in').style.display = 'block';
                 document.getElementById('main-content').style.display = 'block';
                 
-                // Load checkboxes: try static file first, then cache, then build from profiles
+                // ONLY load static checkbox data - no fallback to profile loading
                 if (!buildingIndex && !categoryIndex) {
-                    loadStaticCheckboxData().then(success => {
-                        if (!success) {
-                            loadCachedIndex();
-                        }
-                    });
+                    loadStaticCheckboxData();
                 }
             } else {
                 console.log('User not logged in');
@@ -778,7 +774,7 @@
             });
         }
         
-        // Load checkbox data from static file (priority #1)
+        // Load checkbox data from static file (REQUIRED - no fallback to profile loading)
         async function loadStaticCheckboxData() {
             console.log('📦 Loading checkbox data from static file...');
             
@@ -803,10 +799,26 @@
                 return true;
                 
             } catch (error) {
-                console.warn('⚠️ Could not load static checkbox data:', error);
-                console.log('🔄 Falling back to building from profiles...');
+                console.error('❌ CRITICAL: Could not load static checkbox data:', error);
+                document.getElementById('results-count').textContent = 
+                    'VIRHE: Hakuparametrien lataus epäonnistui. Ota yhteyttä ylläpitoon.';
+                
+                // Show error message instead of loading profiles
+                showCheckboxError();
                 return false;
             }
+        }
+        
+        // Show error message when static data fails
+        function showCheckboxError() {
+            const categories = ['ammatti', 'osaaminen', 'työtoiveet', 'alue', 'kieli', 'koulutus', 'ajokortit', 'lupatiedot'];
+            
+            categories.forEach(category => {
+                const container = document.getElementById(`${category}-checkboxes`);
+                if (container) {
+                    container.innerHTML = '<div style="color: red; padding: 10px;">❌ Hakuparametrien lataus epäonnistui</div>';
+                }
+            });
         }
         
         // Load cached checkbox index
@@ -1463,13 +1475,13 @@
             loadBatch();
         }
         
-        // Create checkboxes from cached index
+        // Create checkboxes from cached index (ONLY from static data)
         function createCheckboxesFromCache() {
-            console.log('🏷️ Creating checkboxes from cache, categoryIndex exists:', !!categoryIndex);
+            console.log('🏷️ Creating checkboxes from static data, categoryIndex exists:', !!categoryIndex);
             
             if (!categoryIndex) {
-                console.log('❌ No categoryIndex available, building from loaded profiles...');
-                buildCheckboxesFromProfiles();
+                console.error('❌ No categoryIndex available - static data loading failed');
+                showCheckboxError();
                 return;
             }
             
@@ -1492,38 +1504,16 @@
                 
                 console.log(`🔍 Processing category: ${category}, data exists:`, !!categoryData, 'mapping to:', categoryMap[category]);
                 
-                if (categoryData) {
-                    // If it's a Map (from fresh build), convert to array
-                    if (categoryData instanceof Map) {
-                        items = Array.from(categoryData.entries())
-                            .filter(([key, count]) => key && String(key).trim()) // Filter out invalid items
-                            .map(([key, count]) => ({ value: key, count }));
-                    }
-                    // If it's cached data with { name, count } structure
-                    else if (Array.isArray(categoryData)) {
-                        items = categoryData
-                            .filter(item => item && (item.name || item.value)) // Filter out invalid items
-                            .map(item => ({ 
-                                value: item.name || item.value, 
-                                count: item.count || 0
-                            }));
-                    }
-                    // If it's an object, convert to array
-                    else if (typeof categoryData === 'object') {
-                        items = Object.entries(categoryData)
-                            .filter(([key, count]) => key && String(key).trim()) // Filter out invalid items
-                            .map(([key, count]) => ({ value: key, count }));
-                    }
+                if (categoryData && Array.isArray(categoryData)) {
+                    items = categoryData.filter(item => item && item.value);
+                    console.log(`📋 Creating checkboxes for ${category}:`, items.length, 'items');
+                    createCheckboxesWithSearch(categoryMap[category], items);
+                } else {
+                    console.warn(`⚠️ No data for category: ${category}`);
                 }
-                
-                console.log(`📋 Creating checkboxes for ${category}:`, items.length, 'items');
-                if (category === 'työtoiveet') {
-                    console.log('🎯 TYÖTOIVEET DEBUG:', { categoryData, items: items.slice(0, 5) });
-                }
-                createCheckboxesWithSearch(categoryMap[category], items);
             });
             
-            console.log('✅ All checkboxes created from cache');
+            console.log('✅ All checkboxes created from static data');
         }
         
         // Build checkboxes directly from loaded profiles (fallback when no cache)
