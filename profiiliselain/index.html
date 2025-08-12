@@ -776,97 +776,816 @@
         
         // EMBEDDED checkbox data (no external file needed)
         const STATIC_CHECKBOX_DATA = {
-            "data": {
-                "ammatti": [
-                    {"value": "ohjelmistokehittäjä", "count": 804},
-                    {"value": "varastotyöntekijä", "count": 621},
-                    {"value": "asiakaspalvelupäällikkö", "count": 523},
-                    {"value": "markkinointipäällikkö", "count": 494},
-                    {"value": "asiakaspalveluneuvoja", "count": 479},
-                    {"value": "myyjä", "count": 458},
-                    {"value": "hankepäällikkö", "count": 397},
-                    {"value": "talouspäällikkö", "count": 394},
-                    {"value": "projektipäällikkö", "count": 390},
-                    {"value": "myyntipäällikkö", "count": 381}
-                ],
-                "osaaminen": [
-                    {"value": "Asiakaspalvelu", "count": 1638},
-                    {"value": "Johtaminen", "count": 1574},
-                    {"value": "Myynti", "count": 1556},
-                    {"value": "Markkinointi", "count": 1441},
-                    {"value": "Projektinhallinta", "count": 1391},
-                    {"value": "Taloushallinto", "count": 1205},
-                    {"value": "Henkilöstöhallinto", "count": 1158},
-                    {"value": "Tietotekniikka", "count": 1089},
-                    {"value": "Kielitaito", "count": 1034},
-                    {"value": "Viestintä", "count": 982}
-                ],
-                "työtoiveet": [
-                    {"value": "Kokopäivätyö", "count": 18500},
-                    {"value": "Osa-aikatyö", "count": 5200},
-                    {"value": "Vuorotyö", "count": 2800},
-                    {"value": "Etätyö", "count": 1200}
-                ],
-                "työnhakualue": [
-                    {"value": "Helsinki", "count": 8500},
-                    {"value": "Espoo", "count": 3400},
-                    {"value": "Vantaa", "count": 2800},
-                    {"value": "Tampere", "count": 2100},
-                    {"value": "Turku", "count": 1800},
-                    {"value": "Oulu", "count": 1200},
-                    {"value": "Jyväskylä", "count": 900},
-                    {"value": "Lahti", "count": 750}
-                ],
-                "kielitaito": [
-                    {"value": "suomi", "count": 15238},
-                    {"value": "englanti", "count": 12456},
-                    {"value": "ruotsi", "count": 8734},
-                    {"value": "venäjä", "count": 2345},
-                    {"value": "saksa", "count": 1876},
-                    {"value": "ranska", "count": 1234},
-                    {"value": "espanja", "count": 987},
-                    {"value": "arabia", "count": 654},
-                    {"value": "kiina", "count": 432},
-                    {"value": "viro", "count": 345}
-                ],
-                "koulutus": [
-                    {"value": "Kansainvälisen kaupan koulutusohjelma", "count": 668},
-                    {"value": "Liiketalouden koulutusohjelma", "count": 523},
-                    {"value": "Tietojenkäsittelyn koulutusohjelma", "count": 445},
-                    {"value": "Sosiaali- ja terveysalan koulutusohjelma", "count": 398},
-                    {"value": "Tekniikan koulutusohjelma", "count": 356},
-                    {"value": "Kaupan ja hallinnon perustutkinto", "count": 298},
-                    {"value": "Yliopisto", "count": 2800},
-                    {"value": "Ammattikorkeakoulu", "count": 3400},
-                    {"value": "Lukio", "count": 1200},
-                    {"value": "Ammattitutkinto", "count": 900}
-                ],
-                "ajokortit": [
-                    {"value": "B", "count": 16815},
-                    {"value": "A", "count": 1234},
-                    {"value": "C", "count": 456},
-                    {"value": "D", "count": 234},
-                    {"value": "BE", "count": 123},
-                    {"value": "CE", "count": 89},
-                    {"value": "DE", "count": 45}
-                ],
-                "lupatiedot": [
-                    {"value": "Hygieniapassi", "count": 6654},
-                    {"value": "Tulityökortti", "count": 2345},
-                    {"value": "Työturvallisuuskortti", "count": 1876},
-                    {"value": "Ensiapukoulutus", "count": 1234},
-                    {"value": "Trukkikortti", "count": 987},
-                    {"value": "Nosturikortti", "count": 654},
-                    {"value": "Hitsaajan pätevyys", "count": 432},
-                    {"value": "Vartijan lupa", "count": 298},
-                    {"value": "Kiipeilylupa", "count": 156},
-                    {"value": "Räjäytyslupa", "count": 89}
-                ]
-            },
-            "generated": "2025-08-12T17:45:00.000Z",
-            "profileCount": 27717,
-            "version": "FIREBASE_REAL_DATA_2.0"
-        };
+  "data": {
+    "ammatti": [
+      {
+        "value": "ohjelmistokehittäjä",
+        "count": 804
+      },
+      {
+        "value": "varastotyöntekijä",
+        "count": 621
+      },
+      {
+        "value": "asiakaspalvelupäällikkö",
+        "count": 523
+      },
+      {
+        "value": "markkinointipäällikkö",
+        "count": 494
+      },
+      {
+        "value": "asiakaspalveluneuvoja",
+        "count": 479
+      },
+      {
+        "value": "myyjä",
+        "count": 458
+      },
+      {
+        "value": "hankepäällikkö",
+        "count": 397
+      },
+      {
+        "value": "graafinen suunnittelija",
+        "count": 391
+      },
+      {
+        "value": "myyntijohtaja",
+        "count": 336
+      },
+      {
+        "value": "sihteeri",
+        "count": 324
+      },
+      {
+        "value": "talonrakentaja",
+        "count": 303
+      },
+      {
+        "value": "verkkokehittäjä",
+        "count": 290
+      },
+      {
+        "value": "toimistoavustaja",
+        "count": 273
+      },
+      {
+        "value": "lähihoitaja",
+        "count": 261
+      },
+      {
+        "value": "tarjoilija",
+        "count": 257
+      },
+      {
+        "value": "markkinointikonsultti",
+        "count": 250
+      },
+      {
+        "value": "tavaraliikenteen kuljettaja",
+        "count": 248
+      },
+      {
+        "value": "taloushallinnon assistentti",
+        "count": 234
+      },
+      {
+        "value": "kokki",
+        "count": 231
+      },
+      {
+        "value": "markkinointiassistentti",
+        "count": 230
+      },
+      {
+        "value": "kirjanpitäjä",
+        "count": 229
+      },
+      {
+        "value": "laitossiivooja",
+        "count": 228
+      },
+      {
+        "value": "sähköasentaja",
+        "count": 227
+      },
+      {
+        "value": "lastenhoitaja",
+        "count": 225
+      },
+      {
+        "value": "tilausten keräilijä, varasto",
+        "count": 223
+      },
+      {
+        "value": "liiketoimintajohtaja",
+        "count": 220
+      },
+      {
+        "value": "käyttöliittymäkehittäjä",
+        "count": 219
+      },
+      {
+        "value": "puhelinpalveluneuvoja",
+        "count": 219
+      },
+      {
+        "value": "myyntiedustaja",
+        "count": 209
+      },
+      {
+        "value": "digimarkkinointipäällikkö",
+        "count": 208
+      }
+    ],
+    "osaaminen": [
+      {
+        "value": "viestiä asiakkaiden kanssa",
+        "count": 1638
+      },
+      {
+        "value": "ratkaista ongelmia",
+        "count": 1630
+      },
+      {
+        "value": "tunnistaa asiakkaan tarpeet",
+        "count": 1616
+      },
+      {
+        "value": "asiakaspalvelu",
+        "count": 1514
+      },
+      {
+        "value": "toimia esimiehenä",
+        "count": 1367
+      },
+      {
+        "value": "hallita budjetteja",
+        "count": 1210
+      },
+      {
+        "value": "kouluttaa työntekijöitä",
+        "count": 1101
+      },
+      {
+        "value": "suorittaa projektinhallintaa",
+        "count": 1078
+      },
+      {
+        "value": "varmistaa asiakastyytyväisyys",
+        "count": 1068
+      },
+      {
+        "value": "keskustella esimiesten kanssa",
+        "count": 1012
+      },
+      {
+        "value": "käyttää eri viestintäkanavia",
+        "count": 977
+      },
+      {
+        "value": "projektinhallinta",
+        "count": 771
+      },
+      {
+        "value": "kuunnella aktiivisesti",
+        "count": 767
+      },
+      {
+        "value": "rekrytoida työntekijöitä",
+        "count": 664
+      },
+      {
+        "value": "työskennellä rakennustiimissä",
+        "count": 631
+      },
+      {
+        "value": "ottaa yhteyttä asiakkaisiin",
+        "count": 597
+      },
+      {
+        "value": "käyttää suojavarusteita rakennustyömaalla",
+        "count": 595
+      },
+      {
+        "value": "ylläpitää asiakaspalvelua",
+        "count": 590
+      },
+      {
+        "value": "tuotetietous",
+        "count": 563
+      },
+      {
+        "value": "kehittää liikekumppanuuksia",
+        "count": 560
+      },
+      {
+        "value": "pitää kirjaa työn edistymisestä",
+        "count": 547
+      },
+      {
+        "value": "noudattaa terveys- ja turvallisuuskäytäntöjä rakennustyömaalla",
+        "count": 540
+      },
+      {
+        "value": "käsitellä asiakasvalituksia",
+        "count": 532
+      },
+      {
+        "value": "noudattaa yrityksen vaatimustasoa",
+        "count": 529
+      },
+      {
+        "value": "asiakassuhteiden hallinta",
+        "count": 520
+      },
+      {
+        "value": "kehittää ammatillinen verkosto",
+        "count": 515
+      },
+      {
+        "value": "yrityksen käytännöt",
+        "count": 505
+      },
+      {
+        "value": "puhua eri kieliä",
+        "count": 500
+      },
+      {
+        "value": "tunnistaa ongelmia",
+        "count": 493
+      },
+      {
+        "value": "antaa rakentavaa palautetta",
+        "count": 477
+      },
+      {
+        "value": "edistää osallisuutta",
+        "count": 476
+      },
+      {
+        "value": "suunnitella markkinointikampanja",
+        "count": 475
+      },
+      {
+        "value": "JavaScript",
+        "count": 470
+      },
+      {
+        "value": "tehdä markkinatutkimusta",
+        "count": 460
+      },
+      {
+        "value": "käyttää tietokoneavusteisia suunnitteluohjelmia",
+        "count": 450
+      },
+      {
+        "value": "noudattaa elintarvikkeisiin liittyvää terveys- turvallisuus- hygienia- ja muuta asiaankuuluvaa lainsäädäntöä",
+        "count": 448
+      },
+      {
+        "value": "ylläpitää suhteita asiakkaisiin",
+        "count": 447
+      },
+      {
+        "value": "tietokoneohjelmointi",
+        "count": 445
+      },
+      {
+        "value": "ylläpitää suhteita tavarantoimittajiin",
+        "count": 437
+      },
+      {
+        "value": "teknisen suunnittelun periaatteet",
+        "count": 437
+      }
+    ],
+    "työtoiveet": [
+      {
+        "value": "Henkilöauto (B)",
+        "count": 5052
+      },
+      {
+        "value": "Moottoripyörä (A1, A2 tai A)",
+        "count": 1338
+      },
+      {
+        "value": "Henkilöauto ja perävaunu (B96 tai BE)",
+        "count": 1050
+      },
+      {
+        "value": "Kuorma-auto (C1 tai C)",
+        "count": 986
+      },
+      {
+        "value": "ohjelmistokehittäjä",
+        "count": 801
+      },
+      {
+        "value": "varastotyöntekijä",
+        "count": 631
+      },
+      {
+        "value": "markkinointipäällikkö",
+        "count": 481
+      },
+      {
+        "value": "asiakaspalvelupäällikkö",
+        "count": 474
+      },
+      {
+        "value": "asiakaspalveluneuvoja",
+        "count": 469
+      },
+      {
+        "value": "Asiointi",
+        "count": 460
+      },
+      {
+        "value": "Oma työpolku",
+        "count": 460
+      },
+      {
+        "value": "Työnhakuprofiili",
+        "count": 460
+      },
+      {
+        "value": "Avoimet työpaikat",
+        "count": 460
+      },
+      {
+        "value": "Tietoa muilla kielillä",
+        "count": 460
+      },
+      {
+        "value": "TE24, KOTO24, KEHA24 – kolme mittavaa uudistusta",
+        "count": 460
+      },
+      {
+        "value": "toimistoavustaja",
+        "count": 414
+      },
+      {
+        "value": "graafinen suunnittelija",
+        "count": 413
+      },
+      {
+        "value": "hankepäällikkö",
+        "count": 408
+      },
+      {
+        "value": "sihteeri",
+        "count": 399
+      },
+      {
+        "value": "Kuorma-auto ja perävaunu (C1E tai CE)",
+        "count": 355
+      }
+    ],
+    "työnhakualue": [
+      {
+        "value": "Uusimaa",
+        "count": 7722
+      },
+      {
+        "value": "Helsinki",
+        "count": 5941
+      },
+      {
+        "value": "Espoo",
+        "count": 3300
+      },
+      {
+        "value": "Vantaa",
+        "count": 2960
+      },
+      {
+        "value": "Keski-Suomi",
+        "count": 2776
+      },
+      {
+        "value": "Pirkanmaa",
+        "count": 2241
+      },
+      {
+        "value": "Varsinais-Suomi",
+        "count": 2092
+      },
+      {
+        "value": "Päijät-Häme",
+        "count": 1618
+      },
+      {
+        "value": "Kanta-Häme",
+        "count": 1573
+      },
+      {
+        "value": "Pohjois-Savo",
+        "count": 1502
+      },
+      {
+        "value": "Suomi",
+        "count": 1374
+      },
+      {
+        "value": "Kymenlaakso",
+        "count": 1285
+      },
+      {
+        "value": "Satakunta",
+        "count": 1238
+      },
+      {
+        "value": "Tampere",
+        "count": 1179
+      },
+      {
+        "value": "Etelä-Karjala",
+        "count": 1101
+      },
+      {
+        "value": "Etelä-Pohjanmaa",
+        "count": 1058
+      },
+      {
+        "value": "Etelä-Savo",
+        "count": 926
+      },
+      {
+        "value": "Turku",
+        "count": 885
+      },
+      {
+        "value": "Keski-Pohjanmaa",
+        "count": 822
+      },
+      {
+        "value": "Pohjanmaa",
+        "count": 763
+      },
+      {
+        "value": "Lappi",
+        "count": 686
+      },
+      {
+        "value": "Pohjois-Pohjanmaa",
+        "count": 678
+      },
+      {
+        "value": "Pohjois-Karjala",
+        "count": 639
+      },
+      {
+        "value": "Kainuu",
+        "count": 502
+      },
+      {
+        "value": "Jyväskylä",
+        "count": 448
+      },
+      {
+        "value": "Kerava",
+        "count": 443
+      },
+      {
+        "value": "Oulu",
+        "count": 431
+      },
+      {
+        "value": "Lahti",
+        "count": 386
+      },
+      {
+        "value": "Järvenpää",
+        "count": 334
+      },
+      {
+        "value": "Ahvenanmaa - Åland",
+        "count": 307
+      }
+    ],
+    "kielitaito": [
+      {
+        "value": "Suomi – Äidinkieli",
+        "count": 15238
+      },
+      {
+        "value": "Englanti – Erittäin hyvä",
+        "count": 9958
+      },
+      {
+        "value": "Englanti – Hyvä",
+        "count": 7012
+      },
+      {
+        "value": "Ruotsi – Tyydyttävä",
+        "count": 5038
+      },
+      {
+        "value": "Englanti – Tyydyttävä",
+        "count": 2545
+      },
+      {
+        "value": "Ruotsi – Alkeet",
+        "count": 2076
+      },
+      {
+        "value": "Ruotsi – Hyvä",
+        "count": 1733
+      },
+      {
+        "value": "Suomi – Erittäin hyvä",
+        "count": 1575
+      },
+      {
+        "value": "Saksa – Alkeet",
+        "count": 1408
+      },
+      {
+        "value": "Suomi – Hyvä",
+        "count": 1388
+      },
+      {
+        "value": "Suomi – Alkeet",
+        "count": 1169
+      },
+      {
+        "value": "Saksa – Tyydyttävä",
+        "count": 1037
+      },
+      {
+        "value": "Suomi – Tyydyttävä",
+        "count": 845
+      },
+      {
+        "value": "Venäjä – Äidinkieli",
+        "count": 843
+      },
+      {
+        "value": "Englanti – Äidinkieli",
+        "count": 718
+      },
+      {
+        "value": "Espanja – Alkeet",
+        "count": 634
+      },
+      {
+        "value": "Ranska – Alkeet",
+        "count": 621
+      },
+      {
+        "value": "Ruotsi – Äidinkieli",
+        "count": 608
+      },
+      {
+        "value": "Venäjä – Alkeet",
+        "count": 460
+      },
+      {
+        "value": "Englanti – Alkeet",
+        "count": 444
+      },
+      {
+        "value": "Ruotsi – Erittäin hyvä",
+        "count": 411
+      },
+      {
+        "value": "Ranska – Tyydyttävä",
+        "count": 382
+      },
+      {
+        "value": "Saksa – Hyvä",
+        "count": 303
+      },
+      {
+        "value": "Viro – Äidinkieli",
+        "count": 290
+      },
+      {
+        "value": "Espanja – Tyydyttävä",
+        "count": 279
+      }
+    ],
+    "koulutus": [
+      {
+        "value": "Ylioppilastutkinto",
+        "count": 2957
+      },
+      {
+        "value": "Tekniikka",
+        "count": 2190
+      },
+      {
+        "value": "Tradenomi",
+        "count": 1659
+      },
+      {
+        "value": "Liiketalous",
+        "count": 1298
+      },
+      {
+        "value": "Fil. maist.",
+        "count": 1022
+      },
+      {
+        "value": "Sosiaali- ja terveysala",
+        "count": 829
+      },
+      {
+        "value": "Media ja viestintä",
+        "count": 799
+      },
+      {
+        "value": "Merkonomi",
+        "count": 793
+      },
+      {
+        "value": "Tieto",
+        "count": 764
+      },
+      {
+        "value": "Rakennusala",
+        "count": 739
+      },
+      {
+        "value": "Peruskoulu",
+        "count": 718
+      },
+      {
+        "value": "Ei tutkinnon nimeä tai oppilaitosta",
+        "count": 668
+      },
+      {
+        "value": "Dipl.ins.",
+        "count": 526
+      },
+      {
+        "value": "Luonnont. kand.",
+        "count": 424
+      },
+      {
+        "value": "Missing: undefined fi",
+        "count": 418
+      },
+      {
+        "value": "Lukion oppimäärä",
+        "count": 416
+      },
+      {
+        "value": "Taide ja muotoilu",
+        "count": 410
+      },
+      {
+        "value": "Muu tai tuntematon yleissivistävä koulutus",
+        "count": 410
+      },
+      {
+        "value": "Hum. kand.",
+        "count": 364
+      },
+      {
+        "value": "Matkailu ja ravitsemisala",
+        "count": 350
+      },
+      {
+        "value": "Luonnonvarat ja ympäristö",
+        "count": 335
+      },
+      {
+        "value": "Artesaani",
+        "count": 323
+      },
+      {
+        "value": "Kauppa ja myynti",
+        "count": 316
+      },
+      {
+        "value": "Restonomi",
+        "count": 266
+      },
+      {
+        "value": "Kuljetus ja logistiikka",
+        "count": 265
+      }
+    ],
+    "ajokortit": [
+      {
+        "value": "Henkilöauto (B)",
+        "count": 16815
+      },
+      {
+        "value": "Moottoripyörä (A1, A2 tai A)",
+        "count": 4403
+      },
+      {
+        "value": "Henkilöauto ja perävaunu (B96 tai BE)",
+        "count": 3499
+      },
+      {
+        "value": "Kuorma-auto (C1 tai C)",
+        "count": 2925
+      },
+      {
+        "value": "Kuorma-auto ja perävaunu (C1E tai CE)",
+        "count": 970
+      },
+      {
+        "value": "Linja-auto (D1 tai D)",
+        "count": 220
+      },
+      {
+        "value": "Linja-auto ja perävaunu (D1E tai DE)",
+        "count": 118
+      }
+    ],
+    "lupatiedot": [
+      {
+        "value": "Hygieniapassi",
+        "count": 6654
+      },
+      {
+        "value": "Työturvallisuuskortti",
+        "count": 6404
+      },
+      {
+        "value": "Ensiapu 1",
+        "count": 4608
+      },
+      {
+        "value": "Tulityökortti",
+        "count": 2909
+      },
+      {
+        "value": "Anniskelupassi",
+        "count": 1561
+      },
+      {
+        "value": "Trukkikortti",
+        "count": 1159
+      },
+      {
+        "value": "Sähkötyöturvallisuuskortti SFS 6002",
+        "count": 643
+      },
+      {
+        "value": "Tieturvakortti 1 ja 2",
+        "count": 535
+      },
+      {
+        "value": "Kuljettajan ammattipätevyyskortti",
+        "count": 378
+      },
+      {
+        "value": "Ikärajapassi",
+        "count": 316
+      },
+      {
+        "value": "Ensiapu 2",
+        "count": 252
+      },
+      {
+        "value": "ADR-ajolupa",
+        "count": 214
+      },
+      {
+        "value": "Järjestyksenvalvojakortti",
+        "count": 196
+      },
+      {
+        "value": "Alkusammutuskortti AS1",
+        "count": 136
+      },
+      {
+        "value": "Työhyvinvointikortti",
+        "count": 112
+      },
+      {
+        "value": "Henkilönostinkortti",
+        "count": 111
+      },
+      {
+        "value": "Vesityökortti",
+        "count": 93
+      },
+      {
+        "value": "Vartijakortti",
+        "count": 93
+      },
+      {
+        "value": "Taksinkuljettajan ajolupa",
+        "count": 92
+      },
+      {
+        "value": "Henkilöauton ammattiajolupa",
+        "count": 82
+      }
+    ]
+  },
+  "generated": "2025-08-12T17:55:55.156Z",
+  "profileCount": 27717,
+  "version": "ULTRA_COMPACT_HTML_4.0"
+};
 
         // Load checkbox data from embedded data (INSTANT)
         async function loadStaticCheckboxData() {
