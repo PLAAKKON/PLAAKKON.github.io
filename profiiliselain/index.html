@@ -1433,8 +1433,8 @@
             console.log('🏷️ Creating checkboxes from cache, categoryIndex exists:', !!categoryIndex);
             
             if (!categoryIndex) {
-                console.log('❌ No categoryIndex available, showing placeholders');
-                showPlaceholderCheckboxes();
+                console.log('❌ No categoryIndex available, building from loaded profiles...');
+                buildCheckboxesFromProfiles();
                 return;
             }
             
@@ -1489,6 +1489,76 @@
             });
             
             console.log('✅ All checkboxes created from cache');
+        }
+        
+        // Build checkboxes directly from loaded profiles (fallback when no cache)
+        function buildCheckboxesFromProfiles() {
+            console.log('🏗️ Building checkboxes directly from loaded profiles...');
+            
+            if (profileCount === 0) {
+                console.log('⏳ No profiles loaded yet, showing placeholders...');
+                showPlaceholderCheckboxes();
+                return;
+            }
+            
+            console.log(`📊 Building checkboxes from ${profileCount} profiles`);
+            
+            // Build category index from loaded profiles
+            const tempCategoryIndex = {
+                ammatti: new Map(),
+                osaaminen: new Map(),
+                työtoiveet: new Map(),
+                työnhakualue: new Map(),
+                kielitaito: new Map(),
+                koulutus: new Map(),
+                ajokortit: new Map(),
+                lupatiedot: new Map()
+            };
+            
+            // Process all loaded profiles
+            Object.values(allProfiles).forEach(profile => {
+                // Process each category
+                if (profile.ammatti) tempCategoryIndex.ammatti.set(profile.ammatti, (tempCategoryIndex.ammatti.get(profile.ammatti) || 0) + 1);
+                if (profile.osaaminen && Array.isArray(profile.osaaminen)) {
+                    profile.osaaminen.forEach(skill => {
+                        if (skill) tempCategoryIndex.osaaminen.set(skill, (tempCategoryIndex.osaaminen.get(skill) || 0) + 1);
+                    });
+                }
+                if (profile.työtoiveet && Array.isArray(profile.työtoiveet)) {
+                    profile.työtoiveet.forEach(wish => {
+                        if (wish) tempCategoryIndex.työtoiveet.set(wish, (tempCategoryIndex.työtoiveet.get(wish) || 0) + 1);
+                    });
+                }
+                if (profile.työnhakualue) tempCategoryIndex.työnhakualue.set(profile.työnhakualue, (tempCategoryIndex.työnhakualue.get(profile.työnhakualue) || 0) + 1);
+                if (profile.kielitaito && Array.isArray(profile.kielitaito)) {
+                    profile.kielitaito.forEach(lang => {
+                        if (lang) tempCategoryIndex.kielitaito.set(lang, (tempCategoryIndex.kielitaito.get(lang) || 0) + 1);
+                    });
+                }
+                if (profile.koulutus) tempCategoryIndex.koulutus.set(profile.koulutus, (tempCategoryIndex.koulutus.get(profile.koulutus) || 0) + 1);
+                if (profile.ajokortit && Array.isArray(profile.ajokortit)) {
+                    profile.ajokortit.forEach(license => {
+                        if (license) tempCategoryIndex.ajokortit.set(license, (tempCategoryIndex.ajokortit.get(license) || 0) + 1);
+                    });
+                }
+                if (profile.lupatiedot && Array.isArray(profile.lupatiedot)) {
+                    profile.lupatiedot.forEach(permit => {
+                        if (permit) tempCategoryIndex.lupatiedot.set(permit, (tempCategoryIndex.lupatiedot.get(permit) || 0) + 1);
+                    });
+                }
+            });
+            
+            // Convert Maps to sorted arrays
+            categoryIndex = {};
+            Object.keys(tempCategoryIndex).forEach(category => {
+                categoryIndex[category] = Array.from(tempCategoryIndex[category].entries())
+                    .map(([value, count]) => ({ value, count }))
+                    .sort((a, b) => b.count - a.count);
+                console.log(`📋 Built ${category}: ${categoryIndex[category].length} unique items`);
+            });
+            
+            console.log('✅ Category index built, creating checkboxes...');
+            createCheckboxesFromCache(); // Now call with the built categoryIndex
         }
         
         // Create checkboxes with search functionality
