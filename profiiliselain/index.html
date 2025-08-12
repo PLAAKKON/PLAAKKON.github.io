@@ -754,9 +754,13 @@
                 document.getElementById('logged-in').style.display = 'block';
                 document.getElementById('main-content').style.display = 'block';
                 
-                // Load cache only once per session
+                // Load checkboxes: try static file first, then cache, then build from profiles
                 if (!buildingIndex && !categoryIndex) {
-                    loadCachedIndex();
+                    loadStaticCheckboxData().then(success => {
+                        if (!success) {
+                            loadCachedIndex();
+                        }
+                    });
                 }
             } else {
                 console.log('User not logged in');
@@ -772,6 +776,37 @@
                 console.log('User logged out');
                 window.location.href = '/';
             });
+        }
+        
+        // Load checkbox data from static file (priority #1)
+        async function loadStaticCheckboxData() {
+            console.log('📦 Loading checkbox data from static file...');
+            
+            try {
+                const response = await fetch('./checkbox-data.json');
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+                
+                const checkboxFile = await response.json();
+                console.log('✅ Static checkbox data loaded:', checkboxFile.profileCount, 'profiles,', checkboxFile.generated);
+                
+                // Set the global categoryIndex
+                categoryIndex = checkboxFile.data;
+                
+                // Create checkboxes immediately
+                createCheckboxesFromCache();
+                
+                document.getElementById('results-count').textContent = 
+                    `Hakuparametrit ladattu (${checkboxFile.profileCount} profiilia, päivitetty ${new Date(checkboxFile.generated).toLocaleDateString('fi-FI')})`;
+                
+                return true;
+                
+            } catch (error) {
+                console.warn('⚠️ Could not load static checkbox data:', error);
+                console.log('🔄 Falling back to building from profiles...');
+                return false;
+            }
         }
         
         // Load cached checkbox index
