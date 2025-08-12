@@ -776,6 +776,8 @@
         
         // Load cached checkbox index
         function loadCachedIndex() {
+            console.log('🔍 loadCachedIndex called. buildingIndex:', buildingIndex, 'categoryIndex:', !!categoryIndex);
+            
             // Prevent multiple simultaneous calls
             if (buildingIndex) {
                 console.log('⏸️ Index building already in progress, skipping...');
@@ -786,6 +788,14 @@
             const cachedDate = localStorage.getItem('profileIndexDate');
             const cachedVersion = localStorage.getItem('profileIndexVersion');
             const expectedVersion = 'v2.0';
+            
+            console.log('📦 Cache check:', { 
+                hasCachedIndex: !!cachedIndex, 
+                hasCachedDate: !!cachedDate, 
+                cachedVersion: cachedVersion,
+                expectedVersion: expectedVersion,
+                cacheSize: cachedIndex ? cachedIndex.length : 0
+            });
             
             if (cachedIndex && cachedDate && cachedVersion === expectedVersion) {
                 const cacheAge = Date.now() - new Date(cachedDate).getTime();
@@ -1273,6 +1283,8 @@
         
         // Build index only if needed (no cache or expired)
         function buildIndexIfNeeded() {
+            console.log('🔧 buildIndexIfNeeded called. buildingIndex:', buildingIndex);
+            
             // Prevent multiple simultaneous builds
             if (buildingIndex) {
                 console.log('⏸️ Index building already in progress, skipping...');
@@ -1281,6 +1293,14 @@
             
             buildingIndex = true;
             console.log('🔄 Building checkbox index - loading profiles from Firebase...');
+            
+            // Safety timeout - reset buildingIndex after 5 minutes
+            setTimeout(() => {
+                if (buildingIndex) {
+                    console.log('⚠️ Timeout reached, resetting buildingIndex flag');
+                    buildingIndex = false;
+                }
+            }, 5 * 60 * 1000); // 5 minutes
             
             // Show placeholder checkboxes immediately
             showPlaceholderCheckboxes();
@@ -1410,12 +1430,15 @@
         
         // Create checkboxes from cached index
         function createCheckboxesFromCache() {
-            console.log('🏷️ Creating checkboxes from cache, categoryIndex:', categoryIndex);
+            console.log('🏷️ Creating checkboxes from cache, categoryIndex exists:', !!categoryIndex);
             
             if (!categoryIndex) {
-                console.log('❌ No categoryIndex available');
+                console.log('❌ No categoryIndex available, showing placeholders');
+                showPlaceholderCheckboxes();
                 return;
             }
+            
+            console.log('📋 Category index keys:', Object.keys(categoryIndex));
             
             const categoryMap = {
                 'ammatti': 'ammatti',
@@ -1468,11 +1491,17 @@
         
         // Create checkboxes with search functionality
         function createCheckboxesWithSearch(category, items) {
+            console.log(`🔧 createCheckboxesWithSearch for ${category}, items:`, items.length);
+            
             const container = document.getElementById(`${category}-checkboxes`);
-            if (!container) return;
+            if (!container) {
+                console.log(`❌ Container not found for ${category}`);
+                return;
+            }
             
             // Clear container
             container.innerHTML = '';
+            console.log(`✅ Container cleared for ${category}`);
             
             // Add search field
             const searchDiv = document.createElement('div');
