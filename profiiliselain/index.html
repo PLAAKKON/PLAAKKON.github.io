@@ -757,21 +757,6 @@
         </div>
 
         <div id="main-content" style="display: none;">
-            <!-- Premium Service Notice -->
-            <div class="premium-service-notice">
-                <h3>💼 Työnantajapalvelu - Täydet profiilit saatavilla!</h3>
-                <p><strong>Näet esikatsauksen profiileista</strong> - Kaikki yhteystiedot ja täydelliset tiedot ovat saatavilla maksullisessa työnantajapalvelussa.</p>
-                <div class="premium-features">
-                    <span class="feature">✓ Täydet yhteystiedot</span>
-                    <span class="feature">✓ Yksityiskohtaiset esittelyt</span>
-                    <span class="feature">✓ Kaikki osaamiset</span>
-                    <span class="feature">✓ Suora yhteydenotto</span>
-                </div>
-                <a href="mailto:info@yoro.fi?subject=Työnantajapalvelu%20-%20Kiinnostus" class="premium-cta">
-                    🚀 Ota yhteyttä työnantajapalvelusta
-                </a>
-            </div>
-            
             <div class="search-section">
                 <h2>🔍 Hae profiileja</h2>
                 
@@ -851,12 +836,6 @@
                 </div>
 
                 <div style="text-align: center; margin-top: 20px;">
-                    <div id="chunked-status" style="background: #e3f2fd; padding: 15px; border-radius: 8px; margin-bottom: 15px; border: 1px solid #2196f3;">
-                        <div style="color: #1565c0; font-weight: bold;">📊 Hakuvaihtoehdot ladattu: <span id="loaded-count">~15,400</span> / 43,553</div>
-                        <button onclick="loadAllCheckboxData()" class="btn" id="load-all-btn" style="background: #4caf50; color: white; margin-top: 10px;">
-                            📥 Lataa kaikki 43,553 hakuvaihtoehtoa
-                        </button>
-                    </div>
                     <button onclick="searchProfiles()" class="btn btn-search" id="search-btn">🔍 Hae profiileja</button>
                     <button onclick="clearSearch()" class="btn">🗑️ Tyhjennä valinnat</button>
                     <button onclick="showSelectedFilters()" class="btn btn-info" style="margin-left: 10px;">📋 Näytä valinnat</button>
@@ -63168,17 +63147,52 @@
                     showMoreBtn.style.display = 'none';
                 }
                 
-                // Näytä onnistumisviesti
+                // Näytä onnistumisviesti - sama tyyli kaikille kategorioille
                 const successMsg = document.createElement('div');
-                if (category === 'ammatti') {
-                    successMsg.innerHTML = `✅ <strong>Kaikki ${categoryData.length} ammattia ladattu!</strong><br><small>Voit nyt hakea ammatteja hakukentästä</small>`;
-                    successMsg.style.cssText = 'color: #28a745; text-align: center; padding: 15px; font-size: 14px; background: #e8f5e8; border-radius: 8px; margin: 10px 0;';
-                } else {
-                    successMsg.textContent = `✅ Kaikki ${categoryData.length} vaihtoehtoa ladattu!`;
-                    successMsg.style.color = 'green';
-                    successMsg.style.fontSize = '0.9em';
-                    successMsg.style.marginTop = '10px';
+                
+                // Luodaan erilaisia viestejä eri kategorioille
+                let categoryName, actionText;
+                switch(category) {
+                    case 'ammatti':
+                        categoryName = 'ammattia';
+                        actionText = 'ammatteja hakukentästä';
+                        break;
+                    case 'osaaminen':
+                        categoryName = 'osaamista';
+                        actionText = 'osaamisia hakukentästä';
+                        break;
+                    case 'työtoiveet':
+                        categoryName = 'työtoivetta';
+                        actionText = 'työtoiveita hakukentästä';
+                        break;
+                    case 'alue':
+                        categoryName = 'aluetta';
+                        actionText = 'alueita hakukentästä';
+                        break;
+                    case 'kieli':
+                        categoryName = 'kielitaitoa';
+                        actionText = 'kielitaitoja hakukentästä';
+                        break;
+                    case 'koulutus':
+                        categoryName = 'koulutusta';
+                        actionText = 'koulutuksia hakukentästä';
+                        break;
+                    case 'ajokortit':
+                        categoryName = 'ajokorttia';
+                        actionText = 'ajokortteja hakukentästä';
+                        break;
+                    case 'lupatiedot':
+                        categoryName = 'lupatietoa';
+                        actionText = 'lupatietoja hakukentästä';
+                        break;
+                    default:
+                        categoryName = 'vaihtoehtoa';
+                        actionText = 'vaihtoehtoja hakukentästä';
                 }
+                
+                successMsg.innerHTML = `✅ <strong>Kaikki ${categoryData.length} ${categoryName} ladattu!</strong><br><small>Voit nyt hakea ${actionText}</small>`;
+                successMsg.style.cssText = 'color: #28a745; text-align: center; padding: 15px; font-size: 14px; background: #e8f5e8; border-radius: 8px; margin: 10px 0;';
+                
                 container.parentNode.appendChild(successMsg);
                 
                 // Viesti jää pysyvästi näkyville - ei setTimeout:ia
