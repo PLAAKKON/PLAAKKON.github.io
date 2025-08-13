@@ -63273,7 +63273,22 @@
                 
                 // Näytä kaikki vaaditut kentät
                 if (profile.esittely) html += `<div class="profile-field"><strong>Esittely:</strong><span>${profile.esittely}</span></div>`;
-                if (profile.createdAt) html += `<div class="profile-field"><strong>Luotu:</strong><span>${profile.createdAt}</span></div>`;
+                if (profile.createdAt) {
+                    let dateStr = profile.createdAt;
+                    // Jos on Firebase Timestamp, muunna se päivämääräksi
+                    if (profile.createdAt && typeof profile.createdAt === 'object' && profile.createdAt.seconds) {
+                        const date = new Date(profile.createdAt.seconds * 1000);
+                        dateStr = date.toLocaleDateString('fi-FI') + ' ' + date.toLocaleTimeString('fi-FI', {hour: '2-digit', minute: '2-digit'});
+                    } else if (typeof profile.createdAt === 'string' && profile.createdAt.includes('Timestamp')) {
+                        // Jos on string-muotoinen Timestamp, yritä parsia se
+                        const match = profile.createdAt.match(/seconds=(\d+)/);
+                        if (match) {
+                            const date = new Date(parseInt(match[1]) * 1000);
+                            dateStr = date.toLocaleDateString('fi-FI') + ' ' + date.toLocaleTimeString('fi-FI', {hour: '2-digit', minute: '2-digit'});
+                        }
+                    }
+                    html += `<div class="profile-field"><strong>Luotu:</strong><span>${dateStr}</span></div>`;
+                }
                 if (profile.tyonhakualue) html += `<div class="profile-field"><strong>Työnhakualue:</strong><span>${profile.tyonhakualue}</span></div>`;
                 if (profile.aloitusajankohta) html += `<div class="profile-field"><strong>Aloitusajankohta:</strong><span>${profile.aloitusajankohta}</span></div>`;
                 
