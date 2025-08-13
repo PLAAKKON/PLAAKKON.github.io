@@ -62,16 +62,17 @@
 
         .auth-section {
             background: rgba(255, 255, 255, 0.1);
-            padding: 30px;
-            border-radius: 15px;
-            margin-bottom: 20px;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 15px;
             text-align: center;
             backdrop-filter: blur(5px);
             border: 1px solid rgba(255, 255, 255, 0.2);
-            min-height: 200px;
+            min-height: 60px;
             display: flex;
-            flex-direction: column;
-            justify-content: center;
+            flex-direction: row;
+            justify-content: space-between;
+            align-items: center;
         }
 
         .search-section {
@@ -149,11 +150,19 @@
             background: rgba(220, 53, 69, 1);
         }
 
+        .btn-info {
+            background: rgba(23, 162, 184, 0.8);
+        }
+
+        .btn-info:hover {
+            background: rgba(23, 162, 184, 1);
+        }
+
         /* Checkbox search styles */
         .search-categories {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 20px;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
             margin: 20px 0;
         }
 
@@ -657,8 +666,9 @@
                         </button>
                     </div>
                     <button onclick="searchProfiles()" class="btn btn-search" id="search-btn">🔍 Hae profiileja</button>
-                    <button onclick="clearSearch()" class="btn">🗑️ Tyhjennä haku</button>
-                    <button onclick="clearCacheAndRebuild()" class="btn btn-secondary" style="margin-left: 10px;">🔄 Päivitä hakuehdot</button>
+                    <button onclick="clearSearch()" class="btn">🗑️ Tyhjennä valinnat</button>
+                    <button onclick="showSelectedFilters()" class="btn btn-info" style="margin-left: 10px;">📋 Näytä valinnat</button>
+                    <button onclick="clearCacheAndRebuild()" class="btn btn-secondary" style="margin-left: 10px;">⚡ Päivitä</button>
                 </div>
             </div>
 
@@ -62638,6 +62648,51 @@
             
             document.getElementById('results-count').textContent = `Valitse hakuehdot nähdäksesi profiilit.`;
             document.getElementById('profiles-container').innerHTML = '<div class="profile-card"><p>Valitse checkboxeista hakuehdot tai käytä vapaata hakua. Paina "Hae profiileja" nähdäksesi tulokset.</p></div>';
+        }
+        
+        // Show selected filters in a popup
+        function showSelectedFilters() {
+            const selectedFilters = {};
+            const checkboxes = document.querySelectorAll('input[type="checkbox"]:checked');
+            
+            checkboxes.forEach(cb => {
+                const category = cb.name;
+                if (!selectedFilters[category]) {
+                    selectedFilters[category] = [];
+                }
+                selectedFilters[category].push(cb.value);
+            });
+            
+            let message = '📋 **Valitut hakuehdot:**\n\n';
+            let hasFilters = false;
+            
+            Object.keys(selectedFilters).forEach(category => {
+                if (selectedFilters[category].length > 0) {
+                    hasFilters = true;
+                    const categoryNames = {
+                        'ammatti': '💼 Ammatit',
+                        'osaaminen': '🛠 Osaamiset', 
+                        'työtoiveet': '💼 Työtoiveet',
+                        'alue': '📍 Alueet',
+                        'kieli': '🌍 Kielet',
+                        'koulutus': '🎓 Koulutus',
+                        'ajokortit': '🚗 Ajokortit',
+                        'lupatiedot': '📜 Lupatiedot'
+                    };
+                    
+                    message += `${categoryNames[category] || category}:\n`;
+                    selectedFilters[category].forEach(filter => {
+                        message += `  • ${filter}\n`;
+                    });
+                    message += '\n';
+                }
+            });
+            
+            if (!hasFilters) {
+                message = '📋 Ei valittuja hakuehtoja.\n\nValitse checkboxeista hakuehdot ja paina "Hae profiileja".';
+            }
+            
+            alert(message);
         }
         
         // Load profiles for search when needed
