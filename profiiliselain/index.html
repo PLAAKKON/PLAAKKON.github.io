@@ -62833,6 +62833,13 @@
             try {
                 // Lataa kaikki data checkbox-data-full.json:sta
                 console.log(`Ladataan kaikki ${category} vaihtoehdot...`);
+                
+                // Jos kyseessä ammatti, tyhjennä container ensin (automaattinen lataus)
+                if (category === 'ammatti') {
+                    console.log('🧹 Tyhjennetään ammatit-container ennen kaikki ammattien lataamista');
+                    container.innerHTML = '';
+                }
+                
                 const response = await fetch('./checkbox-data-full.json');
                 
                 if (!response.ok) {
