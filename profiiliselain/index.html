@@ -227,21 +227,25 @@
         </div>
         
         <div class="main-content">
-            <div class="status-info">
-                <strong>🚀 Chunked Loading Käytössä:</strong> Aluksi latautuu 50 suosituinta vaihtoehtoa per kategoria. 
-                Klikkaa "Lataa kaikki vaihtoehdot" nähdäksesi täydelliset 43,553 hakuvaihtoehtoa!
+            <div class="status-info" id="loadingStatus">
+                <strong>⏳ Ladataan kaikkia hakuvaihtoehtoja...</strong><br>
+                Lataaminen kestää hetken (43,553 hakuvaihtoehtoa ladataan). Odota hetki...
             </div>
             
             <div class="search-section">
                 <h2 class="section-title">🔍 Haku-kriteerit</h2>
                 
                 <div id="checkboxContainer" class="checkbox-container">
-                    <!-- Checkboxit latautuvat tänne JavaScript:llä -->
+                    <div style="text-align: center; padding: 40px; color: #6c757d;">
+                        <div style="font-size: 3em; margin-bottom: 20px;">⏳</div>
+                        <h3>Ladataan kaikkia hakuvaihtoehtoja...</h3>
+                        <p>Lataaminen kestää hetken (43,553 hakuvaihtoehtoa). Odota hetki...</p>
+                    </div>
                 </div>
                 
-                <div style="text-align: center;">
-                    <button id="loadAllBtn" class="load-all-button" onclick="loadAllOptions()">
-                        📥 Lataa kaikki vaihtoehdot (43,553 hakuehtoa)
+                <div style="text-align: center; display: none;" id="loadAllSection">
+                    <button id="loadAllBtn" class="load-all-button" onclick="loadAllOptions()" disabled>
+                        ✅ Kaikki data ladattu!
                     </button>
                 </div>
                 
@@ -328,23 +332,27 @@
             }
         };
         
-        // Lataa initial data sivun latautuessa
+        // Lataa kaikki data heti sivun latautuessa
         document.addEventListener('DOMContentLoaded', function() {
-            loadInitialCheckboxes();
+            console.log('🚀 Aloitetaan täydellisen datan lataaminen...');
+            loadAllOptionsAutomatically();
         });
         
         function loadInitialCheckboxes() {
-            checkboxData = INITIAL_CHECKBOX_DATA;
-            renderCheckboxes();
-            updateDataCount();
+            // Tämä funktio ei ole enää käytössä - käytetään loadAllOptionsAutomatically
+            console.log('loadInitialCheckboxes() ohitettu - käytetään full load');
         }
         
-        async function loadAllOptions() {
+        async function loadAllOptionsAutomatically() {
             try {
-                document.getElementById('loadAllBtn').textContent = '⏳ Ladataan...';
-                document.getElementById('loadAllBtn').disabled = true;
+                console.log('Yritetään ladata kaikki checkbox-data-full.json...');
                 
-                console.log('Yritetään ladata checkbox-data-full.json...');
+                // Päivitä status
+                document.getElementById('loadingStatus').innerHTML = `
+                    <strong>⏳ Ladataan kaikkia hakuvaihtoehtoja...</strong><br>
+                    Lataaminen kestää hetken (43,553 hakuvaihtoehtoa). Odota hetki...
+                `;
+                
                 const response = await fetch('/checkbox-data-full.json');
                 
                 if (!response.ok) {
@@ -352,22 +360,36 @@
                 }
                 
                 const fullData = await response.json();
-                console.log('Kaikki data ladattu:', fullData);
+                console.log('✅ Kaikki data ladattu automaattisesti:', fullData);
                 
                 checkboxData = fullData;
                 allDataLoaded = true;
                 renderCheckboxes();
                 updateDataCount();
                 
-                document.getElementById('loadAllBtn').textContent = '✅ Kaikki data ladattu!';
-                document.getElementById('loadAllBtn').style.background = 'linear-gradient(135deg, #28a745 0%, #20c997 100%)';
+                // Päivitä status success-tilaan
+                document.getElementById('loadingStatus').innerHTML = `
+                    <strong>✅ Kaikki hakuvaihtoehdot ladattu!</strong><br>
+                    43,553 hakuvaihtoehtoa on nyt käytettävissä. Voit aloittaa haun.
+                `;
+                document.getElementById('loadingStatus').style.background = '#d4edda';
+                document.getElementById('loadingStatus').style.color = '#155724';
                 
             } catch (error) {
-                console.error('Virhe kaikenkattavan datan lataamisessa:', error);
-                document.getElementById('loadAllBtn').textContent = '❌ Lataus epäonnistui - yritä uudestaan';
-                document.getElementById('loadAllBtn').disabled = false;
-                alert('Virhe datan lataamisessa. Tarkista verkkoyhtyeys ja yritä uudestaan.');
+                console.error('❌ Virhe kaikenkattavan datan lataamisessa:', error);
+                document.getElementById('loadingStatus').innerHTML = `
+                    <strong>❌ Lataus epäonnistui</strong><br>
+                    Virhe datan lataamisessa. Päivitä sivu ja yritä uudestaan.
+                `;
+                document.getElementById('loadingStatus').style.background = '#f8d7da';
+                document.getElementById('loadingStatus').style.color = '#721c24';
             }
+        }
+        
+        async function loadAllOptions() {
+            // Tämä funktio ei ole enää tarpeen, koska kaikki latautuu automaattisesti
+            console.log('loadAllOptions() - data on jo ladattu automaattisesti');
+            return;
         }
         
         function renderCheckboxes() {
@@ -449,8 +471,8 @@
             
             if (allDataLoaded) {
                 document.getElementById('dataCount').innerHTML = `
-                    <strong>✅ Täydellinen dataset ladattu:</strong> 
-                    ${totalCount.toLocaleString()} hakuvaihtoehtoa saatavilla!
+                    <strong>✅ Täydellinen dataset ladattu automaattisesti:</strong> 
+                    ${totalCount.toLocaleString()} hakuvaihtoehtoa käytettävissä!
                 `;
                 document.getElementById('dataCount').style.background = '#d4edda';
                 document.getElementById('dataCount').style.color = '#155724';
