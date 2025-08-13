@@ -22,15 +22,22 @@
             <div class="form-container">
                 <h2>Rekisteröidy käyttäjäksi</h2>
                 <input type="email" id="registerEmail" placeholder="Sähköposti">
-                <input type="password" id="registerPassword" placeholder="Salasana">
+                <div class="password-container">
+                    <input type="password" id="registerPassword" placeholder="Salasana">
+                    <button type="button" class="toggle-password" onclick="togglePassword('registerPassword')">👁️</button>
+                </div>
                 <button onclick="registerUser()" class="btn btn-primary">Rekisteröidy</button>
             </div>
 
             <div class="form-container">
                 <h2>Kirjaudu sisään</h2>
                 <input type="email" id="loginEmail" placeholder="Sähköposti">
-                <input type="password" id="loginPassword" placeholder="Salasana">
+                <div class="password-container">
+                    <input type="password" id="loginPassword" placeholder="Salasana">
+                    <button type="button" class="toggle-password" onclick="togglePassword('loginPassword')">👁️</button>
+                </div>
                 <button onclick="loginUser()" class="btn btn-primary">Kirjaudu</button>
+                <button onclick="resetPassword()" class="btn btn-secondary">Salasana hukassa?</button>
                 <a href="/" class="back-link">← Takaisin etusivulle</a>
             </div>
         </div>

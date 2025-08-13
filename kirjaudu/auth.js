@@ -75,3 +75,36 @@ firebase.auth().onAuthStateChanged((user) => {
         console.log('User is signed out');
     }
 });
+
+// Toggle password visibility
+function togglePassword(inputId) {
+    const passwordInput = document.getElementById(inputId);
+    const toggleButton = passwordInput.nextElementSibling;
+    
+    if (passwordInput.type === 'password') {
+        passwordInput.type = 'text';
+        toggleButton.textContent = '🙈';
+    } else {
+        passwordInput.type = 'password';
+        toggleButton.textContent = '👁️';
+    }
+}
+
+// Reset password function
+function resetPassword() {
+    const email = document.getElementById('loginEmail').value;
+    
+    if (!email) {
+        alert('Syötä sähköpostiosoite ensin');
+        return;
+    }
+    
+    firebase.auth().sendPasswordResetEmail(email)
+        .then(() => {
+            alert('Salasanan resetointilinkki lähetetty sähköpostiisi!');
+        })
+        .catch((error) => {
+            console.error('Password reset error:', error);
+            alert('Virhe salasanan resetoinnissa: ' + error.message);
+        });
+}

@@ -97,6 +97,35 @@ input::placeholder {
     color: #666;
 }
 
+/* Password container */
+.password-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.password-container input {
+    flex: 1;
+    padding-right: 50px;
+}
+
+.toggle-password {
+    position: absolute;
+    right: 15px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 18px;
+    color: #666;
+    padding: 5px;
+    border-radius: 4px;
+    transition: background-color 0.2s ease;
+}
+
+.toggle-password:hover {
+    background-color: rgba(0, 0, 0, 0.1);
+}
+
 /* Buttons */
 .btn {
     padding: 15px 25px;
@@ -124,6 +153,23 @@ input::placeholder {
 }
 
 .btn-primary:active {
+    transform: translateY(0);
+}
+
+.btn-secondary {
+    background: rgba(108, 117, 125, 0.8);
+    border: 1px solid rgba(108, 117, 125, 0.5);
+    color: white;
+}
+
+.btn-secondary:hover {
+    background: rgba(90, 98, 104, 0.9);
+    border-color: rgba(90, 98, 104, 0.7);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(108, 117, 125, 0.4);
+}
+
+.btn-secondary:active {
     transform: translateY(0);
 }
 
