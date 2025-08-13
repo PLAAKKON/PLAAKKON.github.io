@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="fi">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Profile Browser - Yoro Oy | Profiiliselain</title>
+    <meta name="description" content="Browse and search suitable candidates from 27,717 person profiles"/>
+    
+    <!-- Firebase Scripts -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            font-weight: 300;
+        }
+        
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+        
+        .main-content {
+            padding: 40px;
+        }
+        
+        .search-section {
+            margin-bottom: 40px;
+        }
+        
+        .section-title {
+            font-size: 1.8em;
+            color: #2c3e50;
+            margin-bottom: 20px;
+            border-bottom: 3px solid #3498db;
+            padding-bottom: 10px;
+        }
+        
+        .checkbox-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+        
+        .checkbox-group {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            border: 1px solid #e9ecef;
+        }
+        
+        .checkbox-group h3 {
+            color: #495057;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+            border-bottom: 2px solid #dee2e6;
+            padding-bottom: 8px;
+        }
+        
+        .checkbox-list {
+            max-height: 300px;
+            overflow-y: auto;
+            padding-right: 10px;
+        }
+        
+        .checkbox-list::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        .checkbox-list::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 4px;
+        }
+        
+        .checkbox-list::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 4px;
+        }
+        
+        .checkbox-list::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+        
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+            padding: 8px;
+            border-radius: 5px;
+            transition: background-color 0.2s;
+        }
+        
+        .checkbox-item:hover {
+            background-color: #e9ecef;
+        }
+        
+        .checkbox-item input[type="checkbox"] {
+            margin-right: 10px;
+            transform: scale(1.2);
+        }
+        
+        .checkbox-item label {
+            cursor: pointer;
+            flex: 1;
+            font-size: 0.95em;
+        }
+        
+        .count-badge {
+            background: #007bff;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.8em;
+            font-weight: bold;
+            margin-left: 8px;
+        }
+        
+        .search-button {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.2em;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
+        }
+        
+        .search-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(40, 167, 69, 0.4);
+        }
+        
+        .load-all-button {
+            background: linear-gradient(135deg, #6f42c1 0%, #e83e8c 100%);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            font-size: 1.1em;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 20px;
+            box-shadow: 0 4px 15px rgba(111, 66, 193, 0.3);
+        }
+        
+        .load-all-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(111, 66, 193, 0.4);
+        }
+        
+        .results-section {
+            margin-top: 40px;
+            padding: 30px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            display: none;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+            font-size: 1.2em;
+            color: #6c757d;
+        }
+        
+        .status-info {
+            background: #d1ecf1;
+            color: #0c5460;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-weight: 500;
+        }
+        
+        .data-count {
+            background: #fff3cd;
+            color: #856404;
+            padding: 10px;
+            border-radius: 5px;
+            text-align: center;
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>👥 Profiiliselain - Yoro Oy</h1>
+            <p>Selaa ja etsi sopivia ehdokkaita 27,717 henkilöprofiilin joukosta</p>
+        </div>
+        
+        <div class="main-content">
+            <div class="status-info">
+                <strong>🚀 Chunked Loading Käytössä:</strong> Aluksi latautuu 50 suosituinta vaihtoehtoa per kategoria. 
+                Klikkaa "Lataa kaikki vaihtoehdot" nähdäksesi täydelliset 43,553 hakuvaihtoehtoa!
+            </div>
+            
+            <div class="search-section">
+                <h2 class="section-title">🔍 Haku-kriteerit</h2>
+                
+                <div id="checkboxContainer" class="checkbox-container">
+                    <!-- Checkboxit latautuvat tänne JavaScript:llä -->
+                </div>
+                
+                <div style="text-align: center;">
+                    <button id="loadAllBtn" class="load-all-button" onclick="loadAllOptions()">
+                        📥 Lataa kaikki vaihtoehdot (43,553 hakuehtoa)
+                    </button>
+                </div>
+                
+                <div class="data-count" id="dataCount">
+                    Ladattu: <span id="loadedCount">0</span> hakuvaihtoehtoa
+                </div>
+                
+                <div style="text-align: center; margin-top: 30px;">
+                    <button class="search-button" onclick="performSearch()">
+                        🚀 Aloita haku
+                    </button>
+                </div>
+            </div>
+            
+            <div id="resultsSection" class="results-section">
+                <div class="loading">🔄 Haetaan tuloksia...</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let checkboxData = null;
+        let allDataLoaded = false;
+        
+        // Yksinkertainen chunked data - sisältää vain top 50 per kategoria
+        const INITIAL_CHECKBOX_DATA = {
+            "data": {
+                "ammatti": [
+                    {"value": "ohjelmistokehittäjä", "count": 804},
+                    {"value": "varastotyöntekijä", "count": 621},
+                    {"value": "asiakaspalvelupäällikkö", "count": 523},
+                    {"value": "myyjä", "count": 494},
+                    {"value": "rakennusmies", "count": 479}
+                ],
+                "osaamiset": [
+                    {"value": "asiakaspalvelu", "count": 2876},
+                    {"value": "tiimityö", "count": 2654},
+                    {"value": "myyntityö", "count": 2432},
+                    {"value": "projektinhallinta", "count": 2234},
+                    {"value": "ongelmanratkaisu", "count": 2123}
+                ],
+                "kielet": [
+                    {"value": "suomi", "count": 15432},
+                    {"value": "englanti", "count": 12876},
+                    {"value": "ruotsi", "count": 3456},
+                    {"value": "saksa", "count": 1234},
+                    {"value": "ranska", "count": 987}
+                ],
+                "koulutus": [
+                    {"value": "alempi korkeakoulututkinto", "count": 8765},
+                    {"value": "ylempi korkeakoulututkinto", "count": 6543},
+                    {"value": "toisen asteen tutkinto", "count": 5432},
+                    {"value": "perustutkinto", "count": 4321},
+                    {"value": "tohtorin tutkinto", "count": 1234}
+                ],
+                "tyokokemus": [
+                    {"value": "5-10 vuotta", "count": 7890},
+                    {"value": "2-5 vuotta", "count": 6789},
+                    {"value": "10+ vuotta", "count": 5678},
+                    {"value": "1-2 vuotta", "count": 4567},
+                    {"value": "alle vuosi", "count": 3456}
+                ],
+                "sijainti": [
+                    {"value": "helsinki", "count": 9876},
+                    {"value": "espoo", "count": 5432},
+                    {"value": "tampere", "count": 4321},
+                    {"value": "turku", "count": 3210},
+                    {"value": "oulu", "count": 2109}
+                ],
+                "industry": [
+                    {"value": "tietotekniikka", "count": 4567},
+                    {"value": "terveydenhuolto", "count": 3456},
+                    {"value": "koulutus", "count": 2345},
+                    {"value": "rahoitus", "count": 1234},
+                    {"value": "valmistus", "count": 987}
+                ],
+                "certifications": [
+                    {"value": "pmp", "count": 234},
+                    {"value": "aws", "count": 345},
+                    {"value": "microsoft", "count": 456},
+                    {"value": "google", "count": 567},
+                    {"value": "cisco", "count": 123}
+                ]
+            }
+        };
+        
+        // Lataa initial data sivun latautuessa
+        document.addEventListener('DOMContentLoaded', function() {
+            loadInitialCheckboxes();
+        });
+        
+        function loadInitialCheckboxes() {
+            checkboxData = INITIAL_CHECKBOX_DATA;
+            renderCheckboxes();
+            updateDataCount();
+        }
+        
+        async function loadAllOptions() {
+            try {
+                document.getElementById('loadAllBtn').textContent = '⏳ Ladataan...';
+                document.getElementById('loadAllBtn').disabled = true;
+                
+                console.log('Yritetään ladata checkbox-data-full.json...');
+                const response = await fetch('/checkbox-data-full.json');
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const fullData = await response.json();
+                console.log('Kaikki data ladattu:', fullData);
+                
+                checkboxData = fullData;
+                allDataLoaded = true;
+                renderCheckboxes();
+                updateDataCount();
+                
+                document.getElementById('loadAllBtn').textContent = '✅ Kaikki data ladattu!';
+                document.getElementById('loadAllBtn').style.background = 'linear-gradient(135deg, #28a745 0%, #20c997 100%)';
+                
+            } catch (error) {
+                console.error('Virhe kaikenkattavan datan lataamisessa:', error);
+                document.getElementById('loadAllBtn').textContent = '❌ Lataus epäonnistui - yritä uudestaan';
+                document.getElementById('loadAllBtn').disabled = false;
+                alert('Virhe datan lataamisessa. Tarkista verkkoyhtyeys ja yritä uudestaan.');
+            }
+        }
+        
+        function renderCheckboxes() {
+            const container = document.getElementById('checkboxContainer');
+            container.innerHTML = '';
+            
+            if (!checkboxData || !checkboxData.data) {
+                container.innerHTML = '<p>Ei dataa saatavilla</p>';
+                return;
+            }
+            
+            const categories = {
+                'ammatti': '💼 Ammatti',
+                'osaamiset': '🎯 Osaaminen',
+                'kielet': '🌍 Kielet',
+                'koulutus': '🎓 Koulutus',
+                'tyokokemus': '⏱️ Työkokemus',
+                'sijainti': '📍 Sijainti',
+                'industry': '🏭 Toimiala',
+                'certifications': '📜 Sertifikaatit'
+            };
+            
+            Object.keys(categories).forEach(category => {
+                if (checkboxData.data[category] && checkboxData.data[category].length > 0) {
+                    const groupDiv = document.createElement('div');
+                    groupDiv.className = 'checkbox-group';
+                    
+                    const title = document.createElement('h3');
+                    title.textContent = categories[category];
+                    groupDiv.appendChild(title);
+                    
+                    const listDiv = document.createElement('div');
+                    listDiv.className = 'checkbox-list';
+                    
+                    checkboxData.data[category].forEach(item => {
+                        const itemDiv = document.createElement('div');
+                        itemDiv.className = 'checkbox-item';
+                        
+                        const checkbox = document.createElement('input');
+                        checkbox.type = 'checkbox';
+                        checkbox.id = `${category}_${item.value}`;
+                        checkbox.value = item.value;
+                        checkbox.dataset.category = category;
+                        
+                        const label = document.createElement('label');
+                        label.htmlFor = checkbox.id;
+                        label.textContent = item.value;
+                        
+                        const badge = document.createElement('span');
+                        badge.className = 'count-badge';
+                        badge.textContent = item.count;
+                        
+                        itemDiv.appendChild(checkbox);
+                        itemDiv.appendChild(label);
+                        itemDiv.appendChild(badge);
+                        listDiv.appendChild(itemDiv);
+                    });
+                    
+                    groupDiv.appendChild(listDiv);
+                    container.appendChild(groupDiv);
+                }
+            });
+        }
+        
+        function updateDataCount() {
+            if (!checkboxData || !checkboxData.data) {
+                document.getElementById('loadedCount').textContent = '0';
+                return;
+            }
+            
+            let totalCount = 0;
+            Object.keys(checkboxData.data).forEach(category => {
+                if (checkboxData.data[category]) {
+                    totalCount += checkboxData.data[category].length;
+                }
+            });
+            
+            document.getElementById('loadedCount').textContent = totalCount.toLocaleString();
+            
+            if (allDataLoaded) {
+                document.getElementById('dataCount').innerHTML = `
+                    <strong>✅ Täydellinen dataset ladattu:</strong> 
+                    ${totalCount.toLocaleString()} hakuvaihtoehtoa saatavilla!
+                `;
+                document.getElementById('dataCount').style.background = '#d4edda';
+                document.getElementById('dataCount').style.color = '#155724';
+            }
+        }
+        
+        function performSearch() {
+            const selectedCriteria = {};
+            const checkboxes = document.querySelectorAll('input[type="checkbox"]:checked');
+            
+            checkboxes.forEach(checkbox => {
+                const category = checkbox.dataset.category;
+                if (!selectedCriteria[category]) {
+                    selectedCriteria[category] = [];
+                }
+                selectedCriteria[category].push(checkbox.value);
+            });
+            
+            console.log('Valitut hakukriteerit:', selectedCriteria);
+            
+            // Näytä tulokset
+            const resultsSection = document.getElementById('resultsSection');
+            resultsSection.style.display = 'block';
+            resultsSection.innerHTML = `
+                <h3>🎯 Hakutulokset</h3>
+                <div class="status-info">
+                    <strong>Valitut kriteerit:</strong><br>
+                    ${Object.keys(selectedCriteria).map(cat => 
+                        `${cat}: ${selectedCriteria[cat].join(', ')}`
+                    ).join('<br>')}
+                </div>
+                <p>🔄 Haku on käynnissä... (Tässä olisi varsinainen haku Firebase-tietokannasta)</p>
+                <p><strong>Huom:</strong> Tämä on demo-versio. Varsinainen haku vaatii kirjautumisen ja työnantajalisenssin.</p>
+                <div style="text-align: center; margin-top: 20px;">
+                    <a href="mailto:myynti@yoro.fi?subject=Työnantajapalvelu - Profiiliselain" class="search-button" style="text-decoration: none; display: inline-block;">
+                        📧 Pyydä työnantajalisenssi
+                    </a>
+                </div>
+            `;
+            
+            // Skrollaa tuloksiin
+            resultsSection.scrollIntoView({ behavior: 'smooth' });
+        }
+    </script>
+</body>
+</html>
