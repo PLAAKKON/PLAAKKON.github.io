@@ -1710,8 +1710,8 @@
             
             console.log(`📦 About to create ${items.length} items for ${category}`);
             
-            // Show first 50 items initially
-            const initialItems = items.slice(0, 50);
+            // Show first 200 items initially
+            const initialItems = items.slice(0, 200);
             console.log(`📦 Creating ${initialItems.length} initial items for ${category}`);
             
             initialItems.forEach((item, index) => {
@@ -1746,8 +1746,8 @@
             
             checkboxList.innerHTML = '';
             
-            // Show max 100 filtered results
-            const itemsToShow = filtered.slice(0, 100);
+            // Show max 200 filtered results
+            const itemsToShow = filtered.slice(0, 200);
             itemsToShow.forEach(item => {
                 const checkboxItem = createCheckboxItem(category, item.name, item.count);
                 if (checkboxItem) { // Only append if item is valid
@@ -1755,12 +1755,12 @@
                 }
             });
             
-            if (filtered.length > 100) {
+            if (filtered.length > 200) {
                 const moreDiv = document.createElement('div');
                 moreDiv.style.padding = '5px';
                 moreDiv.style.fontStyle = 'italic';
                 moreDiv.style.color = '#666';
-                moreDiv.textContent = `... ja ${filtered.length - 100} muuta tulosta`;
+                moreDiv.textContent = `... ja ${filtered.length - 200} muuta tulosta`;
                 checkboxList.appendChild(moreDiv);
             }
         }

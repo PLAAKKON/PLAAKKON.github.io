@@ -63804,8 +63804,9 @@
             
             checkboxList.innerHTML = '';
             
-            // Show max 100 filtered results
-            const itemsToShow = filtered.slice(0, 100);
+            // Show all results for ammatti, max 100 for others
+            const maxResults = category === 'ammatti' ? filtered.length : 100;
+            const itemsToShow = filtered.slice(0, maxResults);
             itemsToShow.forEach(item => {
                 const checkboxItem = createCheckboxItem(category, item.name, item.count);
                 if (checkboxItem) { // Only append if item is valid
@@ -63813,12 +63814,13 @@
                 }
             });
             
-            if (filtered.length > 100) {
+            // Show "more results" message only for non-ammatti categories
+            if (filtered.length > maxResults && category !== 'ammatti') {
                 const moreDiv = document.createElement('div');
                 moreDiv.style.padding = '5px';
                 moreDiv.style.fontStyle = 'italic';
                 moreDiv.style.color = '#666';
-                moreDiv.textContent = `... ja ${filtered.length - 100} muuta tulosta`;
+                moreDiv.textContent = `... ja ${filtered.length - maxResults} muuta tulosta`;
                 checkboxList.appendChild(moreDiv);
             }
         }
