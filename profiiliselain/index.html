@@ -596,6 +596,7 @@
                         <div id="osaaminen-checkboxes" class="checkbox-container">
                             <!-- Osaaminen checkboxit tulevat tähän -->
                         </div>
+                        <button onclick="showMoreOptions('osaaminen')" class="show-more-btn">Näytä lisää...</button>
                     </div>
 
                     <div class="search-category">
@@ -603,6 +604,7 @@
                         <div id="työtoiveet-checkboxes" class="checkbox-container">
                             <!-- Työtoiveet checkboxit tulevat tähän -->
                         </div>
+                        <button onclick="showMoreOptions('työtoiveet')" class="show-more-btn">Näytä lisää...</button>
                     </div>
 
                     <div class="search-category">
@@ -610,6 +612,7 @@
                         <div id="alue-checkboxes" class="checkbox-container">
                             <!-- Alue checkboxit tulevat tähän -->
                         </div>
+                        <button onclick="showMoreOptions('alue')" class="show-more-btn">Näytä lisää...</button>
                     </div>
 
                     <div class="search-category">
@@ -617,6 +620,7 @@
                         <div id="kieli-checkboxes" class="checkbox-container">
                             <!-- Kieli checkboxit tulevat tähän -->
                         </div>
+                        <button onclick="showMoreOptions('kieli')" class="show-more-btn">Näytä lisää...</button>
                     </div>
 
                     <div class="search-category">
@@ -624,6 +628,7 @@
                         <div id="koulutus-checkboxes" class="checkbox-container">
                             <!-- Koulutus checkboxit tulevat tähän -->
                         </div>
+                        <button onclick="showMoreOptions('koulutus')" class="show-more-btn">Näytä lisää...</button>
                     </div>
 
                     <div class="search-category">
@@ -631,6 +636,7 @@
                         <div id="ajokortit-checkboxes" class="checkbox-container">
                             <!-- Ajokortit checkboxit tulevat tähän -->
                         </div>
+                        <button onclick="showMoreOptions('ajokortit')" class="show-more-btn">Näytä lisää...</button>
                     </div>
                     </div>
 
@@ -639,6 +645,7 @@
                         <div id="lupatiedot-checkboxes" class="checkbox-container">
                             <!-- Lupatiedot checkboxit tulevat tähän -->
                         </div>
+                        <button onclick="showMoreOptions('lupatiedot')" class="show-more-btn">Näytä lisää...</button>
                     </div>
                 </div>
 
@@ -63030,8 +63037,8 @@
                 });
             });
             
-            // Lataa kaikki checkboxit automaattisesti sivun latautuessa
-            loadAllCheckboxes();
+            // Lataa vain ammatit automaattisesti sivun latautuessa
+            showMoreOptions('ammatti');
         });
 
         // CACHE MANAGEMENT FUNCTIONS
