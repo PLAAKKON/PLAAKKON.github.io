@@ -650,6 +650,12 @@
                 </div>
 
                 <div style="text-align: center; margin-top: 20px;">
+                    <div id="chunked-status" style="background: #e3f2fd; padding: 15px; border-radius: 8px; margin-bottom: 15px; border: 1px solid #2196f3;">
+                        <div style="color: #1565c0; font-weight: bold;">📊 Hakuvaihtoehdot ladattu: <span id="loaded-count">~15,400</span> / 43,553</div>
+                        <button onclick="loadAllCheckboxData()" class="btn" id="load-all-btn" style="background: #4caf50; color: white; margin-top: 10px;">
+                            📥 Lataa kaikki 43,553 hakuvaihtoehtoa
+                        </button>
+                    </div>
                     <button onclick="searchProfiles()" class="btn btn-search" id="search-btn">🔍 Hae profiileja</button>
                     <button onclick="clearSearch()" class="btn">🗑️ Tyhjennä haku</button>
                     <button onclick="clearCacheAndRebuild()" class="btn btn-secondary" style="margin-left: 10px;">🔄 Päivitä hakuehdot</button>
@@ -62815,26 +62821,92 @@
         }
 
         // Show more options for a category
-        function showMoreOptions(category) {
+        async function showMoreOptions(category) {
             const container = document.getElementById(`${category}-checkboxes`);
-            const remaining = container.getAttribute('data-remaining');
+            const showMoreBtn = container.parentNode.querySelector('.show-more-btn');
             
-            if (remaining) {
-                const remainingItems = JSON.parse(remaining);
+            if (showMoreBtn) {
+                showMoreBtn.textContent = '⏳ Ladataan...';
+                showMoreBtn.disabled = true;
+            }
+            
+            try {
+                // Lataa kaikki data checkbox-data-full.json:sta
+                console.log(`Ladataan kaikki ${category} vaihtoehdot...`);
+                const response = await fetch('/checkbox-data-full.json');
                 
-                remainingItems.forEach(([key, count]) => {
-                    const item = createCheckboxItem(category, key, count);
-                    if (item) { // Only append if item is valid
-                        container.appendChild(item);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const fullData = await response.json();
+                console.log('Kaikki data ladattu:', fullData);
+                
+                // Etsi kategorian data
+                let categoryData = null;
+                const categoryMappings = {
+                    'ammatti': 'ammatti',
+                    'osaaminen': 'osaamiset', 
+                    'työtoiveet': 'osaamiset',
+                    'alue': 'sijainti',
+                    'kieli': 'kielet',
+                    'koulutus': 'koulutus',
+                    'ajokortit': 'certifications',
+                    'lupatiedot': 'certifications'
+                };
+                
+                const dataKey = categoryMappings[category] || category;
+                if (fullData.data && fullData.data[dataKey]) {
+                    categoryData = fullData.data[dataKey];
+                }
+                
+                if (!categoryData) {
+                    console.warn(`Ei dataa kategorialle: ${category}`);
+                    return;
+                }
+                
+                // Poista nykyiset checkboxit (paitsi jo näkyvät)
+                const existingCheckboxes = container.querySelectorAll('input[type="checkbox"]');
+                const existingValues = Array.from(existingCheckboxes).map(cb => cb.value);
+                
+                // Lisää kaikki uudet vaihtoehdot
+                let addedCount = 0;
+                categoryData.forEach(item => {
+                    if (!existingValues.includes(item.value)) {
+                        const newItem = createCheckboxItem(category, item.value, item.count);
+                        if (newItem) {
+                            container.appendChild(newItem);
+                            addedCount++;
+                        }
                     }
                 });
-
-                container.removeAttribute('data-remaining');
                 
-                // Hide the "show more" button
-                const showMoreBtn = container.parentNode.querySelector('.show-more-btn');
+                console.log(`Lisätty ${addedCount} uutta vaihtoehtoa kategoriaan ${category}`);
+                
+                // Piilota "Näytä lisää" -nappi
                 if (showMoreBtn) {
                     showMoreBtn.style.display = 'none';
+                }
+                
+                // Näytä onnistumisviesti
+                const successMsg = document.createElement('div');
+                successMsg.textContent = `✅ Kaikki ${categoryData.length} vaihtoehtoa ladattu!`;
+                successMsg.style.color = 'green';
+                successMsg.style.fontSize = '0.9em';
+                successMsg.style.marginTop = '10px';
+                container.parentNode.appendChild(successMsg);
+                
+                setTimeout(() => {
+                    if (successMsg.parentNode) {
+                        successMsg.parentNode.removeChild(successMsg);
+                    }
+                }, 3000);
+                
+            } catch (error) {
+                console.error('Virhe ladattaessa kaikkia vaihtoehtoja:', error);
+                if (showMoreBtn) {
+                    showMoreBtn.textContent = '❌ Lataus epäonnistui - yritä uudestaan';
+                    showMoreBtn.disabled = false;
                 }
             }
         }
