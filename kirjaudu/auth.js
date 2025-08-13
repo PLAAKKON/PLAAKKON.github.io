@@ -8,6 +8,13 @@ window.addEventListener('load', function() {
     }
 });
 
+// Get return URL from query parameters
+function getReturnUrl() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const returnUrl = urlParams.get('returnUrl');
+    return returnUrl || '../';
+}
+
 // Register user function
 function registerUser() {
     const email = document.getElementById('registerEmail').value;
@@ -23,8 +30,8 @@ function registerUser() {
             const user = userCredential.user;
             console.log('User registered:', user);
             alert('Rekisteröinti onnistui!');
-            // Redirect to profile browser
-            window.location.href = '../profiiliselain/';
+            // Redirect based on return URL
+            window.location.href = getReturnUrl();
         })
         .catch((error) => {
             console.error('Registration error:', error);
@@ -47,8 +54,8 @@ function loginUser() {
             const user = userCredential.user;
             console.log('User logged in:', user);
             alert('Kirjautuminen onnistui!');
-            // Redirect to profile browser
-            window.location.href = '../profiiliselain/';
+            // Redirect based on return URL
+            window.location.href = getReturnUrl();
         })
         .catch((error) => {
             console.error('Login error:', error);
