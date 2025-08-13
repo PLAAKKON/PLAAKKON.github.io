@@ -21,8 +21,43 @@
         html, body {
             height: 100%;
             font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-            color: white;
+            color: #2c3e50;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        /* Language toggle */
+        .language-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            display: flex;
+            gap: 5px;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            border-radius: 25px;
+            padding: 5px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .lang-btn {
+            padding: 8px 12px;
             background: transparent;
+            border: none;
+            border-radius: 20px;
+            color: rgba(255, 255, 255, 0.8);
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            letter-spacing: 0.5px;
+        }
+
+        .lang-btn.active,
+        .lang-btn:hover {
+            background: rgba(255, 255, 255, 0.25);
+            color: white;
+            transform: scale(1.05);
         }
 
         .video-background {
@@ -33,55 +68,71 @@
             height: 100%;
             object-fit: cover;
             z-index: -2;
+            opacity: 0.1;
         }
 
         .container {
             max-width: 1200px;
             margin: 0 auto;
             padding: 20px;
-            background-color: rgba(0, 0, 0, 0.4);
-            border-radius: 10px;
-            backdrop-filter: blur(10px);
+            background-color: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            backdrop-filter: blur(15px);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
         }
 
         .header {
-            background: rgba(255, 255, 255, 0.1);
-            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 30px;
             border-radius: 15px;
             margin-bottom: 20px;
             text-align: center;
-            backdrop-filter: blur(5px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.3);
         }
 
         .header h1 {
             color: white;
             font-size: 2.5rem;
             margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .header p {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 1.1rem;
         }
 
         .auth-section {
-            background: rgba(255, 255, 255, 0.1);
-            padding: 15px;
-            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.8);
+            padding: 20px;
+            border-radius: 15px;
             margin-bottom: 15px;
             text-align: center;
-            backdrop-filter: blur(5px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(102, 126, 234, 0.2);
             min-height: 60px;
             display: flex;
             flex-direction: row;
             justify-content: space-between;
             align-items: center;
+            box-shadow: 0 3px 15px rgba(0, 0, 0, 0.05);
         }
 
         .search-section {
-            background: rgba(255, 255, 255, 0.1);
-            padding: 20px;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 25px;
             border-radius: 15px;
             margin-bottom: 20px;
-            backdrop-filter: blur(5px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(102, 126, 234, 0.1);
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
+        }
+
+        .search-section h2 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-weight: 700;
         }
 
         .search-grid {
@@ -99,63 +150,77 @@
         .search-field label {
             font-weight: 600;
             margin-bottom: 5px;
-            color: white;
+            color: #2c3e50;
         }
 
         .search-field input, .search-field select {
-            padding: 10px;
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            border-radius: 8px;
+            padding: 12px 15px;
+            border: 2px solid rgba(102, 126, 234, 0.2);
+            border-radius: 10px;
             font-size: 14px;
             background: rgba(255, 255, 255, 0.9);
-            color: #333;
+            color: #2c3e50;
+            transition: all 0.3s ease;
+        }
+
+        .search-field input:focus, .search-field select:focus {
+            outline: none;
+            border-color: #667eea;
+            background: rgba(255, 255, 255, 1);
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
         }
 
         .btn {
             display: inline-block;
             padding: 12px 24px;
-            background: rgba(30, 144, 255, 0.8);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
             text-decoration: none;
-            border-radius: 8px;
+            border-radius: 10px;
             margin: 8px;
-            font-weight: 500;
+            font-weight: 600;
             transition: all 0.3s ease;
             border: none;
             cursor: pointer;
-            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
         }
 
         .btn:hover {
-            background: rgba(30, 144, 255, 1);
+            background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
             transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
         }
 
         .btn-search {
-            background: rgba(40, 167, 69, 0.8);
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
             font-size: 16px;
             padding: 15px 30px;
+            box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
         }
 
         .btn-search:hover {
-            background: rgba(40, 167, 69, 1);
+            background: linear-gradient(135deg, #218838 0%, #1ea085 100%);
+            box-shadow: 0 8px 25px rgba(40, 167, 69, 0.4);
         }
 
         .btn-logout {
-            background: rgba(220, 53, 69, 0.8);
+            background: linear-gradient(135deg, #dc3545 0%, #e85d75 100%);
+            box-shadow: 0 4px 15px rgba(220, 53, 69, 0.3);
         }
 
         .btn-logout:hover {
-            background: rgba(220, 53, 69, 1);
+            background: linear-gradient(135deg, #c82333 0%, #d93b5b 100%);
+            box-shadow: 0 8px 25px rgba(220, 53, 69, 0.4);
         }
 
         .btn-info {
-            background: rgba(23, 162, 184, 0.8);
+            background: linear-gradient(135deg, #17a2b8 0%, #6f42c1 100%);
+            box-shadow: 0 4px 15px rgba(23, 162, 184, 0.3);
         }
 
         .btn-info:hover {
-            background: rgba(23, 162, 184, 1);
+            background: linear-gradient(135deg, #138496 0%, #5a2d8e 100%);
+            box-shadow: 0 8px 25px rgba(23, 162, 184, 0.4);
         }
 
         /* Checkbox search styles */
@@ -169,28 +234,30 @@
         }
 
         .search-category {
-            background: rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.9);
             border-radius: 15px;
             padding: 20px;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            backdrop-filter: blur(5px);
+            border: 1px solid rgba(102, 126, 234, 0.2);
+            backdrop-filter: blur(10px);
             transition: all 0.3s ease;
             max-width: 100%;
             overflow: hidden;
             word-wrap: break-word;
+            box-shadow: 0 3px 15px rgba(0, 0, 0, 0.05);
         }
 
         .search-category:hover {
             transform: translateY(-2px);
-            background: rgba(255, 255, 255, 0.15);
-            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+            background: rgba(255, 255, 255, 0.95);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.15);
         }
 
         .search-category h3 {
             margin: 0 0 15px 0;
-            color: white;
+            color: #2c3e50;
             font-size: 18px;
-            border-bottom: 2px solid rgba(30, 144, 255, 0.8);
+            font-weight: 700;
+            border-bottom: 2px solid #667eea;
             padding-bottom: 8px;
         }
 
@@ -206,12 +273,12 @@
         }
 
         .checkbox-container::-webkit-scrollbar-track {
-            background: rgba(255, 255, 255, 0.1);
+            background: rgba(102, 126, 234, 0.1);
             border-radius: 3px;
         }
 
         .checkbox-container::-webkit-scrollbar-thumb {
-            background: rgba(30, 144, 255, 0.8);
+            background: #667eea;
             border-radius: 3px;
         }
 
@@ -225,13 +292,13 @@
         }
 
         .checkbox-item:hover {
-            background-color: rgba(255, 255, 255, 0.1);
+            background-color: rgba(102, 126, 234, 0.1);
         }
 
         .checkbox-item input[type="checkbox"] {
             margin-right: 8px;
             transform: scale(1.2);
-            accent-color: #1e90ff;
+            accent-color: #667eea;
         }
 
         .checkbox-item label {
@@ -240,11 +307,11 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            color: white;
+            color: #2c3e50;
         }
 
         .checkbox-count {
-            background: rgba(30, 144, 255, 0.8);
+            background: #667eea;
             color: white;
             padding: 4px 8px;
             border-radius: 12px;
@@ -423,6 +490,12 @@
     </style>
 </head>
 <body>
+    <!-- Language toggle -->
+    <div class="language-toggle">
+        <button onclick="setLanguage('fi')" class="lang-btn" id="lang-fi">FI</button>
+        <button onclick="setLanguage('en')" class="lang-btn" id="lang-en">EN</button>
+    </div>
+
     <!-- Video Background -->
     <video autoplay muted loop class="video-background">
         <source src="/city_2160_24fps.mp4" type="video/mp4">
@@ -430,111 +503,111 @@
 
     <div class="container">
         <div class="header">
-            <h1>👥 Profiiliselain - Yoro Oy (Työnantajapalvelu)</h1>
-            <p>GDPR-suojattu ehdokashaku 27,717 henkilöprofiilin joukosta • Maksullinen palvelu työnantajille</p>
+            <h1 data-fi="👥 Profiiliselain - Yoro Oy (Työnantajapalvelu)" data-en="👥 Profile Browser - Yoro Oy (Employer Service)">👥 Profiiliselain - Yoro Oy (Työnantajapalvelu)</h1>
+            <p data-fi="GDPR-suojattu ehdokashaku 27,717 henkilöprofiilin joukosta • Maksullinen palvelu työnantajille" data-en="GDPR-protected candidate search from 27,717 person profiles • Paid service for employers">GDPR-suojattu ehdokashaku 27,717 henkilöprofiilin joukosta • Maksullinen palvelu työnantajille</p>
         </div>
 
         <div class="auth-section" id="auth-section">
             <div id="not-logged-in" style="display: none;">
-                <h2>🔐 Kirjautuminen vaaditaan</h2>
-                <p>Sinun täytyy kirjautua sisään nähdäksesi profiilit.</p>
-                <a href="/kirjaudu/" class="btn">Kirjaudu sisään</a>
-                <a href="/" class="btn">Takaisin etusivulle</a>
+                <h2 data-fi="🔐 Kirjautuminen vaaditaan" data-en="🔐 Login Required">🔐 Kirjautuminen vaaditaan</h2>
+                <p data-fi="Sinun täytyy kirjautua sisään nähdäksesi profiilit." data-en="You need to log in to view profiles.">Sinun täytyy kirjautua sisään nähdäksesi profiilit.</p>
+                <a href="/kirjaudu/" class="btn" data-fi="Kirjaudu sisään" data-en="Log In">Kirjaudu sisään</a>
+                <a href="/" class="btn" data-fi="Takaisin etusivulle" data-en="Back to Homepage">Takaisin etusivulle</a>
             </div>
             <div id="logged-in" style="display: none;">
-                <p>Kirjautunut käyttäjä: <span id="user-email"></span></p>
-                <button onclick="logoutUser()" class="btn btn-logout">Kirjaudu ulos</button>
-                <a href="/" class="btn">Takaisin etusivulle</a>
+                <p data-fi="Kirjautunut käyttäjä:" data-en="Logged in user:">Kirjautunut käyttäjä: <span id="user-email"></span></p>
+                <button onclick="logoutUser()" class="btn btn-logout" data-fi="Kirjaudu ulos" data-en="Log Out">Kirjaudu ulos</button>
+                <a href="/" class="btn" data-fi="Takaisin etusivulle" data-en="Back to Homepage">Takaisin etusivulle</a>
             </div>
         </div>
 
         <div id="main-content" style="display: none;">
             <div class="search-section">
-                <h2>🔍 Hae profiileja</h2>
+                <h2 data-fi="🔍 Hae profiileja" data-en="🔍 Search Profiles">🔍 Hae profiileja</h2>
                 
                 <!-- Vapaa tekstihaku -->
                 <div class="free-search">
                     <div class="search-field">
-                        <label for="search-free">Vapaa haku</label>
-                        <input type="text" id="search-free" placeholder="Hakusana kaikista kentistä...">
+                        <label for="search-free" data-fi="Vapaa haku" data-en="Free Search">Vapaa haku</label>
+                        <input type="text" id="search-free" data-fi="Hakusana kaikista kentistä..." data-en="Search keyword from all fields..." placeholder="Hakusana kaikista kentistä...">
                     </div>
                 </div>
 
                 <!-- Checkbox-pohjaiset hakuparametrit -->
                 <div class="search-categories">
                     <div class="search-category">
-                        <h3>💼 Ammatit</h3>
+                        <h3 data-fi="💼 Ammatit" data-en="💼 Professions">💼 Ammatit</h3>
                         <div id="ammatti-checkboxes" class="checkbox-container">
                             <!-- Ammatti checkboxit tulevat tähän -->
                         </div>
                     </div>
 
                     <div class="search-category">
-                        <h3>� Osaamiset</h3>
+                        <h3 data-fi="🔧 Osaamiset" data-en="🔧 Skills">🔧 Osaamiset</h3>
                         <div id="osaaminen-checkboxes" class="checkbox-container">
                             <!-- Osaaminen checkboxit tulevat tähän -->
                         </div>
-                        <button onclick="showMoreOptions('osaaminen')" class="show-more-btn">Näytä lisää...</button>
+                        <button onclick="showMoreOptions('osaaminen')" class="show-more-btn" data-fi="Näytä lisää..." data-en="Show more...">Näytä lisää...</button>
                     </div>
 
                     <div class="search-category">
-                        <h3>💼 Työtoiveet</h3>
+                        <h3 data-fi="💼 Työtoiveet" data-en="💼 Job Preferences">💼 Työtoiveet</h3>
                         <div id="työtoiveet-checkboxes" class="checkbox-container">
                             <!-- Työtoiveet checkboxit tulevat tähän -->
                         </div>
-                        <button onclick="showMoreOptions('työtoiveet')" class="show-more-btn">Näytä lisää...</button>
+                        <button onclick="showMoreOptions('työtoiveet')" class="show-more-btn" data-fi="Näytä lisää..." data-en="Show more...">Näytä lisää...</button>
                     </div>
 
                     <div class="search-category">
-                        <h3>📍 Työnhakualue</h3>
+                        <h3 data-fi="📍 Työnhakualue" data-en="📍 Job Search Area">📍 Työnhakualue</h3>
                         <div id="alue-checkboxes" class="checkbox-container">
                             <!-- Alue checkboxit tulevat tähän -->
                         </div>
-                        <button onclick="showMoreOptions('alue')" class="show-more-btn">Näytä lisää...</button>
+                        <button onclick="showMoreOptions('alue')" class="show-more-btn" data-fi="Näytä lisää..." data-en="Show more...">Näytä lisää...</button>
                     </div>
 
                     <div class="search-category">
-                        <h3>🌍 Kielitaito</h3>
+                        <h3 data-fi="🌍 Kielitaito" data-en="🌍 Language Skills">🌍 Kielitaito</h3>
                         <div id="kieli-checkboxes" class="checkbox-container">
                             <!-- Kieli checkboxit tulevat tähän -->
                         </div>
-                        <button onclick="showMoreOptions('kieli')" class="show-more-btn">Näytä lisää...</button>
+                        <button onclick="showMoreOptions('kieli')" class="show-more-btn" data-fi="Näytä lisää..." data-en="Show more...">Näytä lisää...</button>
                     </div>
 
                     <div class="search-category">
-                        <h3>🎓 Koulutus</h3>
+                        <h3 data-fi="🎓 Koulutus" data-en="🎓 Education">🎓 Koulutus</h3>
                         <div id="koulutus-checkboxes" class="checkbox-container">
                             <!-- Koulutus checkboxit tulevat tähän -->
                         </div>
-                        <button onclick="showMoreOptions('koulutus')" class="show-more-btn">Näytä lisää...</button>
+                        <button onclick="showMoreOptions('koulutus')" class="show-more-btn" data-fi="Näytä lisää..." data-en="Show more...">Näytä lisää...</button>
                     </div>
 
                     <div class="search-category">
-                        <h3>🚗 Ajokortit</h3>
+                        <h3 data-fi="🚗 Ajokortit" data-en="🚗 Driving Licenses">🚗 Ajokortit</h3>
                         <div id="ajokortit-checkboxes" class="checkbox-container">
                             <!-- Ajokortit checkboxit tulevat tähän -->
                         </div>
-                        <button onclick="showMoreOptions('ajokortit')" class="show-more-btn">Näytä lisää...</button>
+                        <button onclick="showMoreOptions('ajokortit')" class="show-more-btn" data-fi="Näytä lisää..." data-en="Show more...">Näytä lisää...</button>
                     </div>
 
                     <div class="search-category">
-                        <h3>📋 Lupatiedot</h3>
+                        <h3 data-fi="📋 Lupatiedot" data-en="📋 Permits & Licenses">📋 Lupatiedot</h3>
                         <div id="lupatiedot-checkboxes" class="checkbox-container">
                             <!-- Lupatiedot checkboxit tulevat tähän -->
                         </div>
-                        <button onclick="showMoreOptions('lupatiedot')" class="show-more-btn">Näytä lisää...</button>
+                        <button onclick="showMoreOptions('lupatiedot')" class="show-more-btn" data-fi="Näytä lisää..." data-en="Show more...">Näytä lisää...</button>
                     </div>
                 </div>
 
                 <div style="text-align: center; margin-top: 20px;">
-                    <button onclick="searchProfiles()" class="btn btn-search" id="search-btn">🔍 Hae profiileja</button>
-                    <button onclick="clearSearch()" class="btn">🗑️ Tyhjennä valinnat</button>
-                    <button onclick="showSelectedFilters()" class="btn btn-info" style="margin-left: 10px;">📋 Näytä valinnat</button>
+                    <button onclick="searchProfiles()" class="btn btn-search" id="search-btn" data-fi="🔍 Hae profiileja" data-en="🔍 Search Profiles">🔍 Hae profiileja</button>
+                    <button onclick="clearSearch()" class="btn" data-fi="🗑️ Tyhjennä valinnat" data-en="🗑️ Clear Selections">🗑️ Tyhjennä valinnat</button>
+                    <button onclick="showSelectedFilters()" class="btn btn-info" style="margin-left: 10px;" data-fi="📋 Näytä valinnat" data-en="📋 Show Selections">📋 Näytä valinnat</button>
                 </div>
             </div>
 
             <div id="loading" class="loading" style="display: none;">
-                <p>⏳ Ladataan profiileja...</p>
+                <p data-fi="⏳ Ladataan profiileja..." data-en="⏳ Loading profiles...">⏳ Ladataan profiileja...</p>
             </div>
 
             <div id="results-info" class="results-info" style="display: none;">
@@ -63580,6 +63653,48 @@
             // Rebuild from scratch
             buildIndexIfNeeded();
         }
+
+        // Language functionality
+        let currentLanguage = 'fi';
+
+        function setLanguage(lang) {
+            currentLanguage = lang;
+            localStorage.setItem('preferredLanguage', lang);
+            
+            // Update language buttons
+            document.querySelectorAll('.lang-btn').forEach(btn => btn.classList.remove('active'));
+            document.getElementById('lang-' + lang).classList.add('active');
+            
+            // Update all texts
+            document.querySelectorAll('[data-fi][data-en]').forEach(element => {
+                const text = element.getAttribute('data-' + lang);
+                if (element.tagName === 'INPUT') {
+                    element.placeholder = text;
+                } else {
+                    if (element.id === 'user-email') {
+                        // Don't change user email content
+                        return;
+                    }
+                    // Handle elements with both text and span elements
+                    if (element.querySelector('span#user-email')) {
+                        const userEmailSpan = element.querySelector('span#user-email');
+                        const userEmail = userEmailSpan.textContent;
+                        element.innerHTML = text + ' <span id="user-email">' + userEmail + '</span>';
+                    } else {
+                        element.textContent = text;
+                    }
+                }
+            });
+            
+            // Update HTML lang attribute
+            document.documentElement.lang = lang;
+        }
+
+        // Initialize language on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            const savedLang = localStorage.getItem('preferredLanguage') || 'fi';
+            setLanguage(savedLang);
+        });
     </script>
 </body>
 </html>

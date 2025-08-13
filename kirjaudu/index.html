@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Yoro Oy - Kirjautuminen</title>
+    <title>Yoro Oy - Kirjautuminen / Login</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
@@ -12,6 +12,12 @@
     <script defer src="./auth.js"></script>
 </head>
 <body>
+    <!-- Language toggle -->
+    <div class="language-toggle">
+        <button onclick="setLanguage('fi')" class="lang-btn" id="lang-fi">FI</button>
+        <button onclick="setLanguage('en')" class="lang-btn" id="lang-en">EN</button>
+    </div>
+
     <!-- Video background -->
     <video autoplay muted loop class="video-background">
         <source src="/city_2160_24fps.mp4" type="video/mp4">
@@ -20,27 +26,60 @@
     <div class="container">
         <div class="auth-forms">
             <div class="form-container">
-                <h2>Rekisteröidy käyttäjäksi</h2>
-                <input type="email" id="registerEmail" placeholder="Sähköposti">
+                <h2 data-fi="Rekisteröidy käyttäjäksi" data-en="Create Account">Rekisteröidy käyttäjäksi</h2>
+                <input type="email" id="registerEmail" data-fi="Sähköposti" data-en="Email" placeholder="Sähköposti">
                 <div class="password-container">
-                    <input type="password" id="registerPassword" placeholder="Salasana">
+                    <input type="password" id="registerPassword" data-fi="Salasana" data-en="Password" placeholder="Salasana">
                     <button type="button" class="toggle-password" onclick="togglePassword('registerPassword')">👁️</button>
                 </div>
-                <button onclick="registerUser()" class="btn btn-primary">Rekisteröidy</button>
+                <button onclick="registerUser()" class="btn btn-primary" data-fi="Rekisteröidy" data-en="Register">Rekisteröidy</button>
             </div>
 
             <div class="form-container">
-                <h2>Kirjaudu sisään</h2>
-                <input type="email" id="loginEmail" placeholder="Sähköposti">
+                <h2 data-fi="Kirjaudu sisään" data-en="Sign In">Kirjaudu sisään</h2>
+                <input type="email" id="loginEmail" data-fi="Sähköposti" data-en="Email" placeholder="Sähköposti">
                 <div class="password-container">
-                    <input type="password" id="loginPassword" placeholder="Salasana">
+                    <input type="password" id="loginPassword" data-fi="Salasana" data-en="Password" placeholder="Salasana">
                     <button type="button" class="toggle-password" onclick="togglePassword('loginPassword')">👁️</button>
                 </div>
-                <button onclick="loginUser()" class="btn btn-primary">Kirjaudu</button>
-                <button onclick="resetPassword()" class="btn btn-secondary">Salasana hukassa?</button>
-                <a href="/" class="back-link">← Takaisin etusivulle</a>
+                <button onclick="loginUser()" class="btn btn-primary" data-fi="Kirjaudu" data-en="Sign In">Kirjaudu</button>
+                <button onclick="resetPassword()" class="btn btn-secondary" data-fi="Salasana hukassa?" data-en="Forgot password?">Salasana hukassa?</button>
+                <a href="/" class="back-link" data-fi="← Takaisin etusivulle" data-en="← Back to homepage">← Takaisin etusivulle</a>
             </div>
         </div>
     </div>
+
+    <script>
+        // Language functionality
+        let currentLanguage = 'fi';
+
+        function setLanguage(lang) {
+            currentLanguage = lang;
+            localStorage.setItem('preferredLanguage', lang);
+            
+            // Update language buttons
+            document.querySelectorAll('.lang-btn').forEach(btn => btn.classList.remove('active'));
+            document.getElementById('lang-' + lang).classList.add('active');
+            
+            // Update all texts
+            document.querySelectorAll('[data-fi][data-en]').forEach(element => {
+                const text = element.getAttribute('data-' + lang);
+                if (element.tagName === 'INPUT') {
+                    element.placeholder = text;
+                } else {
+                    element.textContent = text;
+                }
+            });
+            
+            // Update HTML lang attribute
+            document.documentElement.lang = lang;
+        }
+
+        // Initialize language on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            const savedLang = localStorage.getItem('preferredLanguage') || 'fi';
+            setLanguage(savedLang);
+        });
+    </script>
 </body>
 </html>
