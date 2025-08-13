@@ -62915,22 +62915,16 @@
             }
         }
         
-        // Lataa kaikki checkboxit automaattisesti
+        // Lataa kaikki checkboxit automaattisesti - VAIN AMMATIT
         async function loadAllCheckboxes() {
-            console.log('🚀 Aloitetaan kaikkien checkboxien automaattinen lataus...');
+            console.log('🚀 Aloitetaan ammattien automaattinen lataus...');
             
-            const categories = ['ammatti', 'osaaminen', 'työtoiveet', 'alue', 'kieli', 'koulutus', 'ajokortit', 'lupatiedot'];
-            
-            for (const category of categories) {
-                try {
-                    await showMoreOptions(category);
-                    console.log(`✅ Kategoria ${category} ladattu`);
-                } catch (error) {
-                    console.error(`❌ Virhe kategoriassa ${category}:`, error);
-                }
+            try {
+                await showMoreOptions('ammatti');
+                console.log('✅ Ammatit ladattu automaattisesti');
+            } catch (error) {
+                console.error('❌ Virhe ammattien latauksessa:', error);
             }
-            
-            console.log('🎯 Kaikki kategoriat ladattu automaattisesti!');
         }
 
         // Capitalize first letter
