@@ -63445,8 +63445,9 @@
             container.appendChild(checkboxContainer);
             console.log(`✅ Checkbox container appended to ${category}`);
             
-            // Store all items for filtering
-            container.setAttribute('data-all-items', JSON.stringify(items));
+            // Store all items for filtering (convert value -> name for consistency)
+            const itemsForFiltering = items.map(item => ({ name: item.value || item.name, count: item.count }));
+            container.setAttribute('data-all-items', JSON.stringify(itemsForFiltering));
             
             console.log(`✅ Created ${initialItems.length}/${items.length} checkboxes for ${category}`);
         }
