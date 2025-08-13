@@ -277,20 +277,21 @@
             overflow-y: auto;
             margin-bottom: 15px;
             padding-right: 5px;
+            scrollbar-width: none; /* Firefox */
+            -ms-overflow-style: none; /* Internet Explorer 10+ */
         }
 
         .checkbox-container::-webkit-scrollbar {
-            width: 6px;
+            width: 0px;
+            background: transparent;
         }
 
         .checkbox-container::-webkit-scrollbar-track {
-            background: rgba(102, 126, 234, 0.1);
-            border-radius: 3px;
+            background: transparent;
         }
 
         .checkbox-container::-webkit-scrollbar-thumb {
-            background: #667eea;
-            border-radius: 3px;
+            background: transparent;
         }
 
         .checkbox-item {
