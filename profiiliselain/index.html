@@ -161,9 +161,11 @@
         /* Checkbox search styles */
         .search-categories {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
             gap: 15px;
             margin: 20px 0;
+            max-width: 100%;
+            overflow-x: auto;
         }
 
         .search-category {
@@ -173,6 +175,9 @@
             border: 1px solid rgba(255, 255, 255, 0.2);
             backdrop-filter: blur(5px);
             transition: all 0.3s ease;
+            max-width: 100%;
+            overflow: hidden;
+            word-wrap: break-word;
         }
 
         .search-category:hover {
@@ -272,11 +277,30 @@
             font-size: 12px;
             transition: all 0.3s ease;
             backdrop-filter: blur(5px);
+            width: 100%;
+            max-width: 200px;
+            text-align: center;
+            word-wrap: break-word;
+            white-space: normal;
         }
 
         .show-more-btn:hover {
             background: rgba(30, 144, 255, 0.8);
             transform: translateY(-1px);
+        }
+
+        .checkbox-list {
+            max-width: 100%;
+            overflow-x: auto;
+            word-wrap: break-word;
+        }
+
+        .checkbox-list label {
+            display: block;
+            max-width: 100%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
         }
 
         /* Results section */
@@ -360,6 +384,17 @@
             
             .search-categories {
                 grid-template-columns: 1fr;
+                gap: 10px;
+            }
+            
+            .search-category {
+                padding: 15px;
+            }
+            
+            .show-more-btn {
+                max-width: 100%;
+                font-size: 11px;
+                padding: 6px 12px;
             }
             
             .header h1 {
@@ -369,6 +404,12 @@
             .auth-section {
                 padding: 20px;
                 min-height: 150px;
+            }
+        }
+
+        @media (max-width: 1024px) {
+            .search-categories {
+                grid-template-columns: repeat(2, 1fr);
             }
         }
     </style>
@@ -62921,18 +62962,19 @@
                 
                 const fullData = await response.json();
                 console.log('Kaikki data ladattu:', fullData);
+                console.log('Saatavilla olevat avaimet:', Object.keys(fullData.data));
                 
                 // Etsi kategorian data
                 let categoryData = null;
                 const categoryMappings = {
-                    'ammatti': 'ammatti',
+                    'ammatti': 'ammatit',
                     'osaaminen': 'osaamiset', 
-                    'työtoiveet': 'osaamiset',
-                    'alue': 'sijainti',
-                    'kieli': 'kielet',
+                    'työtoiveet': 'tyonhakualue',
+                    'alue': 'tyonhakualue',
+                    'kieli': 'kielitaito',
                     'koulutus': 'koulutus',
-                    'ajokortit': 'certifications',
-                    'lupatiedot': 'certifications'
+                    'ajokortit': 'ajokortit',
+                    'lupatiedot': 'lupatiedot'
                 };
                 
                 const dataKey = categoryMappings[category] || category;
