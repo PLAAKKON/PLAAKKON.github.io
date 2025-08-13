@@ -63181,11 +63181,7 @@
                 }
                 container.parentNode.appendChild(successMsg);
                 
-                setTimeout(() => {
-                    if (successMsg.parentNode) {
-                        successMsg.parentNode.removeChild(successMsg);
-                    }
-                }, category === 'ammatti' ? 4000 : 3000);
+                // Viesti jää pysyvästi näkyville - ei setTimeout:ia
                 
             } catch (error) {
                 console.error('Virhe ladattaessa kaikkia vaihtoehtoja:', error);
