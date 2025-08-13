@@ -62838,6 +62838,29 @@
                 if (category === 'ammatti') {
                     console.log('🧹 Tyhjennetään ammatit-container ennen kaikki ammattien lataamista');
                     container.innerHTML = '';
+                    
+                    // Luo hakukenttä uudelleen
+                    const searchDiv = document.createElement('div');
+                    searchDiv.className = 'checkbox-search';
+                    searchDiv.innerHTML = `
+                        <input type="text" 
+                               placeholder="Hae ammatteja..." 
+                               onkeyup="filterCheckboxes('ammatti', this.value)"
+                               style="width: calc(100% - 120px); padding: 8px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 4px; display: inline-block;">
+                        <button onclick="filterCheckboxes('ammatti', document.querySelector('#ammatti-checkboxes input').value)" 
+                                style="width: 110px; padding: 8px; margin-left: 8px; background: #007acc; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                            🔍 Etsi
+                        </button>
+                    `;
+                    container.appendChild(searchDiv);
+                    console.log('🔍 Hakukenttä luotu uudelleen ammateille');
+                    
+                    // Luo checkboxList elementti
+                    const checkboxList = document.createElement('div');
+                    checkboxList.id = `${category}-list`;
+                    checkboxList.style.cssText = 'max-height: 300px; overflow-y: auto; border: 1px solid #eee; border-radius: 4px; padding: 10px;';
+                    container.appendChild(checkboxList);
+                    console.log('📋 CheckboxList luotu uudelleen ammateille');
                 }
                 
                 const response = await fetch('./checkbox-data-full.json');
@@ -62878,11 +62901,14 @@
                 
                 // Lisää kaikki uudet vaihtoehdot
                 let addedCount = 0;
+                const targetContainer = category === 'ammatti' ? 
+                    document.getElementById(`${category}-list`) || container : container;
+                    
                 categoryData.forEach(item => {
                     if (!existingValues.includes(item.value)) {
                         const newItem = createCheckboxItem(category, item.value, item.count);
                         if (newItem) {
-                            container.appendChild(newItem);
+                            targetContainer.appendChild(newItem);
                             addedCount++;
                         }
                     }
@@ -63412,7 +63438,11 @@
                 <input type="text" 
                        placeholder="Hae ${category}..." 
                        onkeyup="filterCheckboxes('${category}', this.value)"
-                       style="width: 100%; padding: 8px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 4px;">
+                       style="width: calc(100% - 120px); padding: 8px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 4px; display: inline-block;">
+                <button onclick="filterCheckboxes('${category}', document.querySelector('#${category}-checkboxes input').value)" 
+                        style="width: 110px; padding: 8px; margin-left: 8px; background: #007acc; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                    🔍 Etsi
+                </button>
             `;
             container.appendChild(searchDiv);
             console.log(`✅ Search field added for ${category}`);
