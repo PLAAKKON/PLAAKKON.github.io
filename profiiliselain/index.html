@@ -62883,6 +62883,10 @@
                 
                 console.log(`Lisätty ${addedCount} uutta vaihtoehtoa kategoriaan ${category}`);
                 
+                // Aseta data-all-items attribuutti hakua varten
+                const allItems = categoryData.map(item => ({ name: item.value, count: item.count }));
+                container.setAttribute('data-all-items', JSON.stringify(allItems));
+                
                 // Piilota "Näytä lisää" -nappi
                 if (showMoreBtn) {
                     showMoreBtn.style.display = 'none';
