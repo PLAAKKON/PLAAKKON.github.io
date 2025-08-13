@@ -62833,7 +62833,7 @@
             try {
                 // Lataa kaikki data checkbox-data-full.json:sta
                 console.log(`Ladataan kaikki ${category} vaihtoehdot...`);
-                const response = await fetch('/checkbox-data-full.json');
+                const response = await fetch('./checkbox-data-full.json');
                 
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
