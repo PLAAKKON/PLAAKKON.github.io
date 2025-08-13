@@ -23,8 +23,8 @@ function registerUser() {
             const user = userCredential.user;
             console.log('User registered:', user);
             alert('Rekisteröinti onnistui!');
-            // Redirect to profile page or home
-            window.location.href = '../';
+            // Redirect to profile browser
+            window.location.href = '../profiiliselain/';
         })
         .catch((error) => {
             console.error('Registration error:', error);
@@ -47,8 +47,8 @@ function loginUser() {
             const user = userCredential.user;
             console.log('User logged in:', user);
             alert('Kirjautuminen onnistui!');
-            // Redirect to profile page or home
-            window.location.href = '../';
+            // Redirect to profile browser
+            window.location.href = '../profiiliselain/';
         })
         .catch((error) => {
             console.error('Login error:', error);
