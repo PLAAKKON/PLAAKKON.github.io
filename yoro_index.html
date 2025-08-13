@@ -337,9 +337,24 @@
 
         #loading {
             text-align: center;
-            padding: 20px;
+            padding: 30px;
             color: white;
             font-style: italic;
+            background: rgba(30, 144, 255, 0.2);
+            border: 2px solid rgba(30, 144, 255, 0.8);
+            border-radius: 15px;
+            margin: 20px 0;
+            backdrop-filter: blur(10px);
+            font-size: 18px;
+            font-weight: 600;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 0.8; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.02); }
+            100% { opacity: 0.8; transform: scale(1); }
         }
 
         /* Responsive design */
@@ -446,6 +461,10 @@
             color: white;
             backdrop-filter: blur(5px);
             border: 1px solid rgba(255, 255, 255, 0.2);
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            max-width: 100%;
+            box-sizing: border-box;
         }
 
         /* GDPR Privacy Protection Styles */
@@ -1000,10 +1019,21 @@
                 return;
             }
 
+            // Update button to show loading state
+            const searchBtn = document.getElementById('search-btn');
+            const originalText = searchBtn.innerHTML;
+            searchBtn.innerHTML = '⏳ Haetaan profiileja...';
+            searchBtn.disabled = true;
+            searchBtn.style.opacity = '0.7';
+
             // NOW load profiles for search (only when user actually searches)
             console.log('🔍 User initiated search - loading profiles from Firebase...');
             document.getElementById('loading').style.display = 'block';
-            document.getElementById('results-count').textContent = 'Ladataan profiileja hakua varten...';
+            document.getElementById('results-count').textContent = '🔍 Haetaan profiileja tietokannasta... Tämä voi kestää hetken.';
+            
+            // Store original button state for restoration
+            searchBtn.originalText = originalText;
+            
             loadProfilesForSearch(freeSearch, selectedFilters);
         }
 
@@ -1079,6 +1109,14 @@
                     console.error('❌ Error loading profiles for search:', error);
                     document.getElementById('loading').style.display = 'none';
                     document.getElementById('results-count').textContent = 'Virhe ladattaessa profiileja.';
+                    
+                    // Restore search button
+                    const searchBtn = document.getElementById('search-btn');
+                    if (searchBtn.originalText) {
+                        searchBtn.innerHTML = searchBtn.originalText;
+                        searchBtn.disabled = false;
+                        searchBtn.style.opacity = '1';
+                    }
                 });
             }
             
@@ -1174,6 +1212,14 @@
             document.getElementById('loading').style.display = 'none';
             document.getElementById('results-info').style.display = 'block';
             document.getElementById('results-count').textContent = `Löytyi ${filtered.length} profiilia hakuehdoilla.`;
+            
+            // Restore search button
+            const searchBtn = document.getElementById('search-btn');
+            if (searchBtn.originalText) {
+                searchBtn.innerHTML = searchBtn.originalText;
+                searchBtn.disabled = false;
+                searchBtn.style.opacity = '1';
+            }
             
             // GDPR: Rajoita tulokset kolmeen ja blur-efekti (maksullinen palvelu työnantajille)
             displayProfiles(filtered.slice(0, 3)); // Show only first 3 results with blur
@@ -1328,7 +1374,7 @@
                 moreResults.style.marginTop = '30px';
                 moreResults.innerHTML = `
                     <h3>📊 Lisää tuloksia saatavilla</h3>
-                    <p>Hakuehdoillasi löytyi yhteensä profiileja. Työnantajapalvelussa näet kaikki tulokset ja täydet yhteystiedot.</p>
+                    <p>Hakuehdoillasi löytyi yhteensä ${profiles.length}+ profiilia. Työnantajapalvelussa näet kaikki tulokset ja täydet yhteystiedot.</p>
                     <a href="mailto:info@yoro.fi?subject=Työnantajapalvelu - Lisää tuloksia" class="contact-btn">
                         🚀 Tilaa työnantajapalvelu
                     </a>
