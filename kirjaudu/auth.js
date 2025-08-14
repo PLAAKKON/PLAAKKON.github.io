@@ -83,6 +83,39 @@ firebase.auth().onAuthStateChanged((user) => {
     }
 });
 
+// Auto-logout functionality (5 minutes of inactivity)
+let inactivityTimer;
+const INACTIVITY_TIMEOUT = 5 * 60 * 1000; // 5 minutes in milliseconds
+
+function resetInactivityTimer() {
+    clearTimeout(inactivityTimer);
+    inactivityTimer = setTimeout(() => {
+        if (firebase.auth().currentUser) {
+            alert('Istunto päättyi automaattisesti 5 minuutin käyttämättömyyden vuoksi. / Session expired due to 5 minutes of inactivity.');
+            firebase.auth().signOut().then(() => {
+                window.location.href = '/';
+            });
+        }
+    }, INACTIVITY_TIMEOUT);
+}
+
+// Track user activity
+const activityEvents = ['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart', 'click'];
+activityEvents.forEach(event => {
+    document.addEventListener(event, resetInactivityTimer, true);
+});
+
+// Start timer when user logs in
+firebase.auth().onAuthStateChanged((user) => {
+    if (user) {
+        resetInactivityTimer();
+        console.log('User is signed in:', user.email);
+    } else {
+        clearTimeout(inactivityTimer);
+        console.log('User is signed out');
+    }
+});
+
 // Toggle password visibility
 function togglePassword(inputId) {
     const passwordInput = document.getElementById(inputId);

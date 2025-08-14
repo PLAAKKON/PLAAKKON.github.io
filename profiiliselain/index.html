@@ -763,6 +763,35 @@
             }
         });
 
+        // Auto-logout functionality (5 minutes of inactivity)
+        let inactivityTimer;
+        const INACTIVITY_TIMEOUT = 5 * 60 * 1000; // 5 minutes in milliseconds
+
+        function resetInactivityTimer() {
+            clearTimeout(inactivityTimer);
+            inactivityTimer = setTimeout(() => {
+                if (firebase.auth().currentUser) {
+                    alert('Istunto päättyi automaattisesti 5 minuutin käyttämättömyyden vuoksi. / Session expired due to 5 minutes of inactivity.');
+                    logoutUser();
+                }
+            }, INACTIVITY_TIMEOUT);
+        }
+
+        // Track user activity
+        const activityEvents = ['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart', 'click'];
+        activityEvents.forEach(event => {
+            document.addEventListener(event, resetInactivityTimer, true);
+        });
+
+        // Start timer when user logs in
+        auth.onAuthStateChanged((user) => {
+            if (user) {
+                resetInactivityTimer();
+            } else {
+                clearTimeout(inactivityTimer);
+            }
+        });
+
         // Logout function
         function logoutUser() {
             auth.signOut().then(() => {
