@@ -62602,16 +62602,17 @@
             document.getElementById('loading-progress').textContent = 'Aloitetaan lataus...';
             document.getElementById('results-count').textContent = 'Ladataan profiileja hakua varten...';
             
-            // Scroll to results area after 1 second
+            // Immediately scroll to loading area
             setTimeout(() => {
-                const resultsArea = document.getElementById('loading');
-                if (resultsArea) {
-                    resultsArea.scrollIntoView({ 
+                const loadingElement = document.getElementById('loading');
+                if (loadingElement) {
+                    loadingElement.scrollIntoView({ 
                         behavior: 'smooth', 
-                        block: 'start' 
+                        block: 'center',
+                        inline: 'nearest'
                     });
                 }
-            }, 1000);
+            }, 100);
             
             loadProfilesForSearch(freeSearch, selectedFilters);
         }
