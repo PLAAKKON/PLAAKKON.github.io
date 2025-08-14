@@ -63153,9 +63153,15 @@
                 if (profile.tyokokemus) {
                     // Ensure tyokokemus is a string before splitting
                     const tyokokemusText = typeof profile.tyokokemus === 'string' ? profile.tyokokemus : String(profile.tyokokemus);
-                    const firstLine = tyokokemusText.split(/[\r\n]+/)[0];
-                    const hasMoreLines = tyokokemusText.split(/[\r\n]+/).length > 1;
-                    html += `<div class="profile-field"><strong>Työkokemus:</strong><span>${firstLine}${hasMoreLines ? '<span class="blurred-text">...</span>' : ''}</span></div>`;
+                    const words = tyokokemusText.split(' ');
+                    
+                    if (words.length > 5) {
+                        const firstFiveWords = words.slice(0, 5).join(' ');
+                        const remainingWords = words.slice(5).join(' ');
+                        html += `<div class="profile-field"><strong>Työkokemus:</strong><span>${firstFiveWords} <span class="blurred-text">${remainingWords}</span></span></div>`;
+                    } else {
+                        html += `<div class="profile-field"><strong>Työkokemus:</strong><span>${tyokokemusText}</span></div>`;
+                    }
                 }
                 
                 if (profile.koulutus && profile.koulutus.length > 0) {
