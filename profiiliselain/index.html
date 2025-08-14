@@ -63127,9 +63127,10 @@
                 }
                 
                 if (profile.tyokokemus) {
-                    // Show only first line of work experience and blur the rest
-                    const firstLine = profile.tyokokemus.split(/[\r\n]+/)[0];
-                    const hasMoreLines = profile.tyokokemus.split(/[\r\n]+/).length > 1;
+                    // Ensure tyokokemus is a string before splitting
+                    const tyokokemusText = typeof profile.tyokokemus === 'string' ? profile.tyokokemus : String(profile.tyokokemus);
+                    const firstLine = tyokokemusText.split(/[\r\n]+/)[0];
+                    const hasMoreLines = tyokokemusText.split(/[\r\n]+/).length > 1;
                     html += `<div class="profile-field"><strong>Työkokemus:</strong><span>${firstLine}${hasMoreLines ? '<span class="blurred-text">...</span>' : ''}</span></div>`;
                 }
                 
