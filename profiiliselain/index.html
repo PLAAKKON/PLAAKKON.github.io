@@ -62601,6 +62601,18 @@
             document.getElementById('loading').style.display = 'block';
             document.getElementById('loading-progress').textContent = 'Aloitetaan lataus...';
             document.getElementById('results-count').textContent = 'Ladataan profiileja hakua varten...';
+            
+            // Scroll to results area after 1 second
+            setTimeout(() => {
+                const resultsArea = document.getElementById('loading');
+                if (resultsArea) {
+                    resultsArea.scrollIntoView({ 
+                        behavior: 'smooth', 
+                        block: 'start' 
+                    });
+                }
+            }, 1000);
+            
             loadProfilesForSearch(freeSearch, selectedFilters);
         }
 
