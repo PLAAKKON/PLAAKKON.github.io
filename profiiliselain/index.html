@@ -653,7 +653,8 @@
             </div>
 
             <div id="loading" class="loading" style="display: none;">
-                <p data-fi="⏳ Ladataan profiileja..." data-en="⏳ Loading profiles...">⏳ Ladataan profiileja...</p>
+                <p id="loading-text" data-fi="⏳ Ladataan profiileja..." data-en="⏳ Loading profiles...">⏳ Ladataan profiileja...</p>
+                <div id="loading-progress" style="margin-top: 10px; font-size: 14px; color: #475569;"></div>
             </div>
 
             <div id="results-info" class="results-info" style="display: none;">
@@ -62598,6 +62599,7 @@
             // NOW load profiles for search (only when user actually searches)
             console.log('🔍 User initiated search - loading profiles from Firebase...');
             document.getElementById('loading').style.display = 'block';
+            document.getElementById('loading-progress').textContent = 'Aloitetaan lataus...';
             document.getElementById('results-count').textContent = 'Ladataan profiileja hakua varten...';
             loadProfilesForSearch(freeSearch, selectedFilters);
         }
@@ -62704,6 +62706,9 @@
                     allProfilesTemp = allProfilesTemp.concat(batch);
                     console.log(`📊 Loaded batch: ${batch.length} profiles (total: ${allProfilesTemp.length})`);
                     
+                    // Update loading progress in UI
+                    document.getElementById('loading-progress').textContent = `Ladattu: ${allProfilesTemp.length} profiilia...`;
+                    
                     // Load more if available
                     if (querySnapshot.size === batchSize) {
                         loadBatch(lastDocument);
@@ -62712,8 +62717,14 @@
                         allProfiles = allProfilesTemp;
                         console.log(`✅ All profiles loaded for search: ${allProfiles.length} total`);
                         
-                        // Now perform the search with the loaded profiles
-                        performSearchWithProfiles(freeSearch, selectedFilters);
+                        // Update UI to show search is starting
+                        document.getElementById('loading-progress').textContent = `✅ ${allProfiles.length} profiilia ladattu - aloitetaan haku...`;
+                        
+                        // Add small delay to show completion message
+                        setTimeout(() => {
+                            // Now perform the search with the loaded profiles
+                            performSearchWithProfiles(freeSearch, selectedFilters);
+                        }, 500);
                     }
                 }).catch((error) => {
                     console.error('❌ Error loading profiles for search:', error);
