@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="fi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LxP Profiilitesti – Yoro Oy</title>
+  <script src="https://www.gstatic.com/firebasejs/10.11.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.11.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.11.1/firebase-firestore-compat.js"></script>
+  <script defer src="../firebaseConfig.js"></script>
+  <script defer src="../auth.js"></script>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+
+<body>
+  <!-- Background Video -->
+  <video autoplay muted loop id="backgroundVideo">
+    <source src="../Yoro1_final_1080p_30s.mp4" type="video/mp4">
+    Your browser does not support the video tag.
+  </video>
+
+  <div class="container">
+    <h1 id="mainTitle">Työ- ja opintopolun profiilitesti</h1>
+
+    <p id="description1">LxP-profiilitesti on Yoro Oy:n kehittämä työkalu, joka tukee yksilöiden urasuunnittelua ja ammatillista suuntautumista. Testi soveltuu sekä opinto-ohjaukseen että työnvälityspalveluihin.</p>
+
+    <p id="description2">Vastaamalla 10 kysymykseen saat henkilökohtaisen profiilin ja suuntaa antavan arvion vahvuuksistasi ja sopivista työ- ja koulutusvaihtoehdoista.</p>
+
+    <p id="description3">Testi on tarkoitettu arviointikäyttöön ohjauksen tukena. Tuloksia ei tule käyttää ainoana perusteena koulutus- tai urapäätöksille.</p>
+
+    <p><strong id="termsLabel">Käyttöehdot:</strong> <span id="licenseText">Katso lisenssi kohdasta</span>
+      <a href="https://github.com/plaakkon/profiilitesti/blob/main/license.txt" target="_blank" style="text-decoration: underline; color: #60a5fa; text-shadow: 0 0 8px rgba(96, 165, 250, 0.4), 1px 1px 3px rgba(0, 0, 0, 0.8);">license.txt</a>.
+    </p>
+
+    <p style="margin-top: 30px; font-size: 0.9em; color: #e5e7eb;">© 2025 Yoro Oy</p>
+
+    <div id="questionContainer" style="margin: 20px 0;"></div>
+
+    <!-- Language Toggle -->
+    <div class="language-toggle">
+      <button id="langFi" class="lang-button active" onclick="setLanguage('fi')">FI</button>
+      <button id="langEn" class="lang-button" onclick="setLanguage('en')">EN</button>
+    </div>
+
+    <!-- Profiilitestin napit -->
+    <div id="testButtons" style="display: flex; gap: 10px; margin-top: 15px; flex-wrap: wrap;">
+      <a class="button" href="/rekisteroidy" target="_self" id="registerBtn">Rekisteröidy käyttäjäksi</a>
+      <a class="button" href="/kirjaudu" target="_self" id="loginBtn">Kirjaudu sisään</a>
+    </div>
+    
+    <button 
+      id="toggleButton" 
+      type="button" 
+      style="margin-top: 20px; padding: 10px 15px;"
+    >
+      <span id="startTestText">Aloita kysely</span>
+    </button>
+    
+    <p id="userEmailDisplay"></p>
+    <button id="logoutBtn" onclick="logoutUser()" style="display:none;" data-text-fi="Kirjaudu ulos" data-text-en="Logout">Kirjaudu ulos</button>
+    <button id="homeBtn" onclick="navigateToHome()" data-text-fi="Palaa Yoro.fi etusivulle" data-text-en="Return to Yoro.fi homepage">Palaa Yoro.fi etusivulle</button>
+
+    <div id="loginOffer" style="display:none; margin-top:20px; text-align:center;">
+      <p style="color:#d32f2f; font-weight:bold;" id="loginOfferText">
+      Kirjautumaton käyttäjä näkee vain osan tuloksista. Kirjaudu sisään nähdäksesi täydellisen profiiliarvion.
+      </p>
+    </div>
+      
+    <div id="resultsContainer" style="margin-top: 30px; display: none;">
+      <h2 id="resultsTitle">Sinulle sopivat ammatit:</h2>
+      <ul id="resultsList"></ul>
+      <div id="writtenSummaryContainer" style="margin-top: 20px; display: none;">
+        <h3 id="verbalAssessmentTitle">Sanallinen arvio profiilistasi:</h3>
+        <div id="writtenSummary" style="padding-left: 20px; margin: 0;"></div>
+      </div>
+    </div>
+  </div>
+
+  <script src="script.js" type="module"></script>
+  <script>
+    // Language data
+    const translations = {
+      fi: {
+        mainTitle: "Työ- ja opintopolun profiilitesti",
+        description1: "LxP-profiilitesti on Yoro Oy:n kehittämä työkalu, joka tukee yksilöiden urasuunnittelua ja ammatillista suuntautumista. Testi soveltuu sekä opinto-ohjaukseen että työnvälityspalveluihin.",
+        description2: "Vastaamalla 10 kysymykseen saat henkilökohtaisen profiilin ja suuntaa antavan arvion vahvuuksistasi ja sopivista työ- ja koulutusvaihtoehdoista.",
+        description3: "Testi on tarkoitettu arviointikäyttöön ohjauksen tukena. Tuloksia ei tule käyttää ainoana perusteena koulutus- tai urapäätöksille.",
+        termsLabel: "Käyttöehdot:",
+        licenseText: "Katso lisenssi kohdasta",
+        startTestText: "Aloita kysely",
+        registerBtn: "Rekisteröidy käyttäjäksi",
+        loginBtn: "Kirjaudu sisään",
+        loginOfferText: "Kirjautumaton käyttäjä näkee vain osan tuloksista. Kirjaudu sisään nähdäksesi täydellisen profiiliarvion.",
+        resultsTitle: "Sinulle sopivat ammatit:",
+        verbalAssessmentTitle: "Sanallinen arvio profiilistasi:"
+      },
+      en: {
+        mainTitle: "Career and Study Path Profile Test",
+        description1: "The LxP profile test is a tool developed by Yoro Oy that supports individual career planning and professional orientation. The test is suitable for both study guidance and employment services.",
+        description2: "By answering 10 questions, you will receive a personal profile and an indicative assessment of your strengths and suitable work and education options.",
+        description3: "The test is intended for assessment use as support for guidance. Results should not be used as the sole basis for education or career decisions.",
+        termsLabel: "Terms of Use:",
+        licenseText: "See license at",
+        startTestText: "Start Survey",
+        registerBtn: "Register as User",
+        loginBtn: "Sign In",
+        loginOfferText: "Non-logged users see only part of the results. Sign in to see your complete profile assessment.",
+        resultsTitle: "Suitable careers for you:",
+        verbalAssessmentTitle: "Verbal assessment of your profile:"
+      }
+    };
+
+    let currentLanguage = 'fi';
+
+    function setLanguage(lang) {
+      currentLanguage = lang;
+      document.documentElement.lang = lang;
+      
+      // Update text elements
+      Object.keys(translations[lang]).forEach(key => {
+        const element = document.getElementById(key);
+        if (element) {
+          element.textContent = translations[lang][key];
+        }
+      });
+
+      // Update buttons with data attributes
+      document.querySelectorAll('[data-text-fi][data-text-en]').forEach(btn => {
+        btn.textContent = btn.getAttribute(`data-text-${lang}`);
+      });
+
+      // Update language toggle buttons
+      document.querySelectorAll('.lang-button').forEach(btn => {
+        btn.classList.remove('active');
+      });
+      document.getElementById(`lang${lang.charAt(0).toUpperCase() + lang.slice(1)}`).classList.add('active');
+
+      // Update script language if test is running
+      if (window.updateLanguage) {
+        window.updateLanguage(lang);
+      }
+    }
+
+    // Näytä sähköposti ja logout-nappi jos käyttäjä on kirjautunut
+    window.addEventListener('DOMContentLoaded', function() {
+      const userEmail = localStorage.getItem('userEmail');
+      const emailDisplay = document.getElementById('userEmailDisplay');
+      const logoutBtn = document.getElementById('logoutBtn');
+      const testButtons = document.getElementById('testButtons');
+      const goToTestBtn = document.getElementById('goToTestBtn');
+      if (userEmail) {
+        emailDisplay.textContent = userEmail;
+        logoutBtn.style.display = 'inline-block';
+        if (testButtons) testButtons.style.display = 'none';
+        if (goToTestBtn) goToTestBtn.style.display = 'inline-block';
+      } else {
+        emailDisplay.textContent = '';
+        logoutBtn.style.display = 'none';
+        if (testButtons) testButtons.style.display = 'flex';
+        if (goToTestBtn) goToTestBtn.style.display = 'none';
+      }
+    });
+
+    // Uloskirjautumisfunktio
+    function logoutUser() {
+      // Jos käytät Firebase Auth:
+      // firebase.auth().signOut().then(() => { ... });
+
+      // Poista käyttäjän tiedot localStoragesta
+      localStorage.removeItem('userEmail');
+      location.reload(); // Päivitä sivu, jotta näkymä palautuu alkuperäiseksi
+    }
+
+    // Esimerkki etusivulle navigoinnista
+    function navigateToHome() {
+      window.location.href = "https://yoro.fi";
+    }
+  </script>
+</body>
+</html>
