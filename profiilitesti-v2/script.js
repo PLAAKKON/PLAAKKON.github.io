@@ -1,6 +1,14 @@
 // Language support
 let currentLanguage = 'fi';
 
+// Questions will be set dynamically based on current language
+let questions = [];
+
+// Set initial questions
+function updateQuestions() {
+  questions = questionsData[currentLanguage];
+}
+
 const questionsData = {
   fi: [
     {
@@ -209,7 +217,7 @@ const questionsData = {
 };
 
 // Simplified questions for demo (first 5 questions)
-const questions = questionsData[currentLanguage];
+// questions variable is now defined globally and updated dynamically
 
 const results = {
   "1": { name: "Fyysinen varasto- ja logistiikka-aputyö", threshold: 14, score: 0 },
@@ -419,9 +427,7 @@ window.updateLanguage = function(lang) {
   currentLanguage = lang;
   
   // Update questions array
-  const newQuestions = questionsData[lang];
-  questions.length = 0;
-  questions.push(...newQuestions);
+  updateQuestions();
   
   // If test is in progress, update current question
   if (currentQuestionIndex < questions.length && document.getElementById("questionContainer").style.display !== "none") {
@@ -458,6 +464,9 @@ document.getElementById("toggleButton").addEventListener("click", () => {
   currentQuestionIndex = 0;
   Object.keys(answers).forEach(key => delete answers[key]);
   Object.keys(results).forEach(key => results[key].score = 0);
+
+  // Ensure questions are up to date
+  updateQuestions();
 
   document.getElementById("questionContainer").style.display = "block";
   document.getElementById("resultsContainer").style.display = "none";
@@ -732,3 +741,6 @@ if (typeof firebase !== 'undefined') {
     if (loginOffer) loginOffer.style.display = user ? "none" : "block";
   });
 }
+
+// Initialize questions on page load
+updateQuestions();
