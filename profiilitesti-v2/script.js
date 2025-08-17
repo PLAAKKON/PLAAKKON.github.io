@@ -629,33 +629,41 @@ function renderTeaserResults() {
   const resultsContainer = document.getElementById("resultsContainer");
   resultsContainer.innerHTML = "";
 
-  const professionHTML = finalResults
+  const topProfessions = finalResults.slice(0, 3);
+  const hiddenCount = finalResults.length - topProfessions.length;
+
+  const professionHTML = topProfessions
     .map((r) => `<li>${r.label}</li>`)
-    .join("");
+    .join("") +
+    (hiddenCount > 0 ? `<li class="teaser-hidden" style="color: #9ca3af; font-style: italic;">+ ${hiddenCount} ${currentLanguage === 'fi' ? 'muuta ammattia piilotettu' : 'other professions hidden'}</li>` : "");
+
+  const shortText = verbalAssessment.split('<br/>').slice(0, 2).join('<br/>');
 
   const titles = currentLanguage === 'fi' ? {
-    careers: "Sinulle sopivat ammatit",
+    preview: "Sinulle sopivat ammatit (esikatselu)",
     assessment: "Sanallinen arvio",
-    loginPrompt: "Kirjaudu sisään saadaksesi henkilökohtaista ohjausta ja lisätietoja.",
-    showProfile: "Näytä täydellinen profiilini"
+    loginPrompt: "Kirjaudu sisään nähdäksesi koko profiilisi, kaikki suositukset ja ohjausvaihtoehdot.",
+    showProfile: "Näytä koko profiilini"
   } : {
-    careers: "Suitable careers for you",
+    preview: "Suitable careers for you (preview)",
     assessment: "Verbal assessment", 
-    loginPrompt: "Sign in to get personalized guidance and additional information.",
+    loginPrompt: "Sign in to see your complete profile, all recommendations and guidance options.",
     showProfile: "Show my complete profile"
   };
 
   resultsContainer.innerHTML = `
-    <div>
-      <h3>${titles.careers}</h3>
+    <div class="teaser-box">
+      <h3>${titles.preview}</h3>
       <ul>${professionHTML}</ul>
 
       <h3>${titles.assessment}</h3>
-      <div>${verbalAssessment}</div>
+      <div>
+        ${shortText}<span class="teaser-hidden" style="color: #9ca3af; font-style: italic;"><br/>... (${currentLanguage === 'fi' ? 'kirjaudu nähdäksesi koko arvio' : 'sign in to see complete assessment'})</span>
+      </div>
 
-      <div class="teaser-cta" style="margin-top: 20px; padding: 15px; background: rgba(59, 130, 246, 0.1); border-radius: 8px; text-align: center;">
+      <div class="teaser-cta" style="margin-top: 20px; padding: 20px; background: rgba(59, 130, 246, 0.1); border: 2px solid rgba(59, 130, 246, 0.3); border-radius: 8px; text-align: center;">
         <p><em>${titles.loginPrompt}</em></p>
-        <a href="/kirjaudu" class="cta-button" style="display: inline-block; margin-top: 10px; padding: 10px 20px; background: linear-gradient(135deg, #3B82F6, #1D4ED8); color: white; text-decoration: none; border-radius: 6px; font-weight: bold;">${titles.showProfile}</a>
+        <a href="/kirjaudu" class="cta-button" style="display: inline-block; margin-top: 10px; padding: 12px 24px; background: linear-gradient(135deg, #3B82F6, #1D4ED8); color: white; text-decoration: none; border-radius: 6px; font-weight: bold; box-shadow: 0 2px 4px rgba(0,0,0,0.2);">${titles.showProfile}</a>
       </div>
     </div>
   `;
