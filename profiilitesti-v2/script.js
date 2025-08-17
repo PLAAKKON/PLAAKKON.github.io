@@ -475,7 +475,7 @@ function showQuestion() {
     
   container.innerHTML = `
     <h3>${question.text}</h3>
-    <p id="instructionText" style="font-style: italic; color: #9ca3af;">${instructionText}</p>
+    <p id="instructionText" class="instruction-text">${instructionText}</p>
   `;
 
   Object.entries(question.options).forEach(([key, option]) => {
@@ -635,7 +635,7 @@ function renderTeaserResults() {
   const professionHTML = topProfessions
     .map((r) => `<li>${r.label}</li>`)
     .join("") +
-    (hiddenCount > 0 ? `<li class="teaser-hidden" style="color: #9ca3af; font-style: italic;">+ ${hiddenCount} ${currentLanguage === 'fi' ? 'muuta ammattia piilotettu' : 'other professions hidden'}</li>` : "");
+    (hiddenCount > 0 ? `<li class="teaser-hidden">+ ${hiddenCount} ${currentLanguage === 'fi' ? 'muuta ammattia piilotettu' : 'other professions hidden'}</li>` : "");
 
   const shortText = verbalAssessment.split('<br/>').slice(0, 2).join('<br/>');
 
@@ -658,12 +658,12 @@ function renderTeaserResults() {
 
       <h3>${titles.assessment}</h3>
       <div>
-        ${shortText}<span class="teaser-hidden" style="color: #9ca3af; font-style: italic;"><br/>... (${currentLanguage === 'fi' ? 'kirjaudu nähdäksesi koko arvio' : 'sign in to see complete assessment'})</span>
+        ${shortText}<span class="teaser-hidden"><br/>... (${currentLanguage === 'fi' ? 'kirjaudu nähdäksesi koko arvio' : 'sign in to see complete assessment'})</span>
       </div>
 
-      <div class="teaser-cta" style="margin-top: 20px; padding: 20px; background: rgba(59, 130, 246, 0.1); border: 2px solid rgba(59, 130, 246, 0.3); border-radius: 8px; text-align: center;">
+      <div class="teaser-cta">
         <p><em>${titles.loginPrompt}</em></p>
-        <a href="/kirjaudu" class="cta-button" style="display: inline-block; margin-top: 10px; padding: 12px 24px; background: linear-gradient(135deg, #3B82F6, #1D4ED8); color: white; text-decoration: none; border-radius: 6px; font-weight: bold; box-shadow: 0 2px 4px rgba(0,0,0,0.2);">${titles.showProfile}</a>
+        <a href="/kirjaudu" class="cta-button">${titles.showProfile}</a>
       </div>
     </div>
   `;

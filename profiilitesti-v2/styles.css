@@ -91,6 +91,14 @@ p {
   color: #e5e7eb;
 }
 
+/* Instruction text styling */
+.instruction-text {
+  font-style: italic;
+  color: #9ca3af !important;
+  font-size: 1rem;
+  margin-bottom: 1.5rem;
+}
+
 button {
   padding: 12px 24px;
   font-size: 16px;
@@ -272,26 +280,42 @@ button:active {
   background: rgba(31, 41, 55, 0.8);
   padding: 1.5em;
   border-radius: 12px;
+  border: 2px solid rgba(96, 165, 250, 0.2);
   box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
   margin-top: 2em;
-  border: 1px solid rgba(75, 85, 99, 0.3);
 }
 
-.teaser-cta a.cta-button {
-  display: inline-block;
-  margin-top: 1em;
-  background: linear-gradient(135deg, #3b82f6, #1d4ed8);
-  color: white;
-  padding: 12px 24px;
+.teaser-hidden {
+  color: #9ca3af !important;
+  font-style: italic;
+}
+
+.teaser-cta {
+  margin-top: 20px;
+  padding: 20px;
+  background: rgba(59, 130, 246, 0.1);
+  border: 2px solid rgba(59, 130, 246, 0.3);
   border-radius: 8px;
+  text-align: center;
+}
+
+.cta-button {
+  display: inline-block;
+  margin-top: 10px;
+  padding: 12px 24px;
+  background: linear-gradient(135deg, #3B82F6, #1D4ED8);
+  color: white !important;
   text-decoration: none;
-  font-weight: 600;
+  border-radius: 6px;
+  font-weight: bold;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
   transition: all 0.3s ease;
 }
 
-.teaser-cta a.cta-button:hover {
+.cta-button:hover {
   background: linear-gradient(135deg, #2563eb, #1e40af);
   transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.3);
 }
 
 @keyframes flashRed {
