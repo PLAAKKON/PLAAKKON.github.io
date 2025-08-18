@@ -442,10 +442,14 @@ window.updateLanguage = function(lang) {
 };
 
 function updateResultsLanguage() {
-  const currentResults = currentLanguage === 'fi' ? results : resultsEn;
-  
   // Update results if they are showing
   if (finalResults.length > 0) {
+    // Reset both language result sets
+    Object.keys(results).forEach(key => results[key].score = 0);
+    Object.keys(resultsEn).forEach(key => resultsEn[key].score = 0);
+    
+    // Recalculate with current language
+    calculateResults();
     finalResults = getFinalResults();
     verbalAssessment = getVerbalAssessment();
     
@@ -463,7 +467,10 @@ document.getElementById("toggleButton").addEventListener("click", () => {
 
   currentQuestionIndex = 0;
   Object.keys(answers).forEach(key => delete answers[key]);
+  
+  // Reset scores for both languages
   Object.keys(results).forEach(key => results[key].score = 0);
+  Object.keys(resultsEn).forEach(key => resultsEn[key].score = 0);
 
   // Ensure questions are up to date
   updateQuestions();
@@ -484,7 +491,7 @@ function showQuestion() {
     
   container.innerHTML = `
     <h3>${question.text}</h3>
-    <p id="instructionText" class="instruction-text">${instructionText}</p>
+    <p id="instructionText" style="font-style: italic; color: #9ca3af; margin-bottom: 1.5rem;">${instructionText}</p>
   `;
 
   Object.entries(question.options).forEach(([key, option]) => {
@@ -580,8 +587,11 @@ function handleAnswer(qid, option) {
 }
 
 function calculateResults() {
+  // Get the correct results object based on current language
+  const currentResults = currentLanguage === 'fi' ? results : resultsEn;
+  
   // Reset all scores
-  Object.keys(results).forEach(key => results[key].score = 0);
+  Object.keys(currentResults).forEach(key => currentResults[key].score = 0);
   
   // Calculate scores based on answers
   Object.entries(answers).forEach(([qid, option]) => {
@@ -589,8 +599,8 @@ function calculateResults() {
     if (question && question.options[option]) {
       const points = question.options[option].points;
       Object.entries(points).forEach(([resultId, score]) => {
-        if (results[resultId]) {
-          results[resultId].score += score;
+        if (currentResults[resultId]) {
+          currentResults[resultId].score += score;
         }
       });
     }
@@ -718,7 +728,10 @@ function addRestartButton() {
     document.getElementById("questionContainer").style.display = "none";
     currentQuestionIndex = 0;
     Object.keys(answers).forEach(key => delete answers[key]);
+    
+    // Reset scores for both languages
     Object.keys(results).forEach(key => results[key].score = 0);
+    Object.keys(resultsEn).forEach(key => resultsEn[key].score = 0);
   };
   resultsContainer.appendChild(restartButton);
 }
