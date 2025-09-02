@@ -811,7 +811,7 @@
       <p>Find suitable candidates from 27k+ profiles</p>
       <div class="button-group">
         <a class="button primary" href="https://lxp.yoro.fi/" target="_blank">🔵 LxP Matcher</a>
-        <a class="button secondary" href="/profiiliselain">� Browse Profiles</a>
+        <a class="button secondary" href="/profiiliselain">👥 Browse Profiles</a>
       </div>
     </div>
     
@@ -899,11 +899,81 @@
       </div>
       
       <div class="nav-card">
-        <h3>� Massatyöstö</h3>
+        <h3>📊 Massatyöstö</h3>
         <p><strong>Batch-prosessointi:</strong> ~$0.0015 per profiili</p>
         <p><strong>29k henkilöä ≈ $43</strong></p>
         <div class="button-group">
           <a class="button tertiary" href="mailto:myynti@yoro.fi?subject=Batch-analyysi">Pyydä ohjeita</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ Section -->
+  <section id="faq">
+    <h2>❓ Usein kysyttyä LxP-järjestelmästä</h2>
+    <div class="faq-container">
+      <div class="faq-item">
+        <div class="faq-question" onclick="toggleFAQ(this)">
+          <h3>1. Mikä on tekoälyn rooli? <span class="faq-icon">+</span></h3>
+        </div>
+        <div class="faq-answer">
+          <p>Tekoäly ei korvaa itse profilointilogiikkaa vaan tukee sitä. Sen tehtävät:</p>
+          <ul>
+            <li>• Täyttää 10 kysymyksen lomake automaattisesti CV:n ja hakemuksen perusteella</li>
+            <li>• Kirjoittaa lyhyen sanallisen yhteenvedon kandidaateista</li>
+            <li>• Mahdollistaa skaalautuvuuden (kymmeniä tuhansia hakijoita ilman manuaalista työtä)</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-question" onclick="toggleFAQ(this)">
+          <h3>2. Onko 10 kysymyksen lomake liian yksinkertainen? <span class="faq-icon">+</span></h3>
+        </div>
+        <div class="faq-answer">
+          <p>Ei. Jokaisessa kysymyksessä on 4–5 vaihtoehtoa → <strong>yli 8 miljoonaa yhdistelmää</strong>.</p>
+          <p>Lisäksi logiikka sisältää yhdistelmäehtoja (2–3 kysymyksen yhdistelmät), jotka tuottavat lisäpisteitä. Näin saadaan monimutkaisia profiileja, joita pelkkä koulutus- tai työhistoriadata ei paljasta.</p>
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-question" onclick="toggleFAQ(this)">
+          <h3>3. Miksi demossa on vanha GPT-3.5 Turbo? <span class="faq-icon">+</span></h3>
+        </div>
+        <div class="faq-answer">
+          <p>Koska järjestelmä on kehitysvaiheessa, käytimme kevyempää ja edullisempaa mallia:</p>
+          <ul>
+            <li>• <strong>Nopeus:</strong> toimii testikäytössä hyvin</li>
+            <li>• <strong>Kustannus:</strong> noin 1/10 uusien mallien hinnasta</li>
+            <li>• <strong>Vaihdettavuus:</strong> lopullisessa mallissa voidaan käyttää mitä tahansa (GPT-5, Claude Sonnet 4 jne.)</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-question" onclick="toggleFAQ(this)">
+          <h3>4. Miksi haku tuntuu hitaalta? <span class="faq-icon">+</span></h3>
+        </div>
+        <div class="faq-answer">
+          <p>Nykyinen haku käy läpi kaikki 29 000 profiilia syvällisesti.</p>
+          <ul>
+            <li>• <strong>Ratkaisu:</strong> indeksointi → lisätään hakijan yksilöllinen ID jokaiseen kenttään</li>
+            <li>• <strong>Tulos:</strong> haun nopeus moninkertaistuu</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-question" onclick="toggleFAQ(this)">
+          <h3>5. Mikä erottaa LxP:n muista malleista? <span class="faq-icon">+</span></h3>
+        </div>
+        <div class="faq-answer">
+          <ul>
+            <li>• <strong>Viro:</strong> 3 parametria (osaaminen, kysyntä, saatavuus)</li>
+            <li>• <strong>Hollanti:</strong> osaamisperusteinen CV-purku</li>
+            <li>• <strong>Suomi Yoro LxP:</strong> tuo uutena työnhakijan motivaatio- ja käyttäytymispreferenssit, joita ei muualla hyödynnetä → parempi yhteensopivuus ja vähemmän turhia hakemuksia sekä työn- ja koulutuksen ohjausta</li>
+          </ul>
         </div>
       </div>
     </div>
@@ -913,7 +983,7 @@
 <!-- English Content -->
 <div class="lang-content" data-lang="en">
   <section>
-    <h2>� AI-powered Career Services</h2>
+    <h2>🚀 AI-powered Career Services</h2>
     <p>Yoro.fi is an intelligent career planning and recruitment web service. Use artificial intelligence to find suitable employees, professions, or educational paths.</p>
     
     <div class="button-group">
@@ -987,76 +1057,6 @@
         <p><strong>29k people ≈ $43</strong></p>
         <div class="button-group">
           <a class="button tertiary" href="mailto:myynti@yoro.fi?subject=Batch-analysis">Request Instructions</a>
-        </div>
-      </div>
-    </div>
-  </section>
-  
-  <!-- FAQ Section -->
-  <section id="faq">
-    <h2>❓ Usein kysyttyä LxP-järjestelmästä</h2>
-    <div class="faq-container">
-      <div class="faq-item">
-        <div class="faq-question" onclick="toggleFAQ(this)">
-          <h3>1. Mikä on tekoälyn rooli? <span class="faq-icon">+</span></h3>
-        </div>
-        <div class="faq-answer">
-          <p>Tekoäly ei korvaa itse profilointilogiikkaa vaan tukee sitä. Sen tehtävät:</p>
-          <ul>
-            <li>• Täyttää 10 kysymyksen lomake automaattisesti CV:n ja hakemuksen perusteella</li>
-            <li>• Kirjoittaa lyhyen sanallisen yhteenvedon kandidaateista</li>
-            <li>• Mahdollistaa skaalautuvuuden (kymmeniä tuhansia hakijoita ilman manuaalista työtä)</li>
-          </ul>
-        </div>
-      </div>
-
-      <div class="faq-item">
-        <div class="faq-question" onclick="toggleFAQ(this)">
-          <h3>2. Onko 10 kysymyksen lomake liian yksinkertainen? <span class="faq-icon">+</span></h3>
-        </div>
-        <div class="faq-answer">
-          <p>Ei. Jokaisessa kysymyksessä on 4–5 vaihtoehtoa → <strong>yli 8 miljoonaa yhdistelmää</strong>.</p>
-          <p>Lisäksi logiikka sisältää yhdistelmäehtoja (2–3 kysymyksen yhdistelmät), jotka tuottavat lisäpisteitä. Näin saadaan monimutkaisia profiileja, joita pelkkä koulutus- tai työhistoriadata ei paljasta.</p>
-        </div>
-      </div>
-
-      <div class="faq-item">
-        <div class="faq-question" onclick="toggleFAQ(this)">
-          <h3>3. Miksi demossa on vanha GPT-3.5 Turbo? <span class="faq-icon">+</span></h3>
-        </div>
-        <div class="faq-answer">
-          <p>Koska järjestelmä on kehitysvaiheessa, käytimme kevyempää ja edullisempaa mallia:</p>
-          <ul>
-            <li>• <strong>Nopeus:</strong> toimii testikäytössä hyvin</li>
-            <li>• <strong>Kustannus:</strong> noin 1/10 uusien mallien hinnasta</li>
-            <li>• <strong>Vaihdettavuus:</strong> lopullisessa mallissa voidaan käyttää mitä tahansa (GPT-5, Claude Sonnet 4 jne.)</li>
-          </ul>
-        </div>
-      </div>
-
-      <div class="faq-item">
-        <div class="faq-question" onclick="toggleFAQ(this)">
-          <h3>4. Miksi haku tuntuu hitaalta? <span class="faq-icon">+</span></h3>
-        </div>
-        <div class="faq-answer">
-          <p>Nykyinen haku käy läpi kaikki 29 000 profiilia syvällisesti.</p>
-          <ul>
-            <li>• <strong>Ratkaisu:</strong> indeksointi → lisätään hakijan yksilöllinen ID jokaiseen kenttään</li>
-            <li>• <strong>Tulos:</strong> haun nopeus moninkertaistuu</li>
-          </ul>
-        </div>
-      </div>
-
-      <div class="faq-item">
-        <div class="faq-question" onclick="toggleFAQ(this)">
-          <h3>5. Mikä erottaa LxP:n muista malleista? <span class="faq-icon">+</span></h3>
-        </div>
-        <div class="faq-answer">
-          <ul>
-            <li>• <strong>Viro:</strong> 3 parametria (osaaminen, kysyntä, saatavuus)</li>
-            <li>• <strong>Hollanti:</strong> osaamisperusteinen CV-purku</li>
-            <li>• <strong>Suomi Yoro LxP:</strong> tuo uutena työnhakijan motivaatio- ja käyttäytymispreferenssit, joita ei muualla hyödynnetä → parempi yhteensopivuus ja vähemmän turhia hakemuksia sekä työn- ja koulutuksen ohjausta</li>
-          </ul>
         </div>
       </div>
     </div>
@@ -1202,37 +1202,6 @@
 <script>
     // Language switching functionality
     let currentLanguage = 'fi';
-    
-    function switchLanguage(lang) {
-      currentLanguage = lang;
-      
-      // Hide all language content
-      document.querySelectorAll('.lang-content').forEach(el => {
-        el.classList.remove('active');
-      });
-      
-      // Show selected language content
-      document.querySelectorAll(`.lang-content[data-lang="${lang}"]`).forEach(el => {
-        el.classList.add('active');
-      });
-      
-      // Update language selector buttons
-      document.getElementById('langFi').classList.toggle('active', lang === 'fi');
-      document.getElementById('langEn').classList.toggle('active', lang === 'en');
-      
-      // Update HTML lang attribute
-      document.documentElement.lang = lang;
-      
-      // Update page title
-      if (lang === 'en') {
-        document.title = 'Yoro Oy - AI-powered Career Services | LxP Profiling & Recruitment';
-      } else {
-        document.title = 'Yoro Oy - AI-pohjaiset työelämäpalvelut | LxP-profilointi ja rekrytointi';
-      }
-      
-      // Save language preference
-      localStorage.setItem('preferred-language', lang);
-    }
     
     // Load saved language preference
     function loadLanguagePreference() {
