@@ -1,0 +1,22 @@
+{
+  "name": "lxp-api",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Lightweight JSON API for lxp.yoro.fi (/api/analyze, /api/analyze-candidates)",
+  "main": "server.js",
+  "type": "commonjs",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "cross-env NODE_ENV=development node server.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.19.2"
+  },
+  "devDependencies": {
+    "cross-env": "^7.0.3"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

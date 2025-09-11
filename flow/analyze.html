@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="fi">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Yoro Flow – Analyysi</title>
+  <!-- Firebase compat SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/10.11.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.11.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.11.1/firebase-firestore-compat.js"></script>
+  <!-- PDF.js for PDF parsing -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js" integrity="sha512-q+4liFwdPC/bNdhUpZx6aXDx/h77yEQtn4I1slHydcbZK34nLaR3cAeYSJshoxIOq3mjEf7xJE8YWIUHMn+oCQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <link rel="stylesheet" href="./flow.css" />
+</head>
+<body>
+  <div class="container">
+    <h1>Yoro Flow – Analyysi</h1>
+
+    <div class="mode-info">
+      <p id="modeText">Tila: –</p>
+      <label>
+        Määrä (N):
+        <input id="countInput" type="number" min="1" max="100" value="10" />
+      </label>
+    </div>
+
+    <div class="input-area">
+      <h2>1) Anna kuvaus tai lataa PDF</h2>
+      <textarea id="textInput" placeholder="Liitä kuvaus tähän..." rows="8"></textarea>
+      <div class="file-row">
+        <input id="pdfInput" type="file" accept="application/pdf" />
+        <button id="parsePdfBtn">Lue PDF</button>
+      </div>
+      <div class="hint">Suojaa henkilötiedot. PII:tä ei näytetä tuloksissa.</div>
+    </div>
+
+    <div class="actions">
+      <button id="startBtn" class="primary">Aloita</button>
+      <a href="/" class="secondary">Takaisin etusivulle</a>
+    </div>
+
+    <div class="progress" id="progressBox" style="display:none;">
+      <h2>Edistyminen</h2>
+      <ul id="progressList"></ul>
+    </div>
+
+    <div class="review" id="reviewBox" style="display:none;">
+      <h2>Vahvista LxP</h2>
+      <p>Ehdotettu LxP-avain (lxp.yoro.fi): <strong id="reviewLxp">—</strong></p>
+      <div id="reviewReasons" class="hint"></div>
+      <label style="display:block; margin-top:8px;">
+        Muokkaa LxP-avainta:
+        <input id="reviewLxpInput" type="text" style="width: 260px;" />
+      </label>
+      <div class="hint" style="margin-top:8px;">Jatkamme automaattisesti <span id="reviewCountdown">10</span> s kuluttua, ellet keskeytä tai hyväksy.
+      </div>
+      <div class="actions" style="margin-top:10px;">
+        <button id="reviewProceedBtn" class="primary">Hyväksy ja jatka</button>
+        <button id="reviewCancelBtn" class="secondary">Keskeytä</button>
+      </div>
+    </div>
+
+    <div class="results" id="resultsBox" style="display:none;">
+      <h2>Tulokset</h2>
+      <div id="resultsMeta"></div>
+      <ol id="resultsList"></ol>
+      <div class="next">
+        <a class="primary" href="/profiiliselain/">Avaa profiiliselain (täysi näkymä)</a>
+      </div>
+    </div>
+
+    <div class="debug" id="debugBox" style="display:none;">
+      <h2>Debug</h2>
+      <div class="debug-actions">
+        <button id="toggleDebugBtn" type="button">Piilota</button>
+        <button id="copyDebugBtn" type="button">Kopioi</button>
+      </div>
+      <pre id="debugPre" style="max-height:280px; overflow:auto; background:#0f0f15; border:1px solid #303040; padding:10px;"></pre>
+      <div class="hint">Huom: Debug-näkymä on PII-suojattu ja näyttää vain työkalun käyttämän reitin ja laskennan yhteenvedot.</div>
+    </div>
+
+    <div class="auth" id="authBox" style="display:none;">
+      <h2>Kirjautuminen vaaditaan</h2>
+      <p>Kirjaudu sisään jatkaaksesi hakua.</p>
+      <a class="primary" href="/kirjaudu/">Kirjaudu</a>
+    </div>
+  </div>
+
+  <script src="./flow.js"></script>
+</body>
+</html>

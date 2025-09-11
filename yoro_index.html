@@ -666,6 +666,14 @@
                         </div>
                         <button onclick="showMoreOptions('lupatiedot')" class="show-more-btn">Näytä lisää...</button>
                     </div>
+
+                    <div class="search-category">
+                        <h3>🎯 LxP</h3>
+                        <div id="lxp-checkboxes" class="checkbox-container">
+                            <!-- LxP checkboxit tulevat tähän -->
+                        </div>
+                        <button onclick="showMoreOptions('lxp')" class="show-more-btn">Näytä lisää...</button>
+                    </div>
                 </div>
 
                 <div style="text-align: center; margin-top: 20px;">
@@ -689,21 +697,35 @@
         </div>
     </div>
 
-    <script>
-        // Firebase configuration - käytetään urapolku-7780a datalle
-        const firebaseConfig = {
-            apiKey: "AIzaSyAnfsX522_ybXR7yhnAJbxDjuszVu4rZLE",
-            authDomain: "urapolku-7780a.firebaseapp.com",
-            projectId: "urapolku-7780a",
-            storageBucket: "urapolku-7780a.firebasestorage.app",
-            messagingSenderId: "314066598772",
-            appId: "1:314066598772:web:50183db006293290378a21"
-        };
+        <script>
+                // Firebase configuration — dual apps per spec:
+                // - search/auth UI → urapolku-7781a (default app)
+                // - profiles Firestore DB → urapolku-7780a (named app: 'profiles')
+                const searchConfig = {
+                        apiKey: "AIzaSyBdY2Xl5q2gW0ZlqjvHwmx2wIo1c3vZKfA",
+                        authDomain: "urapolku-7781a.firebaseapp.com",
+                        projectId: "urapolku-7781a"
+                };
+                const profilesConfig = {
+                        apiKey: "AIzaSyAnfsX522_ybXR7yhnAJbxDjuszVu4rZLE",
+                        authDomain: "urapolku-7780a.firebaseapp.com",
+                        projectId: "urapolku-7780a",
+                        storageBucket: "urapolku-7780a.firebasestorage.app",
+                        messagingSenderId: "314066598772",
+                        appId: "1:314066598772:web:50183db006293290378a21"
+                };
 
-        // Initialize Firebase
-        firebase.initializeApp(firebaseConfig);
-        const auth = firebase.auth();
-        const db = firebase.firestore();
+                // Initialize dual Firebase apps (v8)
+                const searchApp = (firebase.apps && firebase.apps.length)
+                    ? firebase.app()
+                    : firebase.initializeApp(searchConfig);
+                const profilesApp = (firebase.apps || []).some(a => a && a.name === 'profiles')
+                    ? firebase.app('profiles')
+                    : firebase.initializeApp(profilesConfig, 'profiles');
+
+                // Use auth from 7781a and Firestore from 7780a
+                const auth = searchApp.auth();
+                const db = profilesApp.firestore();
 
         let allProfiles = [];
         let categoryIndex = null; // Cache for checkbox data
@@ -919,7 +941,7 @@
         
         // Show error message when static data fails
         function showCheckboxError() {
-            const categories = ['ammatti', 'osaaminen', 'työtoiveet', 'alue', 'kieli', 'koulutus', 'ajokortit', 'lupatiedot'];
+            const categories = ['ammatti', 'osaaminen', 'työtoiveet', 'alue', 'kieli', 'koulutus', 'ajokortit', 'lupatiedot', 'lxp'];
             
             categories.forEach(category => {
                 const container = document.getElementById(`${category}-checkboxes`);
@@ -982,7 +1004,7 @@
         
         // Show placeholder checkboxes while building cache
         function showPlaceholderCheckboxes() {
-            const categories = ['ammatti', 'osaaminen', 'työtoiveet', 'alue', 'kieli', 'koulutus', 'ajokortit', 'lupatiedot'];
+            const categories = ['ammatti', 'osaaminen', 'työtoiveet', 'alue', 'kieli', 'koulutus', 'ajokortit', 'lupatiedot', 'lxp'];
             categories.forEach(category => {
                 const container = document.getElementById(`${category}-checkboxes`);
                 if (container) {
@@ -1006,7 +1028,8 @@
                 kieli: getSelectedCheckboxes('kieli'),
                 työtoiveet: getSelectedCheckboxes('työtoiveet'),
                 ajokortit: getSelectedCheckboxes('ajokortit'),
-                lupatiedot: getSelectedCheckboxes('lupatiedot')
+                lupatiedot: getSelectedCheckboxes('lupatiedot'),
+                lxp: getSelectedCheckboxes('lxp')
             };
 
             // Check if any search criteria is specified
@@ -1147,6 +1170,8 @@
                                        safeIncludes(profile.tyokokemus, freeSearch) ||
                                        safeIncludes(profile.osaamisteksti, freeSearch) ||
                                        safeIncludes(profile.ajotiedot, freeSearch) ||
+                                       safeIncludes(profile.lxpKey, freeSearch) ||
+                                       (profile.lxp && (Array.isArray(profile.lxp) ? profile.lxp.some(v => safeIncludes(v, freeSearch)) : safeIncludes(profile.lxp, freeSearch))) ||
                                        (profile.ammatit && profile.ammatit.some(a => safeIncludes(a, freeSearch))) ||
                                        (profile.osaamiset && profile.osaamiset.some(o => safeIncludes(o, freeSearch))) ||
                                        (profile.tyotoiveet && profile.tyotoiveet.some(t => safeIncludes(t, freeSearch))) ||
@@ -1175,6 +1200,11 @@
                                     case 'työtoiveet': return profile.tyotoiveet || [];
                                     case 'ajokortit': return profile.ajokortit || [];
                                     case 'lupatiedot': return profile.lupatiedot || [];
+                                    case 'lxp': {
+                                        const raw = (profile.lxpKey || profile.lxp);
+                                        if (!raw) return [];
+                                        return Array.isArray(raw) ? raw : [raw];
+                                    }
                                     default: return [];
                                 }
                             };
@@ -1497,7 +1527,8 @@
                 kieli: new Map(),
                 koulutus: new Map(),
                 ajokortit: new Map(),
-                lupatiedot: new Map()
+                lupatiedot: new Map(),
+                lxp: new Map()
             };
             
             function loadBatch(lastDoc = null) {
@@ -1549,6 +1580,21 @@
                             processField(profile.tyotoiveet, index.työtoiveet);
                             processField(profile.ajokortit, index.ajokortit);
                             processField(profile.lupatiedot, index.lupatiedot);
+                            // LxP: support single string, array, or lxpKey; normalize to UPPERCASE
+                            try {
+                                const rawLxp = (profile.lxpKey || profile.lxp);
+                                if (rawLxp) {
+                                    if (Array.isArray(rawLxp)) {
+                                        const upperArr = rawLxp.map(v => String(v).trim().toUpperCase()).filter(Boolean);
+                                        processField(upperArr, index.lxp);
+                                    } else {
+                                        const upperOne = String(rawLxp).trim().toUpperCase();
+                                        if (upperOne) processField(upperOne, index.lxp);
+                                    }
+                                }
+                            } catch (e) {
+                                console.warn('Error processing LxP field', e);
+                            }
                             
                             processedCount++;
                             
@@ -1627,7 +1673,8 @@
                 'kielitaito': 'kieli',
                 'koulutus': 'koulutus', 
                 'ajokortit': 'ajokortit',
-                'lupatiedot': 'lupatiedot'
+                'lupatiedot': 'lupatiedot',
+                'lxp': 'lxp'
             };
             
             Object.keys(categoryMap).forEach(category => {
@@ -1846,7 +1893,7 @@
             allProfiles = [];
             
             // Clear all checkbox containers
-            const categories = ['ammatti', 'osaaminen', 'työtoiveet', 'alue', 'kieli', 'koulutus', 'ajokortit', 'lupatiedot'];
+            const categories = ['ammatti', 'osaaminen', 'työtoiveet', 'alue', 'kieli', 'koulutus', 'ajokortit', 'lupatiedot', 'lxp'];
             categories.forEach(category => {
                 const container = document.getElementById(`${category}-checkboxes`);
                 if (container) {
