@@ -139,7 +139,7 @@
       font-size: 1.2rem;
     }
 
-  main {
+    main {
       max-width: 900px;
       margin: auto;
       padding: 2rem;
@@ -160,16 +160,16 @@
       padding-bottom: 0.5rem;
     }
 
-  .flow-launch {display:flex;gap:10px;align-items:center;margin:10px 0 20px}
-  .flow-launch select, .flow-launch input{padding:8px;border-radius:6px;border:1px solid rgba(255,255,255,.3);background:#fff;color:#333}
-  .flow-launch .btn{margin:0}
-
     h3 {
       color: #ffffff;
       margin-top: 0;
       margin-bottom: 0.5rem;
       font-size: 1.3rem;
     }
+  .cta-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px; margin-top: 1rem; }
+  .cta-card { padding: 1.2rem; border-radius: 12px; border: 1px solid rgba(255,255,255,0.2); background: rgba(255,255,255,0.08); }
+  .cta-title { font-weight: 700; font-size: 1.2rem; margin-bottom: 0.6rem; }
+  .cta-desc { opacity: 0.9; }
 
     /* Button Styles */
     .button-group {
@@ -755,27 +755,6 @@
 <button class="back-to-top" id="backToTop" onclick="scrollToTop()">↑</button>
 
 <main>
-    <section>
-      <h2>Yhtenäinen työnkulku</h2>
-      <div class="flow-launch">
-        <label>
-          Tila:
-          <select id="flowMode">
-            <option value="hire">Etsi työntekijä</option>
-            <option value="course">Kohdenna kurssi-/koulutustarjonta</option>
-          </select>
-        </label>
-        <label>
-          Määrä (N):
-          <input id="flowCount" type="number" min="1" max="100" value="10" />
-        </label>
-        <button class="btn" id="goFlow">Aloita</button>
-      </div>
-      <div class="button-group">
-        <a class="button primary" href="/flow/analyze.html?mode=hire&count=10">🔎 Etsi työntekijä</a>
-        <a class="button secondary" href="/flow/analyze.html?mode=course&count=10">🎓 Kohdenna kurssi-/koulutustarjonta</a>
-      </div>
-    </section>
 <!-- Search Container -->
 <div class="search-container">
   <input type="text" class="search-input" id="searchInput" onkeyup="searchContent()" 
@@ -1760,18 +1739,5 @@
       console.log('💡 Features: FAQ, PWA, Search, Quick Nav, Theme Toggle, Performance Monitoring');
     });
   </script>
-  <script>
-    (function(){
-      const btn = document.getElementById('goFlow');
-      if(!btn) return;
-      btn.addEventListener('click', ()=>{
-        const mode = document.getElementById('flowMode').value;
-        const count = document.getElementById('flowCount').value || '10';
-        window.location.href = `/flow/analyze.html?mode=${encodeURIComponent(mode)}&count=${encodeURIComponent(count)}`;
-      });
-    })();
-  </script>
 </body>
 </html>
-
-

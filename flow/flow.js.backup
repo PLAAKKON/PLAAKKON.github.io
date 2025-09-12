@@ -300,11 +300,11 @@
   }
 
   // External LxP API config (replace endpoints when available)
-  const STRICT_LXP = false; // enforce using lxp.yoro.fi only; no local fallbacks
+  const STRICT_LXP = true; // enforce using lxp.yoro.fi only; no local fallbacks
   const LXP_BASE_OVERRIDE = (new URL(window.location.href)).searchParams.get('lxpBase');
   const CF_FALLBACK_BASE = 'https://us-central1-urapolku-7780a.cloudfunctions.net';
   const LXP_API = {
-    base: LXP_BASE_OVERRIDE || 'https://lxp.yoro.fi/profile-analyzer',
+    base: LXP_BASE_OVERRIDE || 'https://lxp.yoro.fi',
     analyzeJob: '/api/analyze', // POST { text } -> { lxpKey, labels?: string[] }
     analyzeCandidates: '/api/analyze-candidates' // POST { candidates:[{id, text?}], lxpKey } -> { codes: [{id, code}] }
   };
