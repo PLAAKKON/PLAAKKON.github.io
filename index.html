@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <title>Yoro Oy — AI‑avusteinen rekrytointi ja koulutus­kohdistus</title>
   <meta name="description" content="Yoro Oy auttaa organisaatioita automatisoimaan rekrytoinnin ja koulutuksen kohdistuksen. Liitä työpaikkailmoitus, määritä tavoite ja saat tulokset nopeasti ja läpinäkyvästi."/>
-  <link rel="manifest" href="/manifest.json">
   <meta name="theme-color" content="#0A6CC8">
   <link rel="apple-touch-icon" href="/logo_transparent.png">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -380,13 +379,15 @@
             <h3 class="lang-content active" data-lang="fi" style="margin-bottom: 16px;">Jätä viesti</h3>
             <h3 class="lang-content" data-lang="en" style="margin-bottom: 16px;">Leave a message</h3>
             
-            <form style="display: flex; flex-direction: column; gap: 16px;">
+            <form action="https://formspree.io/f/mnnbrwqn" method="POST" style="display: flex; flex-direction: column; gap: 16px;">
               <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
-                <input type="text" placeholder="Nimi / Name" style="padding: 12px; border: 1px solid var(--border); border-radius: 8px; font-family: inherit;">
-                <input type="email" placeholder="Sähköposti / Email" style="padding: 12px; border: 1px solid var(--border); border-radius: 8px; font-family: inherit;">
+                <input type="text" name="nimi" placeholder="Nimi / Name" required style="padding: 12px; border: 1px solid var(--border); border-radius: 8px; font-family: inherit;">
+                <input type="email" name="email" placeholder="Sähköposti / Email" required style="padding: 12px; border: 1px solid var(--border); border-radius: 8px; font-family: inherit;">
               </div>
-              <input type="tel" placeholder="Puhelinnumero / Phone" style="padding: 12px; border: 1px solid var(--border); border-radius: 8px; font-family: inherit;">
-              <textarea placeholder="Kirjoita viestisi tähän / Write your message here" rows="4" style="padding: 12px; border: 1px solid var(--border); border-radius: 8px; font-family: inherit; resize: vertical;"></textarea>
+              <input type="tel" name="puhelin" placeholder="Puhelinnumero / Phone" style="padding: 12px; border: 1px solid var(--border); border-radius: 8px; font-family: inherit;">
+              <textarea name="message" placeholder="Kirjoita viestisi tähän / Write your message here" rows="4" required style="padding: 12px; border: 1px solid var(--border); border-radius: 8px; font-family: inherit; resize: vertical;"></textarea>
+              <input type="hidden" name="_subject" value="Yhteydenotto Yoro.fi sivustolta">
+              <input type="hidden" name="_language" value="fi">
               <button type="submit" class="btn primary" style="align-self: flex-start;">
                 <span class="lang-content active" data-lang="fi">Lähetä viesti</span>
                 <span class="lang-content" data-lang="en">Send message</span>
