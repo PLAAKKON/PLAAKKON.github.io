@@ -593,8 +593,8 @@
                         <input type="text" id="search-free" data-fi="Hakusana kaikista kentistä..." data-en="Search keyword from all fields..." placeholder="Hakusana kaikista kentistä...">
                     </div>
                     <div class="search-field">
-                        <label for="search-lxp" data-fi="LxP-avain" data-en="LxP Key">LxP-avain</label>
-                        <input type="text" id="search-lxp" data-fi="LxP-avain (numerot ja kirjaimet)..." data-en="LxP key (numbers and letters)..." placeholder="LxP-avain (numerot ja kirjaimet)...">
+                        <label for="search-lxp" data-fi="LxP-avain (joustava)" data-en="LxP Key (flexible)">LxP-avain (joustava)</label>
+                        <input type="text" id="search-lxp" data-fi="Esim. 1ABCDE löytää 1A, 1E, 1AE..." data-en="E.g. 1ABCDE finds 1A, 1E, 1AE..." placeholder="Esim. 1ABCDE löytää 1A, 1E, 1AE...">
                     </div>
                 </div>
 
@@ -62636,12 +62636,12 @@
             };
 
             // Check if any search criteria is specified
-            const hasSearchCriteria = freeSearch || 
+            const hasSearchCriteria = freeSearch || lxpSearch ||
                 Object.values(selectedFilters).some(arr => arr.length > 0);
 
             if (!hasSearchCriteria) {
                 document.getElementById('results-count').textContent = `Valitse hakuehdot nähdäksesi profiilit`;
-                document.getElementById('profiles-container').innerHTML = '<div class="profile-card"><p>Valitse checkboxeista hakuehdot tai käytä vapaata hakua</p></div>';
+                document.getElementById('profiles-container').innerHTML = '<div class="profile-card"><p>Valitse checkboxeista hakuehdot, käytä vapaata hakua tai LxP-avainta</p></div>';
                 return;
             }
 
@@ -62692,7 +62692,7 @@
             });
             
             document.getElementById('results-count').textContent = `Valitse hakuehdot nähdäksesi profiilit.`;
-            document.getElementById('profiles-container').innerHTML = '<div class="profile-card"><p>Valitse checkboxeista hakuehdot tai käytä vapaata hakua. Paina "Hae profiileja" nähdäksesi tulokset.</p></div>';
+            document.getElementById('profiles-container').innerHTML = '<div class="profile-card"><p>Valitse checkboxeista hakuehdot, käytä vapaata hakua tai LxP-avainta. Paina "Hae profiileja" nähdäksesi tulokset.</p></div>';
         }
         
         // Show selected filters in a popup
@@ -62734,7 +62734,7 @@
             });
             
             if (!hasFilters) {
-                message = '📋 Ei valittuja hakuehtoja.\n\nValitse checkboxeista hakuehdot ja paina "Hae profiileja".';
+                message = '📋 Ei valittuja hakuehtoja.\n\nValitse checkboxeista hakuehdot, käytä vapaata hakua tai LxP-avainta ja paina "Hae profiileja".';
             }
             
             alert(message);
@@ -62786,7 +62786,7 @@
                         // Add small delay to show completion message
                         setTimeout(() => {
                             // Now perform the search with the loaded profiles
-                            performSearchWithProfiles(freeSearch, selectedFilters);
+                            performSearchWithProfiles(freeSearch, lxpSearch, selectedFilters);
                         }, 500);
                     }
                 }).catch((error) => {
@@ -62799,8 +62799,50 @@
             loadBatch();
         }
         
+        // Joustava LxP-haku - hakee profiilit joissa on osia hakusanasta
+        function flexibleLxPMatch(profileLxP, searchLxP) {
+            if (!profileLxP || !searchLxP) return false;
+            
+            const profileCode = String(profileLxP).toLowerCase().trim();
+            const searchCode = String(searchLxP).toLowerCase().trim();
+            
+            // Jos profiilikoodi sisältää hakusanan tai päinvastoin
+            if (profileCode.includes(searchCode) || searchCode.includes(profileCode)) {
+                return true;
+            }
+            
+            // Joustava haku: tarkista onko hakusanan merkit profiilissa
+            // Esim. haku "1ABCDE" löytää profiilin "1A", "1E", "1AE", jne.
+            const searchChars = searchCode.split('');
+            let profileIndex = 0;
+            
+            for (let i = 0; i < searchChars.length && profileIndex < profileCode.length; i++) {
+                const charIndex = profileCode.indexOf(searchChars[i], profileIndex);
+                if (charIndex !== -1) {
+                    profileIndex = charIndex + 1;
+                } else {
+                    // Jos merkki ei löydy, kokeile päinvastaista suuntaa
+                    // Tarkista voiko profiilikoodi olla osa hakusanaa
+                    let profileChars = profileCode.split('');
+                    let searchIndex = 0;
+                    
+                    for (let j = 0; j < profileChars.length && searchIndex < searchCode.length; j++) {
+                        const pCharIndex = searchCode.indexOf(profileChars[j], searchIndex);
+                        if (pCharIndex !== -1) {
+                            searchIndex = pCharIndex + 1;
+                        } else {
+                            return false;
+                        }
+                    }
+                    return searchIndex > 0; // Löytyi vähintään yksi merkki
+                }
+            }
+            
+            return true;
+        }
+        
         // Perform search with loaded profiles
-        function performSearchWithProfiles(freeSearch, selectedFilters) {
+        function performSearchWithProfiles(freeSearch, lxpSearch, selectedFilters) {
             const filtered = allProfiles.filter(profile => {
                 let matches = true;
                 
@@ -62815,8 +62857,8 @@
                         }
                     };
                     
-                    // LxP-spesifinen haku
-                    if (lxpSearch && !safeIncludes(profile.LxP, lxpSearch)) {
+                    // LxP-spesifinen joustava haku
+                    if (lxpSearch && !flexibleLxPMatch(profile.LxP, lxpSearch)) {
                         return false;
                     }
                     
