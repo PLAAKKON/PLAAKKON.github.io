@@ -439,27 +439,56 @@
         document.head.appendChild(s1);
       })(function(){
         firebase.initializeApp(firebaseConfig);
-        // Auth state listener
+        // 1) Pysyvä kirjautuminen (LOCAL = säilyy selainistuntojen yli)
+        firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL).catch(console.error);
+
+        // 2) Tallenna provider uudelleenkäyttöä varten
+        window._googleProvider = new firebase.auth.GoogleAuthProvider();
+
+        // 3) Kuuntele auth-tila
         firebase.auth().onAuthStateChanged(function(user){
           renderAuthMenu(user);
         });
       });
+
+      // Kirjautuminen Googlella (popup)
+      function loginWithGoogle(){
+        firebase.auth().signInWithPopup(window._googleProvider)
+          .then(()=>{/* ok */})
+          .catch(err=>{
+            // Fallback: kokeile redirectiä jos popup estyy
+            if (err && err.code === 'auth/popup-blocked') {
+              firebase.auth().signInWithRedirect(window._googleProvider);
+            } else {
+              console.error(err);
+              alert('Kirjautuminen epäonnistui: ' + (err?.message || 'tuntematon virhe'));
+            }
+          });
+      }
+
+      // Uloskirjautuminen
+      function logout(){
+        firebase.auth().signOut().catch(console.error);
+      }
 
       // Kirjautumisvalikon renderöinti
       function renderAuthMenu(user){
         var el = document.getElementById('auth-menu');
         if(!el) return;
         if(user){
-          // Näytä käyttäjävalikko ja uloskirjautuminen
           el.innerHTML = `
-            <div style="display:flex;align-items:center;gap:10px">
-              <span style="font-size:.95em;color:var(--muted)">${user.displayName||user.email}</span>
-              <button class="btn" style="height:32px;padding:0 12px;font-size:.95em" onclick="firebase.auth().signOut()">Kirjaudu ulos</button>
-            </div>
-          `;
-        }else{
-          // Näytä Kirjaudu-nappi
-          el.innerHTML = `<a class="btn" style="height:32px;padding:0 12px;font-size:.95em" href="/kirjaudu">Kirjaudu</a>`;
+        <div style="display:flex;align-items:center;gap:10px">
+          <span style="font-size:.95em;color:var(--muted)">${user.displayName||user.email}</span>
+          <button class="btn" style="height:32px;padding:0 12px;font-size:.95em" onclick="logout()">Kirjaudu ulos</button>
+        </div>
+      `;
+        } else {
+          el.innerHTML = `
+        <div style="display:flex;align-items:center;gap:8px">
+          <button class="btn" style="height:32px;padding:0 12px;font-size:.95em" onclick="loginWithGoogle()">Kirjaudu Googlella</button>
+          <a class="btn" style="height:32px;padding:0 12px;font-size:.95em" href="/kirjaudu">Muu kirjautuminen</a>
+        </div>
+      `;
         }
       }
     function switchLang(lang){
