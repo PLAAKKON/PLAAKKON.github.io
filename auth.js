@@ -28,7 +28,12 @@ window.loginUser = function() {
     signInWithEmailAndPassword(auth, email, password)
         .then((userCredential) => {
             alert('Kirjautuminen onnistui!');
-            window.location.href = 'https://plaakkon.github.io/profiilitesti/';
+            
+            // Set localStorage for profiilitesti compatibility
+            localStorage.setItem('userEmail', userCredential.user.email);
+            
+            // Use relative URL to work on both yoro.fi and plaakkon.github.io
+            window.location.href = '/profiilitesti/';
         })
         .catch((error) => {
             console.error('Kirjautuminen epäonnistui:', error);
