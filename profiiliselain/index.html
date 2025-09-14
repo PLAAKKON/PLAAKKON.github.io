@@ -62887,13 +62887,20 @@
                                 
                                 // DEBUG: Näytä ensimmäiset 10 dokumenttia
                                 if (debugCounter < 10) {
-                                    console.log(`🔍 Debug doc ${doc.id}:`, {
+                                    const debugInfo = {
+                                        id: doc.id,
                                         tyonhakualue: docData.tyonhakualue,
                                         työnhakualue: docData.työnhakualue,
                                         area: area,
                                         areaType: typeof area,
                                         alueKeys: Object.keys(docData).filter(key => key.toLowerCase().includes('alue'))
-                                    });
+                                    };
+                                    console.log(`🔍 Debug doc ${doc.id}:`, debugInfo);
+                                    
+                                    // VÄLIAIKAINEN: Näytä myös alert ensimmäisestä dokumentista
+                                    if (debugCounter === 0) {
+                                        alert(`Debug doc 1: ${JSON.stringify(debugInfo, null, 2)}`);
+                                    }
                                     debugCounter++;
                                 }
                                 
@@ -62964,6 +62971,14 @@
                             } catch (error) {
                                 console.warn('⚠️ Failed to save cache (localStorage full?):', error);
                             }
+                            
+                            // FINAL DEBUG: Näytä lopullinen tulos
+                            console.log(`🎯 FINAL AREA INDEX RESULT:`, {
+                                totalAreas: areaProfileIds.size,
+                                totalProfiles: Array.from(areaProfileIds.values()).reduce((sum, ids) => sum + ids.length, 0),
+                                sampleAreas: Array.from(areaProfileIds.keys()).slice(0, 10),
+                                seinäjokiProfiles: areaProfileIds.get('Seinäjoki') || []
+                            });
                             
                             areaIndexLoaded = true;
                             resolve();
