@@ -62820,24 +62820,27 @@
                         return false;
                     }
                     
-                    const textMatches = safeIncludes(profile.esittely, freeSearch) ||
-                                       safeIncludes(profile.esittely_10sanaa, freeSearch) ||
-                                       safeIncludes(profile.tyonhakualue, freeSearch) ||
-                                       safeIncludes(profile.aloitusajankohta, freeSearch) ||
-                                       safeIncludes(profile.muu_kokemus, freeSearch) ||
-                                       safeIncludes(profile.tyokokemus, freeSearch) ||
-                                       safeIncludes(profile.osaamisteksti, freeSearch) ||
-                                       safeIncludes(profile.ajotiedot, freeSearch) ||
-                                       safeIncludes(profile.LxP, freeSearch) ||
-                                       (profile.ammatit && profile.ammatit.some(a => safeIncludes(a, freeSearch))) ||
-                                       (profile.osaamiset && profile.osaamiset.some(o => safeIncludes(o, freeSearch))) ||
-                                       (profile.tyotoiveet && profile.tyotoiveet.some(t => safeIncludes(t, freeSearch))) ||
-                                       (profile.koulutus && profile.koulutus.some(k => safeIncludes(k, freeSearch))) ||
-                                       (profile.kielitaito && profile.kielitaito.some(k => safeIncludes(k, freeSearch))) ||
-                                       (profile.ajokortit && profile.ajokortit.some(a => safeIncludes(a, freeSearch))) ||
-                                       (profile.lupatiedot && profile.lupatiedot.some(l => safeIncludes(l, freeSearch)));
-                    
-                    if (!textMatches) matches = false;
+                    // Vapaa haku (vain jos se on määritelty)
+                    if (freeSearch) {
+                        const textMatches = safeIncludes(profile.esittely, freeSearch) ||
+                                           safeIncludes(profile.esittely_10sanaa, freeSearch) ||
+                                           safeIncludes(profile.tyonhakualue, freeSearch) ||
+                                           safeIncludes(profile.aloitusajankohta, freeSearch) ||
+                                           safeIncludes(profile.muu_kokemus, freeSearch) ||
+                                           safeIncludes(profile.tyokokemus, freeSearch) ||
+                                           safeIncludes(profile.osaamisteksti, freeSearch) ||
+                                           safeIncludes(profile.ajotiedot, freeSearch) ||
+                                           safeIncludes(profile.LxP, freeSearch) ||
+                                           (profile.ammatit && profile.ammatit.some(a => safeIncludes(a, freeSearch))) ||
+                                           (profile.osaamiset && profile.osaamiset.some(o => safeIncludes(o, freeSearch))) ||
+                                           (profile.tyotoiveet && profile.tyotoiveet.some(t => safeIncludes(t, freeSearch))) ||
+                                           (profile.koulutus && profile.koulutus.some(k => safeIncludes(k, freeSearch))) ||
+                                           (profile.kielitaito && profile.kielitaito.some(k => safeIncludes(k, freeSearch))) ||
+                                           (profile.ajokortit && profile.ajokortit.some(a => safeIncludes(a, freeSearch))) ||
+                                           (profile.lupatiedot && profile.lupatiedot.some(l => safeIncludes(l, freeSearch)));
+                        
+                        if (!textMatches) return false;
+                    }
                 }
                 
                 // Filter by selected checkboxes
