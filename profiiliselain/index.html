@@ -562,11 +562,6 @@
         <button onclick="setLanguage('en')" class="lang-btn" id="lang-en">EN</button>
     </div>
 
-    <!-- Video Background -->
-    <video autoplay muted loop class="video-background">
-        <source src="/city_2160_24fps.mp4" type="video/mp4">
-    </video>
-
     <div class="container">
         <div class="header">
             <h1 data-fi="👥 Profiiliselain - Yoro Oy (Työnantajapalvelu)" data-en="👥 Profile Browser - Yoro Oy (Employer Service)">👥 Profiiliselain - Yoro Oy (Työnantajapalvelu)</h1>
@@ -596,6 +591,10 @@
                     <div class="search-field">
                         <label for="search-free" data-fi="Vapaa haku" data-en="Free Search">Vapaa haku</label>
                         <input type="text" id="search-free" data-fi="Hakusana kaikista kentistä..." data-en="Search keyword from all fields..." placeholder="Hakusana kaikista kentistä...">
+                    </div>
+                    <div class="search-field">
+                        <label for="search-lxp" data-fi="LxP-avain" data-en="LxP Key">LxP-avain</label>
+                        <input type="text" id="search-lxp" data-fi="LxP-avain (numerot ja kirjaimet)..." data-en="LxP key (numbers and letters)..." placeholder="LxP-avain (numerot ja kirjaimet)...">
                     </div>
                 </div>
 
@@ -62622,6 +62621,7 @@
         function searchProfiles() {
             // Get free text search
             const freeSearch = document.getElementById('search-free').value.toLowerCase().trim();
+            const lxpSearch = document.getElementById('search-lxp').value.toLowerCase().trim();
             
             // Get selected checkboxes
             const selectedFilters = {
@@ -62676,6 +62676,7 @@
         function clearSearch() {
             // Clear free text search
             document.getElementById('search-free').value = '';
+            document.getElementById('search-lxp').value = '';
             
             // Clear all checkboxes
             const checkboxes = document.querySelectorAll('input[type="checkbox"]');
@@ -62813,6 +62814,11 @@
                             return false;
                         }
                     };
+                    
+                    // LxP-spesifinen haku
+                    if (lxpSearch && !safeIncludes(profile.LxP, lxpSearch)) {
+                        return false;
+                    }
                     
                     const textMatches = safeIncludes(profile.esittely, freeSearch) ||
                                        safeIncludes(profile.esittely_10sanaa, freeSearch) ||
