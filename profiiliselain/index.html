@@ -62689,6 +62689,8 @@
 
         // Search profiles
         async function searchProfiles() {
+            console.log('🔍 searchProfiles() STARTED');
+            
             // Get free text search
             const freeSearch = document.getElementById('search-free').value.toLowerCase().trim();
             const lxpSearch = document.getElementById('search-lxp').value.toLowerCase().trim();
@@ -62704,6 +62706,8 @@
                 ajokortit: getSelectedCheckboxes('ajokortit'),
                 lupatiedot: getSelectedCheckboxes('lupatiedot')
             };
+            
+            console.log('🔍 selectedFilters collected:', selectedFilters);
 
             // Check if any search criteria is specified
             const hasSearchCriteria = freeSearch || lxpSearch ||
@@ -62814,7 +62818,6 @@
         // UPDATED: Fixed area.trim() TypeError - added type checking and error handling
         async function buildAreaIndex() {
             console.log('🚀 buildAreaIndex() STARTING - areaIndexLoaded:', areaIndexLoaded);
-            alert('buildAreaIndex() käynnistyi!');
             
             if (areaIndexLoaded) {
                 console.log('📍 Area index already loaded, skipping...');
@@ -62894,17 +62897,14 @@
                                         id: doc.id,
                                         tyonhakualue: docData.tyonhakualue,
                                         työnhakualue: docData.työnhakualue,
+                                        area: docData.area,
                                         areaField: areaField,
                                         areaFieldType: typeof areaField,
                                         isArray: Array.isArray(areaField),
-                                        alueKeys: Object.keys(docData).filter(key => key.toLowerCase().includes('alue'))
+                                        fullDocData: docData, // SHOW COMPLETE DOCUMENT
+                                        allKeys: Object.keys(docData)
                                     };
-                                    console.log(`🔍 Debug doc ${doc.id}:`, debugInfo);
-                                    
-                                    // VÄLIAIKAINEN: Näytä myös alert ensimmäisestä dokumentista
-                                    if (debugCounter === 0) {
-                                        alert(`Debug doc 1: ${JSON.stringify(debugInfo, null, 2)}`);
-                                    }
+                                    console.log(`🔍 COMPLETE Debug doc ${doc.id}:`, debugInfo);
                                     debugCounter++;
                                 }
                                 
@@ -63006,7 +63006,6 @@
         // Load profiles for search when needed - OPTIMIZED WITH AREA INDEX
         async function loadProfilesForSearch(freeSearch, selectedFilters) {
             console.log('🔍 Loading profiles for search...', {freeSearch, selectedFilters});
-            alert(`loadProfilesForSearch kutsuttu: ${JSON.stringify(selectedFilters)}`);
             
             // Varmista että aluehakemisto on rakennettu
             if (!areaIndexLoaded) {
@@ -63025,7 +63024,6 @@
             // Määritä ladattavat profiilit valittujen alueiden perusteella
             const selectedAreas = selectedFilters.alue || [];
             console.log('📍 Selected areas:', selectedAreas);
-            alert(`Selected areas: ${JSON.stringify(selectedAreas)}`);
             let profileIdsToLoad = new Set();
             
             if (selectedAreas.length === 0) {
