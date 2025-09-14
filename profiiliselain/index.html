@@ -62817,7 +62817,48 @@
                 return;
             }
             
-            console.log('🗂️ Building area index - loading only IDs and areas...');
+            // Tarkista onko cache olemassa ja voimassa (viikko vanha)
+            const cachedIndex = localStorage.getItem('areaProfileIndex');
+            const cacheTimestamp = localStorage.getItem('areaProfileIndexTimestamp');
+            const CACHE_VALID_DAYS = 7; // Päivitä kerran viikossa
+            
+            if (cachedIndex && cacheTimestamp) {
+                const cacheAge = (Date.now() - parseInt(cacheTimestamp)) / (1000 * 60 * 60 * 24); // päivissä
+                
+                if (cacheAge < CACHE_VALID_DAYS) {
+                    console.log(`� Loading area index from cache (${cacheAge.toFixed(1)} days old)...`);
+                    
+                    try {
+                        const parsedCache = JSON.parse(cachedIndex);
+                        
+                        // Palauta Map-objekti cachesta
+                        areaProfileIds.clear();
+                        Object.entries(parsedCache).forEach(([area, profileIds]) => {
+                            areaProfileIds.set(area, profileIds);
+                        });
+                        
+                        areaIndexLoaded = true;
+                        console.log(`✅ Area index loaded from cache: ${areaProfileIds.size} areas`);
+                        
+                        // Log Seinäjoki erikseen testaamista varten
+                        if (areaProfileIds.has('Seinäjoki')) {
+                            console.log(`🎯 Seinäjoki ready from cache: ${areaProfileIds.get('Seinäjoki').length} profiles`);
+                        }
+                        
+                        return; // Käytä cachea, älä rakenna uudelleen
+                    } catch (error) {
+                        console.warn('⚠️ Cache corrupted, rebuilding...', error);
+                        localStorage.removeItem('areaProfileIndex');
+                        localStorage.removeItem('areaProfileIndexTimestamp');
+                    }
+                } else {
+                    console.log(`🔄 Cache expired (${cacheAge.toFixed(1)} days old), rebuilding...`);
+                }
+            } else {
+                console.log('🗂️ No cache found, building area index for first time...');
+            }
+            
+            console.log('🗂️ Building area index - loading all profiles to create mapping...');
             areaProfileIds.clear();
             
             const batchSize = 1000; // Larger batch for lightweight query
@@ -62825,8 +62866,8 @@
             
             function loadAreaBatch(lastDoc = null) {
                 return new Promise((resolve, reject) => {
+                    // Firebase v8 ei tue .select() - ladataan koko dokumentti mutta käsitellään vain tyonhakualue
                     let query = db.collection('profiles')
-                        .select('tyonhakualue') // Only load area field + ID
                         .limit(batchSize);
                     
                     if (lastDoc) {
@@ -62837,7 +62878,10 @@
                         let lastDocument = null;
                         
                         querySnapshot.forEach((doc) => {
-                            const area = doc.data().tyonhakualue;
+                            // Käsittele VAIN tyonhakualue + ID - ignoroi kaikki muu data
+                            const docData = doc.data();
+                            const area = docData.tyonhakualue || docData.työnhakualue; // Molemmat mahdolliset kenttänimet
+                            
                             if (area && area.trim()) {
                                 const normalizedArea = String(area).trim();
                                 
@@ -62846,6 +62890,7 @@
                                     if (!areaProfileIds.has(normalizedArea)) {
                                         areaProfileIds.set(normalizedArea, []);
                                     }
+                                    // Tallenna VAIN ID (numeerinen kuten 10028, 10029...) - ei profiili-dataa
                                     areaProfileIds.get(normalizedArea).push(doc.id);
                                 }
                             }
@@ -62862,11 +62907,30 @@
                             // All done
                             console.log(`✅ Area index built: ${areaProfileIds.size} areas, ${totalProcessed} profiles processed`);
                             
-                            // Log top areas by profile count
+                            // Log top areas by profile count (including Seinäjoki if found)
                             const topAreas = Array.from(areaProfileIds.entries())
                                 .sort((a, b) => b[1].length - a[1].length)
-                                .slice(0, 10);
+                                .slice(0, 15);
                             console.log('📊 Top areas by profile count:', topAreas.map(([area, ids]) => `${area}: ${ids.length}`));
+                            
+                            // Specifically log Seinäjoki for testing
+                            if (areaProfileIds.has('Seinäjoki')) {
+                                console.log(`🎯 Seinäjoki optimization ready: ${areaProfileIds.get('Seinäjoki').length} profiles found`);
+                            }
+                            
+                            // Tallenna cache localStorage:iin (Map → Object muunnos)
+                            // VAIN paikkakunta -> [ID1, ID2, ID3] - ei profiili-dataa!
+                            try {
+                                const cacheData = Object.fromEntries(areaProfileIds);
+                                localStorage.setItem('areaProfileIndex', JSON.stringify(cacheData));
+                                localStorage.setItem('areaProfileIndexTimestamp', Date.now().toString());
+                                
+                                // Näytä cache-koko
+                                const cacheSizeKB = (JSON.stringify(cacheData).length / 1024).toFixed(1);
+                                console.log(`💾 Area index saved to cache: ${cacheSizeKB} KB (only locations + IDs, valid for 7 days)`);
+                            } catch (error) {
+                                console.warn('⚠️ Failed to save cache (localStorage full?):', error);
+                            }
                             
                             areaIndexLoaded = true;
                             resolve();
@@ -63710,14 +63774,43 @@
             // Lataa vain ammatit automaattisesti sivun latautuessa
             showMoreOptions('ammatti');
             
-            // OPTIMOINTI: Rakenna aluehakemisto heti sivun latautuessa (background)
-            console.log('🚀 Starting area index build in background...');
+            // OPTIMOINTI: Rakenna/lataa aluehakemisto heti sivun latautuessa (background)
+            console.log('🚀 Initializing area index for fast searches...');
             buildAreaIndex().then(() => {
-                console.log('✅ Background area index build completed - searches will be faster now!');
+                console.log('✅ Area index ready - all searches will now be optimized!');
             }).catch((error) => {
-                console.warn('⚠️ Background area index build failed:', error);
+                console.warn('⚠️ Area index initialization failed:', error);
             });
         });
+
+        // DEBUG FUNCTIONS for testing cache
+        function clearAreaIndexCache() {
+            localStorage.removeItem('areaProfileIndex');
+            localStorage.removeItem('areaProfileIndexTimestamp');
+            console.log('🗑️ Area index cache cleared - reload page to rebuild');
+        }
+        
+        function checkCacheStatus() {
+            const cached = localStorage.getItem('areaProfileIndex');
+            const timestamp = localStorage.getItem('areaProfileIndexTimestamp');
+            
+            if (cached && timestamp) {
+                const ageHours = (Date.now() - parseInt(timestamp)) / (1000 * 60 * 60);
+                const ageDays = ageHours / 24;
+                console.log(`📊 Cache status: ${ageDays.toFixed(1)} days old (expires at 7 days)`);
+                console.log(`📦 Cache size: ${(cached.length / 1024).toFixed(1)} KB (only locations + profile IDs)`);
+                
+                const data = JSON.parse(cached);
+                const totalProfileIds = Object.values(data).reduce((sum, ids) => sum + ids.length, 0);
+                console.log(`🗺️ Areas in cache: ${Object.keys(data).length} locations, ${totalProfileIds} profile IDs total`);
+                
+                if (data['Seinäjoki']) {
+                    console.log(`🎯 Seinäjoki: ${data['Seinäjoki'].length} profile IDs (example: ${data['Seinäjoki'][0]}, ${data['Seinäjoki'][1] || 'N/A'})`);
+                }
+            } else {
+                console.log('❌ No cache found');
+            }
+        }
 
         // CACHE MANAGEMENT FUNCTIONS
         
