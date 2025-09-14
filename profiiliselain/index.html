@@ -553,6 +553,73 @@
                 font-size: 11px;
             }
         }
+
+        /* Info button styles */
+        .info-btn {
+            background: #3b82f6;
+            border: none;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            color: white;
+            cursor: pointer;
+            font-size: 12px;
+            margin-left: 8px;
+            transition: all 0.3s ease;
+            vertical-align: middle;
+        }
+
+        .info-btn:hover {
+            background: #2563eb;
+            transform: scale(1.1);
+        }
+
+        /* Modal styles for LxP info */
+        .lxp-modal {
+            display: none;
+            position: fixed;
+            z-index: 10000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+        }
+
+        .lxp-modal-content {
+            background-color: #fefefe;
+            margin: 5% auto;
+            padding: 30px;
+            border-radius: 16px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
+            position: relative;
+            color: #1f2937;
+        }
+
+        .lxp-close {
+            position: absolute;
+            right: 15px;
+            top: 15px;
+            font-size: 24px;
+            font-weight: bold;
+            cursor: pointer;
+            color: #6b7280;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+        }
+
+        .lxp-close:hover {
+            background: #f3f4f6;
+            color: #1f2937;
+        }
     </style>
 </head>
 <body>
@@ -593,7 +660,10 @@
                         <input type="text" id="search-free" data-fi="Hakusana kaikista kentistä..." data-en="Search keyword from all fields..." placeholder="Hakusana kaikista kentistä...">
                     </div>
                     <div class="search-field">
-                        <label for="search-lxp" data-fi="LxP-avain (joustava)" data-en="LxP Key (flexible)">LxP-avain (joustava)</label>
+                        <label for="search-lxp" data-fi="LxP-avain (joustava)" data-en="LxP Key (flexible)">
+                            LxP-avain (joustava)
+                            <button type="button" class="info-btn" onclick="showLxpInfo()" title="Mitä LxP-koodin numerot ja kirjaimet tarkoittavat?">ℹ️</button>
+                        </label>
                         <input type="text" id="search-lxp" data-fi="Esim. 1ABCDE löytää 1A, 1E, 1AE..." data-en="E.g. 1ABCDE finds 1A, 1E, 1AE..." placeholder="Esim. 1ABCDE löytää 1A, 1E, 1AE...">
                     </div>
                 </div>
@@ -703,6 +773,7 @@
         const db = firebase.firestore();
 
         let allProfiles = [];
+        let areaProfileIds = new Map(); // Map: alue -> [profileId1, profileId2, ...]
         let categoryIndex = null; // Cache for checkbox data
         let currentUser = null;
         let buildingIndex = false; // Prevent multiple simultaneous index builds
@@ -62740,15 +62811,132 @@
             alert(message);
         }
         
-        // Load profiles for search when needed
+        // Load profiles for search when needed - OPTIMIZED VERSION
         function loadProfilesForSearch(freeSearch, selectedFilters) {
             console.log('🔍 Loading profiles for search...');
+            
+            // Tyhjennä aluehakemisto ennen lataamista
+            areaProfileIds.clear();
+            console.log('🗂️ Area index cleared for fresh load');
             
             const batchSize = 500;
             let allProfilesTemp = [];
             
+            // OPTIMOINTI: Jos alueita on valittu, lataa vain niiden profiilit
+            const selectedAreas = selectedFilters.alue || [];
+            let shouldOptimizeByArea = selectedAreas.length > 0;
+            
+            // Erikoistapaukset: Jos valittu 'Suomi' tai 'koko suomi', älä optimoi
+            const hasGeneralArea = selectedAreas.some(area => 
+                ['Suomi', 'suomi', 'Koko Suomi', 'koko suomi', 'Koko maa', 'koko maa'].includes(area)
+            );
+            
+            if (hasGeneralArea) {
+                shouldOptimizeByArea = false;
+                console.log(`🌍 General area selected (${selectedAreas.join(', ')}) - loading all profiles`);
+            }
+            
+            // Laajenna alueet maantieteellisen hierarkian mukaan
+            let allRelevantAreas = [];
+            if (shouldOptimizeByArea) {
+                const regionalHierarchy = {
+                    'Uusimaa': ['Helsinki', 'Espoo', 'Vantaa', 'Kauniainen', 'Hyvinkää', 'Järvenpää', 'Kerava', 'Kirkkonummi', 'Nurmijärvi', 'Sipoo', 'Tuusula', 'Vihti'],
+                    'Pirkanmaa': ['Tampere', 'Nokia', 'Ylöjärvi', 'Kangasala', 'Lempäälä', 'Orivesi', 'Pirkkala', 'Valkeakoski', 'Mänttä-Vilppula'],
+                    'Varsinais-Suomi': ['Turku', 'Kaarina', 'Raisio', 'Naantali', 'Salo', 'Loimaa', 'Somero', 'Paimio'],
+                    'Pohjois-Pohjanmaa': ['Oulu', 'Raahe', 'Ylivieska', 'Oulainen', 'Haapavesi', 'Kalajoki', 'Nivala'],
+                    'Etelä-Pohjanmaa': ['Seinäjoki', 'Kurikka', 'Lapua', 'Ilmajoki', 'Alavus', 'Kauhava'],
+                    'Keski-Suomi': ['Jyväskylä', 'Äänekoski', 'Jämsä', 'Keuruu', 'Saarijärvi'],
+                    'Päijät-Häme': ['Lahti', 'Heinola', 'Hollola', 'Nastola', 'Orimattila', 'Asikkala'],
+                    'Kymenlaakso': ['Kotka', 'Kouvola', 'Hamina', 'Virolahti'],
+                    'Etelä-Karjala': ['Lappeenranta', 'Imatra', 'Joutseno'],
+                    'Satakunta': ['Pori', 'Rauma', 'Kankaanpää', 'Harjavalta', 'Kokemäki'],
+                    'Kanta-Häme': ['Hämeenlinna', 'Forssa', 'Riihimäki', 'Hattula'],
+                    'Pohjois-Karjala': ['Joensuu', 'Nurmes', 'Lieksa', 'Kontiolahti'],
+                    'Pohjois-Savo': ['Kuopio', 'Varkaus', 'Iisalmi', 'Suonenjoki'],
+                    'Etelä-Savo': ['Mikkeli', 'Savonlinna', 'Pieksämäki']
+                };
+                
+                selectedAreas.forEach(area => {
+                    allRelevantAreas.push(area);
+                    
+                    // Jos valittu alue on maakunta, lisää sen kaikki kaupungit
+                    if (regionalHierarchy[area]) {
+                        allRelevantAreas = allRelevantAreas.concat(regionalHierarchy[area]);
+                    }
+                    
+                    // Jos valittu alue on kaupunki, lisää sen maakunta
+                    Object.keys(regionalHierarchy).forEach(region => {
+                        if (regionalHierarchy[region].includes(area)) {
+                            allRelevantAreas.push(region);
+                        }
+                    });
+                });
+                
+                // Poista duplikaatit
+                allRelevantAreas = [...new Set(allRelevantAreas)];
+                
+                console.log(`🎯 FIREBASE OPTIMIZATION: Loading only profiles from areas: ${allRelevantAreas.join(', ')}`);
+            }
+            
+            // Jos yli 10 aluetta, jaetaan useampaan kyselyyn (Firebase-rajoitus)
+            let areaChunks = [];
+            if (shouldOptimizeByArea && allRelevantAreas.length > 0) {
+                for (let i = 0; i < allRelevantAreas.length; i += 10) {
+                    areaChunks.push(allRelevantAreas.slice(i, i + 10));
+                }
+                console.log(`🎯 FIREBASE OPTIMIZATION: ${areaChunks.length} queries needed for ${allRelevantAreas.length} areas`);
+            } else {
+                areaChunks = [null]; // Single query without area filter
+            }
+            
+            let currentChunkIndex = 0;
+            
             function loadBatch(lastDoc = null) {
+                // Jos kaikki chunk:it käyty läpi, lopeta
+                if (currentChunkIndex >= areaChunks.length) {
+                    // All profiles loaded, now perform search
+                    allProfiles = allProfilesTemp;
+                    
+                    const totalMessage = shouldOptimizeByArea ?
+                        `✅ Optimized load completed: ${allProfiles.length} profiles from selected areas (instead of ~30,000)` :
+                        `✅ All profiles loaded for search: ${allProfiles.length} total`;
+                    
+                    console.log(totalMessage);
+                    console.log(`✅ Area index built with ${areaProfileIds.size} areas:`, Array.from(areaProfileIds.keys()).slice(0, 10));
+                    
+                    // Update UI to show search is starting
+                    document.getElementById('loading-progress').textContent = shouldOptimizeByArea ?
+                        `✅ ${allProfiles.length} profiilia ladattu alueelta "${selectedAreas.join(', ')}" - aloitetaan haku...` :
+                        `✅ ${allProfiles.length} profiilia ladattu - aloitetaan haku...`;
+                    
+                    // Add small delay to show completion message
+                    setTimeout(() => {
+                        // Get search parameters again inside callback
+                        const freeSearchNow = document.getElementById('search-free').value.toLowerCase().trim();
+                        const lxpSearchNow = document.getElementById('search-lxp').value.toLowerCase().trim();
+                        const selectedFiltersNow = {
+                            ammatti: getSelectedCheckboxes('ammatti'),
+                            koulutus: getSelectedCheckboxes('koulutus'),
+                            osaaminen: getSelectedCheckboxes('osaaminen'),
+                            alue: getSelectedCheckboxes('alue'),
+                            kieli: getSelectedCheckboxes('kieli'),
+                            työtoiveet: getSelectedCheckboxes('työtoiveet'),
+                            ajokortit: getSelectedCheckboxes('ajokortit'),
+                            lupatiedot: getSelectedCheckboxes('lupatiedot')
+                        };
+                        performSearchWithProfiles(freeSearchNow, lxpSearchNow, selectedFiltersNow);
+                    }, 500);
+                    return;
+                }
+                
                 let query = db.collection('profiles').limit(batchSize);
+                
+                // FIREBASE OPTIMOINTI: Lataa vain valittujen alueiden profiilit  
+                const currentChunk = areaChunks[currentChunkIndex];
+                if (currentChunk && currentChunk.length > 0) {
+                    query = query.where('tyonhakualue', 'in', currentChunk);
+                    console.log(`📍 Loading chunk ${currentChunkIndex + 1}/${areaChunks.length}: ${currentChunk.join(', ')}`);
+                }
                 
                 if (lastDoc) {
                     query = query.startAfter(lastDoc);
@@ -62759,34 +62947,87 @@
                     let lastDocument = null;
                     
                     querySnapshot.forEach((doc) => {
-                        batch.push({
+                        const profileData = {
                             id: doc.id,
                             ...doc.data()
-                        });
+                        };
+                        batch.push(profileData);
+                        
+                        // Rakenna aluehakemisto optimointia varten
+                        const area = profileData.tyonhakualue || profileData.työnhakualue;
+                        if (area) {
+                            const normalizedArea = String(area).trim();
+                            if (normalizedArea && normalizedArea !== 'Suomi' && normalizedArea !== 'suomi') {
+                                if (!areaProfileIds.has(normalizedArea)) {
+                                    areaProfileIds.set(normalizedArea, []);
+                                }
+                                areaProfileIds.get(normalizedArea).push(doc.id);
+                            }
+                        }
+                        
                         lastDocument = doc;
                     });
                     
                     allProfilesTemp = allProfilesTemp.concat(batch);
-                    console.log(`📊 Loaded batch: ${batch.length} profiles (total: ${allProfilesTemp.length})`);
+                    
+                    // Näytä optimoinnin tiedot
+                    const optimizationInfo = shouldOptimizeByArea ? 
+                        ` (optimized for areas: ${allRelevantAreas.slice(0, 5).join(', ')}${allRelevantAreas.length > 5 ? '...' : ''})` : 
+                        ' (loading all profiles)';
+                    
+                    console.log(`📊 Loaded batch: ${batch.length} profiles (total: ${allProfilesTemp.length})${optimizationInfo}`);
+                    console.log(`📍 Area index size: ${areaProfileIds.size} areas`);
                     
                     // Update loading progress in UI
-                    document.getElementById('loading-progress').textContent = `Ladattu: ${allProfilesTemp.length} profiilia...`;
+                    document.getElementById('loading-progress').textContent = shouldOptimizeByArea ?
+                        `Ladattu: ${allProfilesTemp.length} profiilia alueelta "${selectedAreas.join(', ')}"...` :
+                        `Ladattu: ${allProfilesTemp.length} profiilia...`;
                     
-                    // Load more if available
+                    // Load more if available in current chunk
                     if (querySnapshot.size === batchSize) {
-                        loadBatch(lastDocument);
+                        loadBatch(lastDocument); // Continue with same chunk
                     } else {
-                        // All profiles loaded, now perform search
+                        // Current chunk finished, move to next chunk
+                        currentChunkIndex++;
+                        if (currentChunkIndex < areaChunks.length) {
+                            console.log(`✅ Chunk ${currentChunkIndex}/${areaChunks.length} completed. Moving to next chunk...`);
+                            loadBatch(); // Start next chunk from beginning
+                        } else {
+                            console.log(`✅ All ${areaChunks.length} chunks completed!`);
+                            loadBatch(); // This will trigger the completion logic
+                        }
+                    }
                         allProfiles = allProfilesTemp;
-                        console.log(`✅ All profiles loaded for search: ${allProfiles.length} total`);
+                        
+                        const totalMessage = shouldOptimizeByArea ?
+                            `✅ Optimized load completed: ${allProfiles.length} profiles from selected areas (instead of ~30,000)` :
+                            `✅ All profiles loaded for search: ${allProfiles.length} total`;
+                        
+                        console.log(totalMessage);
+                        console.log(`✅ Area index built with ${areaProfileIds.size} areas:`, Array.from(areaProfileIds.keys()).slice(0, 10));
                         
                         // Update UI to show search is starting
-                        document.getElementById('loading-progress').textContent = `✅ ${allProfiles.length} profiilia ladattu - aloitetaan haku...`;
+                        document.getElementById('loading-progress').textContent = shouldOptimizeByArea ?
+                            `✅ ${allProfiles.length} profiilia ladattu alueelta "${selectedAreas.join(', ')}" - aloitetaan haku...` :
+                            `✅ ${allProfiles.length} profiilia ladattu - aloitetaan haku...`;
                         
                         // Add small delay to show completion message
                         setTimeout(() => {
                             // Now perform the search with the loaded profiles
-                            performSearchWithProfiles(freeSearch, lxpSearch, selectedFilters);
+                            // Get search parameters again inside callback
+                            const freeSearchNow = document.getElementById('search-free').value.toLowerCase().trim();
+                            const lxpSearchNow = document.getElementById('search-lxp').value.toLowerCase().trim();
+                            const selectedFiltersNow = {
+                                ammatti: getSelectedCheckboxes('ammatti'),
+                                koulutus: getSelectedCheckboxes('koulutus'),
+                                osaaminen: getSelectedCheckboxes('osaaminen'),
+                                alue: getSelectedCheckboxes('alue'),
+                                kieli: getSelectedCheckboxes('kieli'),
+                                työtoiveet: getSelectedCheckboxes('työtoiveet'),
+                                ajokortit: getSelectedCheckboxes('ajokortit'),
+                                lupatiedot: getSelectedCheckboxes('lupatiedot')
+                            };
+                            performSearchWithProfiles(freeSearchNow, lxpSearchNow, selectedFiltersNow);
                         }, 500);
                     }
                 }).catch((error) => {
@@ -62845,11 +63086,15 @@
             return true;
         }
         
-        // Perform search with loaded profiles
+        // Perform search with loaded profiles - ALREADY OPTIMIZED BY FIREBASE QUERY
         function performSearchWithProfiles(freeSearch, lxpSearch, selectedFilters) {
             console.log(`🔍 SEARCH DEBUG: freeSearch="${freeSearch}", lxpSearch="${lxpSearch}", selectedFilters:`, selectedFilters);
             
-            const filtered = allProfiles.filter(profile => {
+            // Firebase-kysely on jo optimoitu aluekohtaisesti, joten käytetään kaikkia ladattuja profiileja
+            const profilesToSearch = allProfiles;
+            console.log(`� Searching through ${profilesToSearch.length} profiles (already optimized by Firebase query)`);
+            
+            const filtered = profilesToSearch.filter(profile => {
                 let matches = true;
                 
                 // Free text search - SAFE VERSION
@@ -62947,7 +63192,7 @@
                 return matches;
             });
             
-            console.log(`✅ Search completed: ${filtered.length} matches out of ${allProfiles.length} profiles`);
+            console.log(`✅ Search completed: ${filtered.length} matches out of ${profilesToSearch.length} profiles searched (total ${allProfiles.length})`);
             
             document.getElementById('loading').style.display = 'none';
             document.getElementById('results-info').style.display = 'block';
@@ -63893,12 +64138,87 @@
             document.documentElement.lang = lang;
         }
 
+        // LxP Modal functions
+        function showLxpInfo() {
+            document.getElementById('lxpModal').style.display = 'block';
+        }
+
+        function closeLxpModal() {
+            document.getElementById('lxpModal').style.display = 'none';
+        }
+
+        // Close modal when clicking outside of it
+        window.onclick = function(event) {
+            const modal = document.getElementById('lxpModal');
+            if (event.target === modal) {
+                modal.style.display = 'none';
+            }
+        }
+
         // Initialize language on page load
         document.addEventListener('DOMContentLoaded', function() {
             const savedLang = localStorage.getItem('preferredLanguage') || 'fi';
             setLanguage(savedLang);
         });
     </script>
+
+    <!-- LxP Info Modal -->
+    <div id="lxpModal" class="lxp-modal">
+        <div class="lxp-modal-content">
+            <span class="lxp-close" onclick="closeLxpModal()">&times;</span>
+            <h2>🔤 LxP-koodin selitys</h2>
+            <p><strong>LxP (Learning Experience Platform) -koodi</strong> kuvaa henkilön osaamisprofiilia numeroiden ja kirjainten avulla:</p>
+            
+            <h3>📊 Numerot (1-10) - Osaamistaso:</h3>
+            <div style="background: #f3f4f6; padding: 15px; border-radius: 8px; margin: 10px 0;">
+                <strong>1-3:</strong> Perustaso - Alkeet, perusosaaminen<br>
+                <strong>4-6:</strong> Keskitaso - Käytännön osaaminen, kokemus<br>
+                <strong>7-8:</strong> Edistynyt - Syvä osaaminen, erikoistuminen<br>
+                <strong>9-10:</strong> Asiantuntija - Mestarin taso, kouluttajan taito
+            </div>
+
+            <h3>🔤 Kirjaimet (A-Z) - Osaamisalue:</h3>
+            <div style="background: #f3f4f6; padding: 15px; border-radius: 8px; margin: 10px 0; font-size: 14px;">
+                <strong>A:</strong> Analyyttinen ajattelu<br>
+                <strong>B:</strong> Business/liiketoiminta<br>
+                <strong>C:</strong> Communication/viestintä<br>
+                <strong>D:</strong> Design/suunnittelu<br>
+                <strong>E:</strong> Engineering/tekniikka<br>
+                <strong>F:</strong> Finance/talous<br>
+                <strong>G:</strong> Graphics/grafiikka<br>
+                <strong>H:</strong> Health/terveys<br>
+                <strong>I:</strong> Innovation/innovaatio<br>
+                <strong>J:</strong> Journalism/journalismi<br>
+                <strong>K:</strong> Knowledge management/tiedonhallinta<br>
+                <strong>L:</strong> Leadership/johtaminen<br>
+                <strong>M:</strong> Marketing/markkinointi<br>
+                <strong>N:</strong> Negotiation/neuvottelu<br>
+                <strong>O:</strong> Operations/toiminnot<br>
+                <strong>P:</strong> Programming/ohjelmointi<br>
+                <strong>Q:</strong> Quality/laatu<br>
+                <strong>R:</strong> Research/tutkimus<br>
+                <strong>S:</strong> Sales/myynti<br>
+                <strong>T:</strong> Technology/teknologia<br>
+                <strong>U:</strong> User experience/käyttäjäkokemus<br>
+                <strong>V:</strong> Visualization/visualisointi<br>
+                <strong>W:</strong> Writing/kirjoittaminen<br>
+                <strong>X:</strong> eXpertise/erikoisosaaminen<br>
+                <strong>Y:</strong> Youth work/nuorisotyö<br>
+                <strong>Z:</strong> Zero-waste/kestävyys
+            </div>
+
+            <h3>💡 Esimerkkejä:</h3>
+            <div style="background: #e0f2fe; padding: 15px; border-radius: 8px; margin: 10px 0;">
+                <strong>5PC:</strong> Keskitason ohjelmointi- ja viestintätaidot<br>
+                <strong>8LM:</strong> Edistynyt johtaminen ja markkinointi<br>
+                <strong>3AB:</strong> Perus analyyttinen ja liiketoiminta-ajattelu<br>
+                <strong>7ET:</strong> Syvä tekniikka- ja teknologia-osaaminen
+            </div>
+
+            <p><em>💡 <strong>Joustava haku:</strong> Voit hakea osittaisilla koodeilla, esim. "5P" löytää kaikki profiilit joissa on P-kirjain ja 5-taso.</em></p>
+        </div>
+    </div>
+
 </body>
 </html>
 
