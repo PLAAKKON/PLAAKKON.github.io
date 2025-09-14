@@ -774,6 +774,7 @@
 
         let allProfiles = [];
         let areaProfileIds = new Map(); // Map: alue -> [profileId1, profileId2, ...]
+        let areaIndexLoaded = false; // Track if area index is already built
         let categoryIndex = null; // Cache for checkbox data
         let currentUser = null;
         let buildingIndex = false; // Prevent multiple simultaneous index builds
@@ -62689,7 +62690,7 @@
         }
 
         // Search profiles
-        function searchProfiles() {
+        async function searchProfiles() {
             // Get free text search
             const freeSearch = document.getElementById('search-free').value.toLowerCase().trim();
             const lxpSearch = document.getElementById('search-lxp').value.toLowerCase().trim();
@@ -62717,9 +62718,9 @@
             }
 
             // NOW load profiles for search (only when user actually searches)
-            console.log('🔍 User initiated search - loading profiles from Firebase...');
+            console.log('🔍 User initiated search - loading profiles with area optimization...');
             document.getElementById('loading').style.display = 'block';
-            document.getElementById('loading-progress').textContent = 'Aloitetaan lataus...';
+            document.getElementById('loading-progress').textContent = 'Aloitetaan optimoitu lataus...';
             document.getElementById('results-count').textContent = 'Ladataan profiileja hakua varten...';
             
             // Immediately scroll to loading area
@@ -62734,7 +62735,7 @@
                 }
             }, 100);
             
-            loadProfilesForSearch(freeSearch, selectedFilters);
+            await loadProfilesForSearch(freeSearch, selectedFilters);
         }
 
         // Get selected checkbox values for a category
@@ -62811,53 +62812,309 @@
             alert(message);
         }
         
-        // Load profiles for search when needed - OPTIMIZED VERSION
-        function loadProfilesForSearch(freeSearch, selectedFilters) {
+        // Build area index - load only ID and area fields for all profiles
+        async function buildAreaIndex() {
+            if (areaIndexLoaded) {
+                console.log('📍 Area index already loaded, skipping...');
+                return;
+            }
+            
+            console.log('🗂️ Building area index - loading only IDs and areas...');
+            areaProfileIds.clear();
+            
+            const batchSize = 1000; // Larger batch for lightweight query
+            let totalProcessed = 0;
+            
+            function loadAreaBatch(lastDoc = null) {
+                return new Promise((resolve, reject) => {
+                    let query = db.collection('profiles')
+                        .select('tyonhakualue') // Only load area field + ID
+                        .limit(batchSize);
+                    
+                    if (lastDoc) {
+                        query = query.startAfter(lastDoc);
+                    }
+                    
+                    query.get().then((querySnapshot) => {
+                        let lastDocument = null;
+                        
+                        querySnapshot.forEach((doc) => {
+                            const area = doc.data().tyonhakualue;
+                            if (area && area.trim()) {
+                                const normalizedArea = String(area).trim();
+                                
+                                // Skip general areas that don't provide optimization
+                                if (!['Suomi', 'suomi', 'Koko Suomi', 'koko suomi', 'Koko maa', 'koko maa'].includes(normalizedArea)) {
+                                    if (!areaProfileIds.has(normalizedArea)) {
+                                        areaProfileIds.set(normalizedArea, []);
+                                    }
+                                    areaProfileIds.get(normalizedArea).push(doc.id);
+                                }
+                            }
+                            lastDocument = doc;
+                            totalProcessed++;
+                        });
+                        
+                        console.log(`📊 Area index progress: ${totalProcessed} profiles processed, ${areaProfileIds.size} areas found`);
+                        
+                        if (querySnapshot.size === batchSize) {
+                            // More data available
+                            loadAreaBatch(lastDocument).then(resolve).catch(reject);
+                        } else {
+                            // All done
+                            console.log(`✅ Area index built: ${areaProfileIds.size} areas, ${totalProcessed} profiles processed`);
+                            
+                            // Log top areas by profile count
+                            const topAreas = Array.from(areaProfileIds.entries())
+                                .sort((a, b) => b[1].length - a[1].length)
+                                .slice(0, 10);
+                            console.log('📊 Top areas by profile count:', topAreas.map(([area, ids]) => `${area}: ${ids.length}`));
+                            
+                            areaIndexLoaded = true;
+                            resolve();
+                        }
+                    }).catch(reject);
+                });
+            }
+            
+            try {
+                await loadAreaBatch();
+            } catch (error) {
+                console.error('❌ Error building area index:', error);
+                throw error;
+            }
+        }
+        
+        // Load profiles for search when needed - OPTIMIZED WITH AREA INDEX
+        async function loadProfilesForSearch(freeSearch, selectedFilters) {
             console.log('🔍 Loading profiles for search...');
             
-            // Tyhjennä aluehakemisto ennen lataamista
-            areaProfileIds.clear();
-            console.log('🗂️ Area index cleared for fresh load');
+            // Varmista että aluehakemisto on rakennettu
+            if (!areaIndexLoaded) {
+                console.log('📍 Area index not built yet - building now...');
+                document.getElementById('loading-progress').textContent = 'Rakennetaan aluehakemisto...';
+                try {
+                    await buildAreaIndex();
+                } catch (error) {
+                    console.error('❌ Failed to build area index:', error);
+                    document.getElementById('loading').style.display = 'none';
+                    document.getElementById('results-count').textContent = 'Virhe ladattaessa aluehakemistoa.';
+                    return;
+                }
+            }
             
-            const batchSize = 500;
-            let allProfilesTemp = [];
-            
-            // OPTIMOINTI: Jos alueita on valittu, lataa vain niiden profiilit
+            // Määritä ladattavat profiilit valittujen alueiden perusteella
             const selectedAreas = selectedFilters.alue || [];
-            let shouldOptimizeByArea = selectedAreas.length > 0;
+            let profileIdsToLoad = new Set();
             
-            // Erikoistapaukset: Jos valittu 'Suomi' tai 'koko suomi', älä optimoi
+            if (selectedAreas.length === 0) {
+                // Jos ei alueita valittu, lataa kaikki profiilit (vanha tapa)
+                console.log('🌍 No areas selected - loading all profiles');
+                await loadAllProfilesTraditional(freeSearch, selectedFilters);
+                return;
+            }
+            
+            // Tarkista onko valittu yleisiä alueita
             const hasGeneralArea = selectedAreas.some(area => 
                 ['Suomi', 'suomi', 'Koko Suomi', 'koko suomi', 'Koko maa', 'koko maa'].includes(area)
             );
             
             if (hasGeneralArea) {
-                shouldOptimizeByArea = false;
-                console.log(`🌍 General area selected (${selectedAreas.join(', ')}) - loading all profiles`);
+                console.log('🌍 General area selected - loading all profiles');
+                await loadAllProfilesTraditional(freeSearch, selectedFilters);
+                return;
+            }
+            let shouldOptimizeByArea = selectedAreas.length > 0;
+            
+            // Erikoistapaukset: Jos valittu 'Suomi' tai 'koko suomi', älä optimoi
+            
+            // Kerää valittujen alueiden ID:t (+ maantieteellinen hierarkia)
+            const regionalHierarchy = {
+                'Uusimaa': ['Helsinki', 'Espoo', 'Vantaa', 'Kauniainen', 'Hyvinkää', 'Järvenpää', 'Kerava', 'Kirkkonummi', 'Nurmijärvi', 'Sipoo', 'Tuusula', 'Vihti'],
+                'Pirkanmaa': ['Tampere', 'Nokia', 'Ylöjärvi', 'Kangasala', 'Lempäälä', 'Orivesi', 'Pirkkala', 'Valkeakoski', 'Mänttä-Vilppula'],
+                'Varsinais-Suomi': ['Turku', 'Kaarina', 'Raisio', 'Naantali', 'Salo', 'Loimaa', 'Somero', 'Paimio'],
+                'Pohjois-Pohjanmaa': ['Oulu', 'Raahe', 'Ylivieska', 'Oulainen', 'Haapavesi', 'Kalajoki', 'Nivala'],
+                'Etelä-Pohjanmaa': ['Seinäjoki', 'Kurikka', 'Lapua', 'Ilmajoki', 'Alavus', 'Kauhava'],
+                'Keski-Suomi': ['Jyväskylä', 'Äänekoski', 'Jämsä', 'Keuruu', 'Saarijärvi'],
+                'Päijät-Häme': ['Lahti', 'Heinola', 'Hollola', 'Nastola', 'Orimattila', 'Asikkala'],
+                'Kymenlaakso': ['Kotka', 'Kouvola', 'Hamina', 'Virolahti'],
+                'Etelä-Karjala': ['Lappeenranta', 'Imatra', 'Joutseno'],
+                'Satakunta': ['Pori', 'Rauma', 'Kankaanpää', 'Harjavalta', 'Kokemäki'],
+                'Kanta-Häme': ['Hämeenlinna', 'Forssa', 'Riihimäki', 'Hattula'],
+                'Pohjois-Karjala': ['Joensuu', 'Nurmes', 'Lieksa', 'Kontiolahti'],
+                'Pohjois-Savo': ['Kuopio', 'Varkaus', 'Iisalmi', 'Suonenjoki'],
+                'Etelä-Savo': ['Mikkeli', 'Savonlinna', 'Pieksämäki']
+            };
+            
+            selectedAreas.forEach(area => {
+                // Suora alue
+                if (areaProfileIds.has(area)) {
+                    areaProfileIds.get(area).forEach(id => profileIdsToLoad.add(id));
+                    console.log(`📍 Direct area "${area}": ${areaProfileIds.get(area).length} profiles`);
+                }
+                
+                // Jos valittu alue on maakunta, lisää sen kaupungit
+                if (regionalHierarchy[area]) {
+                    regionalHierarchy[area].forEach(city => {
+                        if (areaProfileIds.has(city)) {
+                            areaProfileIds.get(city).forEach(id => profileIdsToLoad.add(id));
+                            console.log(`📍 Region->City "${area}->${city}": ${areaProfileIds.get(city).length} profiles`);
+                        }
+                    });
+                }
+                
+                // Jos valittu alue on kaupunki, lisää sen maakunta
+                Object.keys(regionalHierarchy).forEach(region => {
+                    if (regionalHierarchy[region].includes(area) && areaProfileIds.has(region)) {
+                        areaProfileIds.get(region).forEach(id => profileIdsToLoad.add(id));
+                        console.log(`📍 City->Region "${area}->${region}": ${areaProfileIds.get(region).length} profiles`);
+                    }
+                });
+            });
+            
+            const totalIds = Array.from(profileIdsToLoad);
+            console.log(`🎯 ULTIMATE OPTIMIZATION: Loading only ${totalIds.length} specific profiles by ID (instead of 30,000+)`);
+            
+            // Lataa profiilit ID:iden perusteella
+            await loadProfilesByIds(totalIds, selectedAreas);
+        }
+        
+        // Load specific profiles by their IDs - ULTIMATE OPTIMIZATION
+        async function loadProfilesByIds(profileIds, selectedAreas) {
+            if (profileIds.length === 0) {
+                console.log('⚠️ No profile IDs to load');
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('results-count').textContent = 'Ei profiileja valituilla alueilla.';
+                return;
             }
             
-            // Laajenna alueet maantieteellisen hierarkian mukaan
-            let allRelevantAreas = [];
-            if (shouldOptimizeByArea) {
-                const regionalHierarchy = {
-                    'Uusimaa': ['Helsinki', 'Espoo', 'Vantaa', 'Kauniainen', 'Hyvinkää', 'Järvenpää', 'Kerava', 'Kirkkonummi', 'Nurmijärvi', 'Sipoo', 'Tuusula', 'Vihti'],
-                    'Pirkanmaa': ['Tampere', 'Nokia', 'Ylöjärvi', 'Kangasala', 'Lempäälä', 'Orivesi', 'Pirkkala', 'Valkeakoski', 'Mänttä-Vilppula'],
-                    'Varsinais-Suomi': ['Turku', 'Kaarina', 'Raisio', 'Naantali', 'Salo', 'Loimaa', 'Somero', 'Paimio'],
-                    'Pohjois-Pohjanmaa': ['Oulu', 'Raahe', 'Ylivieska', 'Oulainen', 'Haapavesi', 'Kalajoki', 'Nivala'],
-                    'Etelä-Pohjanmaa': ['Seinäjoki', 'Kurikka', 'Lapua', 'Ilmajoki', 'Alavus', 'Kauhava'],
-                    'Keski-Suomi': ['Jyväskylä', 'Äänekoski', 'Jämsä', 'Keuruu', 'Saarijärvi'],
-                    'Päijät-Häme': ['Lahti', 'Heinola', 'Hollola', 'Nastola', 'Orimattila', 'Asikkala'],
-                    'Kymenlaakso': ['Kotka', 'Kouvola', 'Hamina', 'Virolahti'],
-                    'Etelä-Karjala': ['Lappeenranta', 'Imatra', 'Joutseno'],
-                    'Satakunta': ['Pori', 'Rauma', 'Kankaanpää', 'Harjavalta', 'Kokemäki'],
-                    'Kanta-Häme': ['Hämeenlinna', 'Forssa', 'Riihimäki', 'Hattula'],
-                    'Pohjois-Karjala': ['Joensuu', 'Nurmes', 'Lieksa', 'Kontiolahti'],
-                    'Pohjois-Savo': ['Kuopio', 'Varkaus', 'Iisalmi', 'Suonenjoki'],
-                    'Etelä-Savo': ['Mikkeli', 'Savonlinna', 'Pieksämäki']
-                };
+            console.log(`🚀 Loading ${profileIds.length} specific profiles by ID...`);
+            document.getElementById('loading-progress').textContent = `Ladataan ${profileIds.length} profiilia ID:iden perusteella...`;
+            
+            let allProfilesTemp = [];
+            const batchSize = 10; // Firebase 'in' operator limit
+            
+            // Jaa ID:t batcheihin (max 10 per batch due to Firebase limit)
+            for (let i = 0; i < profileIds.length; i += batchSize) {
+                const batch = profileIds.slice(i, i + batchSize);
                 
-                selectedAreas.forEach(area => {
-                    allRelevantAreas.push(area);
+                try {
+                    const querySnapshot = await db.collection('profiles')
+                        .where(firebase.firestore.FieldPath.documentId(), 'in', batch)
+                        .get();
+                    
+                    querySnapshot.forEach((doc) => {
+                        allProfilesTemp.push({
+                            id: doc.id,
+                            ...doc.data()
+                        });
+                    });
+                    
+                    console.log(`📊 Loaded ID batch ${Math.floor(i/batchSize) + 1}: ${querySnapshot.size} profiles (total: ${allProfilesTemp.length}/${profileIds.length})`);
+                    document.getElementById('loading-progress').textContent = 
+                        `Ladattu ${allProfilesTemp.length}/${profileIds.length} profiilia alueelta "${selectedAreas.join(', ')}"...`;
+                        
+                } catch (error) {
+                    console.error(`❌ Error loading ID batch:`, error);
+                }
+            }
+            
+            // Kaikki profiilit ladattu
+            allProfiles = allProfilesTemp;
+            console.log(`✅ ID-based loading completed: ${allProfiles.length} profiles loaded for areas: ${selectedAreas.join(', ')}`);
+            
+            // Update UI 
+            document.getElementById('loading-progress').textContent = 
+                `✅ ${allProfiles.length} profiilia ladattu alueelta "${selectedAreas.join(', ')}" - aloitetaan haku...`;
+            
+            // Perform search
+            setTimeout(() => {
+                const freeSearchNow = document.getElementById('search-free').value.toLowerCase().trim();
+                const lxpSearchNow = document.getElementById('search-lxp').value.toLowerCase().trim();
+                const selectedFiltersNow = {
+                    ammatti: getSelectedCheckboxes('ammatti'),
+                    koulutus: getSelectedCheckboxes('koulutus'),
+                    osaaminen: getSelectedCheckboxes('osaaminen'),
+                    alue: getSelectedCheckboxes('alue'),
+                    kieli: getSelectedCheckboxes('kieli'),
+                    työtoiveet: getSelectedCheckboxes('työtoiveet'),
+                    ajokortit: getSelectedCheckboxes('ajokortit'),
+                    lupatiedot: getSelectedCheckboxes('lupatiedot')
+                };
+                performSearchWithProfiles(freeSearchNow, lxpSearchNow, selectedFiltersNow);
+            }, 500);
+        }
+        
+        // Traditional loading for when no area optimization is possible
+        async function loadAllProfilesTraditional(freeSearch, selectedFilters) {
+            console.log('🌍 Loading all profiles (traditional method)...');
+            
+            const batchSize = 500;
+            let allProfilesTemp = [];
+            
+            function loadBatch(lastDoc = null) {
+                return new Promise((resolve, reject) => {
+                    let query = db.collection('profiles').limit(batchSize);
+                    
+                    if (lastDoc) {
+                        query = query.startAfter(lastDoc);
+                    }
+                    
+                    query.get().then((querySnapshot) => {
+                        let lastDocument = null;
+                        
+                        querySnapshot.forEach((doc) => {
+                            allProfilesTemp.push({
+                                id: doc.id,
+                                ...doc.data()
+                            });
+                            lastDocument = doc;
+                        });
+                        
+                        console.log(`📊 Traditional batch: ${querySnapshot.size} profiles (total: ${allProfilesTemp.length})`);
+                        document.getElementById('loading-progress').textContent = `Ladattu: ${allProfilesTemp.length} profiilia...`;
+                        
+                        if (querySnapshot.size === batchSize) {
+                            // More data available
+                            loadBatch(lastDocument).then(resolve).catch(reject);
+                        } else {
+                            // All done
+                            resolve();
+                        }
+                    }).catch(reject);
+                });
+            }
+            
+            try {
+                await loadBatch();
+                allProfiles = allProfilesTemp;
+                console.log(`✅ Traditional loading completed: ${allProfiles.length} total profiles`);
+                
+                document.getElementById('loading-progress').textContent = `✅ ${allProfiles.length} profiilia ladattu - aloitetaan haku...`;
+                
+                // Perform search
+                setTimeout(() => {
+                    const freeSearchNow = document.getElementById('search-free').value.toLowerCase().trim();
+                    const lxpSearchNow = document.getElementById('search-lxp').value.toLowerCase().trim();
+                    const selectedFiltersNow = {
+                        ammatti: getSelectedCheckboxes('ammatti'),
+                        koulutus: getSelectedCheckboxes('koulutus'),
+                        osaaminen: getSelectedCheckboxes('osaaminen'),
+                        alue: getSelectedCheckboxes('alue'),
+                        kieli: getSelectedCheckboxes('kieli'),
+                        työtoiveet: getSelectedCheckboxes('työtoiveet'),
+                        ajokortit: getSelectedCheckboxes('ajokortit'),
+                        lupatiedot: getSelectedCheckboxes('lupatiedot')
+                    };
+                    performSearchWithProfiles(freeSearchNow, lxpSearchNow, selectedFiltersNow);
+                }, 500);
+                
+            } catch (error) {
+                console.error('❌ Error in traditional loading:', error);
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('results-count').textContent = 'Virhe ladattaessa profiileja.';
+            }
+        }
                     
                     // Jos valittu alue on maakunta, lisää sen kaikki kaupungit
                     if (regionalHierarchy[area]) {
@@ -63631,6 +63888,14 @@
             
             // Lataa vain ammatit automaattisesti sivun latautuessa
             showMoreOptions('ammatti');
+            
+            // OPTIMOINTI: Rakenna aluehakemisto heti sivun latautuessa (background)
+            console.log('🚀 Starting area index build in background...');
+            buildAreaIndex().then(() => {
+                console.log('✅ Background area index build completed - searches will be faster now!');
+            }).catch((error) => {
+                console.warn('⚠️ Background area index build failed:', error);
+            });
         });
 
         // CACHE MANAGEMENT FUNCTIONS
