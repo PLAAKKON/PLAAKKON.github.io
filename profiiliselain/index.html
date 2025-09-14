@@ -62882,8 +62882,9 @@
                             const docData = doc.data();
                             const area = docData.tyonhakualue || docData.työnhakualue; // Molemmat mahdolliset kenttänimet
                             
-                            if (area && area.trim()) {
-                                const normalizedArea = String(area).trim();
+                            // Varmista että area on string ja ei tyhjä
+                            if (area && typeof area === 'string' && area.trim()) {
+                                const normalizedArea = area.trim();
                                 
                                 // Skip general areas that don't provide optimization
                                 if (!['Suomi', 'suomi', 'Koko Suomi', 'koko suomi', 'Koko maa', 'koko maa'].includes(normalizedArea)) {
@@ -62893,7 +62894,11 @@
                                     // Tallenna VAIN ID (numeerinen kuten 10028, 10029...) - ei profiili-dataa
                                     areaProfileIds.get(normalizedArea).push(doc.id);
                                 }
+                            } else if (area) {
+                                // Debug: Jos area on jotain muuta kuin string
+                                console.warn(`⚠️ Unexpected area type for doc ${doc.id}:`, typeof area, area);
                             }
+                            
                             lastDocument = doc;
                             totalProcessed++;
                         });
