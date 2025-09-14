@@ -62811,6 +62811,7 @@
         }
         
         // Build area index - load only ID and area fields for all profiles
+        // UPDATED: Fixed area.trim() TypeError - added type checking and error handling
         async function buildAreaIndex() {
             if (areaIndexLoaded) {
                 console.log('📍 Area index already loaded, skipping...');
@@ -62877,26 +62878,53 @@
                     query.get().then((querySnapshot) => {
                         let lastDocument = null;
                         
+                        let debugCounter = 0;
                         querySnapshot.forEach((doc) => {
-                            // Käsittele VAIN tyonhakualue + ID - ignoroi kaikki muu data
-                            const docData = doc.data();
-                            const area = docData.tyonhakualue || docData.työnhakualue; // Molemmat mahdolliset kenttänimet
-                            
-                            // Varmista että area on string ja ei tyhjä
-                            if (area && typeof area === 'string' && area.trim()) {
-                                const normalizedArea = area.trim();
+                            try {
+                                // Käsittele VAIN tyonhakualue + ID - ignoroi kaikki muu data
+                                const docData = doc.data();
+                                const area = docData.tyonhakualue || docData.työnhakualue; // Molemmat mahdolliset kenttänimet
                                 
-                                // Skip general areas that don't provide optimization
-                                if (!['Suomi', 'suomi', 'Koko Suomi', 'koko suomi', 'Koko maa', 'koko maa'].includes(normalizedArea)) {
-                                    if (!areaProfileIds.has(normalizedArea)) {
-                                        areaProfileIds.set(normalizedArea, []);
-                                    }
-                                    // Tallenna VAIN ID (numeerinen kuten 10028, 10029...) - ei profiili-dataa
-                                    areaProfileIds.get(normalizedArea).push(doc.id);
+                                // DEBUG: Näytä ensimmäiset 10 dokumenttia
+                                if (debugCounter < 10) {
+                                    console.log(`🔍 Debug doc ${doc.id}:`, {
+                                        tyonhakualue: docData.tyonhakualue,
+                                        työnhakualue: docData.työnhakualue,
+                                        area: area,
+                                        areaType: typeof area,
+                                        alueKeys: Object.keys(docData).filter(key => key.toLowerCase().includes('alue'))
+                                    });
+                                    debugCounter++;
                                 }
-                            } else if (area) {
-                                // Debug: Jos area on jotain muuta kuin string
-                                console.warn(`⚠️ Unexpected area type for doc ${doc.id}:`, typeof area, area);
+                                
+                                // Varmista että area on olemassa ja on string-tyyppiä
+                                if (area && typeof area === 'string') {
+                                    const trimmedArea = area.trim();
+                                    if (trimmedArea) {
+                                        // Skip general areas that don't provide optimization
+                                        if (!['Suomi', 'suomi', 'Koko Suomi', 'koko suomi', 'Koko maa', 'koko maa'].includes(trimmedArea)) {
+                                            if (!areaProfileIds.has(trimmedArea)) {
+                                                areaProfileIds.set(trimmedArea, []);
+                                            }
+                                            // Tallenna VAIN ID (numeerinen kuten 10028, 10029...) - ei profiili-dataa
+                                            areaProfileIds.get(trimmedArea).push(doc.id);
+                                        } else {
+                                            // DEBUG: Näytä kuinka monta "Suomi" aluetta löytyy
+                                            if (debugCounter < 20) {
+                                                console.log(`⚠️ Skipping general area: "${trimmedArea}" for doc ${doc.id}`);
+                                                debugCounter++;
+                                            }
+                                        }
+                                    }
+                                } else {
+                                    // DEBUG: Jos area on jotain muuta kuin string tai tyhjä
+                                    if (debugCounter < 20) {
+                                        console.warn(`⚠️ Skipping doc ${doc.id} - area:`, area, `type: ${typeof area}`);
+                                        debugCounter++;
+                                    }
+                                }
+                            } catch (error) {
+                                console.error(`❌ Error processing doc ${doc.id}:`, error);
                             }
                             
                             lastDocument = doc;
