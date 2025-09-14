@@ -184,6 +184,7 @@
         <button id="btnFi" class="active" onclick="switchLang('fi')">FI</button>
         <button id="btnEn" onclick="switchLang('en')">EN</button>
       </div>
+        <div id="auth-menu"></div>
     </div>
   </header>
 
@@ -412,6 +413,55 @@
   </footer>
 
   <script>
+      // Firebase SDK (v9 compat, CDN)
+      // Lisää nämä scriptit ennen muuta JS:ää
+      const firebaseConfig = {
+        apiKey: "AIzaSyAnfsX522_ybXR7yhnAJbxDjuszVu4rZLE",
+        authDomain: "urapolku-7780a.firebaseapp.com",
+        projectId: "urapolku-7780a",
+        storageBucket: "urapolku-7780a.appspot.com",
+        messagingSenderId: "314066598772",
+        appId: "1:314066598772:web:50183db006293290378a21",
+        measurementId: "G-83QWJEC5SS"
+      };
+
+      // Lataa Firebase SDK:t dynaamisesti (jos ei jo ladattu)
+      (function loadFirebaseSDKs(cb){
+        if(window.firebase) return cb();
+        var s1=document.createElement('script');
+        s1.src='https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js';
+        s1.onload=function(){
+          var s2=document.createElement('script');
+          s2.src='https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js';
+          s2.onload=cb;
+          document.head.appendChild(s2);
+        };
+        document.head.appendChild(s1);
+      })(function(){
+        firebase.initializeApp(firebaseConfig);
+        // Auth state listener
+        firebase.auth().onAuthStateChanged(function(user){
+          renderAuthMenu(user);
+        });
+      });
+
+      // Kirjautumisvalikon renderöinti
+      function renderAuthMenu(user){
+        var el = document.getElementById('auth-menu');
+        if(!el) return;
+        if(user){
+          // Näytä käyttäjävalikko ja uloskirjautuminen
+          el.innerHTML = `
+            <div style="display:flex;align-items:center;gap:10px">
+              <span style="font-size:.95em;color:var(--muted)">${user.displayName||user.email}</span>
+              <button class="btn" style="height:32px;padding:0 12px;font-size:.95em" onclick="firebase.auth().signOut()">Kirjaudu ulos</button>
+            </div>
+          `;
+        }else{
+          // Näytä Kirjaudu-nappi
+          el.innerHTML = `<a class="btn" style="height:32px;padding:0 12px;font-size:.95em" href="/kirjaudu">Kirjaudu</a>`;
+        }
+      }
     function switchLang(lang){
       document.querySelectorAll('.lang button').forEach(b=>b.classList.remove('active'));
       (lang==='fi'?btnFi:btnEn).classList.add('active');
