@@ -62813,6 +62813,9 @@
         // Build area index - load only ID and area fields for all profiles
         // UPDATED: Fixed area.trim() TypeError - added type checking and error handling
         async function buildAreaIndex() {
+            console.log('🚀 buildAreaIndex() STARTING - areaIndexLoaded:', areaIndexLoaded);
+            alert('buildAreaIndex() käynnistyi!');
+            
             if (areaIndexLoaded) {
                 console.log('📍 Area index already loaded, skipping...');
                 return;
@@ -62883,7 +62886,7 @@
                             try {
                                 // Käsittele VAIN tyonhakualue + ID - ignoroi kaikki muu data
                                 const docData = doc.data();
-                                const area = docData.tyonhakualue || docData.työnhakualue; // Molemmat mahdolliset kenttänimet
+                                const areaField = docData.tyonhakualue || docData.työnhakualue; // Molemmat mahdolliset kenttänimet
                                 
                                 // DEBUG: Näytä ensimmäiset 10 dokumenttia
                                 if (debugCounter < 10) {
@@ -62891,8 +62894,9 @@
                                         id: doc.id,
                                         tyonhakualue: docData.tyonhakualue,
                                         työnhakualue: docData.työnhakualue,
-                                        area: area,
-                                        areaType: typeof area,
+                                        areaField: areaField,
+                                        areaFieldType: typeof areaField,
+                                        isArray: Array.isArray(areaField),
                                         alueKeys: Object.keys(docData).filter(key => key.toLowerCase().includes('alue'))
                                     };
                                     console.log(`🔍 Debug doc ${doc.id}:`, debugInfo);
@@ -62904,8 +62908,18 @@
                                     debugCounter++;
                                 }
                                 
-                                // Varmista että area on olemassa ja on string-tyyppiä
-                                if (area && typeof area === 'string') {
+                                // KORJAUS: Käsittele sekä string että array
+                                let areasToProcess = [];
+                                if (Array.isArray(areaField)) {
+                                    // Jos tyonhakualue on array, käsittele jokainen alue
+                                    areasToProcess = areaField.filter(area => area && typeof area === 'string');
+                                } else if (areaField && typeof areaField === 'string') {
+                                    // Jos tyonhakualue on string, käsittele se
+                                    areasToProcess = [areaField];
+                                }
+                                
+                                // Käsittele jokainen alue
+                                areasToProcess.forEach(area => {
                                     const trimmedArea = area.trim();
                                     if (trimmedArea) {
                                         // Skip general areas that don't provide optimization
@@ -62917,19 +62931,13 @@
                                             areaProfileIds.get(trimmedArea).push(doc.id);
                                         } else {
                                             // DEBUG: Näytä kuinka monta "Suomi" aluetta löytyy
-                                            if (debugCounter < 20) {
+                                            if (debugCounter < 30) {
                                                 console.log(`⚠️ Skipping general area: "${trimmedArea}" for doc ${doc.id}`);
-                                                debugCounter++;
                                             }
                                         }
                                     }
-                                } else {
-                                    // DEBUG: Jos area on jotain muuta kuin string tai tyhjä
-                                    if (debugCounter < 20) {
-                                        console.warn(`⚠️ Skipping doc ${doc.id} - area:`, area, `type: ${typeof area}`);
-                                        debugCounter++;
-                                    }
-                                }
+                                });
+                                
                             } catch (error) {
                                 console.error(`❌ Error processing doc ${doc.id}:`, error);
                             }
@@ -62997,7 +63005,8 @@
         
         // Load profiles for search when needed - OPTIMIZED WITH AREA INDEX
         async function loadProfilesForSearch(freeSearch, selectedFilters) {
-            console.log('🔍 Loading profiles for search...');
+            console.log('🔍 Loading profiles for search...', {freeSearch, selectedFilters});
+            alert(`loadProfilesForSearch kutsuttu: ${JSON.stringify(selectedFilters)}`);
             
             // Varmista että aluehakemisto on rakennettu
             if (!areaIndexLoaded) {
@@ -63015,6 +63024,8 @@
             
             // Määritä ladattavat profiilit valittujen alueiden perusteella
             const selectedAreas = selectedFilters.alue || [];
+            console.log('📍 Selected areas:', selectedAreas);
+            alert(`Selected areas: ${JSON.stringify(selectedAreas)}`);
             let profileIdsToLoad = new Set();
             
             if (selectedAreas.length === 0) {
