@@ -62801,7 +62801,11 @@
         
         // Joustava LxP-haku - hakee profiilit joissa on osia hakusanasta
         function flexibleLxPMatch(profileLxP, searchLxP) {
-            if (!profileLxP || !searchLxP) return false;
+            // Jos hakusana on tyhjä, ei filtteröidä
+            if (!searchLxP || String(searchLxP).trim() === '') return true;
+            
+            // Jos profiililla ei ole LxP-arvoa tai se on tyhjä, ei täsmää
+            if (!profileLxP || String(profileLxP).trim() === '') return false;
             
             const profileCode = String(profileLxP).toLowerCase().trim();
             const searchCode = String(searchLxP).toLowerCase().trim();
@@ -62843,6 +62847,8 @@
         
         // Perform search with loaded profiles
         function performSearchWithProfiles(freeSearch, lxpSearch, selectedFilters) {
+            console.log(`🔍 SEARCH DEBUG: freeSearch="${freeSearch}", lxpSearch="${lxpSearch}", selectedFilters:`, selectedFilters);
+            
             const filtered = allProfiles.filter(profile => {
                 let matches = true;
                 
@@ -62858,8 +62864,15 @@
                     };
                     
                     // LxP-spesifinen joustava haku
-                    if (lxpSearch && !flexibleLxPMatch(profile.LxP, lxpSearch)) {
-                        return false;
+                    if (lxpSearch) {
+                        const lxpMatch = flexibleLxPMatch(profile.LxP, lxpSearch);
+                        // Debug: Log ensimmäiset 5 profiilia
+                        if (Math.random() < 0.001) { // Log vain harvoin
+                            console.log(`LxP Debug: Profiili ${profile.id}, LxP: "${profile.LxP}", Haku: "${lxpSearch}", Match: ${lxpMatch}`);
+                        }
+                        if (!lxpMatch) {
+                            return false;
+                        }
                     }
                     
                     // Vapaa haku (vain jos se on määritelty)
