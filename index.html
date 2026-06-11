@@ -3,26 +3,29 @@
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <title>Yoro Oy — Parametripohjainen työmarkkinaohjaus</title>
-  <meta name="description" content="Maailman tehokkain työmarkkinoiden ohjausjärjestelmä: työllistymistodennäköisyys omalla alueella, vertailu eri puolille Suomea, työllistymispolut ja kuntien työvoimanäkymä."/>
-  <meta name="theme-color" content="#0A6CC8">
+  <title>Yoro Oy — LxP-pohjainen työmarkkinaohjaus</title>
+  <meta name="description" content="LxP mittaa työympäristön sopivuuden — mitä muut järjestelmät jättävät pois. Ohjausmoottori yhdistää profiilin, TE24/ESCO-polut, alueen kysynnän ja työllistymispolut."/>
+  <meta name="theme-color" content="#0d9488">
   <link rel="apple-touch-icon" href="/logo_transparent.png">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
     :root{
-      --bg: #ffffff;
+      --bg: #fafbfc;
       --surface: #ffffff;
-      --surface-alt: #f7f9fb;
-      --text: #142033;
-      --muted: #5d6b82;
-      --brand: #0A6CC8; /* fresh, professional blue */
+      --surface-alt: #f0f4f8;
+      --text: #0f172a;
+      --muted: #64748b;
+      --brand: #0A6CC8;
       --brand-600: #085aa6;
       --brand-50: #e8f2fc;
-      --border: #e5eaf1;
+      --accent: #0d9488;
+      --accent-50: #ecfdf5;
+      --border: #e2e8f0;
       --success: #0b8f55;
       --warning: #b27a00;
       --radius: 16px;
-      --shadow: 0 8px 24px rgba(20,32,51,0.08);
+      --shadow: 0 10px 30px rgba(15,23,42,0.07);
+      --shadow-lg: 0 20px 50px rgba(15,23,42,0.1);
     }
 
     *{box-sizing:border-box}
@@ -48,8 +51,17 @@
     }
     .topbar .inner{
       display:flex; align-items:center; justify-content:space-between;
-      height: 64px;
+      height: 64px; gap: 16px;
     }
+    .topnav{
+      display:flex; gap:4px; flex-wrap:wrap;
+    }
+    .topnav a{
+      font-size:.85rem; font-weight:600; color:var(--muted);
+      padding:8px 12px; border-radius:8px; text-decoration:none;
+    }
+    .topnav a:hover{color:var(--brand); background:var(--brand-50); text-decoration:none}
+    @media (max-width:900px){.topnav{display:none}}
     .brand{
       display:flex; align-items:center; gap:12px;
       font-weight: 700; letter-spacing: -0.01em;
@@ -74,8 +86,8 @@
     }
 
     .hero{
-      padding: 72px 0 40px;
-      background: linear-gradient(180deg, var(--brand-50), #ffffff);
+      padding: 80px 0 48px;
+      background: linear-gradient(135deg, var(--brand-50) 0%, var(--accent-50) 45%, #fff 100%);
       border-bottom: 1px solid var(--border);
     }
     .hero-grid{
@@ -116,7 +128,65 @@
     .section + .section{margin-top: 56px}
 
     .h2{
-      font-size: 24px; letter-spacing:-0.01em; margin: 0 0 8px;
+      font-size: clamp(22px, 3vw, 30px); letter-spacing:-0.02em; margin: 0 0 8px;
+      font-weight: 800;
+    }
+    .section-alt{
+      background: var(--surface); border:1px solid var(--border);
+      border-radius: calc(var(--radius) + 4px); padding: 32px 28px;
+      box-shadow: var(--shadow);
+    }
+    .coal-quote{
+      background: linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%);
+      border: 1px solid #fed7aa; border-radius: var(--radius);
+      padding: 24px 28px; margin-top: 20px;
+      font-size: 1.05rem; line-height: 1.65; color: #9a3412;
+    }
+    .coal-quote strong{color:#c2410c}
+    .compare-table{width:100%; border-collapse:collapse; margin-top:16px; font-size:.92rem}
+    .compare-table th,.compare-table td{
+      border:1px solid var(--border); padding:12px 14px; text-align:left;
+    }
+    .compare-table th{background:var(--surface-alt); font-weight:700}
+    .compare-table td{color:var(--muted)}
+    .compare-table td:last-child{color:var(--text); font-weight:600}
+
+    /* Ohjausmoottori-kaavio */
+    .engine-diagram{
+      background: linear-gradient(180deg, #e8ecf0 0%, #dfe4ea 100%);
+      border-radius: var(--radius); padding: 28px 20px;
+      border: 1px solid #cbd5e1;
+    }
+    .engine-band-label{
+      font-size:.7rem; font-weight:800; letter-spacing:.08em;
+      text-transform:uppercase; color:var(--muted); margin-bottom:12px;
+    }
+    .engine-band + .engine-band{margin-top:28px}
+    .engine-row{
+      display:flex; flex-wrap:wrap; gap:12px; justify-content:center; align-items:stretch;
+    }
+    .engine-box{
+      background:#fff; border:1px solid #cbd5e1; border-radius:12px;
+      padding:14px 16px; font-size:.88rem; font-weight:600; text-align:center;
+      min-width:140px; flex:1; max-width:220px;
+      box-shadow: 0 2px 8px rgba(0,0,0,.06);
+      display:flex; align-items:center; justify-content:center;
+    }
+    .engine-box.highlight{
+      background: linear-gradient(135deg, var(--brand) 0%, #0d9488 100%);
+      color:#fff; border-color:transparent; max-width:260px; flex:1.2;
+      font-size:.95rem;
+    }
+    .engine-box.output{border-left:4px solid var(--accent)}
+    .engine-arrows{
+      display:flex; justify-content:center; gap:24px; padding:14px 0;
+      color: var(--accent); font-size:1.4rem; font-weight:700;
+    }
+    .engine-flow-hint{
+      text-align:center; font-size:.8rem; color:var(--muted); margin-top:8px;
+    }
+    @media (max-width:680px){
+      .engine-box{max-width:100%; min-width:100%}
     }
     .intro{color: var(--muted); margin: 0 0 24px}
 
@@ -219,9 +289,23 @@
   <header class="topbar">
     <div class="wrap inner">
       <div class="brand">
-        <img src="logo_transparent.png" alt="Yoro Oy"/>
-        <span>Yoro Oy</span>
+        <a href="/" style="display:flex;align-items:center;gap:12px;color:inherit;text-decoration:none">
+          <img src="logo_transparent.png" alt="Yoro Oy"/>
+          <span>Yoro Oy</span>
+        </a>
       </div>
+      <nav class="topnav lang-content active" data-lang="fi" aria-label="Sivusto">
+        <a href="#miksi-lxp">Miksi LxP</a>
+        <a href="#kaavio">Ohjausmoottori</a>
+        <a href="#kunnat">Kunnille</a>
+        <a href="#tyokalut">Työkalut</a>
+      </nav>
+      <nav class="topnav lang-content" data-lang="en" aria-label="Site">
+        <a href="#miksi-lxp">Why LxP</a>
+        <a href="#kaavio">Engine</a>
+        <a href="#kunnat">Municipalities</a>
+        <a href="#tyokalut">Tools</a>
+      </nav>
       <div class="lang">
         <button id="btnFi" class="active" onclick="switchLang('fi')">FI</button>
         <button id="btnEn" onclick="switchLang('en')">EN</button>
@@ -236,9 +320,9 @@
       <div>
         <!-- FI hero -->
         <div class="lang-content active" data-lang="fi">
-          <span class="badge">Visio</span>
-          <h1>Parametripohjainen työmarkkinoiden ohjausjärjestelmä</h1>
-          <p class="sub">Rakennamme maailman tehokkaimman työmarkkinaohjauksen: se laskee työllistymistodennäköisyyden omalla työnhakualueellasi, vertaa sitä eri puolille Suomea, seuraa työllistymispolkuja ja ehdottaa todennettuja reittejä — lisäkoulutuksesta muuttoon ja alan vaihtoon.</p>
+          <span class="badge">Työmarkkinaohjaus</span>
+          <h1>Maailman tehokkain ohjaus alkaa työympäristön sopivuudesta</h1>
+          <p class="sub">LxP mittaa sen, mitä muut järjestelmät jättävät pois — miten ihminen työskentelee ja missä ympäristössä pysyy hyvänä. Yhdistettynä työtoiveisiin ja alueen dataan se luo pidemmät työsuhteet, innokkaammat tekijät ja todennetut työllistymispolut.</p>
           <div class="cta">
             <a class="btn primary" href="https://yoro.fi/profiilitesti/">Aloita profiilitestillä</a>
             <a class="btn primary" href="https://lxp.yoro.fi/test-workflow.html?mode=hire" target="_blank">Etsi kandidaatteja</a>
@@ -248,9 +332,9 @@
         </div>
         <!-- EN hero -->
         <div class="lang-content" data-lang="en">
-          <span class="badge">Vision</span>
-          <h1>Parameter-based labor market guidance</h1>
-          <p class="sub">We are building the world's most effective labor market guidance system: employment probability in your search area, comparison across Finland, path tracking, and evidence-based routes — from upskilling and relocation to career change.</p>
+          <span class="badge">Labor market guidance</span>
+          <h1>The world's best guidance starts with work-environment fit</h1>
+          <p class="sub">LxP measures what other systems miss — how a person works and where they thrive. Combined with job wishes and regional data, it enables longer tenures, more motivated hires, and evidence-based employment paths.</p>
           <div class="cta">
             <a class="btn primary" href="https://yoro.fi/profiilitesti/">Start with profile test</a>
             <a class="btn primary" href="https://lxp.yoro.fi/test-workflow.html?mode=hire" target="_blank">Find candidates</a>
@@ -271,6 +355,123 @@
 
   <main>
     <div class="wrap">
+      <!-- Miksi LxP -->
+      <section class="section section-alt" id="miksi-lxp">
+        <h2 class="h2 lang-content active" data-lang="fi">Miksi LxP on erilainen?</h2>
+        <h2 class="h2 lang-content" data-lang="en">Why is LxP different?</h2>
+        <p class="intro lang-content active" data-lang="fi">Useimmat järjestelmät perustuvat osaamiseen, ammattinimikkeeseen ja sijaintiin. LxP tuo <strong>neljännen dimension</strong>, jota ei löydy CV:stä eikä globaaleista rekrytointityökaluista.</p>
+        <p class="intro lang-content" data-lang="en">Most systems rely on skills, job titles, and location. LxP adds a <strong>fourth dimension</strong> you cannot read from a CV or global ATS tools.</p>
+
+        <div class="grid-2">
+          <div class="card card-accent">
+            <h3 class="lang-content active" data-lang="fi">Työympäristön sopivuus</h3>
+            <h3 class="lang-content" data-lang="en">Work-environment fit</h3>
+            <p class="lang-content active" data-lang="fi">Itsenäisyys, tiimityö, rytmi, IT-käyttö, oppimishalukkuus — mitattu ja toistettava parametri, ei HR-arvio.</p>
+            <p class="lang-content" data-lang="en">Independence, teamwork, rhythm, digital tools, learning appetite — measured and repeatable, not a gut-feel HR score.</p>
+          </div>
+          <div class="card card-green">
+            <h3 class="lang-content active" data-lang="fi">Työtoiveet (TE24)</h3>
+            <h3 class="lang-content" data-lang="en">Job wishes (TE24)</h3>
+            <p class="lang-content active" data-lang="fi">Ei “haen mitä tahansa” vaan mihin ihminen <em>haluaa</em> mennä — innokkaampi ja aikaansaavampi työntekijä.</p>
+            <p class="lang-content" data-lang="en">Not “I'll take anything” but where a person <em>wants</em> to go — a more motivated, productive hire.</p>
+          </div>
+        </div>
+
+        <table class="compare-table lang-content active" data-lang="fi">
+          <thead><tr><th>Muut järjestelmät</th><th>Yoro + LxP</th></tr></thead>
+          <tbody>
+            <tr><td>Osaaminen + titteli</td><td>LxP + työtoiveet + osaaminen</td></tr>
+            <tr><td>Culture fit = arvio</td><td>Culture fit = mitattu parametri</td></tr>
+            <tr><td>Työllistyi kerran</td><td>Pysyi — polku dokumentoitu</td></tr>
+          </tbody>
+        </table>
+        <table class="compare-table lang-content" data-lang="en">
+          <thead><tr><th>Other systems</th><th>Yoro + LxP</th></tr></thead>
+          <tbody>
+            <tr><td>Skills + title</td><td>LxP + job wishes + skills</td></tr>
+            <tr><td>Culture fit = opinion</td><td>Culture fit = measured parameter</td></tr>
+            <tr><td>Got hired once</td><td>Stayed — path documented</td></tr>
+          </tbody>
+        </table>
+
+        <div class="coal-quote lang-content active" data-lang="fi">
+          <strong>Kuuma hiili:</strong> Muutos on pieni — yksi puuttuva mittari — mutta kuten kuuma hiili koko hiilloksessa, se voi saada koko järjestelmän hehkumaan: parempi ensimmäinen työpaikka, pidempi työsuhde, enemmän dataa poluista, parempi seuraava suositus.
+        </div>
+        <div class="coal-quote lang-content" data-lang="en">
+          <strong>The hot coal:</strong> The change is small — one missing metric — but like a hot coal in the embers, it can make the whole system glow: better first job, longer tenure, richer path data, better next recommendation.
+        </div>
+      </section>
+
+      <!-- Ohjausmoottori kaavio -->
+      <section class="section" id="kaavio">
+        <h2 class="h2 lang-content active" data-lang="fi">Ohjausmoottori — miten se toimii</h2>
+        <h2 class="h2 lang-content" data-lang="en">Guidance engine — how it works</h2>
+        <p class="intro lang-content active" data-lang="fi">Nuoren syöte kulkee parametripohjaisen moottorin läpi ja tuottaa konkreettisen ohjauksen.</p>
+        <p class="intro lang-content" data-lang="en">Youth input flows through a parameter-based engine and produces concrete guidance.</p>
+
+        <div class="engine-diagram lang-content active" data-lang="fi">
+          <div class="engine-band">
+            <div class="engine-band-label">Nuoren syöte</div>
+            <div class="engine-row">
+              <div class="engine-box">Koulutus / arvosanat<br><small style="font-weight:400;color:var(--muted)">valinnainen</small></div>
+              <div class="engine-box">10 LxP-kysymystä</div>
+              <div class="engine-box">+ 5 kiinnostuskysymystä</div>
+            </div>
+          </div>
+          <div class="engine-arrows">↓ &nbsp; ↓ &nbsp; ↓</div>
+          <div class="engine-band">
+            <div class="engine-band-label">Ohjausmoottori</div>
+            <div class="engine-row">
+              <div class="engine-box">Alueen kysyntä</div>
+              <div class="engine-box">TE24 / ESCO-graafi</div>
+              <div class="engine-box">LxP-profiili</div>
+              <div class="engine-box highlight">Matcher + selitys</div>
+            </div>
+            <div class="engine-flow-hint">Koulutus → TE24 · LxP-kysymykset → profiili · Kiinnostus → suoraan matcheriin</div>
+          </div>
+          <div class="engine-arrows">↓</div>
+          <div class="engine-band">
+            <div class="engine-band-label">Tulos nuorelle</div>
+            <div class="engine-row">
+              <div class="engine-box output">Työtyylikuvaus</div>
+              <div class="engine-box output">3–10 ammattia / polkua</div>
+              <div class="engine-box output">TET / opinto / mentor</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="engine-diagram lang-content" data-lang="en">
+          <div class="engine-band">
+            <div class="engine-band-label">Young person's input</div>
+            <div class="engine-row">
+              <div class="engine-box">Education / grades<br><small style="font-weight:400;color:var(--muted)">optional</small></div>
+              <div class="engine-box">10 LxP questions</div>
+              <div class="engine-box">+ 5 interest questions</div>
+            </div>
+          </div>
+          <div class="engine-arrows">↓ &nbsp; ↓ &nbsp; ↓</div>
+          <div class="engine-band">
+            <div class="engine-band-label">Guidance engine</div>
+            <div class="engine-row">
+              <div class="engine-box">Regional demand</div>
+              <div class="engine-box">TE24 / ESCO graph</div>
+              <div class="engine-box">LxP profile</div>
+              <div class="engine-box highlight">Matcher + explanation</div>
+            </div>
+            <div class="engine-flow-hint">Education → TE24 · LxP questions → profile · Interests → matcher directly</div>
+          </div>
+          <div class="engine-arrows">↓</div>
+          <div class="engine-band">
+            <div class="engine-band-label">Result for the young person</div>
+            <div class="engine-row">
+              <div class="engine-box output">Work style description</div>
+              <div class="engine-box output">3–10 careers / paths</div>
+              <div class="engine-box output">Work try-out / studies / mentor</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       <!-- Audiences -->
       <section class="section">
         <h2 class="h2 lang-content active" data-lang="fi">Kolmelle käyttäjäryhmälle</h2>
@@ -290,7 +491,7 @@
             <p class="lang-content active" data-lang="fi">Löydä parhaat kandidaatit LxP- ja TE24-pohjaisella haulla. Parametrit näkyvät: työtyyli, ammatti, kokemus, alue ja koulutus — läpinäkyvästi.</p>
             <p class="lang-content" data-lang="en">Find the best candidates with LxP and TE24-based matching. Parameters are visible: work style, occupation, experience, region, and education.</p>
           </div>
-          <div class="card card-warn" id="kunnat">
+          <div class="card card-warn">
             <h3 class="lang-content active" data-lang="fi">Kunnat ja alueet</h3>
             <h3 class="lang-content" data-lang="en">Municipalities & regions</h3>
             <p class="lang-content active" data-lang="fi">Seuraa ammatteja, joihin työllistyy vähemmän ihmisiä kuin valmistuu. Näe työvoiman jakautuminen, työttömyys ja koulutustarpeet toimialoittain — selkeästi ja päivittyvästi.</p>
@@ -299,13 +500,13 @@
         </div>
       </section>
 
-      <!-- Core engine -->
-      <section class="section feature">
+      <!-- Core engine capabilities -->
+      <section class="section feature section-alt">
         <div>
-          <h2 class="h2 lang-content active" data-lang="fi">Ohjausmoottori</h2>
-          <h2 class="h2 lang-content" data-lang="en">Guidance engine</h2>
-          <p class="intro lang-content active" data-lang="fi" style="margin-bottom:16px">Parametripohjainen malli yhdistää profiilin, alueen kysynnän, koulutuksen ja toteutuneet työllistymispolut.</p>
-          <p class="intro lang-content" data-lang="en" style="margin-bottom:16px">A parameter-based model combines profile, regional demand, education, and realized employment paths.</p>
+          <h2 class="h2 lang-content active" data-lang="fi">Mitä moottori laskee</h2>
+          <h2 class="h2 lang-content" data-lang="en">What the engine computes</h2>
+          <p class="intro lang-content active" data-lang="fi" style="margin-bottom:16px">Kaavion <a href="#kaavio">matcher + selitys</a> -kerros tuottaa nämä analyysit parametreista — ei arvauksista.</p>
+          <p class="intro lang-content" data-lang="en" style="margin-bottom:16px">The diagram's <a href="#kaavio">matcher + explanation</a> layer produces these analyses from parameters — not guesswork.</p>
           <div class="grid-2">
             <div class="card">
               <h3 class="lang-content active" data-lang="fi">Työllistymistodennäköisyys</h3>
@@ -380,9 +581,9 @@
       </section>
 
       <!-- Sectors -->
-      <section class="section">
-        <h2 class="h2 lang-content active" data-lang="fi">Toimialat ja työvoimanäkymä</h2>
-        <h2 class="h2 lang-content" data-lang="en">Sectors & labor outlook</h2>
+      <section class="section section-alt" id="kunnat">
+        <h2 class="h2 lang-content active" data-lang="fi">Toimialat ja työvoimanäkymä — kunnille</h2>
+        <h2 class="h2 lang-content" data-lang="en">Sectors & labor outlook — for municipalities</h2>
         <p class="intro lang-content active" data-lang="fi">Kunnat ja alueet näkevät datan jaoteltuna selkeisiin palvelu- ja teollisuuslohkkoihin — työttömyys, valmistuvat määrät ja työllistyminen rinnakkain.</p>
         <p class="intro lang-content" data-lang="en">Municipalities see data split into clear service and industry blocks — unemployment, graduates, and employment side by side.</p>
         <div class="sectors">
@@ -407,7 +608,7 @@
       </section>
 
       <!-- Live tools -->
-      <section class="section">
+      <section class="section section-alt" id="tyokalut">
         <h2 class="h2 lang-content active" data-lang="fi">Käytössä nyt</h2>
         <h2 class="h2 lang-content" data-lang="en">Available now</h2>
         <p class="intro lang-content active" data-lang="fi">Visio rakentuu vaiheittain. Nämä työkalut ovat jo käytössä ja muodostavat pohjan ohjausjärjestelmälle.</p>
@@ -439,10 +640,10 @@
             <p class="lang-content" data-lang="en">The system compares anonymized profiles and detects which actions (training, relocation, career change) preceded employment in similar situations.</p>
           </div>
           <div class="card">
-            <h3 class="lang-content active" data-lang="fi">Voiko kunta käyttää tätä?</h3>
-            <h3 class="lang-content" data-lang="en">Can municipalities use this?</h3>
-            <p class="lang-content active" data-lang="fi">Kyllä — kuntanäkymä on visiomme ydin. Ota yhteyttä pilottikumppanuudesta: työvoiman jako, valmistuvat vs. työllistyvät, toimialakohtainen työttömyys.</p>
-            <p class="lang-content" data-lang="en">Yes — the municipal view is core to our vision. Contact us for pilot partnerships: labor distribution, graduates vs. employed, sector-specific unemployment.</p>
+            <h3 class="lang-content active" data-lang="fi">Miksi LxP puuttuu muista järjestelmistä?</h3>
+            <h3 class="lang-content" data-lang="en">Why is LxP missing elsewhere?</h3>
+            <p class="lang-content active" data-lang="fi">Globaalit ATS- ja matching-ratkaisut eivät mittaa työympäristön sopivuutta parametreina. LxP on Yoron erottava kerros — pieni muutos, suuri vaikutus työsuhteen kestoon.</p>
+            <p class="lang-content" data-lang="en">Global ATS and matching tools don't measure work-environment fit as parameters. LxP is Yoro's differentiating layer — a small change with a large impact on tenure.</p>
           </div>
         </div>
       </section>
