@@ -3,8 +3,8 @@
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <title>Yoro Oy — AI‑avusteinen rekrytointi ja koulutus­kohdistus</title>
-  <meta name="description" content="Yoro Oy auttaa organisaatioita automatisoimaan rekrytoinnin ja koulutuksen kohdistuksen. Liitä työpaikkailmoitus, määritä tavoite ja saat tulokset nopeasti ja läpinäkyvästi."/>
+  <title>Yoro Oy — Parametripohjainen työmarkkinaohjaus</title>
+  <meta name="description" content="Maailman tehokkain työmarkkinoiden ohjausjärjestelmä: työllistymistodennäköisyys omalla alueella, vertailu eri puolille Suomea, työllistymispolut ja kuntien työvoimanäkymä."/>
   <meta name="theme-color" content="#0A6CC8">
   <link rel="apple-touch-icon" href="/logo_transparent.png">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -150,6 +150,48 @@
       border-radius: 12px; padding: 12px;
     }
 
+    .badge{
+      display:inline-block; font-size:.75rem; font-weight:700; letter-spacing:.04em;
+      text-transform:uppercase; color:var(--brand); background:var(--brand-50);
+      border:1px solid #c5ddf5; border-radius:999px; padding:6px 12px; margin-bottom:12px;
+    }
+    .hero .sub{max-width:62ch}
+    .grid-2{display:grid; gap:20px; grid-template-columns:repeat(2,1fr)}
+    @media (max-width:760px){.grid-2{grid-template-columns:1fr}}
+    .grid-4{display:grid; gap:16px; grid-template-columns:repeat(4,1fr)}
+    @media (max-width:1000px){.grid-4{grid-template-columns:repeat(2,1fr)}}
+    @media (max-width:560px){.grid-4{grid-template-columns:1fr}}
+    .card-accent{border-left:4px solid var(--brand)}
+    .card-green{border-left:4px solid var(--success)}
+    .card-warn{border-left:4px solid var(--warning)}
+    .sectors{display:flex; flex-wrap:wrap; gap:10px}
+    .sector{
+      font-size:.9rem; font-weight:600; color:var(--text);
+      background:#fff; border:1px solid var(--border); border-radius:999px;
+      padding:8px 14px; box-shadow:0 2px 8px rgba(20,32,51,.04);
+    }
+    .path-flow{
+      display:flex; flex-wrap:wrap; gap:10px; align-items:center; margin-top:12px;
+    }
+    .path-step{
+      background:#fff; border:1px solid var(--border); border-radius:12px;
+      padding:10px 14px; font-size:.92rem; font-weight:600;
+    }
+    .path-arrow{color:var(--muted); font-weight:700}
+    .preview-box{
+      background:linear-gradient(135deg,#0A6CC8 0%,#085aa6 100%);
+      color:#fff; border-radius:var(--radius); padding:20px; box-shadow:var(--shadow);
+    }
+    .preview-box .metric{font-size:2rem; font-weight:800; line-height:1.1}
+    .preview-box .label{opacity:.85; font-size:.9rem}
+    .preview-row{display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:14px}
+    .preview-cell{background:rgba(255,255,255,.12); border-radius:10px; padding:12px}
+    .tools-bar{
+      display:flex; flex-wrap:wrap; gap:12px; padding:20px;
+      background:var(--surface-alt); border:1px solid var(--border);
+      border-radius:var(--radius);
+    }
+
     footer{
       border-top: 1px solid var(--border);
       background: #fff; padding: 28px 0; color: var(--muted);
@@ -194,24 +236,26 @@
       <div>
         <!-- FI hero -->
         <div class="lang-content active" data-lang="fi">
-          <h1>Älykäs automaatio rekrytointiin ja koulutuksen kohdistukseen</h1>
-          <p class="sub">Yhdistämme kielimallit ja data-analytiikan, jotta löydät osaajat ja ohjaat koulutuksen vaikuttavasti. Liitä työpaikkailmoitus tai kuvaus tarpeesta — saat läpinäkyvät tulokset hetkessä.</p>
+          <span class="badge">Visio</span>
+          <h1>Parametripohjainen työmarkkinoiden ohjausjärjestelmä</h1>
+          <p class="sub">Rakennamme maailman tehokkaimman työmarkkinaohjauksen: se laskee työllistymistodennäköisyyden omalla työnhakualueellasi, vertaa sitä eri puolille Suomea, seuraa työllistymispolkuja ja ehdottaa todennettuja reittejä — lisäkoulutuksesta muuttoon ja alan vaihtoon.</p>
           <div class="cta">
-            <a class="btn primary" href="https://lxp.yoro.fi/test-workflow.html?mode=hire" target="_blank">Käynnistä rekrytointihaku</a>
-            <a class="btn primary" href="https://lxp.yoro.fi/test-workflow.html?mode=course" target="_blank">Kohdenna koulutus</a>
-            <a class="btn" href="https://lxp.yoro.fi" target="_blank">Avaa sovellus</a>
-            <a class="btn" href="mailto:myynti@yoro.fi">Ota yhteyttä</a>
+            <a class="btn primary" href="https://yoro.fi/profiilitesti/">Aloita profiilitestillä</a>
+            <a class="btn primary" href="https://lxp.yoro.fi/test-workflow.html?mode=hire" target="_blank">Etsi kandidaatteja</a>
+            <a class="btn" href="#kunnat">Kunnille ja alueille</a>
+            <a class="btn" href="mailto:myynti@yoro.fi">Kumppanuus / pilotti</a>
           </div>
         </div>
         <!-- EN hero -->
         <div class="lang-content" data-lang="en">
-          <h1>Intelligent automation for hiring and training targeting</h1>
-          <p class="sub">We combine language models with data analytics so you can find talent and direct training effectively. Paste a job posting or describe your need — get transparent results fast.</p>
+          <span class="badge">Vision</span>
+          <h1>Parameter-based labor market guidance</h1>
+          <p class="sub">We are building the world's most effective labor market guidance system: employment probability in your search area, comparison across Finland, path tracking, and evidence-based routes — from upskilling and relocation to career change.</p>
           <div class="cta">
-            <a class="btn primary" href="https://lxp.yoro.fi/test-workflow.html?mode=hire" target="_blank">Start hiring search</a>
-            <a class="btn primary" href="https://lxp.yoro.fi/test-workflow.html?mode=course" target="_blank">Target training</a>
-            <a class="btn" href="https://lxp.yoro.fi" target="_blank">Open app</a>
-            <a class="btn" href="mailto:sales@yoro.fi">Contact sales</a>
+            <a class="btn primary" href="https://yoro.fi/profiilitesti/">Start with profile test</a>
+            <a class="btn primary" href="https://lxp.yoro.fi/test-workflow.html?mode=hire" target="_blank">Find candidates</a>
+            <a class="btn" href="#kunnat">For municipalities</a>
+            <a class="btn" href="mailto:myynti@yoro.fi">Partnership / pilot</a>
           </div>
         </div>
       </div>
@@ -227,73 +271,153 @@
 
   <main>
     <div class="wrap">
-      <!-- Benefits -->
+      <!-- Audiences -->
       <section class="section">
-        <h2 class="h2 lang-content active" data-lang="fi">Mitä saat</h2>
-        <h2 class="h2 lang-content" data-lang="en">What you get</h2>
-        <p class="intro lang-content active" data-lang="fi">Selkeä prosessi ja mitattavat tulokset — ilman manuaalista sovittamista.</p>
-        <p class="intro lang-content" data-lang="en">A clear process and measurable outcomes — without manual matching.</p>
-
+        <h2 class="h2 lang-content active" data-lang="fi">Kolmelle käyttäjäryhmälle</h2>
+        <h2 class="h2 lang-content" data-lang="en">Built for three audiences</h2>
+        <p class="intro lang-content active" data-lang="fi">Sama data ja parametrit — eri näkymä työttömälle, työnantajalle ja kunnalle.</p>
+        <p class="intro lang-content" data-lang="en">Same data and parameters — different views for job seekers, employers, and municipalities.</p>
         <div class="grid">
-          <div class="card">
-            <h3 class="lang-content active" data-lang="fi">Automatisoitu analyysi</h3>
-            <h3 class="lang-content" data-lang="en">Automated analysis</h3>
-            <p class="lang-content active" data-lang="fi">Jäsennämme ilmoituksen ja muodostamme LxP-avaimen, jonka avulla haku on vertailtavaa ja toistettavaa.</p>
-            <p class="lang-content" data-lang="en">We parse your posting into an LxP key so the search is comparable and reproducible.</p>
+          <div class="card card-accent">
+            <h3 class="lang-content active" data-lang="fi">Työttömät ja työnhakijat</h3>
+            <h3 class="lang-content" data-lang="en">Job seekers</h3>
+            <p class="lang-content active" data-lang="fi">Näe työllistymistodennäköisyys omalla työnhakualueellasi ja miten se muuttuu muualla Suomessa. Saat ehdotuksia poluista, joilla vastaavassa tilanteessa olevat ovat työllistyneet.</p>
+            <p class="lang-content" data-lang="en">See employment probability in your search area and how it compares across Finland. Get path suggestions based on what worked for people in similar situations.</p>
           </div>
-
-          <div class="card">
-            <h3 class="lang-content active" data-lang="fi">Läpinäkyvä haku</h3>
-            <h3 class="lang-content" data-lang="en">Transparent search</h3>
-            <p class="lang-content active" data-lang="fi">Hakukriteerit näkyvät ja tulokset järjestyvät sopivuuden mukaan. Henkilötietoja ei näytetä ilman perustetta.</p>
-            <p class="lang-content" data-lang="en">Criteria are visible and results are ranked by fit. Personally identifiable data is not shown without basis.</p>
+          <div class="card card-green">
+            <h3 class="lang-content active" data-lang="fi">Työnantajat ja rekrytoijat</h3>
+            <h3 class="lang-content" data-lang="en">Employers & recruiters</h3>
+            <p class="lang-content active" data-lang="fi">Löydä parhaat kandidaatit LxP- ja TE24-pohjaisella haulla. Parametrit näkyvät: työtyyli, ammatti, kokemus, alue ja koulutus — läpinäkyvästi.</p>
+            <p class="lang-content" data-lang="en">Find the best candidates with LxP and TE24-based matching. Parameters are visible: work style, occupation, experience, region, and education.</p>
           </div>
-
-          <div class="card">
-            <h3 class="lang-content active" data-lang="fi">Nopea käyttöönotto</h3>
-            <h3 class="lang-content" data-lang="en">Fast to adopt</h3>
-            <p class="lang-content active" data-lang="fi">Käyttö suoraan selaimessa. Ei asennuksia, toimivat integraatiot.</p>
-            <p class="lang-content" data-lang="en">Runs in your browser. No installs, reliable integrations.</p>
+          <div class="card card-warn" id="kunnat">
+            <h3 class="lang-content active" data-lang="fi">Kunnat ja alueet</h3>
+            <h3 class="lang-content" data-lang="en">Municipalities & regions</h3>
+            <p class="lang-content active" data-lang="fi">Seuraa ammatteja, joihin työllistyy vähemmän ihmisiä kuin valmistuu. Näe työvoiman jakautuminen, työttömyys ja koulutustarpeet toimialoittain — selkeästi ja päivittyvästi.</p>
+            <p class="lang-content" data-lang="en">Track occupations where employment lags behind graduations. View labor distribution, unemployment, and training needs by sector — clearly and continuously updated.</p>
           </div>
         </div>
       </section>
 
-      <!-- How it works -->
+      <!-- Core engine -->
       <section class="section feature">
         <div>
-          <h2 class="h2 lang-content active" data-lang="fi">Näin se toimii</h2>
-          <h2 class="h2 lang-content" data-lang="en">How it works</h2>
-          <ol class="list lang-content active" data-lang="fi">
-            <li>Valitse tavoite: rekrytointi tai koulutuksen kohdistus.</li>
-            <li>Liitä työpaikkailmoitus tai kuvaus tarpeesta (teksti tai PDF).</li>
-            <li>AI muodostaa LxP-avaimen ja etsii sopivimmat profiilit.</li>
-          </ol>
-          <ol class="list lang-content" data-lang="en">
-            <li>Choose your goal: hiring or training targeting.</li>
-            <li>Paste a job posting or describe the need (text or PDF).</li>
-            <li>AI builds an LxP key and finds the best‑fit profiles.</li>
-          </ol>
+          <h2 class="h2 lang-content active" data-lang="fi">Ohjausmoottori</h2>
+          <h2 class="h2 lang-content" data-lang="en">Guidance engine</h2>
+          <p class="intro lang-content active" data-lang="fi" style="margin-bottom:16px">Parametripohjainen malli yhdistää profiilin, alueen kysynnän, koulutuksen ja toteutuneet työllistymispolut.</p>
+          <p class="intro lang-content" data-lang="en" style="margin-bottom:16px">A parameter-based model combines profile, regional demand, education, and realized employment paths.</p>
+          <div class="grid-2">
+            <div class="card">
+              <h3 class="lang-content active" data-lang="fi">Työllistymistodennäköisyys</h3>
+              <h3 class="lang-content" data-lang="en">Employment probability</h3>
+              <p class="lang-content active" data-lang="fi">Lasketaan omalle työnhakualueelle: ammatti + profiili + markkinatilanne.</p>
+              <p class="lang-content" data-lang="en">Calculated for your search area: occupation + profile + market conditions.</p>
+            </div>
+            <div class="card">
+              <h3 class="lang-content active" data-lang="fi">Aluevertailu</h3>
+              <h3 class="lang-content" data-lang="en">Regional comparison</h3>
+              <p class="lang-content active" data-lang="fi">Vertaa samaa profiilia ja tavoiteammattia eri maakunnissa ja kaupungeissa.</p>
+              <p class="lang-content" data-lang="en">Compare the same profile and target occupation across regions and cities.</p>
+            </div>
+            <div class="card">
+              <h3 class="lang-content active" data-lang="fi">Polkujen seuranta</h3>
+              <h3 class="lang-content" data-lang="en">Path tracking</h3>
+              <p class="lang-content active" data-lang="fi">Järjestelmä havainnoi, miten vastaavassa tilanteessa olleet ovat työllistyneet — anonymisoidusti ja tilastollisesti.</p>
+              <p class="lang-content" data-lang="en">The system observes how people in similar situations got employed — anonymized and statistical.</p>
+            </div>
+            <div class="card">
+              <h3 class="lang-content active" data-lang="fi">Reittiehdotukset</h3>
+              <h3 class="lang-content" data-lang="en">Route suggestions</h3>
+              <p class="lang-content active" data-lang="fi">Ehdottaa todennettuja työllistymisreittejä: lisäkoulutus, muutto, alan vaihto, TET tai mentorointi.</p>
+              <p class="lang-content" data-lang="en">Suggests evidence-based routes: upskilling, relocation, career change, work try-outs, or mentoring.</p>
+            </div>
+          </div>
         </div>
-        <div class="note lang-content active" data-lang="fi">
-          <strong>Tietosuoja:</strong> Hakutuloksissa näytetään vain tunnisteet ja sopivuus, kunnes jatkotoimiin on peruste.
+        <div class="preview-box lang-content active" data-lang="fi">
+          <div class="label">Esimerkki — työnhakijan näkymä (konsepti)</div>
+          <div class="metric" style="margin-top:8px">42 %</div>
+          <div class="label">Työllistymistodennäköisyys 6 kk:ssa · Uusimaa · Myynti</div>
+          <div class="preview-row">
+            <div class="preview-cell"><div class="metric" style="font-size:1.4rem">58 %</div><div class="label">Pirkanmaa</div></div>
+            <div class="preview-cell"><div class="metric" style="font-size:1.4rem">31 %</div><div class="label">Nykyinen alue</div></div>
+          </div>
         </div>
-        <div class="note lang-content" data-lang="en">
-          <strong>Privacy:</strong> Results show identifiers and fit only until there is a basis for next steps.
+        <div class="preview-box lang-content" data-lang="en">
+          <div class="label">Example — job seeker view (concept)</div>
+          <div class="metric" style="margin-top:8px">42%</div>
+          <div class="label">Employment probability within 6 mo · Uusimaa · Sales</div>
+          <div class="preview-row">
+            <div class="preview-cell"><div class="metric" style="font-size:1.4rem">58%</div><div class="label">Pirkanmaa</div></div>
+            <div class="preview-cell"><div class="metric" style="font-size:1.4rem">31%</div><div class="label">Current area</div></div>
+          </div>
         </div>
       </section>
 
-      <!-- For job seekers -->
+      <!-- Employment paths -->
       <section class="section">
+        <h2 class="h2 lang-content active" data-lang="fi">Työllistymispolut</h2>
+        <h2 class="h2 lang-content" data-lang="en">Employment paths</h2>
+        <p class="intro lang-content active" data-lang="fi">Kun vastaavassa tilanteessa oleva on työllistynyt, järjestelmä tunnistaa toistuvat reitit ja ehdottaa niitä seuraavaksi askeleeksi.</p>
+        <p class="intro lang-content" data-lang="en">When someone in a similar situation was employed, the system identifies recurring routes and suggests them as next steps.</p>
         <div class="card">
-          <h2 class="h2 lang-content active" data-lang="fi">Työnhakijoille tai opiskelijoille</h2>
-          <h2 class="h2 lang-content" data-lang="en">For job seekers</h2>
-          <p class="lang-content active" data-lang="fi">Tee LxP‑profiilitesti ja saa personoitu työllistymissuunnitelma.</p>
-          <p class="lang-content" data-lang="en">Take the LxP profile test and find your next step.</p>
-          <div class="cta">
-            <a class="btn primary" href="https://plaakkon.github.io/profiilitesti/" target="_blank" >Tee testi</a>
-            <a class="btn primary" href="https://plaakkon.github.io/profiiliselain/" target="_blank">Profiiliselain (Työnantajapalvelu)</a>
-            <a class="btn" href="/kirjaudu">Kirjaudu</a>
+          <p class="lang-content active" data-lang="fi" style="margin:0 0 8px;color:var(--text);font-weight:600">Esimerkkipolku: nuori · ei työkokemusta · kiinnostus teknologiaan</p>
+          <p class="lang-content" data-lang="en" style="margin:0 0 8px;color:var(--text);font-weight:600">Example path: young · no work experience · interest in technology</p>
+          <div class="path-flow lang-content active" data-lang="fi">
+            <span class="path-step">LxP-profiilitesti</span><span class="path-arrow">→</span>
+            <span class="path-step">Lyhytkurssi (ICT)</span><span class="path-arrow">→</span>
+            <span class="path-step">Harjoittelu</span><span class="path-arrow">→</span>
+            <span class="path-step">Muutto kasvukeskuksen alueelle</span><span class="path-arrow">→</span>
+            <span class="path-step">Työllistyminen</span>
           </div>
+          <div class="path-flow lang-content" data-lang="en">
+            <span class="path-step">LxP profile test</span><span class="path-arrow">→</span>
+            <span class="path-step">Short course (ICT)</span><span class="path-arrow">→</span>
+            <span class="path-step">Internship</span><span class="path-arrow">→</span>
+            <span class="path-step">Move to growth region</span><span class="path-arrow">→</span>
+            <span class="path-step">Employment</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Sectors -->
+      <section class="section">
+        <h2 class="h2 lang-content active" data-lang="fi">Toimialat ja työvoimanäkymä</h2>
+        <h2 class="h2 lang-content" data-lang="en">Sectors & labor outlook</h2>
+        <p class="intro lang-content active" data-lang="fi">Kunnat ja alueet näkevät datan jaoteltuna selkeisiin palvelu- ja teollisuuslohkkoihin — työttömyys, valmistuvat määrät ja työllistyminen rinnakkain.</p>
+        <p class="intro lang-content" data-lang="en">Municipalities see data split into clear service and industry blocks — unemployment, graduates, and employment side by side.</p>
+        <div class="sectors">
+          <span class="sector lang-content active" data-lang="fi">Terveyspalvelut</span>
+          <span class="sector lang-content" data-lang="en">Health services</span>
+          <span class="sector">Insinööripalvelut</span>
+          <span class="sector">Rakennuspalvelut</span>
+          <span class="sector">Teollisuustyö</span>
+          <span class="sector">Ohjelmistosuunnittelu</span>
+          <span class="sector">Elektroniikkasuunnittelu</span>
+          <span class="sector">Peliteollisuus</span>
+          <span class="sector">Metsäteollisuus</span>
+          <span class="sector">Kaivosteollisuus</span>
+          <span class="sector lang-content active" data-lang="fi">Kauppa & palvelut</span>
+          <span class="sector lang-content" data-lang="en">Retail & services</span>
+          <span class="sector">Logistiikka</span>
+          <span class="sector lang-content active" data-lang="fi">Julkinen sektori</span>
+          <span class="sector lang-content" data-lang="en">Public sector</span>
+        </div>
+        <p class="note lang-content active" data-lang="fi" style="margin-top:16px"><strong>Kunnille:</strong> hälytys kun valmistuvia on enemmän kuin alueelle työllistyy — ammattikohtaisesti ja toimialoittain. Data tukee koulutus- ja elinvoimapäätöksiä.</p>
+        <p class="note lang-content" data-lang="en" style="margin-top:16px"><strong>For municipalities:</strong> alert when graduates exceed local employment uptake — by occupation and sector. Data supports education and regional development decisions.</p>
+      </section>
+
+      <!-- Live tools -->
+      <section class="section">
+        <h2 class="h2 lang-content active" data-lang="fi">Käytössä nyt</h2>
+        <h2 class="h2 lang-content" data-lang="en">Available now</h2>
+        <p class="intro lang-content active" data-lang="fi">Visio rakentuu vaiheittain. Nämä työkalut ovat jo käytössä ja muodostavat pohjan ohjausjärjestelmälle.</p>
+        <p class="intro lang-content" data-lang="en">The vision is built in phases. These tools are live today and form the foundation of the guidance system.</p>
+        <div class="tools-bar">
+          <a class="btn primary" href="https://yoro.fi/profiilitesti/">LxP Profiilitesti</a>
+          <a class="btn primary" href="https://lxp.yoro.fi/test-workflow.html?mode=hire" target="_blank">Kandidaattihaku</a>
+          <a class="btn" href="https://yoro.fi/profiiliselain/" target="_blank">Profiiliselain</a>
+          <a class="btn" href="https://lxp.yoro.fi/test-workflow.html?mode=course" target="_blank">Koulutuksen kohdistus</a>
+          <a class="btn" href="/kirjaudu">Kirjaudu</a>
         </div>
       </section>
 
@@ -303,22 +427,22 @@
         <h2 class="h2 lang-content" data-lang="en">FAQ</h2>
         <div class="grid">
           <div class="card">
-            <h3 class="lang-content active" data-lang="fi">Onko tämä rekrytointia vai koulutusta?</h3>
-            <h3 class="lang-content" data-lang="en">Is this for hiring or training?</h3>
-            <p class="lang-content active" data-lang="fi">Molempia. Valitse tavoite ja saat siihen sopivan prosessin.</p>
-            <p class="lang-content" data-lang="en">Both. Choose the goal and you’ll get the matching process.</p>
+            <h3 class="lang-content active" data-lang="fi">Mitä tarkoittaa parametripohjainen?</h3>
+            <h3 class="lang-content" data-lang="en">What does parameter-based mean?</h3>
+            <p class="lang-content active" data-lang="fi">Jokainen suositus perustuu mitattaviin tekijöihin: LxP-profiili, ammatti (TE24), alue, koulutus, kokemus ja toteutuneet polut — ei pelkkään intuition.</p>
+            <p class="lang-content" data-lang="en">Every recommendation is based on measurable factors: LxP profile, occupation (TE24), region, education, experience, and realized paths — not intuition alone.</p>
           </div>
           <div class="card">
-            <h3 class="lang-content active" data-lang="fi">Näkyykö henkilötietoja?</h3>
-            <h3 class="lang-content" data-lang="en">Do you show personal data?</h3>
-            <p class="lang-content active" data-lang="fi">Ei ilman perustetta. Tuloksissa näytetään ensin tunnisteet ja sopivuus.</p>
-            <p class="lang-content" data-lang="en">Not without basis. We first show identifiers and fit.</p>
+            <h3 class="lang-content active" data-lang="fi">Miten työllistymispolut toimivat?</h3>
+            <h3 class="lang-content" data-lang="en">How do employment paths work?</h3>
+            <p class="lang-content active" data-lang="fi">Järjestelmä vertaa anonymisoituja profiileja ja havaitsee, mitkä toimenpiteet (koulutus, muutto, alan vaihto) edelsivät työllistymistä vastaavissa tilanteissa.</p>
+            <p class="lang-content" data-lang="en">The system compares anonymized profiles and detects which actions (training, relocation, career change) preceded employment in similar situations.</p>
           </div>
           <div class="card">
-            <h3 class="lang-content active" data-lang="fi">Mitä teknologiaa käytätte?</h3>
-            <h3 class="lang-content" data-lang="en">What technology do you use?</h3>
-            <p class="lang-content active" data-lang="fi">Kielimallit, LxP‑luokitus ja tietokantahaku. Integraatiot Firebaseen ja muihin järjestelmiin.</p>
-            <p class="lang-content" data-lang="en">Language models, LxP classification and database search. Integrations with Firebase and other systems.</p>
+            <h3 class="lang-content active" data-lang="fi">Voiko kunta käyttää tätä?</h3>
+            <h3 class="lang-content" data-lang="en">Can municipalities use this?</h3>
+            <p class="lang-content active" data-lang="fi">Kyllä — kuntanäkymä on visiomme ydin. Ota yhteyttä pilottikumppanuudesta: työvoiman jako, valmistuvat vs. työllistyvät, toimialakohtainen työttömyys.</p>
+            <p class="lang-content" data-lang="en">Yes — the municipal view is core to our vision. Contact us for pilot partnerships: labor distribution, graduates vs. employed, sector-specific unemployment.</p>
           </div>
         </div>
       </section>
@@ -404,10 +528,10 @@
   <footer>
     <div class="wrap foot-grid">
       <div class="lang-content active" data-lang="fi">
-        © 2025 Yoro Oy — <a href="mailto:myynti@yoro.fi">myynti@yoro.fi</a>
+        © 2026 Yoro Oy — <a href="mailto:myynti@yoro.fi">myynti@yoro.fi</a>
       </div>
       <div class="lang-content" data-lang="en">
-        © 2025 Yoro Oy — <a href="mailto:sales@yoro.fi">sales@yoro.fi</a>
+        © 2026 Yoro Oy — <a href="mailto:sales@yoro.fi">sales@yoro.fi</a>
       </div>
     </div>
   </footer>
