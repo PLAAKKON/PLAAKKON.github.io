@@ -109,36 +109,42 @@ const LXP_QUESTIONS = [
   },
   {
     id: 'q7',
-    phase: 'Koulutus',
-    text: 'Mikä on koulutustaustasi?',
+    phase: 'Koulutuspolku',
+    text: 'Missä olet koulutuspolullasi juuri nyt?',
+    hint: 'Ei tarvitse tietää vielä jatko-opintoja — valitse mikä kuvaa sinua nyt.',
     options: [
-      { key: 'a', label: 'Olen oppinut työni käytännössä, ilman muodollista koulutusta.' },
-      { key: 'b', label: 'Olen suorittanut keskiasteen koulutuksen (esim. ammattikoulu).' },
-      { key: 'c', label: 'Minulla on korkeakoulututkinto.' },
+      { key: 'a', label: 'Olen peruskoulussa (esim. 7.–9. luokka).' },
+      { key: 'b', label: 'Harkitsen lukio-opintoja peruskoulun jälkeen.' },
+      { key: 'c', label: 'Harkitsen ammattikoulu-opintoja peruskoulun jälkeen.' },
+      { key: 'd', label: 'Opiskelen jo lukiossa tai ammattikoulussa.' },
+      { key: 'e', label: 'En tiedä vielä — jatkokoulutusvalinta on auki.' },
     ],
     narrative: {
-      a: 'Käytännön koulutus ja kokemus.',
-      b: 'Keskiasteen koulutus taustalla.',
-      c: 'Korkeakoulutettu.',
+      a: 'Peruskoulussa — suunta vielä muotoutumassa.',
+      b: 'Lukio kiinnostaa jatkossa.',
+      c: 'Ammattikoulu kiinnostaa jatkossa.',
+      d: 'Jo toisella asteella opiskelussa.',
+      e: 'Jatko-opinnot auki — ei kiirettä valita.',
     },
   },
   {
     id: 'q8',
-    phase: 'Oppiminen',
-    text: 'Miten suhtaudut alan vaihtoon ja opiskeluun?',
+    phase: 'Jatko-opinnot',
+    text: 'Miten ajattelet jatko-opintoja tällä hetkellä?',
+    hint: 'Voit olla epävarma — tämä auttaa ehdottamaan sopivia polkuja.',
     options: [
-      { key: 'a', label: 'Olen avoin uusille mahdollisuuksille ja valmis opiskelemaan uutta alaa varten.' },
-      { key: 'b', label: 'Haluan syventää osaamistani nykyisellä alallani.' },
-      { key: 'c', label: 'Olen avoin alanvaihdolle, mutta en voi sitoutua uusiin opintoihin.' },
-      { key: 'd', label: 'Haluan jatkaa nykyisellä alallani, enkä suunnittele lisäkoulutusta.' },
-      { key: 'e', label: 'Olen valmis vaihtamaan alaa, jolle nykyiset taitoni riittävät.' },
+      { key: 'a', label: 'Haluan kokeilla eri asioita ennen kuin päätän suunnan.' },
+      { key: 'b', label: 'Kun löydän kiinnostavan suunnan, olen valmis opiskelemaan.' },
+      { key: 'c', label: 'Toivoisin lyhyen polun — ammattikoulu tai käytännön työ.' },
+      { key: 'd', label: 'Kiinnostaa pitkä opintopolku — lukio ja ehkä korkeakoulu.' },
+      { key: 'e', label: 'En osaa vielä sanoa — en halua lukita itseäni mihinkään.' },
     ],
     narrative: {
-      a: 'Avoin uusille poluille ja opiskelulle.',
-      b: 'Syvennät osaamista nykyisellä suunnalla.',
-      c: 'Avoin vaihdolle ilman pitkää koulutusta.',
-      d: 'Jatkat tutulla polulla.',
-      e: 'Alanvaihto ilman uutta tutkintoa.',
+      a: 'Kokeilet ensin — päätös myöhemmin.',
+      b: 'Opiskelukin sopii, kun suunta tuntuu omalta.',
+      c: 'Lyhyt ja käytännönläheinen polku kiinnostaa.',
+      d: 'Pitkä opintopolku voisi sopia.',
+      e: 'Opiskeluvalinta auki — stressaamaton suhtautuminen.',
     },
   },
   {
@@ -238,14 +244,14 @@ const INTEREST_Q = [
   },
   {
     id: 'i4',
-    text: 'Miten haluaisit tutustua ammattiin ensin?',
-    hint: 'Valitse yksi — seuraava askel.',
+    text: 'Mikä olisi sinulle luontevin tapa tutustua työelämään?',
+    hint: 'Valitse yksi. Et tarvitse vielä tietää ammattia.',
     multi: 1,
     options: [
-      { key: 'tet', label: 'Kokeilla käytännössä — TET, kesätyö, harjoittelu' },
-      { key: 'study', label: 'Lyhyt koulutus tai kurssi' },
-      { key: 'mentor', label: 'Jutella ammattilaisen kanssa' },
-      { key: 'explore', label: 'En tiedä vielä — näytä useita vaihtoehtoja' },
+      { key: 'tet', label: 'Kokeilla käytännössä — TET, kesätyö tai harjoittelu' },
+      { key: 'study', label: 'Tutustua koulutuksiin ja opintoihin' },
+      { key: 'mentor', label: 'Kuulla ammattilaiselta, millaista työ on' },
+      { key: 'explore', label: 'En tiedä vielä — haluan nähdä useita vaihtoehtoja' },
     ],
   },
 ];
@@ -428,7 +434,7 @@ const PATHS = [
     subjects: ['historia', 'yhteiskunta', 'uskonto'],
     workday: ['organize', 'help'],
     topics: ['people'],
-    lxp: { q2: ['c', 'd'], q7: ['b', 'c'] },
+    lxp: { q2: ['c', 'd'], q8: ['d'] },
     tet: 'TET kunnassa, poliisilla tai järjestössä',
     study: 'Hallinto- tai oikeusalan opinnot',
   },
@@ -510,6 +516,18 @@ function scorePaths(answers, sectors, interests) {
       }
     });
 
+    const academicPaths = ['engineer', 'it', 'lab', 'society'];
+    const practicalPaths = ['build', 'health', 'service', 'nature'];
+    if (answers.q7 === 'b' || answers.q7 === 'd' || answers.q8 === 'd') {
+      if (academicPaths.includes(path.id)) score += 6;
+    }
+    if (answers.q7 === 'c' || answers.q8 === 'c') {
+      if (practicalPaths.includes(path.id)) score += 6;
+    }
+    if (answers.q7 === 'e' || answers.q8 === 'e' || answers.q8 === 'a') {
+      score += 3;
+    }
+
   if (sectorSet.size) {
       path.sectors.forEach((s) => {
         if (sectorSet.has(s)) score += 5;
@@ -544,9 +562,9 @@ function buildNarrative(answers) {
 
 function nextStepLabel() {
   const map = {
-    tet: 'Seuraavaksi: kokeile TET:llä',
-    study: 'Seuraavaksi: tutustu koulutukseen',
-    mentor: 'Seuraavaksi: juttele ammattilaiselle',
+    tet: 'Seuraavaksi: kokeile työtä käytännössä',
+    study: 'Seuraavaksi: tutustu opintoihin',
+    mentor: 'Seuraavaksi: kuule ammattilaiselta',
     explore: 'Seuraavaksi: tutki useita polkuja',
   };
   return map[state.interest.i4] || map.explore;
@@ -616,7 +634,7 @@ function render() {
       <div class="card">
         <div class="phase-tag">${state.lxpIndex + 1}/10 · ${q.phase}</div>
         <h2>${q.text}</h2>
-        <p class="hint">Valitse yksi — ei oikeita tai vääriä vastauksia.</p>
+        <p class="hint">${q.hint || 'Valitse yksi — ei oikeita tai vääriä vastauksia.'}</p>
         <div class="options" id="opts">
           ${q.options.map((o) => `<button type="button" class="opt${state.lxp[q.id] === o.key ? ' selected' : ''}" data-key="${o.key}">${o.label}</button>`).join('')}
         </div>
@@ -799,7 +817,7 @@ function render() {
 
       <button class="btn btn-share" id="shareBtn" style="margin-top:20px">Jaa kaverille 📲</button>
       <button class="btn btn-ghost" id="retryBtn">Tee testi uudelleen</button>
-      <a href="https://yoro.fi/profiilitesti/" class="btn btn-ghost" style="text-decoration:none;margin-top:8px">Täysi LxP-profiilitesti →</a>
+      <a href="https://yoro.fi/" class="btn btn-ghost" style="text-decoration:none;margin-top:8px">← Palaa Yoro.fi-sivuille</a>
 
       <p class="disclaimer">Tulos perustuu työtyyliin (LxP), lempikouluaineisiin ja kiinnostukseen. Ammatti selkiytyy kokeilemalla — ei yhdestä testistä.</p>`;
 
