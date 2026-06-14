@@ -202,13 +202,13 @@ const TYOOHJAUS_QUESTIONS = [
       { key: 'a', label: 'Olen huolellinen ja tarkka — pienetkin virheet häiritsevät minua.' },
       { key: 'b', label: 'Pyrin olemaan tarkka, mutta priorisoin usein kokonaiskuvan.' },
       { key: 'c', label: 'Olen suurpiirteinen — näen mieluummin kokonaisuuden kuin yksityiskohdat.' },
-      { key: 'd', label: 'Teen välillä virheitä, mutta korjaan ne nopeasti eteenpäin menessä.' },
+      { key: 'd', label: 'Teen välillä virheitä, mutta korjaan ne nopeasti eteenpäin mennessä.' },
     ],
     narrative: {
       a: 'Tarkkuus ja huolellisuus ovat vahvuuksiasi.',
       b: 'Tasapaino tarkkuuden ja kokonaiskuvan välillä.',
-      c: 'Suur kuva ja kokonaisuus edellä.',
-      d: 'Ketterä eteenpäin — virheet korjataan matkan varrella.',
+      c: 'Suur kuva ja kokonaisuus edellä — sopii esim. tuotekehitykseen ja luovaan tekemiseen.',
+      d: 'Ketterä eteenpäin — virheet korjataan matkan varrella; sinnikkyys vie pitkälle.',
     },
   },
 ];
@@ -346,12 +346,12 @@ const PATHS = [
     id: 'engineer',
     name: 'Tuotekehitys & insinööri',
     emoji: '⚙️',
-    desc: 'Suunnittelu, laskenta, simulointi — tekniikka käytännössä ja koneella.',
+    desc: 'Ideat, prototyypit, kehitys — luovuus ja sinnikkyys ratkaisevat; pieni hajamielisyys ei haittaa.',
     sectors: ['tekniikka'],
     subjects: ['matematiikka', 'fysiikka', 'kemia', 'kasityo'],
     workday: ['solve', 'build'],
     topics: ['tech', 'how'],
-    lxp: { q2: ['c'], q5: ['a', 'b'], q1: ['a', 'b', 'd'] },
+    lxp: { q2: ['c'], q5: ['a', 'b'], q1: ['a', 'b', 'd'], q10: ['a', 'b'] },
     tet: 'TET teknisellä alalla — tehdas, insinööritoimisto tai tuotekehitys',
     study: 'Lukio (pitkä matikka & fysiikka) tai teknillinen ammattikoulu',
   },
@@ -774,7 +774,16 @@ function scorePaths(answers, sectors, interests, tyoohjaus = {}) {
     } else if (precision === 'c' || precision === 'd') {
       if (['business', 'creative', 'service', 'society'].includes(path.id)) score += 10;
       if (path.id === 'lab') score -= 18;
-      if (path.id === 'engineer' && precision === 'd') score -= 6;
+      // Tuotekehitys & digi: hajamielisyys ok — painotus luovuuteen ja sinnikkyyteen
+      if (path.id === 'engineer' || path.id === 'it') {
+        score += 10;
+        if (answers.q10 === 'a' || answers.q10 === 'b') score += 12;
+        if (i1.includes('tekniikka') || i1.includes('luova')) score += 8;
+        if (i2 === 'solve' || i2 === 'create') score += 8;
+        i3.forEach((key) => {
+          if (key === 'tech' || key === 'creative') score += 6;
+        });
+      }
     }
 
     if (hasHigherEdBackground(answers)) {
