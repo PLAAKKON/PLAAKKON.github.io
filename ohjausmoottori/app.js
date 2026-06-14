@@ -197,12 +197,14 @@ const TYOOHJAUS_QUESTIONS = [
     id: 'precision',
     phase: 'Työohjaus',
     text: 'Miten kuvailisit omaa työskentelyäsi?',
+    textPlain: 'Millaista tekijä olet?',
     hint: 'Tämä kysymys on vain uraohjaukseen — ei vaikuta työnantajan LxP-hakuun. Ei oikeaa vastausta.',
+    hintPlain: 'Vain uraohjaukseen. Ei oikeaa vastausta.',
     options: [
-      { key: 'a', label: 'Olen huolellinen ja tarkka — pienetkin virheet häiritsevät minua.' },
-      { key: 'b', label: 'Pyrin olemaan tarkka, mutta priorisoin usein kokonaiskuvan.' },
-      { key: 'c', label: 'Olen suurpiirteinen — näen mieluummin kokonaisuuden kuin yksityiskohdat.' },
-      { key: 'd', label: 'Teen välillä virheitä, mutta korjaan ne nopeasti eteenpäin mennessä.' },
+      { key: 'a', label: 'Olen huolellinen ja tarkka — pienetkin virheet häiritsevät minua.', labelPlain: 'Olen tarkka. Pienet virheet häiritsevät.' },
+      { key: 'b', label: 'Pyrin olemaan tarkka, mutta priorisoin usein kokonaiskuvan.', labelPlain: 'Yritän olla tarkka, mutta kokonaiskuva on tärkeämpi.' },
+      { key: 'c', label: 'Olen suurpiirteinen — näen mieluummin kokonaisuuden kuin yksityiskohdat.', labelPlain: 'Olen suurpiirteinen. Näen mieluummin kokonaisuuden.' },
+      { key: 'd', label: 'Teen välillä virheitä, mutta korjaan ne nopeasti eteenpäin mennessä.', labelPlain: 'Teen virheitä, mutta korjaan ne nopeasti.' },
     ],
     narrative: {
       a: 'Tarkkuus ja huolellisuus ovat vahvuuksiasi.',
@@ -215,13 +217,15 @@ const TYOOHJAUS_QUESTIONS = [
     id: 'drive',
     phase: 'Työohjaus',
     text: 'Mikä kuvaa sinua parhaiten työssä?',
+    textPlain: 'Mikä sopii sinulle työssä?',
     hint: 'Vain uraohjaukseen — ei vaikuta työnantajan LxP-hakuun.',
+    hintPlain: 'Vain uraohjaukseen.',
     options: [
-      { key: 'a', label: 'Keksin mielelläni uusia ratkaisuja ja ideoita.' },
-      { key: 'b', label: 'Vienn asiat loppuun, vaikka homma on hankala ja kestää kauan.' },
-      { key: 'c', label: 'Keksin mielelläni uusia ratkaisuja ja vien hankalatkin asiat loppuun saakka.' },
-      { key: 'd', label: 'Pidän työstä, jossa eteneminen on selkeää — en hae erityisesti pitkäkestoisia hankalia projekteja.' },
-      { key: 'e', label: 'En osaa vielä sanoa.' },
+      { key: 'a', label: 'Keksin mielelläni uusia ratkaisuja ja ideoita.', labelPlain: 'Keksin mielelläni uusia ideoita.' },
+      { key: 'b', label: 'Vienn asiat loppuun, vaikka homma on hankala ja kestää kauan.', labelPlain: 'Vien asiat loppuun, vaikka homma on hankala.' },
+      { key: 'c', label: 'Keksin mielelläni uusia ratkaisuja ja vien hankalatkin asiat loppuun saakka.', labelPlain: 'Keksin ideoita ja vien hankalat asiat loppuun.' },
+      { key: 'd', label: 'Pidän työstä, jossa eteneminen on selkeää — en hae erityisesti pitkäkestoisia hankalia projekteja.', labelPlain: 'Pidän selkeästä etenemisestä. En hae pitkiä hankalia projekteja.' },
+      { key: 'e', label: 'En osaa vielä sanoa.', labelPlain: 'En osaa vielä sanoa.' },
     ],
     narrative: {
       a: 'Luova ongelmanratkaisija — ideat edellä.',
@@ -256,29 +260,33 @@ const INTEREST_Q = [
   {
     id: 'i1',
     text: 'Mistä työaloista haluaisit kuulla lisää?',
+    textPlain: 'Mistä aloista haluat kuulla lisää?',
     hint: 'Valitse kaksi — ajattele työtä, ei harrastusta.',
+    hintPlain: 'Valitse kaksi. Ajattele työtä.',
     multi: 2,
     options: [
-      { key: 'tekniikka', label: 'Tekniikka & digi — koneet, ohjelmistot, pelit' },
-      { key: 'terveys', label: 'Ihmiset & hoiva — terveys, kasvatus, neuvonta' },
-      { key: 'luonto', label: 'Luonto & ympäristö — metsä, eläimet, ulkoilu työnä' },
-      { key: 'kaytanto', label: 'Rakentaminen & kädet — korjaus, asennus, tuotanto' },
-      { key: 'luova', label: 'Luova — media, design, musiikki, pelit' },
-      { key: 'liiketoiminta', label: 'Liiketoiminta — myynti, hallinto, järjestäminen' },
+      { key: 'tekniikka', label: 'Tekniikka & digi — koneet, ohjelmistot, pelit', labelPlain: 'Tekniikka ja digi' },
+      { key: 'terveys', label: 'Ihmiset & hoiva — terveys, kasvatus, neuvonta', labelPlain: 'Ihmiset ja hoiva' },
+      { key: 'luonto', label: 'Luonto & ympäristö — metsä, eläimet, ulkoilu työnä', labelPlain: 'Luonto ja ympäristö' },
+      { key: 'kaytanto', label: 'Rakentaminen & kädet — korjaus, asennus, tuotanto', labelPlain: 'Rakentaminen ja kädet' },
+      { key: 'luova', label: 'Luova — media, design, musiikki, pelit', labelPlain: 'Luova työ' },
+      { key: 'liiketoiminta', label: 'Liiketoiminta — myynti, hallinto, järjestäminen', labelPlain: 'Liiketoiminta' },
     ],
   },
   {
     id: 'i2',
     text: 'Miltä työpäivä kuulostaa mielenkiintoisimmalta?',
+    textPlain: 'Millainen työpäivä kiinnostaa?',
     hint: 'Valitse yksi.',
+    hintPlain: 'Valitse yksi.',
     multi: 1,
     options: [
-      { key: 'solve', label: 'Ratkaisen ongelman — laskenta, koodi, data tai suunnittelu' },
-      { key: 'help', label: 'Autan ihmistä — hoiva, opetus, neuvonta' },
-      { key: 'build', label: 'Rakennan tai korjaan jotain konkreettista' },
-      { key: 'create', label: 'Luon jotain uutta — kuva, teksti, video, peli' },
-      { key: 'connect', label: 'Keskustelen asiakkaiden tai tiimin kanssa' },
-      { key: 'organize', label: 'Varmistan, että asiat toimivat ja sujuvat' },
+      { key: 'solve', label: 'Ratkaisen ongelman — laskenta, koodi, data tai suunnittelu', labelPlain: 'Ratkaisen ongelman' },
+      { key: 'help', label: 'Autan ihmistä — hoiva, opetus, neuvonta', labelPlain: 'Autan ihmistä' },
+      { key: 'build', label: 'Rakennan tai korjaan jotain konkreettista', labelPlain: 'Rakennan tai korjaan' },
+      { key: 'create', label: 'Luon jotain uutta — kuva, teksti, video, peli', labelPlain: 'Luon jotain uutta' },
+      { key: 'connect', label: 'Keskustelen asiakkaiden tai tiimin kanssa', labelPlain: 'Keskustelen muiden kanssa' },
+      { key: 'organize', label: 'Varmistan, että asiat toimivat ja sujuvat', labelPlain: 'Järjestän asioita' },
     ],
   },
 ];
@@ -286,12 +294,14 @@ const INTEREST_Q = [
 const EXPLORE_Q = {
   id: 'i4',
   text: 'Mikä olisi sinulle luontevin tapa tutustua työelämään?',
+  textPlain: 'Miten haluat tutustua työelämään?',
   hint: 'Valitse yksi — tämä ohjaa seuraavaa askeltasi tuloksissa.',
+  hintPlain: 'Valitse yksi. Tämä ohjaa seuraavaa askelta.',
   options: [
-    { key: 'tet', label: 'Kokeilla käytännössä — TET, kesätyö tai harjoittelu' },
-    { key: 'study', label: 'Tutustua koulutuksiin ja opintoihin' },
-    { key: 'mentor', label: 'Kuulla ammattilaiselta, millaista työ on' },
-    { key: 'explore', label: 'En tiedä vielä — haluan nähdä useita vaihtoehtoja' },
+    { key: 'tet', label: 'Kokeilla käytännössä — TET, kesätyö tai harjoittelu', labelPlain: 'Kokeilla käytännössä (TET tai kesätyö)' },
+    { key: 'study', label: 'Tutustua koulutuksiin ja opintoihin', labelPlain: 'Tutustua opintoihin' },
+    { key: 'mentor', label: 'Kuulla ammattilaiselta, millaista työ on', labelPlain: 'Kuulla ammattilaiselta' },
+    { key: 'explore', label: 'En tiedä vielä — haluan nähdä useita vaihtoehtoja', labelPlain: 'En tiedä vielä — haluan nähdä vaihtoehtoja' },
   ],
 };
 
@@ -302,7 +312,12 @@ const ARCHETYPES = [
     title: 'Syvä Sukeltaja',
     tagline: 'Itsenäinen, tarkka, syvennyt kun löydät oikean jutun.',
     match: (a) => (a.q1 === 'a' || a.q1 === 'b') && a.q2 === 'c' && (a.q5 === 'a' || a.q5 === 'b'),
-    traits: { itsenäisyys: 92, tarkkuus: 88, tiimi: 45, digi: 75 },
+    strengths: [
+      'Pärjäät hyvin omillasi, kun ohjeet ovat selkeät.',
+      'Huolellisuus ja tarkkuus ovat vahvuuksiasi.',
+      'Syvennyt mielelläsi, kun aihe tuntuu omalta.',
+      'Digitaaliset työkalut tuntuvat luontevilta.',
+    ],
   },
   {
     id: 'ratkaisija',
@@ -310,7 +325,12 @@ const ARCHETYPES = [
     title: 'Ongelmanratkaisija',
     tagline: 'Analysoit, lasket, korjaat — aivot työssä.',
     match: (a) => a.q2 === 'c' && (a.q5 === 'a' || a.q5 === 'b') && (a.q4 === 'a' || a.q4 === 'b'),
-    traits: { itsenäisyys: 80, tarkkuus: 90, tiimi: 55, digi: 85 },
+    strengths: [
+      'Ratkaiset mielelläsi ongelmia ajattelemalla.',
+      'Pidät työstä, jossa pitää olla tarkka.',
+      'Pystyt työskentelemään itsenäisesti.',
+      'Digitaaliset työkalut ovat sinulle luontevia.',
+    ],
   },
   {
     id: 'tiimipro',
@@ -318,7 +338,12 @@ const ARCHETYPES = [
     title: 'Tiimipeli-Pro',
     tagline: 'Energia tulee ihmisistä ja yhteisestä tekemisestä.',
     match: (a) => (a.q1 === 'd' || a.q1 === 'e') || a.q2 === 'd' || a.q4 === 'c' || a.q4 === 'd',
-    traits: { itsenäisyys: 40, tarkkuus: 55, tiimi: 95, digi: 50 },
+    strengths: [
+      'Saat energiaa ihmisistä ja yhteisestä tekemisestä.',
+      'Tiimi ja selkeä ohjaus tuovat parhaan tuloksen.',
+      'Ihmisläheinen työympäristö sopii sinulle.',
+      'Kommunikointi on vahvuutesi.',
+    ],
   },
   {
     id: 'tekija',
@@ -326,7 +351,12 @@ const ARCHETYPES = [
     title: 'Käytännön Tekijä',
     tagline: 'Näet kädet työssä — konkreettinen tulos motivoi.',
     match: (a) => a.q2 === 'a' || a.q5 === 'c' || a.q5 === 'd',
-    traits: { itsenäisyys: 65, tarkkuus: 70, tiimi: 50, digi: 30 },
+    strengths: [
+      'Pidät käytännön tekemisestä ja näet työn tuloksen.',
+      'Konkreettinen tekeminen motivoi sinua.',
+      'Fyysinen tai käytännönläheinen työ sopii sinulle.',
+      'Toimit mielelläsi ilman jatkuvaa ruutuaikaa.',
+    ],
   },
   {
     id: 'monitekija',
@@ -334,7 +364,12 @@ const ARCHETYPES = [
     title: 'Monitekijä',
     tagline: 'Vaihtelu pitää sinut hereillä — et jaksa rutiinia.',
     match: (a) => a.q3 === 'c' || a.q5 === 'e',
-    traits: { itsenäisyys: 60, tarkkuus: 55, tiimi: 65, digi: 60 },
+    strengths: [
+      'Vaihtelu ja monipuolisuus pitävät sinut mukana.',
+      'Joustat helposti erilaisissa tehtävissä.',
+      'Et jaksa pitkää samanlaista rutiinia.',
+      'Sovit erilaisiin työympäristöihin.',
+    ],
   },
   {
     id: 'luova',
@@ -342,7 +377,12 @@ const ARCHETYPES = [
     title: 'Luova Muotoilija',
     tagline: 'Ideat, kuvat, tarinat — luot uutta.',
     match: () => false,
-    traits: { itsenäisyys: 70, tarkkuus: 65, tiimi: 60, digi: 70 },
+    strengths: [
+      'Luot mielelläsi uutta — ideat, kuvat tai tarinat.',
+      'Luovuus on sinulle luonteva tapa toimia.',
+      'Pidät työstä, jossa näkyy oma jälkesi.',
+      'Digitaaliset ja luovat työkalut inspiroivat sinua.',
+    ],
   },
 ];
 
@@ -701,6 +741,191 @@ function bindPathToggles() {
 
 const ANALYTICS_KEY = 'yoro_ohjaus_events_v1';
 const FEEDBACK_KEY = 'yoro_ohjaus_feedback_v1';
+const RESULT_STORAGE_KEY = 'yoro_ohjaus_result_v1';
+const PLAIN_LANG_KEY = 'yoro_plain_lang_v1';
+const RESULT_HASH_PREFIX = '#r=';
+
+const COPY = {
+  trustBanner: {
+    fi: 'Tämä ei ole arvosana eikä uraennuste — vain suuntaa kokeiltavaksi.',
+    plain: 'Tämä ei ole arvosana. Se on vain ehdotus suunnasta.',
+  },
+  resultType: { fi: 'Sinun tekijätyyppisi', plain: 'Sinun tyyppisi' },
+  strengthsTitle: { fi: 'Vahvuutesi työssä', plain: 'Miten työskentelet' },
+  pathsTitle: { fi: '3 polkua kokeiltavaksi', plain: '3 polkua kokeiltavaksi' },
+  pathsLead: {
+    fi: 'Ei lopullista uraa — valitse yksi ja kokeile käytännössä. Avaa polku nähdäksesi miksi se ehdotettiin.',
+    plain: 'Valitse yksi polku ja kokeile sitä käytännössä. Voit avata polun ja lukea miksi se sopii.',
+  },
+  savedBanner: { fi: 'Sinulla on tallennettu tulos tästä selaimesta.', plain: 'Tuloksesi on tallessa tässä selaimessa.' },
+  resumeResult: { fi: 'Palaa tulokseesi →', plain: 'Näytä tulos uudelleen →' },
+  copyResultLink: { fi: 'Kopioi linkki tulokseen', plain: 'Kopioi linkki' },
+  linkCopied: { fi: 'Linkki kopioitu!', plain: 'Kopioitu!' },
+  plainToggle: { fi: 'Selkokieli', plain: 'Normaali kieli' },
+  defaultHint: {
+    fi: 'Valitse yksi — ei oikeita tai vääriä vastauksia.',
+    plain: 'Valitse yksi. Kaikki vastaukset käyvät.',
+  },
+  progressAlmost: { fi: ' · melkein valmis!', plain: ' · melkein valmis!' },
+  introTitle1: { fi: 'Et tiedä mitä haluat?', plain: 'Et tiedä vielä mitä haluat?' },
+  introTitle2: { fi: 'Hyvä.', plain: 'Se on ok.' },
+  introBody: {
+    fi: 'Tämä testi ei kerro sinulle ammattia. Se kertoo <strong style="color:var(--text)">miten sinä työskentelet parhaiten</strong> — ja ehdottaa <strong style="color:var(--text)">3 polkua</strong> kokeiltavaksi.',
+    plain: 'Testi ei kerro ammattia. Se kertoo <strong style="color:var(--text)">miten työskentelet</strong>. Saat <strong style="color:var(--text)">3 polkua</strong> kokeiltavaksi.',
+  },
+  introHook: { fi: '✦ Saat oman tekijätyypin + jaettavan kortin', plain: '✦ Saat oman tyypin ja kuvan jaettavaksi' },
+  startBtn: { fi: 'Aloita testi →', plain: 'Aloita →' },
+  introDisclaimer: { fi: 'Ei rekisteröitymistä. Tulos on ohjausta, ei ennustetta.', plain: 'Ei tarvitse rekisteröityä. Tulos on vain ohjausta.' },
+};
+
+function txt(key) {
+  const entry = COPY[key];
+  if (!entry) return key;
+  return state.plainLanguage ? entry.plain : entry.fi;
+}
+
+function qText(q) {
+  if (state.plainLanguage && q.textPlain) return q.textPlain;
+  return q.text;
+}
+
+function qHint(q, fallbackKey = 'defaultHint') {
+  if (state.plainLanguage && q.hintPlain) return q.hintPlain;
+  if (q.hint) return q.hint;
+  return txt(fallbackKey);
+}
+
+function optLabel(o) {
+  if (state.plainLanguage && o.labelPlain) return o.labelPlain;
+  return o.label;
+}
+
+function renderStrengths(archetype) {
+  const items = archetype.strengths || [];
+  return `<ul class="strength-list">${items.map((s) => `<li>${s}</li>`).join('')}</ul>`;
+}
+
+function serializeResultState() {
+  return {
+    v: 1,
+    l: state.lxp,
+    t: state.tyoohjaus,
+    s: [...state.subjects],
+    i: state.interest,
+    p: state.plainLanguage ? 1 : 0,
+  };
+}
+
+function encodeResultPayload(payload) {
+  return btoa(unescape(encodeURIComponent(JSON.stringify(payload))))
+    .replace(/\+/g, '-')
+    .replace(/\//g, '_')
+    .replace(/=+$/g, '');
+}
+
+function decodeResultPayload(encoded) {
+  try {
+    const json = decodeURIComponent(escape(atob(encoded.replace(/-/g, '+').replace(/_/g, '/'))));
+    const data = JSON.parse(json);
+    if (data.v !== 1 || !data.l || !data.i) return null;
+    return data;
+  } catch (_) {
+    return null;
+  }
+}
+
+function applyResultPayload(data) {
+  state.lxp = { ...data.l };
+  state.tyoohjaus = { ...data.t };
+  state.subjects = new Set(data.s || []);
+  state.interest = { ...data.i };
+  state.plainLanguage = !!data.p;
+  state.screen = 'result';
+  state.lxpIndex = 0;
+  state.interestIndex = 0;
+  localStorage.setItem(PLAIN_LANG_KEY, state.plainLanguage ? '1' : '0');
+  document.body.classList.toggle('plain-language', state.plainLanguage);
+  syncPlainToggle();
+}
+
+function persistResult() {
+  const encoded = encodeResultPayload(serializeResultState());
+  localStorage.setItem(RESULT_STORAGE_KEY, encoded);
+  history.replaceState(null, '', `${location.pathname}${location.search}${RESULT_HASH_PREFIX}${encoded}`);
+}
+
+function resultPageUrl() {
+  const encoded = encodeResultPayload(serializeResultState());
+  return `${location.origin}${location.pathname}${RESULT_HASH_PREFIX}${encoded}`;
+}
+
+function loadSavedResultEncoded() {
+  if (location.hash.startsWith(RESULT_HASH_PREFIX)) {
+    return location.hash.slice(RESULT_HASH_PREFIX.length);
+  }
+  try {
+    return localStorage.getItem(RESULT_STORAGE_KEY);
+  } catch (_) {
+    return null;
+  }
+}
+
+function tryRestoreResultFromUrl() {
+  const encoded = location.hash.startsWith(RESULT_HASH_PREFIX)
+    ? location.hash.slice(RESULT_HASH_PREFIX.length)
+    : null;
+  if (!encoded) return false;
+  const data = decodeResultPayload(encoded);
+  if (!data) return false;
+  applyResultPayload(data);
+  return true;
+}
+
+function loadPreferences() {
+  try {
+    state.plainLanguage = localStorage.getItem(PLAIN_LANG_KEY) === '1';
+  } catch (_) {
+    state.plainLanguage = false;
+  }
+  document.body.classList.toggle('plain-language', state.plainLanguage);
+}
+
+function syncPlainToggle() {
+  const btn = document.getElementById('plainLangToggle');
+  if (!btn) return;
+  btn.setAttribute('aria-pressed', state.plainLanguage ? 'true' : 'false');
+  btn.textContent = state.plainLanguage ? COPY.plainToggle.plain : COPY.plainToggle.fi;
+}
+
+function bindAccessibilityControls() {
+  const btn = document.getElementById('plainLangToggle');
+  if (!btn) return;
+  syncPlainToggle();
+  btn.addEventListener('click', () => {
+    state.plainLanguage = !state.plainLanguage;
+    try {
+      localStorage.setItem(PLAIN_LANG_KEY, state.plainLanguage ? '1' : '0');
+    } catch (_) { /* ignore */ }
+    document.body.classList.toggle('plain-language', state.plainLanguage);
+    syncPlainToggle();
+    render();
+  });
+}
+
+function announceProgress(step, total, pct) {
+  const el = document.getElementById('liveStatus');
+  if (!el) return;
+  el.textContent = `Vaihe ${step} / ${total}, ${pct} prosenttia valmis.`;
+}
+
+function focusMainHeading() {
+  requestAnimationFrame(() => {
+    const target = document.querySelector('#app h1, #app h2, #app .result-title');
+    if (!target) return;
+    target.setAttribute('tabindex', '-1');
+    target.focus({ preventScroll: true });
+  });
+}
 
 function track(event, data = {}) {
   try {
@@ -750,6 +975,7 @@ const state = {
   subjects: new Set(),
   interest: {},
   interestIndex: 0,
+  plainLanguage: false,
 };
 
 function totalSteps() {
@@ -1187,7 +1413,8 @@ function nextStepLabel() {
 
 function shareText(archetype, paths) {
   const top = paths[0]?.name || 'uusia polkuja';
-  return `Työtyylini on ${archetype.title} ${archetype.emoji}\n\nYoron ohjausmoottori ehdotti mulle polkua: ${top}\n\nEi yhtä oikeaa ammattia — kokeile 5 min:\nhttps://yoro.fi/ohjausmoottori/`;
+  const url = state.screen === 'result' ? resultPageUrl() : 'https://yoro.fi/ohjausmoottori/';
+  return `Työtyylini on ${archetype.title} ${archetype.emoji}\n\nYoron ohjausmoottori ehdotti mulle polkua: ${top}\n\nEi yhtä oikeaa ammattia — kokeile 5 min:\n${url}`;
 }
 
 function drawGlowCurve(ctx, x1, y1, cx, cy, x2, y2, color, width = 3) {
@@ -1401,8 +1628,16 @@ function render() {
   const pct = progressPct();
 
   if (state.screen === 'intro') {
+    const savedEncoded = loadSavedResultEncoded();
+    const savedBanner = savedEncoded && decodeResultPayload(savedEncoded) ? `
+      <div class="saved-result-banner" id="savedResultBanner">
+        <p>${txt('savedBanner')}</p>
+        <button type="button" class="btn btn-ghost" id="resumeResultBtn">${txt('resumeResult')}</button>
+      </div>` : '';
+
     app.innerHTML = `
       <section class="hero">
+        ${savedBanner}
         <div class="pill">Ilmainen · 5 min</div>
         <svg class="hero-art" viewBox="0 0 320 180" aria-hidden="true" focusable="false">
           <path class="path-cyan" d="M160 155 Q145 110 95 55" stroke-width="2.5"/>
@@ -1416,43 +1651,62 @@ function render() {
           <circle class="node path-magenta" cx="225" cy="55" r="22"/>
           <text x="225" y="60" text-anchor="middle" font-size="18">🚩</text>
         </svg>
-        <h1 style="margin-top:0">Et tiedä mitä haluat?<br><span>Hyvä.</span></h1>
-        <p>Tämä testi ei kerro sinulle ammattia. Se kertoo <strong style="color:var(--text)">miten sinä työskentelet parhaiten</strong> — ja ehdottaa <strong style="color:var(--text)">3 polkua</strong> kokeiltavaksi.</p>
-        <p class="hook">✦ Saat oman työtyyli-tyypin + jaettavan kortin</p>
+        <h1 style="margin-top:0">${txt('introTitle1')}<br><span>${txt('introTitle2')}</span></h1>
+        <p>${txt('introBody')}</p>
+        <p class="hook">${txt('introHook')}</p>
         <div class="stats-row">
           <div class="stat"><strong>10</strong><span>LxP-kysymystä</span></div>
           <div class="stat"><strong>1</strong><span>työohjaus</span></div>
           <div class="stat"><strong>2</strong><span>kiinnostusta</span></div>
         </div>
-        <button class="btn btn-primary" id="startBtn">Aloita testi →</button>
-        <p class="disclaimer" style="margin-top:20px">Ei rekisteröitymistä. Tulos on ohjausta, ei ennustetta.</p>
+        <button class="btn btn-primary" id="startBtn">${txt('startBtn')}</button>
+        <p class="disclaimer" style="margin-top:20px">${txt('introDisclaimer')}</p>
       </section>`;
+    const resumeBtn = document.getElementById('resumeResultBtn');
+    if (resumeBtn) {
+      resumeBtn.onclick = () => {
+        const data = decodeResultPayload(savedEncoded);
+        if (!data) return;
+        applyResultPayload(data);
+        persistResult();
+        spawnConfetti();
+        render();
+      };
+    }
     document.getElementById('startBtn').onclick = () => {
       track('start');
+      history.replaceState(null, '', `${location.pathname}${location.search}`);
       state.screen = 'lxp';
       render();
     };
+    focusMainHeading();
     return;
   }
 
   const progressHtml =
     state.screen !== 'result'
       ? `<div class="progress-wrap">
-          <div class="progress-label"><span>Vaihe ${step}/${totalSteps()}${pct >= 85 ? ' · melkein valmis!' : ''}</span><strong>${pct}%</strong></div>
-          <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
+          <div class="progress-label"><span>Vaihe ${step}/${totalSteps()}${pct >= 85 ? txt('progressAlmost') : ''}</span><strong>${pct}%</strong></div>
+          <div class="progress-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${pct}" aria-label="Testin eteneminen">
+            <div class="progress-fill" style="width:${pct}%"></div>
+          </div>
         </div>`
       : '';
 
   if (state.screen === 'lxp') {
     const q = LXP_QUESTIONS[state.lxpIndex];
+    const headingId = `q-${q.id}`;
     app.innerHTML = `
       ${progressHtml}
       <div class="card">
         <div class="phase-tag">${state.lxpIndex + 1}/${LXP_QUESTIONS.length} · ${q.phase}</div>
-        <h2>${q.text}</h2>
-        <p class="hint">${q.hint || 'Valitse yksi — ei oikeita tai vääriä vastauksia.'}</p>
-        <div class="options" id="opts">
-          ${q.options.map((o) => `<button type="button" class="opt${state.lxp[q.id] === o.key ? ' selected' : ''}" data-key="${o.key}">${o.label}</button>`).join('')}
+        <h2 id="${headingId}">${qText(q)}</h2>
+        <p class="hint">${qHint(q)}</p>
+        <div class="options" id="opts" role="radiogroup" aria-labelledby="${headingId}">
+          ${q.options.map((o) => {
+            const selected = state.lxp[q.id] === o.key;
+            return `<button type="button" class="opt${selected ? ' selected' : ''}" data-key="${o.key}" role="radio" aria-checked="${selected ? 'true' : 'false'}">${optLabel(o)}</button>`;
+          }).join('')}
         </div>
       </div>
       <div class="nav-row">
@@ -1478,6 +1732,8 @@ function render() {
       track('lxp_complete');
       render();
     };
+    announceProgress(step, totalSteps(), pct);
+    focusMainHeading();
     return;
   }
 
@@ -1486,15 +1742,21 @@ function render() {
       ${progressHtml}
       <div class="card">
         <div class="phase-tag">Työohjaus · ei LxP-hakua</div>
-        <p class="hint" style="margin-bottom:16px">Nämä kysymykset vaikuttavat vain uraohjaukseen — eivät työnantajan LxP-hakuun.</p>
-        ${TYOOHJAUS_QUESTIONS.map((q) => `
+        <p class="hint" style="margin-bottom:16px">${state.plainLanguage ? 'Nämä kysymykset vaikuttavat vain uraohjaukseen.' : 'Nämä kysymykset vaikuttavat vain uraohjaukseen — eivät työnantajan LxP-hakuun.'}</p>
+        ${TYOOHJAUS_QUESTIONS.map((q) => {
+          const headingId = `q-${q.id}`;
+          return `
           <div class="tyoohjaus-block">
-            <h2 class="tyoohjaus-q">${q.text}</h2>
-            <p class="hint">${q.hint}</p>
-            <div class="options" data-qid="${q.id}">
-              ${q.options.map((o) => `<button type="button" class="opt${state.tyoohjaus[q.id] === o.key ? ' selected' : ''}" data-key="${o.key}">${o.label}</button>`).join('')}
+            <h2 class="tyoohjaus-q" id="${headingId}">${qText(q)}</h2>
+            <p class="hint">${qHint(q)}</p>
+            <div class="options" data-qid="${q.id}" role="radiogroup" aria-labelledby="${headingId}">
+              ${q.options.map((o) => {
+                const selected = state.tyoohjaus[q.id] === o.key;
+                return `<button type="button" class="opt${selected ? ' selected' : ''}" data-key="${o.key}" role="radio" aria-checked="${selected ? 'true' : 'false'}">${optLabel(o)}</button>`;
+              }).join('')}
             </div>
-          </div>`).join('')}
+          </div>`;
+        }).join('')}
       </div>
       <div class="nav-row">
         <button class="btn btn-ghost" id="backBtn">← Takaisin</button>
@@ -1519,6 +1781,8 @@ function render() {
       state.screen = 'subjects';
       render();
     };
+    announceProgress(step, totalSteps(), pct);
+    focusMainHeading();
     return;
   }
 
@@ -1527,10 +1791,13 @@ function render() {
       ${progressHtml}
       <div class="card">
         <div class="phase-tag">Kouluaineet</div>
-        <h2>Valitse aineet, joista pidät</h2>
-        <p class="hint">1–6 kpl — ei arvosanoja, vain mistä tykkäät.</p>
-        <div class="subject-grid" id="subGrid">
-          ${SUBJECTS.map((s) => `<button type="button" class="opt subject-chip${state.subjects.has(s.id) ? ' multi selected' : ''}" data-id="${s.id}"><span class="emoji">${s.emoji}</span>${s.label}</button>`).join('')}
+        <h2 id="subjects-heading">${state.plainLanguage ? 'Valitse aineet joista pidät' : 'Valitse aineet, joista pidät'}</h2>
+        <p class="hint">${state.plainLanguage ? '1–6 kpl. Ei arvosanoja.' : '1–6 kpl — ei arvosanoja, vain mistä tykkäät.'}</p>
+        <div class="subject-grid" id="subGrid" role="group" aria-labelledby="subjects-heading">
+          ${SUBJECTS.map((s) => {
+            const selected = state.subjects.has(s.id);
+            return `<button type="button" class="opt subject-chip${selected ? ' multi selected' : ''}" data-id="${s.id}" role="checkbox" aria-checked="${selected ? 'true' : 'false'}"><span class="emoji" aria-hidden="true">${s.emoji}</span>${s.label}</button>`;
+          }).join('')}
         </div>
       </div>
       <div class="nav-row">
@@ -1557,6 +1824,8 @@ function render() {
       state.interestIndex = 0;
       render();
     };
+    announceProgress(step, totalSteps(), pct);
+    focusMainHeading();
     return;
   }
 
@@ -1564,6 +1833,7 @@ function render() {
     const isCombo = state.interestIndex === 1;
     const q = INTEREST_Q[state.interestIndex];
     const selected = state.interest[q.id] || (q.multi > 1 ? [] : null);
+    const headingId = `q-${q.id}`;
     const isSelected = (key, qid) => {
       const sel = qid ? state.interest[qid] : selected;
       if (Array.isArray(sel)) return sel.includes(key);
@@ -1572,10 +1842,13 @@ function render() {
 
     const comboHtml = isCombo ? `
         <div class="tyoohjaus-block" style="margin-top:20px">
-          <h2 class="tyoohjaus-q">${EXPLORE_Q.text}</h2>
-          <p class="hint">${EXPLORE_Q.hint}</p>
-          <div class="options" data-qid="i4">
-            ${EXPLORE_Q.options.map((o) => `<button type="button" class="opt${state.interest.i4 === o.key ? ' selected' : ''}" data-key="${o.key}" data-qid="i4">${o.label}</button>`).join('')}
+          <h2 class="tyoohjaus-q" id="q-i4">${qText(EXPLORE_Q)}</h2>
+          <p class="hint">${qHint(EXPLORE_Q)}</p>
+          <div class="options" data-qid="i4" role="radiogroup" aria-labelledby="q-i4">
+            ${EXPLORE_Q.options.map((o) => {
+              const selectedI4 = state.interest.i4 === o.key;
+              return `<button type="button" class="opt${selectedI4 ? ' selected' : ''}" data-key="${o.key}" data-qid="i4" role="radio" aria-checked="${selectedI4 ? 'true' : 'false'}">${optLabel(o)}</button>`;
+            }).join('')}
           </div>
         </div>` : '';
 
@@ -1583,10 +1856,14 @@ function render() {
       ${progressHtml}
       <div class="card">
         <div class="phase-tag">Kiinnostus ${state.interestIndex + 1}/${INTEREST_Q.length}</div>
-        <h2>${q.text}</h2>
-        <p class="hint">${q.hint}</p>
-        <div class="options" id="opts" data-qid="${q.id}">
-          ${q.options.map((o) => `<button type="button" class="opt${isSelected(o.key) ? ' selected' : ''}" data-key="${o.key}">${o.label}</button>`).join('')}
+        <h2 id="${headingId}">${qText(q)}</h2>
+        <p class="hint">${qHint(q)}</p>
+        <div class="options" id="opts" data-qid="${q.id}" role="${q.multi > 1 ? 'group' : 'radiogroup'}" aria-labelledby="${headingId}">
+          ${q.options.map((o) => {
+            const sel = isSelected(o.key);
+            const role = q.multi > 1 ? 'checkbox' : 'radio';
+            return `<button type="button" class="opt${sel ? (q.multi > 1 ? ' multi selected' : ' selected') : ''}" data-key="${o.key}" role="${role}" aria-checked="${sel ? 'true' : 'false'}">${optLabel(o)}</button>`;
+          }).join('')}
         </div>
         ${comboHtml}
       </div>
@@ -1633,10 +1910,13 @@ function render() {
       }
       render();
     };
+    announceProgress(step, totalSteps(), pct);
+    focusMainHeading();
     return;
   }
 
   if (state.screen === 'result') {
+    persistResult();
     const answers = { ...state.lxp };
     const archetype = pickArchetype(answers);
     const sectors = getSectorWeights();
@@ -1655,36 +1935,30 @@ function render() {
         : '';
 
     app.innerHTML = `
-      <p class="trust-banner">Tämä ei ole arvosana eikä uraennuste — vain suuntaa kokeiltavaksi.</p>
+      <p class="trust-banner">${txt('trustBanner')}</p>
 
       <div class="result-hero">
-        <div class="result-emoji">${archetype.emoji}</div>
-        <div class="result-type">Sinun työtyyli-tyyppisi</div>
-        <h2 class="result-title">${archetype.title}</h2>
+        <div class="result-emoji" aria-hidden="true">${archetype.emoji}</div>
+        <div class="result-type">${txt('resultType')}</div>
+        <h2 class="result-title" tabindex="-1">${archetype.title}</h2>
         <p class="hero-sentence">${heroSentence}</p>
       </div>
 
       <div class="card">
-        <div class="section-title" style="margin-top:0">Työtyylisi lyhyesti</div>
-        <ul style="padding-left:18px;color:var(--muted);font-size:0.9rem">
-          ${narrative.slice(0, 4).map((n) => `<li style="margin-bottom:6px">${n}</li>`).join('')}
+        <div class="section-title" style="margin-top:0">${txt('strengthsTitle')}</div>
+        ${renderStrengths(archetype)}
+        <div class="section-title" style="margin-top:18px">${state.plainLanguage ? 'Lisää sinusta' : 'Työtyylisi lyhyesti'}</div>
+        <ul class="narrative-list">
+          ${narrative.slice(0, 4).map((n) => `<li>${n}</li>`).join('')}
         </ul>
-
-        <div class="trait-bars">
-          ${Object.entries(archetype.traits).map(([name, val]) => `
-            <div class="trait">
-              <div class="trait-head"><strong>${name.charAt(0).toUpperCase() + name.slice(1)}</strong><span>${val}%</span></div>
-              <div class="trait-bar"><div class="trait-fill" style="width:${val}%"></div></div>
-            </div>`).join('')}
-        </div>
       </div>
 
       <a class="btn btn-primary cta-primary" href="${cta.url}" target="_blank" rel="noopener noreferrer">${cta.label}</a>
       ${cta.secondary ? `<a class="btn btn-ghost cta-secondary" href="${cta.secondary.url}" target="_blank" rel="noopener noreferrer">${cta.secondary.label}</a>` : ''}
       <p class="cta-desc">${cta.desc}</p>
 
-      <div class="section-title">3 polkua kokeiltavaksi</div>
-      <p class="section-lead">Ei lopullista uraa — valitse yksi ja kokeile käytännössä. Avaa polku nähdäksesi miksi se ehdotettiin.</p>
+      <div class="section-title">${txt('pathsTitle')}</div>
+      <p class="section-lead">${txt('pathsLead')}</p>
       ${higherEdNote}
       ${topPaths.map((p, i) => renderPathCard(p, i, answers, state.interest, state.tyoohjaus, topScore)).join('')}
       ${extraPaths.length ? `
@@ -1703,6 +1977,7 @@ function render() {
         <p class="feedback-thanks" id="feedbackThanks" hidden>Kiitos palautteesta — auttaa meitä kehittämään testiä.</p>
       </div>
 
+      <button class="btn btn-share" id="copyResultLinkBtn">${txt('copyResultLink')}</button>
       <button class="btn btn-share" id="downloadCardBtn">Lataa jaettava kortti (PNG)</button>
       <button class="btn btn-share" id="shareBtn">Jaa tekstinä</button>
       <button class="btn btn-ghost" id="retryBtn">Tee testi uudelleen</button>
@@ -1719,12 +1994,24 @@ function render() {
 
     document.getElementById('downloadCardBtn').onclick = () => downloadShareCard(archetype, top);
 
+    document.getElementById('copyResultLinkBtn').onclick = async () => {
+      const url = resultPageUrl();
+      track('copy_result_link');
+      try {
+        await navigator.clipboard.writeText(url);
+        const btn = document.getElementById('copyResultLinkBtn');
+        btn.textContent = txt('linkCopied');
+        setTimeout(() => { btn.textContent = txt('copyResultLink'); }, 2500);
+      } catch (_) { /* ignore */ }
+    };
+
     document.getElementById('shareBtn').onclick = async () => {
       const text = shareText(archetype, topPaths);
+      const url = resultPageUrl();
       track('share_text');
       if (navigator.share) {
         try {
-          await navigator.share({ title: 'Työtyylini — Yoro', text, url: 'https://yoro.fi/ohjausmoottori/' });
+          await navigator.share({ title: 'Millainen tekijä olet? — Yoro', text, url });
           return;
         } catch (_) { /* fallback */ }
       }
@@ -1736,6 +2023,8 @@ function render() {
 
     document.getElementById('retryBtn').onclick = () => {
       track('retry');
+      history.replaceState(null, '', `${location.pathname}${location.search}`);
+      try { localStorage.removeItem(RESULT_STORAGE_KEY); } catch (_) { /* ignore */ }
       Object.assign(state, {
         screen: 'intro',
         lxpIndex: 0,
@@ -1747,7 +2036,18 @@ function render() {
       });
       render();
     };
+    focusMainHeading();
   }
 }
 
-document.addEventListener('DOMContentLoaded', () => render());
+function initApp() {
+  loadPreferences();
+  bindAccessibilityControls();
+  if (tryRestoreResultFromUrl()) {
+    render();
+    return;
+  }
+  render();
+}
+
+document.addEventListener('DOMContentLoaded', initApp);

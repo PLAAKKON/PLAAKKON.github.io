@@ -19,6 +19,8 @@
   <link rel="apple-touch-icon" href="/logo_transparent.png"/>
 </head>
 <body>
+  <a class="skip-link" href="#app">Siirry sisältöön</a>
+  <div id="liveStatus" class="sr-only" aria-live="polite" aria-atomic="true"></div>
   <div class="bg-glow" aria-hidden="true"></div>
   <div class="confetti" id="confetti" aria-hidden="true"></div>
 
@@ -28,10 +30,13 @@
         <img src="/logo_transparent.png" alt="Yoro"/>
         Ohjausmoottori
       </a>
-      <span class="pill">Beta</span>
+      <div class="topbar-actions">
+        <button type="button" class="plain-toggle" id="plainLangToggle" aria-pressed="false" aria-label="Vaihda selkokieli päälle tai pois">Selkokieli</button>
+        <span class="pill">Beta</span>
+      </div>
     </header>
 
-    <main id="app"></main>
+    <main id="app" tabindex="-1"></main>
   </div>
 
   <script src="app.js"></script>
