@@ -281,34 +281,19 @@ const INTEREST_Q = [
       { key: 'organize', label: 'Varmistan, että asiat toimivat ja sujuvat' },
     ],
   },
-  {
-    id: 'i3',
-    text: 'Mitä aiheita seuraat tai opiskelet vapaaehtoisesti?',
-    hint: 'Valitse enintään kaksi.',
-    multi: 2,
-    options: [
-      { key: 'tech', label: 'Teknologia, pelit, ohjelmointi' },
-      { key: 'people', label: 'Ihmiset, terveys, psykologia' },
-      { key: 'business', label: 'Liiketoiminta, talous, some' },
-      { key: 'nature', label: 'Luonto, ilmasto, eläimet' },
-      { key: 'creative', label: 'Taide, design, tarinat' },
-      { key: 'how', label: 'Miten asiat toimivat — koneet, rakentaminen' },
-      { key: 'unsure', label: 'En osaa vielä sanoa' },
-    ],
-  },
-  {
-    id: 'i4',
-    text: 'Mikä olisi sinulle luontevin tapa tutustua työelämään?',
-    hint: 'Valitse yksi. Et tarvitse vielä tietää ammattia.',
-    multi: 1,
-    options: [
-      { key: 'tet', label: 'Kokeilla käytännössä — TET, kesätyö tai harjoittelu' },
-      { key: 'study', label: 'Tutustua koulutuksiin ja opintoihin' },
-      { key: 'mentor', label: 'Kuulla ammattilaiselta, millaista työ on' },
-      { key: 'explore', label: 'En tiedä vielä — haluan nähdä useita vaihtoehtoja' },
-    ],
-  },
 ];
+
+const EXPLORE_Q = {
+  id: 'i4',
+  text: 'Mikä olisi sinulle luontevin tapa tutustua työelämään?',
+  hint: 'Valitse yksi — tämä ohjaa seuraavaa askeltasi tuloksissa.',
+  options: [
+    { key: 'tet', label: 'Kokeilla käytännössä — TET, kesätyö tai harjoittelu' },
+    { key: 'study', label: 'Tutustua koulutuksiin ja opintoihin' },
+    { key: 'mentor', label: 'Kuulla ammattilaiselta, millaista työ on' },
+    { key: 'explore', label: 'En tiedä vielä — haluan nähdä useita vaihtoehtoja' },
+  ],
+};
 
 const ARCHETYPES = [
   {
@@ -661,28 +646,68 @@ function bindPathToggles() {
   });
 }
 
+const ANALYTICS_KEY = 'yoro_ohjaus_events_v1';
+const FEEDBACK_KEY = 'yoro_ohjaus_feedback_v1';
+
+function track(event, data = {}) {
+  try {
+    const row = { event, data, t: Date.now(), screen: state.screen, step: currentStep() };
+    const log = JSON.parse(sessionStorage.getItem(ANALYTICS_KEY) || '[]');
+    log.push(row);
+    sessionStorage.setItem(ANALYTICS_KEY, JSON.stringify(log.slice(-80)));
+  } catch (_) { /* ignore */ }
+}
+
+function inferTopics(interests) {
+  const topics = new Set();
+  (interests.i1 || []).forEach((key) => {
+    if (key === 'tekniikka') { topics.add('tech'); topics.add('how'); }
+    if (key === 'terveys') topics.add('people');
+    if (key === 'luonto') topics.add('nature');
+    if (key === 'kaytanto') topics.add('how');
+    if (key === 'luova') topics.add('creative');
+    if (key === 'liiketoiminta') topics.add('business');
+  });
+  state.subjects.forEach((subId) => {
+    if (['matematiikka', 'fysiikka', 'kemia', 'kasityo'].includes(subId)) topics.add('tech');
+    if (['biologia', 'kotitalous'].includes(subId)) topics.add('people');
+    if (['maantieto'].includes(subId)) topics.add('nature');
+    if (['kuvataide', 'musiikki', 'aidinkieli'].includes(subId)) topics.add('creative');
+    if (['yhteiskunta', 'englanti'].includes(subId)) topics.add('business');
+  });
+  return [...topics];
+}
+
+function tyoohjausComplete() {
+  return TYOOHJAUS_QUESTIONS.every((q) => state.tyoohjaus[q.id]);
+}
+
+function interestStepValid(index) {
+  if (index === 0) {
+    return Array.isArray(state.interest.i1) && state.interest.i1.length >= 2;
+  }
+  return !!state.interest.i2 && !!state.interest.i4;
+}
+
 const state = {
   screen: 'intro',
   lxpIndex: 0,
   lxp: {},
   tyoohjaus: {},
-  tyoohjausIndex: 0,
   subjects: new Set(),
   interest: {},
   interestIndex: 0,
 };
 
 function totalSteps() {
-  return LXP_QUESTIONS.length + TYOOHJAUS_QUESTIONS.length + 1 + INTEREST_Q.length;
+  return LXP_QUESTIONS.length + 1 + 1 + INTEREST_Q.length;
 }
 
 function currentStep() {
   if (state.screen === 'lxp') return state.lxpIndex + 1;
-  if (state.screen === 'tyoohjaus') return LXP_QUESTIONS.length + 1 + state.tyoohjausIndex;
-  if (state.screen === 'subjects') return LXP_QUESTIONS.length + TYOOHJAUS_QUESTIONS.length + 1;
-  if (state.screen === 'interest') {
-    return LXP_QUESTIONS.length + TYOOHJAUS_QUESTIONS.length + 2 + state.interestIndex;
-  }
+  if (state.screen === 'tyoohjaus') return LXP_QUESTIONS.length + 1;
+  if (state.screen === 'subjects') return LXP_QUESTIONS.length + 2;
+  if (state.screen === 'interest') return LXP_QUESTIONS.length + 3 + state.interestIndex;
   return 0;
 }
 
@@ -703,7 +728,7 @@ function scorePaths(answers, sectors, interests, tyoohjaus = {}) {
   const sectorSet = new Set(sectors);
   const i1 = interests.i1 || [];
   const i2 = interests.i2;
-  const i3 = interests.i3 || [];
+  const i3 = interests.i3?.length ? interests.i3 : inferTopics(interests);
 
   return PATHS.map((path) => {
     let score = 0;
@@ -1098,6 +1123,89 @@ function shareText(archetype, paths) {
   return `Työtyylini on ${archetype.title} ${archetype.emoji}\n\nYoron ohjausmoottori ehdotti mulle polkua: ${top}\n\nEi yhtä oikeaa ammattia — kokeile 5 min:\nhttps://yoro.fi/ohjausmoottori/`;
 }
 
+function drawShareCard(archetype, topPath) {
+  const canvas = document.createElement('canvas');
+  canvas.width = 1200;
+  canvas.height = 630;
+  const ctx = canvas.getContext('2d');
+  if (!ctx) return null;
+
+  ctx.fillStyle = '#0b0f1a';
+  ctx.fillRect(0, 0, 1200, 630);
+
+  const glow = ctx.createRadialGradient(900, 120, 0, 900, 120, 400);
+  glow.addColorStop(0, 'rgba(34, 211, 238, 0.18)');
+  glow.addColorStop(1, 'rgba(11, 15, 26, 0)');
+  ctx.fillStyle = glow;
+  ctx.fillRect(0, 0, 1200, 630);
+
+  ctx.fillStyle = '#f1f5f9';
+  ctx.font = 'bold 56px Inter, system-ui, sans-serif';
+  ctx.fillText('Millainen tekijä olet?', 72, 120);
+
+  ctx.font = '72px Inter, system-ui, sans-serif';
+  ctx.fillText(`${archetype.emoji}  ${archetype.title}`, 72, 230);
+
+  ctx.fillStyle = '#94a3b8';
+  ctx.font = '32px Inter, system-ui, sans-serif';
+  const pathLine = topPath ? `Polku: ${topPath.name}` : '3 polkua kokeiltavaksi';
+  ctx.fillText(pathLine, 72, 310);
+
+  ctx.fillStyle = '#22d3ee';
+  ctx.font = '600 28px Inter, system-ui, sans-serif';
+  ctx.fillText('yoro.fi/ohjausmoottori', 72, 560);
+
+  ctx.fillStyle = '#64748b';
+  ctx.font = '24px Inter, system-ui, sans-serif';
+  ctx.fillText('5 min · ilmainen · ei uraennustetta', 72, 380);
+
+  return canvas;
+}
+
+function downloadShareCard(archetype, topPath) {
+  const canvas = drawShareCard(archetype, topPath);
+  if (!canvas) return;
+  const a = document.createElement('a');
+  a.download = 'yoro-tyotyyli.png';
+  a.href = canvas.toDataURL('image/png');
+  a.click();
+  track('share_card_download', { archetype: archetype.id, path: topPath?.id });
+}
+
+function bindFeedback(archetype, topPath) {
+  const card = document.getElementById('feedbackCard');
+  if (!card) return;
+  const thanks = document.getElementById('feedbackThanks');
+  card.querySelectorAll('[data-feedback]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const rating = btn.dataset.feedback;
+      try {
+        const entry = {
+          rating,
+          archetype: archetype.id,
+          path: topPath?.id,
+          t: Date.now(),
+          events: JSON.parse(sessionStorage.getItem(ANALYTICS_KEY) || '[]').slice(-20),
+        };
+        const all = JSON.parse(sessionStorage.getItem(FEEDBACK_KEY) || '[]');
+        all.push(entry);
+        sessionStorage.setItem(FEEDBACK_KEY, JSON.stringify(all.slice(-50)));
+      } catch (_) { /* ignore */ }
+      track('feedback', { rating });
+      card.querySelectorAll('[data-feedback]').forEach((b) => { b.disabled = true; });
+      if (thanks) thanks.hidden = false;
+    });
+  });
+}
+
+function bindCtaTracking() {
+  document.querySelectorAll('.cta-primary').forEach((a) => {
+    a.addEventListener('click', () => {
+      track('cta_click', { href: a.getAttribute('href') });
+    });
+  });
+}
+
 function spawnConfetti() {
   const el = document.getElementById('confetti');
   if (!el) return;
@@ -1129,13 +1237,14 @@ function render() {
         <p class="hook">✦ Saat oman työtyyli-tyypin + jaettavan kortin</p>
         <div class="stats-row">
           <div class="stat"><strong>10</strong><span>LxP-kysymystä</span></div>
-          <div class="stat"><strong>2</strong><span>työohjauskysymystä</span></div>
-          <div class="stat"><strong>4</strong><span>kiinnostusta</span></div>
+          <div class="stat"><strong>1</strong><span>työohjaus</span></div>
+          <div class="stat"><strong>2</strong><span>kiinnostusta</span></div>
         </div>
         <button class="btn btn-primary" id="startBtn">Aloita testi →</button>
         <p class="disclaimer" style="margin-top:20px">Ei rekisteröitymistä. Tulos on ohjausta, ei ennustetta.</p>
       </section>`;
     document.getElementById('startBtn').onclick = () => {
+      track('start');
       state.screen = 'lxp';
       render();
     };
@@ -1145,7 +1254,7 @@ function render() {
   const progressHtml =
     state.screen !== 'result'
       ? `<div class="progress-wrap">
-          <div class="progress-label"><span>Vaihe ${step}/${totalSteps()}</span><strong>${pct}%</strong></div>
+          <div class="progress-label"><span>Vaihe ${step}/${totalSteps()}${pct >= 85 ? ' · melkein valmis!' : ''}</span><strong>${pct}%</strong></div>
           <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
         </div>`
       : '';
@@ -1181,53 +1290,49 @@ function render() {
         state.lxpIndex++;
       } else {
         state.screen = 'tyoohjaus';
-        state.tyoohjausIndex = 0;
       }
+      track('lxp_complete');
       render();
     };
     return;
   }
 
   if (state.screen === 'tyoohjaus') {
-    const q = TYOOHJAUS_QUESTIONS[state.tyoohjausIndex];
-    const isLastTyoohjaus = state.tyoohjausIndex >= TYOOHJAUS_QUESTIONS.length - 1;
     app.innerHTML = `
       ${progressHtml}
       <div class="card">
-        <div class="phase-tag">Työohjaus ${state.tyoohjausIndex + 1}/${TYOOHJAUS_QUESTIONS.length} · ei LxP-hakua</div>
-        <h2>${q.text}</h2>
-        <p class="hint">${q.hint}</p>
-        <div class="options" id="opts">
-          ${q.options.map((o) => `<button type="button" class="opt${state.tyoohjaus[q.id] === o.key ? ' selected' : ''}" data-key="${o.key}">${o.label}</button>`).join('')}
-        </div>
+        <div class="phase-tag">Työohjaus · ei LxP-hakua</div>
+        <p class="hint" style="margin-bottom:16px">Nämä kysymykset vaikuttavat vain uraohjaukseen — eivät työnantajan LxP-hakuun.</p>
+        ${TYOOHJAUS_QUESTIONS.map((q) => `
+          <div class="tyoohjaus-block">
+            <h2 class="tyoohjaus-q">${q.text}</h2>
+            <p class="hint">${q.hint}</p>
+            <div class="options" data-qid="${q.id}">
+              ${q.options.map((o) => `<button type="button" class="opt${state.tyoohjaus[q.id] === o.key ? ' selected' : ''}" data-key="${o.key}">${o.label}</button>`).join('')}
+            </div>
+          </div>`).join('')}
       </div>
       <div class="nav-row">
         <button class="btn btn-ghost" id="backBtn">← Takaisin</button>
-        <button class="btn btn-primary" id="nextBtn">${isLastTyoohjaus ? 'Lempiaineet →' : 'Seuraava →'}</button>
+        <button class="btn btn-primary" id="nextBtn" ${tyoohjausComplete() ? '' : 'disabled style="opacity:0.5"'}>Lempiaineet →</button>
       </div>`;
 
-    document.querySelectorAll('.opt').forEach((btn) => {
+    document.querySelectorAll('.tyoohjaus-block .opt').forEach((btn) => {
       btn.onclick = () => {
-        state.tyoohjaus[q.id] = btn.dataset.key;
+        const qid = btn.parentElement.dataset.qid;
+        state.tyoohjaus[qid] = btn.dataset.key;
         render();
       };
     });
     document.getElementById('backBtn').onclick = () => {
-      if (state.tyoohjausIndex > 0) {
-        state.tyoohjausIndex--;
-      } else {
-        state.screen = 'lxp';
-        state.lxpIndex = LXP_QUESTIONS.length - 1;
-      }
+      state.screen = 'lxp';
+      state.lxpIndex = LXP_QUESTIONS.length - 1;
       render();
     };
     document.getElementById('nextBtn').onclick = () => {
-      if (!state.tyoohjaus[q.id]) return;
-      if (isLastTyoohjaus) {
-        state.screen = 'subjects';
-      } else {
-        state.tyoohjausIndex++;
-      }
+      if (!tyoohjausComplete()) return;
+      track('tyoohjaus_complete', { ...state.tyoohjaus });
+      state.screen = 'subjects';
       render();
     };
     return;
@@ -1259,11 +1364,11 @@ function render() {
     });
     document.getElementById('backBtn').onclick = () => {
       state.screen = 'tyoohjaus';
-      state.tyoohjausIndex = TYOOHJAUS_QUESTIONS.length - 1;
       render();
     };
     document.getElementById('nextBtn').onclick = () => {
       if (state.subjects.size < 1) return;
+      track('subjects_complete', { count: state.subjects.size });
       state.screen = 'interest';
       state.interestIndex = 0;
       render();
@@ -1272,22 +1377,34 @@ function render() {
   }
 
   if (state.screen === 'interest') {
+    const isCombo = state.interestIndex === 1;
     const q = INTEREST_Q[state.interestIndex];
     const selected = state.interest[q.id] || (q.multi > 1 ? [] : null);
-    const isSelected = (key) => {
-      if (Array.isArray(selected)) return selected.includes(key);
-      return selected === key;
+    const isSelected = (key, qid) => {
+      const sel = qid ? state.interest[qid] : selected;
+      if (Array.isArray(sel)) return sel.includes(key);
+      return sel === key;
     };
+
+    const comboHtml = isCombo ? `
+        <div class="tyoohjaus-block" style="margin-top:20px">
+          <h2 class="tyoohjaus-q">${EXPLORE_Q.text}</h2>
+          <p class="hint">${EXPLORE_Q.hint}</p>
+          <div class="options" data-qid="i4">
+            ${EXPLORE_Q.options.map((o) => `<button type="button" class="opt${state.interest.i4 === o.key ? ' selected' : ''}" data-key="${o.key}" data-qid="i4">${o.label}</button>`).join('')}
+          </div>
+        </div>` : '';
 
     app.innerHTML = `
       ${progressHtml}
       <div class="card">
-        <div class="phase-tag">Kiinnostus ${state.interestIndex + 1}/4</div>
+        <div class="phase-tag">Kiinnostus ${state.interestIndex + 1}/${INTEREST_Q.length}</div>
         <h2>${q.text}</h2>
         <p class="hint">${q.hint}</p>
-        <div class="options" id="opts">
+        <div class="options" id="opts" data-qid="${q.id}">
           ${q.options.map((o) => `<button type="button" class="opt${isSelected(o.key) ? ' selected' : ''}" data-key="${o.key}">${o.label}</button>`).join('')}
         </div>
+        ${comboHtml}
       </div>
       <div class="nav-row">
         <button class="btn btn-ghost" id="backBtn">← Takaisin</button>
@@ -1297,20 +1414,21 @@ function render() {
     document.querySelectorAll('.opt').forEach((btn) => {
       btn.onclick = () => {
         const key = btn.dataset.key;
-        if (q.multi > 1) {
-          let arr = state.interest[q.id] || [];
+        const qid = btn.dataset.qid || btn.parentElement.dataset.qid || q.id;
+        const target = INTEREST_Q.find((item) => item.id === qid) || (qid === 'i4' ? { id: 'i4', multi: 1 } : q);
+        if (target.multi > 1) {
+          let arr = state.interest[qid] || [];
           if (arr.includes(key)) arr = arr.filter((k) => k !== key);
-          else if (arr.length < q.multi) arr = [...arr, key];
-          state.interest[q.id] = arr;
+          else if (arr.length < target.multi) arr = [...arr, key];
+          state.interest[qid] = arr;
         } else {
-          state.interest[q.id] = key;
+          state.interest[qid] = key;
         }
         render();
       };
     });
 
-    const sel = state.interest[q.id];
-    const valid = Array.isArray(sel) ? sel.length >= (q.id === 'i3' ? 1 : q.multi) : !!sel;
+    const valid = interestStepValid(state.interestIndex);
     const nextBtn = document.getElementById('nextBtn');
     if (!valid) nextBtn.setAttribute('disabled', '');
     else nextBtn.removeAttribute('disabled');
@@ -1325,6 +1443,7 @@ function render() {
       if (state.interestIndex < INTEREST_Q.length - 1) {
         state.interestIndex++;
       } else {
+        track('interest_complete', { i1: state.interest.i1, i2: state.interest.i2, i4: state.interest.i4 });
         state.screen = 'result';
         spawnConfetti();
       }
@@ -1389,18 +1508,35 @@ function render() {
       </div>
       <button type="button" class="btn btn-ghost" id="showMorePathsBtn">Näytä ${extraPaths.length} muuta polkua ▾</button>` : ''}
 
-      <button class="btn btn-share" id="shareBtn" style="margin-top:20px">Jaa kaverille</button>
+      <div class="feedback-card" id="feedbackCard">
+        <p class="feedback-title">Osuiko tulos sinuun?</p>
+        <div class="feedback-btns">
+          <button type="button" class="feedback-btn" data-feedback="yes">Kyllä</button>
+          <button type="button" class="feedback-btn" data-feedback="partly">Osittain</button>
+          <button type="button" class="feedback-btn" data-feedback="no">Ei juuri</button>
+        </div>
+        <p class="feedback-thanks" id="feedbackThanks" hidden>Kiitos palautteesta — auttaa meitä kehittämään testiä.</p>
+      </div>
+
+      <button class="btn btn-share" id="downloadCardBtn">Lataa jaettava kortti (PNG)</button>
+      <button class="btn btn-share" id="shareBtn">Jaa tekstinä</button>
       <button class="btn btn-ghost" id="retryBtn">Tee testi uudelleen</button>
       <a href="https://yoro.fi/" class="btn btn-ghost" style="text-decoration:none;margin-top:8px">← Palaa Yoro.fi-sivuille</a>
 
       <p class="disclaimer">Tulos perustuu 10 kysymyksen LxP-työtyyliin, työohjauskerrokseen, lempikouluaineisiin ja kiinnostukseen. Ei vaikuta työnantajan LxP-hakuun (lxp.yoro.fi). Emme mittaa älykkyyttä tai arvosanoja.</p>`;
 
+    track('result_view', { archetype: archetype.id, topPath: top?.id });
     bindPathToggles();
     bindPathWhyToggles();
     bindShowMorePaths(extraPaths.length);
+    bindFeedback(archetype, top);
+    bindCtaTracking();
+
+    document.getElementById('downloadCardBtn').onclick = () => downloadShareCard(archetype, top);
 
     document.getElementById('shareBtn').onclick = async () => {
       const text = shareText(archetype, topPaths);
+      track('share_text');
       if (navigator.share) {
         try {
           await navigator.share({ title: 'Työtyylini — Yoro', text, url: 'https://yoro.fi/ohjausmoottori/' });
@@ -1410,16 +1546,16 @@ function render() {
       await navigator.clipboard.writeText(text);
       const btn = document.getElementById('shareBtn');
       btn.textContent = 'Kopioitu! Lähetä kaverille ✓';
-      setTimeout(() => { btn.textContent = 'Jaa kaverille 📲'; }, 2500);
+      setTimeout(() => { btn.textContent = 'Jaa tekstinä'; }, 2500);
     };
 
     document.getElementById('retryBtn').onclick = () => {
+      track('retry');
       Object.assign(state, {
         screen: 'intro',
         lxpIndex: 0,
         lxp: {},
         tyoohjaus: {},
-        tyoohjausIndex: 0,
         subjects: new Set(),
         interest: {},
         interestIndex: 0,
