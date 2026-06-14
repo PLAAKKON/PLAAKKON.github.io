@@ -1,4 +1,12 @@
-/* Yoro Ohjausmoottori — nuorten työtyyli & polkutesti */
+/* Yoro Ohjausmoottori — nuorten työtyyli & polkutesti
+ *
+ * LXP_QUESTIONS = tasan 10 kysymystä (sama kardinaliteetti kuin lxp.yoro.fi hire-workflow).
+ * Ei koskaan lisätä Q11:ää LXP_QUESTIONS-taulukkoon — hire-prosessi ja profiiliavain
+ * (esim. 1A2C3A4B5A6C7C8B9A) perustuvat 10 kysymykseen.
+ *
+ * TYOOHJAUS_QUESTIONS = vain tähän työkaluun; vaikuttaa polku-/ammattisuosituksiin,
+ * ei LxP-avainta eikä työnantajan hakuprosessia.
+ */
 
 const LXP_QUESTIONS = [
   {
@@ -175,6 +183,32 @@ const LXP_QUESTIONS = [
       a: 'Jatkuva oppija — kasvu on tärkeää.',
       b: 'Kehittyy tasaisesti.',
       c: 'Nykyiset taidot riittävät.',
+    },
+  },
+];
+
+if (LXP_QUESTIONS.length !== 10) {
+  throw new Error('LXP_QUESTIONS must stay at 10 items (hire workflow compatibility)');
+}
+
+/** Työohjauskerros — EI osa LxP-avainta / lxp.yoro.fi hire-matchingia */
+const TYOOHJAUS_QUESTIONS = [
+  {
+    id: 'precision',
+    phase: 'Työohjaus',
+    text: 'Miten kuvailisit omaa työskentelyäsi?',
+    hint: 'Tämä kysymys on vain uraohjaukseen — ei vaikuta työnantajan LxP-hakuun. Ei oikeaa vastausta.',
+    options: [
+      { key: 'a', label: 'Olen huolellinen ja tarkka — pienetkin virheet häiritsevät minua.' },
+      { key: 'b', label: 'Pyrin olemaan tarkka, mutta priorisoin usein kokonaiskuvan.' },
+      { key: 'c', label: 'Olen suurpiirteinen — näen mieluummin kokonaisuuden kuin yksityiskohdat.' },
+      { key: 'd', label: 'Teen välillä virheitä, mutta korjaan ne nopeasti eteenpäin menessä.' },
+    ],
+    narrative: {
+      a: 'Tarkkuus ja huolellisuus ovat vahvuuksiasi.',
+      b: 'Tasapaino tarkkuuden ja kokonaiskuvan välillä.',
+      c: 'Suur kuva ja kokonaisuus edellä.',
+      d: 'Ketterä eteenpäin — virheet korjataan matkan varrella.',
     },
   },
 ];
@@ -410,7 +444,7 @@ const PATHS = [
     topics: ['business'],
     lxp: { q1: ['d'], q4: ['b', 'c'], q9: ['a', 'b'] },
     tet: 'TET yrityksessä — myynti, hallinto tai markkinointi',
-    study: 'Liiketalouden opinnot tai merkonomi',
+    study: 'Tradenomi, kauppatieteet tai liiketalous (AMK/yliopisto)',
   },
   {
     id: 'nature',
@@ -440,91 +474,151 @@ const PATHS = [
   },
 ];
 
-/** TE24-tyyppiset ammatit polkuryhmittäin (näytetään avattavassa listassa) */
+/** TE24-tyyppiset ammatit polkuryhmittäin — eroteltu perus- ja korkeakoulutaso */
 const OCCUPATIONS_BY_PATH = {
-  health: [
-    'Lähihoitaja', 'Sairaanhoitaja', 'Lastenhoitaja', 'Hoiva-avustaja', 'Kuntoutusohjaaja',
-    'Fysioterapeutti', 'Toimintaterapeutti', 'Farmaseutti', 'Hammashoitaja', 'Kätilö',
-    'Ensihoitaja', 'Mielenterveyshoitaja', 'Kodinhoitaja', 'Radiograafi', 'Laboratoriohoitaja',
-    'Geronomi', 'Optikko', 'Terveydenhoitaja',
-  ],
-  service: [
-    'Myyjä', 'Myyntiedustaja', 'Tarjoilija', 'Kokki', 'Ravintola- ja suurtaloustyöntekijä',
-    'Autonkuljettaja (paketti- ja jakeluautot)', 'Kuorma-auton ja yhdistelmäajoneuvon kuljettaja',
-    'Siivooja', 'Hotellityöntekijä', 'Asiakaspalvelutyöntekijä', 'Kassatyöntekijä',
-    'Parturi-kampaaja', 'Kosmetologi', 'Matkailupalvelutyöntekijä', 'Baarimikko',
-    'Huoltoaseman työntekijä', 'Lentokentän palvelutyöntekijä', 'Turistikokelas',
-  ],
-  business: [
-    'Toimisto- ja hallintosihteeri', 'Kirjanpitäjä', 'Varastotyöntekijä', 'Toimistotyöntekijä',
-    'Henkilöstöhallinnon assistentti', 'Sihteeri', 'Taloushallinnon työntekijä',
-    'Ostorihallinnan työntekijä', 'Logistiikan työntekijä', 'Varasto- ja logistiikkatyöntekijä',
-    'Projektisihteeri', 'Asiantuntijasihteeri', 'Merkonomi', 'Tradenomi', 'Assistentti',
-    'Vienti- ja tuontisihteeri', 'Toimistovirkailija', 'Hallintovirkailija',
-  ],
-  society: [
-    'Peruskoulun opettaja', 'Päiväkodin opettaja', 'Sosiaalityöntekijä', 'Poliisi', 'Vartija',
-    'Erityisopettaja', 'Nuorisotyöntekijä', 'Kuraattori', 'Oikeusavustaja', 'Tullivirkailija',
-    'Rajavartija', 'Kunnanhallinnon työntekijä', 'Sosiaaliohjaaja', 'Lastenohjaaja',
-    'Turvallisuusalan työntekijä', 'Paloesimies', 'Vanhustenhoitaja (sosiaali)', 'Ohjaaja',
-  ],
-  build: [
-    'Rakennustyöntekijä', 'Sähköasentaja', 'Kiinteistönhoitaja', 'Koneenasentaja',
-    'Konepaja- ja metallityöntekijä', 'Putkiasentaja', 'Maalari', 'LVI-asentaja',
-    'Rakennusapumies', 'Hitsaaja', 'Levyseppä', 'Teollisuuspuuseppä', 'Koneistaja',
-    'Autokorimekaanikko', 'Ilmanvaihtoasentaja', 'Rakennusvalvoja', 'Rakennusmestari',
-    'Huoltoasentaja',
-  ],
-  engineer: [
-    'Insinööri', 'Tuotekehittäjä', 'Konetekniikan insinööri', 'Sähköinsinööri', 'Rakennusinsinööri',
-    'Prosessisuunnittelija', 'Projektisuunnittelija', 'Laatuinsinööri', 'Ympäristöinsinööri',
-    'Automaatiosuunnittelija', 'Energiainsinööri', 'Koneinsinööri', 'Mekaniikkasuunnittelija',
-    'Tuotantosuunnittelija', 'Geotekniikan insinööri', 'Tuote- ja muotoiluinsinööri',
-    'Rakennesuunnittelija', 'Tuotanto- ja kehitysinsinööri',
-  ],
-  it: [
-    'Ohjelmistokehittäjä', 'Web-kehittäjä', 'Peliohjelmoija', 'Data-analyytikko', 'IT-tukihenkilö',
-    'Kyberturvallisuusasiantuntija', 'Pilviarkkitehti', 'DevOps-insinööri', 'UX/UI-suunnittelija',
-    'Tietokantasuunnittelija', 'Tekoälyasiantuntija', 'Järjestelmäsuunnittelija',
-    'Mobiilisovelluskehittäjä', 'Testausinsinööri', 'IT-projektipäällikkö', 'Pelisuunnittelija',
-    'Tietoturva-asiantuntija', 'Verkkosuunnittelija',
-  ],
-  lab: [
-    'Teollisuuden prosessityöntekijä', 'Laboratorioanalyytikko', 'Laadunvalvontatyöntekijä',
-    'Kemian laborantti', 'Elintarviketehtaan työntekijä', 'Prosessinhoitaja', 'Mittateknikko',
-    'Tehdastyöntekijä', 'Pakkauskoneen hoitaja', 'Tutkimusavustaja', 'Biotekniikan laborantti',
-    'Ympäristöanalyytikko', 'Kemikaaliteknikko', 'Tuotantolinjan operaattori',
-    'Laadunvalvojan assistentti',
-  ],
-  nature: [
-    'Maatalousyrittäjä', 'Maanviljelijä', 'Karjanhoitaja', 'Metsätyöntekijä', 'Puutarhuri',
-    'Metsänhoitaja', 'Kalastaja', 'Ympäristötyöntekijä', 'Luonnonsuojelutyöntekijä',
-    'Maatalouskoneenkuljettaja', 'Viininviljelijä', 'Metsäkoneenkuljettaja', 'Maaseutuyrittäjä',
-    'Eläintenhoitaja', 'Viljelijä',
-  ],
-  creative: [
-    'Graafinen suunnittelija', 'Valokuvaaja', 'Toimittaja', 'Sisällöntuottaja', 'Muusikko',
-    'Näyttelijä', 'Elokuvaaja', 'Animaattori', 'Muotoilija', 'Sisustussuunnittelija',
-    'Mainosgraafikko', 'Mediapalvelutyöntekijä', 'Kuvataiteilija', 'Tekstiilimuotoilija',
-    'Pelisuunnittelija', 'Visuaalinen suunnittelija', 'Luova kirjoittaja', 'Koreografi',
-  ],
+  health: {
+    vocational: [
+      'Lähihoitaja', 'Lastenhoitaja', 'Hoiva-avustaja', 'Kodinhoitaja', 'Kuntoutusohjaaja',
+    ],
+    higherEd: [
+      'Sairaanhoitaja', 'Fysioterapeutti', 'Toimintaterapeutti', 'Farmaseutti', 'Kätilö',
+      'Ensihoitaja', 'Mielenterveyshoitaja', 'Radiograafi', 'Laboratoriohoitaja', 'Geronomi',
+      'Optikko', 'Terveydenhoitaja', 'Hammashoitaja',
+    ],
+  },
+  service: {
+    vocational: [
+      'Myyjä', 'Tarjoilija', 'Kokki', 'Ravintola- ja suurtaloustyöntekijä',
+      'Autonkuljettaja (paketti- ja jakeluautot)', 'Kuorma-auton ja yhdistelmäajoneuvon kuljettaja',
+      'Siivooja', 'Hotellityöntekijä', 'Asiakaspalvelutyöntekijä', 'Kassatyöntekijä',
+      'Parturi-kampaaja', 'Kosmetologi', 'Baarimikko', 'Huoltoaseman työntekijä', 'Turistikokelas',
+    ],
+    higherEd: [
+      'Myyntiedustaja', 'Matkailupalvelutyöntekijä', 'Ravintolapäällikkö', 'Hotellipäällikkö',
+      'Tapahtumakoordinaattori', 'Matkailun tradenomi', 'Asiakaskokemusasiantuntija',
+      'Myyntipäällikkö', 'Markkinoinnin asiantuntija (palveluala)',
+    ],
+  },
+  business: {
+    vocational: [
+      'Toimisto- ja hallintosihteeri', 'Sihteeri', 'Toimistotyöntekijä', 'Toimistovirkailija',
+      'Varastotyöntekijä', 'Varasto- ja logistiikkatyöntekijä', 'Assistentti',
+      'Henkilöstöhallinnon assistentti', 'Ostorihallinnan työntekijä', 'Projektisihteeri',
+      'Vienti- ja tuontisihteeri', 'Hallintovirkailija', 'Merkonomi',
+    ],
+    higherEd: [
+      'Tradenomi', 'Kauppatieteiden tradenomi', 'Projektipäällikkö', 'Liiketoimintakonsultti',
+      'Markkinoinnin asiantuntija', 'HR-asiantuntija', 'Talousanalyytikko', 'Talousjohtaja',
+      'Myyntijohtaja', 'Tuotepäällikkö', 'Yrittäjä', 'Vienti-insinööri',
+      'Logistiikan asiantuntija', 'Kirjanpitäjä (KTK / tradenomi)', 'Tilintarkastaja',
+      'Asiantuntijasihteeri', 'Taloushallinnon asiantuntija',
+    ],
+  },
+  society: {
+    vocational: [
+      'Vartija', 'Lastenohjaaja', 'Sosiaaliohjaaja', 'Ohjaaja', 'Turvallisuusalan työntekijä',
+      'Vanhustenhoitaja (sosiaali)',
+    ],
+    higherEd: [
+      'Peruskoulun opettaja', 'Päiväkodin opettaja', 'Sosiaalityöntekijä', 'Poliisi',
+      'Erityisopettaja', 'Nuorisotyöntekijä', 'Kuraattori', 'Oikeusavustaja', 'Tullivirkailija',
+      'Rajavartija', 'Kunnanhallinnon asiantuntija', 'Paloesimies', 'Hallintotieteiden maisteri (kunta)',
+    ],
+  },
+  build: {
+    vocational: [
+      'Rakennustyöntekijä', 'Sähköasentaja', 'Kiinteistönhoitaja', 'Koneenasentaja',
+      'Konepaja- ja metallityöntekijä', 'Putkiasentaja', 'Maalari', 'LVI-asentaja',
+      'Rakennusapumies', 'Hitsaaja', 'Levyseppä', 'Teollisuuspuuseppä', 'Koneistaja',
+      'Autokorimekaanikko', 'Ilmanvaihtoasentaja', 'Huoltoasentaja',
+    ],
+    higherEd: [
+      'Rakennusmestari', 'Rakennusvalvoja', 'Rakennusinsinööri', 'Sähköinsinööri (rakennusala)',
+      'LVI-suunnittelija', 'Kiinteistöjohtaja', 'Työmaapäällikkö', 'Projekti-insinööri (rakennus)',
+    ],
+  },
+  engineer: {
+    vocational: [
+      'Koneistaja', 'Automaatioasentaja', 'Laadunvalvontatyöntekijä', 'Tuotantolinjan operaattori',
+      'Huoltoasentaja', 'Mittateknikko',
+    ],
+    higherEd: [
+      'Insinööri', 'Tuotekehittäjä', 'Konetekniikan insinööri', 'Sähköinsinööri', 'Rakennusinsinööri',
+      'Prosessisuunnittelija', 'Projektisuunnittelija', 'Laatuinsinööri', 'Ympäristöinsinööri',
+      'Automaatiosuunnittelija', 'Energiainsinööri', 'Koneinsinööri', 'Mekaniikkasuunnittelija',
+      'Tuotantosuunnittelija', 'Geotekniikan insinööri', 'Tuote- ja muotoiluinsinööri',
+      'Rakennesuunnittelija', 'Tuotanto- ja kehitysinsinööri',
+    ],
+  },
+  it: {
+    vocational: [
+      'IT-tukihenkilö', 'Verkkoteknikko', 'Tietokoneasentaja',
+    ],
+    higherEd: [
+      'Ohjelmistokehittäjä', 'Web-kehittäjä', 'Peliohjelmoija', 'Data-analyytikko',
+      'Kyberturvallisuusasiantuntija', 'Pilviarkkitehti', 'DevOps-insinööri', 'UX/UI-suunnittelija',
+      'Tietokantasuunnittelija', 'Tekoälyasiantuntija', 'Järjestelmäsuunnittelija',
+      'Mobiilisovelluskehittäjä', 'Testausinsinööri', 'IT-projektipäällikkö', 'Pelisuunnittelija',
+      'Tietoturva-asiantuntija', 'Verkkosuunnittelija',
+    ],
+  },
+  lab: {
+    vocational: [
+      'Teollisuuden prosessityöntekijä', 'Laadunvalvontatyöntekijä', 'Tehdastyöntekijä',
+      'Pakkauskoneen hoitaja', 'Tuotantolinjan operaattori', 'Laadunvalvojan assistentti',
+    ],
+    higherEd: [
+      'Laboratorioanalyytikko', 'Kemian laborantti', 'Prosessinhoitaja', 'Mittateknikko',
+      'Tutkimusavustaja', 'Biotekniikan laborantti', 'Ympäristöanalyytikko', 'Kemikaaliteknikko',
+      'Elintarviketehdasasiantuntija', 'Laadunvalvontainsinööri', 'Tutkimusinsinööri',
+    ],
+  },
+  nature: {
+    vocational: [
+      'Metsätyöntekijä', 'Maatalouskoneenkuljettaja', 'Metsäkoneenkuljettaja', 'Kalastaja',
+      'Eläintenhoitaja', 'Puutarhuri', 'Maanviljelijä', 'Karjanhoitaja',
+    ],
+    higherEd: [
+      'Maatalousyrittäjä', 'Metsänhoitaja', 'Ympäristötyöntekijä', 'Luonnonsuojelutyöntekijä',
+      'Maaseutuyrittäjä', 'Viljelijä', 'Metsätalousinsinööri', 'Ympäristösuunnittelija',
+      'Luonnonvara-alan asiantuntija', 'Viininviljelijä',
+    ],
+  },
+  creative: {
+    vocational: [
+      'Mediapalvelutyöntekijä', 'Valokuvaaja (freelance)', 'Sisällöntuottaja',
+    ],
+    higherEd: [
+      'Graafinen suunnittelija', 'Toimittaja', 'Muusikko', 'Näyttelijä', 'Elokuvaaja',
+      'Animaattori', 'Muotoilija', 'Sisustussuunnittelija', 'Mainosgraafikko', 'Kuvataiteilija',
+      'Tekstiilimuotoilija', 'Pelisuunnittelija', 'Visuaalinen suunnittelija', 'Luova kirjoittaja',
+      'Koreografi', 'Medianomi', 'Viestintäasiantuntija',
+    ],
+  },
 };
 
-const HIGHER_ED_OCCUPATIONS = [
-  'Sairaanhoitaja', 'Fysioterapeutti', 'Farmaseutti', 'Kätilö', 'Terveydenhoitaja',
-  'Insinööri', 'Ohjelmistokehittäjä', 'Peruskoulun opettaja', 'Päiväkodin opettaja',
-  'Sosiaalityöntekijä', 'Poliisi', 'Tradenomi', 'Erityisopettaja', 'Data-analyytikko',
-  'Tuote- ja muotoiluinsinööri', 'Konetekniikan insinööri', 'Sähköinsinööri',
-];
+function hasHigherEdBackground(answers) {
+  return answers.q7 === 'd' || answers.q8 === 'b';
+}
 
 function occupationsForPath(pathId, answers) {
-  const list = OCCUPATIONS_BY_PATH[pathId] ? [...OCCUPATIONS_BY_PATH[pathId]] : [];
-  if (!wantsHigherEd(answers)) return list;
-  return list.sort((a, b) => {
-    const aHi = HIGHER_ED_OCCUPATIONS.includes(a) ? 0 : 1;
-    const bHi = HIGHER_ED_OCCUPATIONS.includes(b) ? 0 : 1;
-    return aHi - bHi || a.localeCompare(b, 'fi');
-  });
+  const tiers = OCCUPATIONS_BY_PATH[pathId];
+  if (!tiers) return [];
+  if (hasHigherEdBackground(answers)) {
+    return tiers.higherEd.length ? [...tiers.higherEd] : [...tiers.vocational];
+  }
+  return [...tiers.vocational, ...tiers.higherEd];
+}
+
+function occupationCountForPath(pathId, answers) {
+  return occupationsForPath(pathId, answers).length;
+}
+
+function occupationHintFor(answers) {
+  if (hasHigherEdBackground(answers)) {
+    return 'Esimerkkejä korkeakoulutasoiseen polkuun sopivista ammateista (TE24) — ei perustason toimisto- tai käytännön tehtäviä.';
+  }
+  return 'Esimerkkejä tämän polun ammateista (TE24) — kokeile TET:llä tai tutustu opintoihin.';
 }
 
 function renderOccupationList(pathId, answers) {
@@ -551,19 +645,23 @@ const state = {
   screen: 'intro',
   lxpIndex: 0,
   lxp: {},
+  tyoohjaus: {},
   subjects: new Set(),
   interest: {},
   interestIndex: 0,
 };
 
 function totalSteps() {
-  return LXP_QUESTIONS.length + 1 + INTEREST_Q.length;
+  return LXP_QUESTIONS.length + TYOOHJAUS_QUESTIONS.length + 1 + INTEREST_Q.length;
 }
 
 function currentStep() {
   if (state.screen === 'lxp') return state.lxpIndex + 1;
-  if (state.screen === 'subjects') return LXP_QUESTIONS.length + 1;
-  if (state.screen === 'interest') return LXP_QUESTIONS.length + 2 + state.interestIndex;
+  if (state.screen === 'tyoohjaus') return LXP_QUESTIONS.length + 1;
+  if (state.screen === 'subjects') return LXP_QUESTIONS.length + TYOOHJAUS_QUESTIONS.length + 1;
+  if (state.screen === 'interest') {
+    return LXP_QUESTIONS.length + TYOOHJAUS_QUESTIONS.length + 2 + state.interestIndex;
+  }
   return 0;
 }
 
@@ -580,7 +678,7 @@ function pickArchetype(answers) {
   return ARCHETYPES[0];
 }
 
-function scorePaths(answers, sectors, interests) {
+function scorePaths(answers, sectors, interests, tyoohjaus = {}) {
   const sectorSet = new Set(sectors);
   const i1 = interests.i1 || [];
   const i2 = interests.i2;
@@ -666,6 +764,25 @@ function scorePaths(answers, sectors, interests) {
         break;
     }
 
+    const precision = tyoohjaus.precision;
+    if (precision === 'a') {
+      if (['lab', 'engineer', 'it', 'health'].includes(path.id)) score += 14;
+      if (path.id === 'business') score -= 20;
+      if (path.id === 'service') score -= 10;
+    } else if (precision === 'b') {
+      if (['lab', 'engineer', 'it', 'business', 'society'].includes(path.id)) score += 5;
+    } else if (precision === 'c' || precision === 'd') {
+      if (['business', 'creative', 'service', 'society'].includes(path.id)) score += 10;
+      if (path.id === 'lab') score -= 18;
+      if (path.id === 'engineer' && precision === 'd') score -= 6;
+    }
+
+    if (hasHigherEdBackground(answers)) {
+      const vocationalHeavy = ['build', 'service', 'nature'];
+      if (vocationalHeavy.includes(path.id)) score -= 6;
+      if (['engineer', 'it', 'lab', 'society', 'creative', 'business'].includes(path.id)) score += 4;
+    }
+
   if (sectorSet.size) {
       path.sectors.forEach((s) => {
         if (sectorSet.has(s)) score += 5;
@@ -679,7 +796,7 @@ function scorePaths(answers, sectors, interests) {
 }
 
 function wantsHigherEd(answers) {
-  return answers.q7 === 'd' || answers.q7 === 'c' || answers.q8 === 'b';
+  return hasHigherEdBackground(answers) || answers.q7 === 'c';
 }
 
 function studyLineForPath(path, answers) {
@@ -704,13 +821,17 @@ function getSectorWeights() {
   return Object.entries(weights).sort((a, b) => b[1] - a[1]).map(([s]) => s);
 }
 
-function buildNarrative(answers) {
+function buildNarrative(answers, tyoohjaus = {}) {
   const lines = [];
   LXP_QUESTIONS.forEach((q) => {
     const key = answers[q.id];
     if (key && q.narrative[key]) lines.push(q.narrative[key]);
   });
-  return lines.slice(0, 5);
+  TYOOHJAUS_QUESTIONS.forEach((q) => {
+    const key = tyoohjaus[q.id];
+    if (key && q.narrative[key]) lines.push(q.narrative[key]);
+  });
+  return lines.slice(0, 6);
 }
 
 function nextStepLabel() {
@@ -759,7 +880,7 @@ function render() {
         <p class="hook">✦ Saat oman työtyyli-tyypin + jaettavan kortin</p>
         <div class="stats-row">
           <div class="stat"><strong>10</strong><span>LxP-kysymystä</span></div>
-          <div class="stat"><strong>+</strong><span>lempikouluaineet</span></div>
+          <div class="stat"><strong>+</strong><span>työohjaus & kiinnostus</span></div>
           <div class="stat"><strong>4</strong><span>kiinnostusta</span></div>
         </div>
         <button class="btn btn-primary" id="startBtn">Aloita testi →</button>
@@ -785,7 +906,7 @@ function render() {
     app.innerHTML = `
       ${progressHtml}
       <div class="card">
-        <div class="phase-tag">${state.lxpIndex + 1}/10 · ${q.phase}</div>
+        <div class="phase-tag">${state.lxpIndex + 1}/${LXP_QUESTIONS.length} · ${q.phase}</div>
         <h2>${q.text}</h2>
         <p class="hint">${q.hint || 'Valitse yksi — ei oikeita tai vääriä vastauksia.'}</p>
         <div class="options" id="opts">
@@ -794,7 +915,7 @@ function render() {
       </div>
       <div class="nav-row">
         ${state.lxpIndex > 0 ? '<button class="btn btn-ghost" id="backBtn">← Takaisin</button>' : '<span></span>'}
-        <button class="btn btn-primary" id="nextBtn">${state.lxpIndex < 9 ? 'Seuraava →' : 'Lempiaineet →'}</button>
+        <button class="btn btn-primary" id="nextBtn">${state.lxpIndex < LXP_QUESTIONS.length - 1 ? 'Seuraava →' : 'Työohjaus →'}</button>
       </div>`;
 
     document.querySelectorAll('.opt').forEach((btn) => {
@@ -810,8 +931,44 @@ function render() {
       if (state.lxpIndex < LXP_QUESTIONS.length - 1) {
         state.lxpIndex++;
       } else {
-        state.screen = 'subjects';
+        state.screen = 'tyoohjaus';
       }
+      render();
+    };
+    return;
+  }
+
+  if (state.screen === 'tyoohjaus') {
+    const q = TYOOHJAUS_QUESTIONS[0];
+    app.innerHTML = `
+      ${progressHtml}
+      <div class="card">
+        <div class="phase-tag">Työohjaus · ei LxP-hakua</div>
+        <h2>${q.text}</h2>
+        <p class="hint">${q.hint}</p>
+        <div class="options" id="opts">
+          ${q.options.map((o) => `<button type="button" class="opt${state.tyoohjaus[q.id] === o.key ? ' selected' : ''}" data-key="${o.key}">${o.label}</button>`).join('')}
+        </div>
+      </div>
+      <div class="nav-row">
+        <button class="btn btn-ghost" id="backBtn">← Takaisin</button>
+        <button class="btn btn-primary" id="nextBtn">Lempiaineet →</button>
+      </div>`;
+
+    document.querySelectorAll('.opt').forEach((btn) => {
+      btn.onclick = () => {
+        state.tyoohjaus[q.id] = btn.dataset.key;
+        render();
+      };
+    });
+    document.getElementById('backBtn').onclick = () => {
+      state.screen = 'lxp';
+      state.lxpIndex = LXP_QUESTIONS.length - 1;
+      render();
+    };
+    document.getElementById('nextBtn').onclick = () => {
+      if (!state.tyoohjaus[q.id]) return;
+      state.screen = 'subjects';
       render();
     };
     return;
@@ -842,8 +999,7 @@ function render() {
       };
     });
     document.getElementById('backBtn').onclick = () => {
-      state.screen = 'lxp';
-      state.lxpIndex = LXP_QUESTIONS.length - 1;
+      state.screen = 'tyoohjaus';
       render();
     };
     document.getElementById('nextBtn').onclick = () => {
@@ -921,14 +1077,16 @@ function render() {
     const answers = { ...state.lxp };
     const archetype = pickArchetype(answers);
     const sectors = getSectorWeights();
-    const paths = scorePaths(answers, sectors, state.interest);
+    const paths = scorePaths(answers, sectors, state.interest, state.tyoohjaus);
     const topPaths = paths.slice(0, 5);
-    const narrative = buildNarrative(answers);
+    const narrative = buildNarrative(answers, state.tyoohjaus);
     const top = topPaths[0];
     const nextLabel = nextStepLabel();
-    const higherEdNote = wantsHigherEd(answers)
-      ? '<p style="font-size:0.85rem;color:var(--accent3);margin-bottom:12px;padding:12px;background:rgba(52,211,153,0.08);border-radius:12px;border:1px solid rgba(52,211,153,0.2)">🎓 Valintojesi perusteella mukana myös korkeakoulutason jatko-opintopolkuja (AMK/yliopisto).</p>'
-      : '';
+    const higherEdNote = hasHigherEdBackground(answers)
+      ? '<p style="font-size:0.85rem;color:var(--accent3);margin-bottom:12px;padding:12px;background:rgba(52,211,153,0.08);border-radius:12px;border:1px solid rgba(52,211,153,0.2)">🎓 Korkeakoulutaso huomioitu — ammattilistat näyttävät vain korkeamman tason tehtäviä (ei sihteeri-, varasto- tai perushallintotyötä).</p>'
+      : wantsHigherEd(answers)
+        ? '<p style="font-size:0.85rem;color:var(--accent3);margin-bottom:12px;padding:12px;background:rgba(52,211,153,0.08);border-radius:12px;border:1px solid rgba(52,211,153,0.2)">🎓 Valintojesi perusteella mukana myös korkeakoulutason jatko-opintopolkuja (AMK/yliopisto).</p>'
+        : '';
 
     app.innerHTML = `
       <div class="result-hero">
@@ -958,7 +1116,8 @@ function render() {
       ${higherEdNote}
       ${topPaths.map((p, i) => {
         const study = studyLineForPath(p, answers);
-        const occCount = (OCCUPATIONS_BY_PATH[p.id] || []).length;
+        const occCount = occupationCountForPath(p.id, answers);
+        const occHint = occupationHintFor(answers);
         return `
         <div class="path-card">
           <span class="path-emoji">${p.emoji}</span>
@@ -972,7 +1131,7 @@ function render() {
               Näytä ammatit (${occCount}) ▾
             </button>
             <div class="path-occupations" hidden>
-              <p class="occupation-hint">Esimerkkejä tämän polun ammateista (TE24) — kokeile TET:llä tai tutustu opintoihin.</p>
+              <p class="occupation-hint">${occHint}</p>
               ${renderOccupationList(p.id, answers)}
             </div>` : ''}
           </div>
@@ -989,7 +1148,7 @@ function render() {
       <button class="btn btn-ghost" id="retryBtn">Tee testi uudelleen</button>
       <a href="https://yoro.fi/" class="btn btn-ghost" style="text-decoration:none;margin-top:8px">← Palaa Yoro.fi-sivuille</a>
 
-      <p class="disclaimer">Tulos perustuu työtyyliin (LxP), lempikouluaineisiin ja kiinnostukseen. Ammatti selkiytyy kokeilemalla — ei yhdestä testistä.</p>`;
+      <p class="disclaimer">Tulos perustuu 10 kysymyksen LxP-työtyyliin, työohjauskerrokseen, lempikouluaineisiin ja kiinnostukseen. Ei vaikuta työnantajan LxP-hakuun (lxp.yoro.fi).</p>`;
 
     bindPathToggles();
 
@@ -1012,6 +1171,7 @@ function render() {
         screen: 'intro',
         lxpIndex: 0,
         lxp: {},
+        tyoohjaus: {},
         subjects: new Set(),
         interest: {},
         interestIndex: 0,
