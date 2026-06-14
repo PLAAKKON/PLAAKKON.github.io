@@ -208,7 +208,27 @@ const TYOOHJAUS_QUESTIONS = [
       a: 'Tarkkuus ja huolellisuus ovat vahvuuksiasi.',
       b: 'Tasapaino tarkkuuden ja kokonaiskuvan välillä.',
       c: 'Suur kuva ja kokonaisuus edellä — sopii esim. tuotekehitykseen ja luovaan tekemiseen.',
-      d: 'Ketterä eteenpäin — virheet korjataan matkan varrella; sinnikkyys vie pitkälle.',
+      d: 'Ketterä eteenpäin — virheet korjataan matkan varrella.',
+    },
+  },
+  {
+    id: 'drive',
+    phase: 'Työohjaus',
+    text: 'Mikä kuvaa sinua parhaiten työssä?',
+    hint: 'Vain uraohjaukseen — ei vaikuta työnantajan LxP-hakuun.',
+    options: [
+      { key: 'a', label: 'Keksin mielelläni uusia ratkaisuja ja ideoita.' },
+      { key: 'b', label: 'Vienn asiat loppuun, vaikka homma on hankala ja kestää kauan.' },
+      { key: 'c', label: 'Keksin mielelläni uusia ratkaisuja ja vien hankalatkin asiat loppuun saakka.' },
+      { key: 'd', label: 'Pidän työstä, jossa eteneminen on selkeää — en hae erityisesti pitkäkestoisia hankalia projekteja.' },
+      { key: 'e', label: 'En osaa vielä sanoa.' },
+    ],
+    narrative: {
+      a: 'Luova ongelmanratkaisija — ideat edellä.',
+      b: 'Sinnikäs tekijä — kestävyys vie pitkälle.',
+      c: 'Luova ja sinnikäs — sopii erityisesti tuotekehitykseen ja vaativaan tekemiseen.',
+      d: 'Selkeä eteneminen ja sopiva kuormitus — hankala grindaus ei motivoi.',
+      e: 'Työtyyli vielä muotoutumassa.',
     },
   },
 ];
@@ -646,6 +666,7 @@ const state = {
   lxpIndex: 0,
   lxp: {},
   tyoohjaus: {},
+  tyoohjausIndex: 0,
   subjects: new Set(),
   interest: {},
   interestIndex: 0,
@@ -657,7 +678,7 @@ function totalSteps() {
 
 function currentStep() {
   if (state.screen === 'lxp') return state.lxpIndex + 1;
-  if (state.screen === 'tyoohjaus') return LXP_QUESTIONS.length + 1;
+  if (state.screen === 'tyoohjaus') return LXP_QUESTIONS.length + 1 + state.tyoohjausIndex;
   if (state.screen === 'subjects') return LXP_QUESTIONS.length + TYOOHJAUS_QUESTIONS.length + 1;
   if (state.screen === 'interest') {
     return LXP_QUESTIONS.length + TYOOHJAUS_QUESTIONS.length + 2 + state.interestIndex;
@@ -786,6 +807,20 @@ function scorePaths(answers, sectors, interests, tyoohjaus = {}) {
       }
     }
 
+    const drive = tyoohjaus.drive;
+    if (drive === 'a') {
+      if (['creative', 'engineer', 'it'].includes(path.id)) score += 12;
+    } else if (drive === 'b') {
+      if (['engineer', 'lab', 'build', 'health'].includes(path.id)) score += 12;
+    } else if (drive === 'c') {
+      if (['engineer', 'it', 'creative'].includes(path.id)) score += 18;
+      if (i1.includes('tekniikka') || i1.includes('luova')) score += 8;
+      if (i2 === 'solve' || i2 === 'create') score += 8;
+    } else if (drive === 'd') {
+      if (['engineer', 'lab'].includes(path.id)) score -= 14;
+      if (['service', 'build', 'health'].includes(path.id)) score += 8;
+    }
+
     if (hasHigherEdBackground(answers)) {
       const vocationalHeavy = ['build', 'service', 'nature'];
       if (vocationalHeavy.includes(path.id)) score -= 6;
@@ -889,7 +924,7 @@ function render() {
         <p class="hook">✦ Saat oman työtyyli-tyypin + jaettavan kortin</p>
         <div class="stats-row">
           <div class="stat"><strong>10</strong><span>LxP-kysymystä</span></div>
-          <div class="stat"><strong>+</strong><span>työohjaus & kiinnostus</span></div>
+          <div class="stat"><strong>2</strong><span>työohjauskysymystä</span></div>
           <div class="stat"><strong>4</strong><span>kiinnostusta</span></div>
         </div>
         <button class="btn btn-primary" id="startBtn">Aloita testi →</button>
@@ -941,6 +976,7 @@ function render() {
         state.lxpIndex++;
       } else {
         state.screen = 'tyoohjaus';
+        state.tyoohjausIndex = 0;
       }
       render();
     };
@@ -948,11 +984,12 @@ function render() {
   }
 
   if (state.screen === 'tyoohjaus') {
-    const q = TYOOHJAUS_QUESTIONS[0];
+    const q = TYOOHJAUS_QUESTIONS[state.tyoohjausIndex];
+    const isLastTyoohjaus = state.tyoohjausIndex >= TYOOHJAUS_QUESTIONS.length - 1;
     app.innerHTML = `
       ${progressHtml}
       <div class="card">
-        <div class="phase-tag">Työohjaus · ei LxP-hakua</div>
+        <div class="phase-tag">Työohjaus ${state.tyoohjausIndex + 1}/${TYOOHJAUS_QUESTIONS.length} · ei LxP-hakua</div>
         <h2>${q.text}</h2>
         <p class="hint">${q.hint}</p>
         <div class="options" id="opts">
@@ -961,7 +998,7 @@ function render() {
       </div>
       <div class="nav-row">
         <button class="btn btn-ghost" id="backBtn">← Takaisin</button>
-        <button class="btn btn-primary" id="nextBtn">Lempiaineet →</button>
+        <button class="btn btn-primary" id="nextBtn">${isLastTyoohjaus ? 'Lempiaineet →' : 'Seuraava →'}</button>
       </div>`;
 
     document.querySelectorAll('.opt').forEach((btn) => {
@@ -971,13 +1008,21 @@ function render() {
       };
     });
     document.getElementById('backBtn').onclick = () => {
-      state.screen = 'lxp';
-      state.lxpIndex = LXP_QUESTIONS.length - 1;
+      if (state.tyoohjausIndex > 0) {
+        state.tyoohjausIndex--;
+      } else {
+        state.screen = 'lxp';
+        state.lxpIndex = LXP_QUESTIONS.length - 1;
+      }
       render();
     };
     document.getElementById('nextBtn').onclick = () => {
       if (!state.tyoohjaus[q.id]) return;
-      state.screen = 'subjects';
+      if (isLastTyoohjaus) {
+        state.screen = 'subjects';
+      } else {
+        state.tyoohjausIndex++;
+      }
       render();
     };
     return;
@@ -1009,6 +1054,7 @@ function render() {
     });
     document.getElementById('backBtn').onclick = () => {
       state.screen = 'tyoohjaus';
+      state.tyoohjausIndex = TYOOHJAUS_QUESTIONS.length - 1;
       render();
     };
     document.getElementById('nextBtn').onclick = () => {
@@ -1181,6 +1227,7 @@ function render() {
         lxpIndex: 0,
         lxp: {},
         tyoohjaus: {},
+        tyoohjausIndex: 0,
         subjects: new Set(),
         interest: {},
         interestIndex: 0,
