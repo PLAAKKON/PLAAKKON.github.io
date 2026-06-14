@@ -103,6 +103,26 @@ body {
   margin: 16px 0 24px;
 }
 
+.hero-art {
+  display: block;
+  width: min(100%, 320px);
+  height: auto;
+  margin: 8px auto 20px;
+  opacity: 0.95;
+}
+
+.hero-art path,
+.hero-art circle {
+  fill: none;
+  stroke-linecap: round;
+}
+
+.hero-art .path-cyan { stroke: #22d3ee; filter: drop-shadow(0 0 8px rgba(34, 211, 238, 0.55)); }
+.hero-art .path-purple { stroke: #a78bfa; filter: drop-shadow(0 0 8px rgba(167, 139, 250, 0.55)); }
+.hero-art .path-magenta { stroke: #c084fc; filter: drop-shadow(0 0 8px rgba(192, 132, 252, 0.5)); }
+.hero-art .node { fill: rgba(11, 15, 26, 0.9); stroke-width: 2; }
+.hero-art .origin { fill: #22d3ee; stroke: none; filter: drop-shadow(0 0 6px rgba(34, 211, 238, 0.7)); }
+
 .stats-row {
   display: flex;
   gap: 12px;

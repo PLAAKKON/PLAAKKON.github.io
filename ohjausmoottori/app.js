@@ -1123,6 +1123,79 @@ function shareText(archetype, paths) {
   return `Työtyylini on ${archetype.title} ${archetype.emoji}\n\nYoron ohjausmoottori ehdotti mulle polkua: ${top}\n\nEi yhtä oikeaa ammattia — kokeile 5 min:\nhttps://yoro.fi/ohjausmoottori/`;
 }
 
+function drawGlowCurve(ctx, x1, y1, cx, cy, x2, y2, color, width = 3) {
+  ctx.save();
+  ctx.strokeStyle = color;
+  ctx.lineWidth = width;
+  ctx.lineCap = 'round';
+  ctx.shadowColor = color;
+  ctx.shadowBlur = 18;
+  ctx.beginPath();
+  ctx.moveTo(x1, y1);
+  ctx.quadraticCurveTo(cx, cy, x2, y2);
+  ctx.stroke();
+  ctx.restore();
+}
+
+function drawPathNode(ctx, x, y, color, glyph) {
+  ctx.save();
+  ctx.shadowColor = color;
+  ctx.shadowBlur = 22;
+  ctx.strokeStyle = color;
+  ctx.lineWidth = 2;
+  ctx.fillStyle = 'rgba(11, 15, 26, 0.92)';
+  ctx.beginPath();
+  ctx.arc(x, y, 34, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.stroke();
+  ctx.shadowBlur = 0;
+  ctx.fillStyle = '#f8fafc';
+  ctx.font = '28px Inter, system-ui, sans-serif';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(glyph, x, y + 1);
+  ctx.restore();
+}
+
+function drawBranchingPathsArt(ctx, originX, originY) {
+  const nodes = [
+    { x: originX - 130, y: originY - 210, cx: originX - 95, cy: originY - 120, color: '#22d3ee', glyph: '💼' },
+    { x: originX, y: originY - 250, cx: originX, cy: originY - 140, color: '#a78bfa', glyph: '🧭' },
+    { x: originX + 130, y: originY - 210, cx: originX + 95, cy: originY - 120, color: '#c084fc', glyph: '🚩' },
+  ];
+
+  nodes.forEach((node) => drawGlowCurve(ctx, originX, originY, node.cx, node.cy, node.x, node.y, node.color));
+  nodes.forEach((node) => drawPathNode(ctx, node.x, node.y, node.color, node.glyph));
+
+  ctx.save();
+  ctx.fillStyle = '#22d3ee';
+  ctx.shadowColor = '#22d3ee';
+  ctx.shadowBlur = 14;
+  ctx.beginPath();
+  ctx.arc(originX, originY, 8, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.restore();
+}
+
+function drawYoroMark(ctx, x, y) {
+  ctx.save();
+  ctx.textAlign = 'left';
+  ctx.textBaseline = 'alphabetic';
+  ctx.fillStyle = '#f8fafc';
+  ctx.font = 'bold 34px Inter, system-ui, sans-serif';
+  ctx.fillText('Yor', x, y);
+  const oX = x + ctx.measureText('Yor').width;
+  const grad = ctx.createLinearGradient(oX, y - 28, oX + 24, y);
+  grad.addColorStop(0, '#22d3ee');
+  grad.addColorStop(1, '#a78bfa');
+  ctx.fillStyle = grad;
+  ctx.fillText('o', oX, y);
+  ctx.fillStyle = '#94a3b8';
+  ctx.font = '600 11px Inter, system-ui, sans-serif';
+  ctx.fillText('OHJAUSMOOTTORI', x, y + 22);
+  ctx.restore();
+}
+
 function drawShareCard(archetype, topPath) {
   const canvas = document.createElement('canvas');
   canvas.width = 1200;
@@ -1133,31 +1206,48 @@ function drawShareCard(archetype, topPath) {
   ctx.fillStyle = '#0b0f1a';
   ctx.fillRect(0, 0, 1200, 630);
 
-  const glow = ctx.createRadialGradient(900, 120, 0, 900, 120, 400);
-  glow.addColorStop(0, 'rgba(34, 211, 238, 0.18)');
-  glow.addColorStop(1, 'rgba(11, 15, 26, 0)');
-  ctx.fillStyle = glow;
-  ctx.fillRect(0, 0, 1200, 630);
+  [
+    { x: 880, y: 140, r: 360, c: 'rgba(34, 211, 238, 0.16)' },
+    { x: 1020, y: 280, r: 300, c: 'rgba(167, 139, 250, 0.14)' },
+  ].forEach((g) => {
+    const glow = ctx.createRadialGradient(g.x, g.y, 0, g.x, g.y, g.r);
+    glow.addColorStop(0, g.c);
+    glow.addColorStop(1, 'rgba(11, 15, 26, 0)');
+    ctx.fillStyle = glow;
+    ctx.fillRect(0, 0, 1200, 630);
+  });
 
+  drawBranchingPathsArt(ctx, 900, 500);
+
+  ctx.textAlign = 'left';
+  ctx.textBaseline = 'alphabetic';
   ctx.fillStyle = '#f1f5f9';
-  ctx.font = 'bold 56px Inter, system-ui, sans-serif';
-  ctx.fillText('Millainen tekijä olet?', 72, 120);
+  ctx.font = 'bold 52px Inter, system-ui, sans-serif';
+  ctx.fillText('Millainen tekijä olet?', 72, 108);
 
-  ctx.font = '72px Inter, system-ui, sans-serif';
-  ctx.fillText(`${archetype.emoji}  ${archetype.title}`, 72, 230);
+  ctx.font = '64px Inter, system-ui, sans-serif';
+  ctx.fillText(`${archetype.emoji}  ${archetype.title}`, 72, 210);
 
   ctx.fillStyle = '#94a3b8';
-  ctx.font = '32px Inter, system-ui, sans-serif';
+  ctx.font = '28px Inter, system-ui, sans-serif';
   const pathLine = topPath ? `Polku: ${topPath.name}` : '3 polkua kokeiltavaksi';
-  ctx.fillText(pathLine, 72, 310);
+  ctx.fillText(pathLine, 72, 278);
 
-  ctx.fillStyle = '#22d3ee';
-  ctx.font = '600 28px Inter, system-ui, sans-serif';
-  ctx.fillText('yoro.fi/ohjausmoottori', 72, 560);
+  ctx.font = '36px Inter, system-ui, sans-serif';
+  ctx.fillText('🎯', 72, 338);
+  ctx.fillStyle = '#e2e8f0';
+  ctx.font = '26px Inter, system-ui, sans-serif';
+  ctx.fillText('kokeiltavaksi', 118, 338);
 
   ctx.fillStyle = '#64748b';
-  ctx.font = '24px Inter, system-ui, sans-serif';
-  ctx.fillText('5 min · ilmainen · ei uraennustetta', 72, 380);
+  ctx.font = '22px Inter, system-ui, sans-serif';
+  ctx.fillText('5 min · ilmainen · ei uraennustetta', 72, 392);
+
+  ctx.fillStyle = '#22d3ee';
+  ctx.font = '600 24px Inter, system-ui, sans-serif';
+  ctx.fillText('yoro.fi/ohjausmoottori', 72, 560);
+
+  drawYoroMark(ctx, 980, 580);
 
   return canvas;
 }
@@ -1232,7 +1322,19 @@ function render() {
     app.innerHTML = `
       <section class="hero">
         <div class="pill">Ilmainen · 5 min</div>
-        <h1 style="margin-top:14px">Et tiedä mitä haluat?<br><span>Hyvä.</span></h1>
+        <svg class="hero-art" viewBox="0 0 320 180" aria-hidden="true" focusable="false">
+          <path class="path-cyan" d="M160 155 Q145 110 95 55" stroke-width="2.5"/>
+          <path class="path-purple" d="M160 155 Q160 95 160 40" stroke-width="2.5"/>
+          <path class="path-magenta" d="M160 155 Q175 110 225 55" stroke-width="2.5"/>
+          <circle class="origin" cx="160" cy="155" r="5"/>
+          <circle class="node path-cyan" cx="95" cy="55" r="22"/>
+          <text x="95" y="60" text-anchor="middle" font-size="18">💼</text>
+          <circle class="node path-purple" cx="160" cy="40" r="22"/>
+          <text x="160" y="45" text-anchor="middle" font-size="18">🧭</text>
+          <circle class="node path-magenta" cx="225" cy="55" r="22"/>
+          <text x="225" y="60" text-anchor="middle" font-size="18">🚩</text>
+        </svg>
+        <h1 style="margin-top:0">Et tiedä mitä haluat?<br><span>Hyvä.</span></h1>
         <p>Tämä testi ei kerro sinulle ammattia. Se kertoo <strong style="color:var(--text)">miten sinä työskentelet parhaiten</strong> — ja ehdottaa <strong style="color:var(--text)">3 polkua</strong> kokeiltavaksi.</p>
         <p class="hook">✦ Saat oman työtyyli-tyypin + jaettavan kortin</p>
         <div class="stats-row">
