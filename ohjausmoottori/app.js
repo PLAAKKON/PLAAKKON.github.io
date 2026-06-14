@@ -256,6 +256,22 @@ const SUBJECTS = [
   { id: 'liikunta', label: 'Liikunta', emoji: '🏃', sectors: ['palvelu'] },
 ];
 
+/** Kiinnostusvastaus → polkujen sector-tagit */
+function sectorsFromInterest(key) {
+  const map = {
+    tekniikka: ['tekniikka'],
+    ihmiset: ['terveys'],
+    terveys: ['terveys'],
+    luonto: ['luonto'],
+    kaytanto: ['kaytanto'],
+    luova: ['luova'],
+    liiketoiminta: ['liiketoiminta'],
+    turvallisuus: ['yhteiskunta'],
+    liikenne: ['palvelu'],
+  };
+  return map[key] || [];
+}
+
 const INTEREST_Q = [
   {
     id: 'i1',
@@ -264,13 +280,16 @@ const INTEREST_Q = [
     hint: 'Valitse kaksi — ajattele työtä, ei harrastusta.',
     hintPlain: 'Valitse kaksi. Ajattele työtä.',
     multi: 2,
+    grid: true,
     options: [
-      { key: 'tekniikka', label: 'Tekniikka & digi — koneet, ohjelmistot, pelit', labelPlain: 'Tekniikka ja digi' },
-      { key: 'terveys', label: 'Ihmiset & hoiva — terveys, kasvatus, neuvonta', labelPlain: 'Ihmiset ja hoiva' },
-      { key: 'luonto', label: 'Luonto & ympäristö — metsä, eläimet, ulkoilu työnä', labelPlain: 'Luonto ja ympäristö' },
-      { key: 'kaytanto', label: 'Rakentaminen & kädet — korjaus, asennus, tuotanto', labelPlain: 'Rakentaminen ja kädet' },
-      { key: 'luova', label: 'Luova — media, design, musiikki, pelit', labelPlain: 'Luova työ' },
-      { key: 'liiketoiminta', label: 'Liiketoiminta — myynti, hallinto, järjestäminen', labelPlain: 'Liiketoiminta' },
+      { key: 'tekniikka', label: '💻 Tekniikka ja digi', labelPlain: '💻 Tekniikka ja digi' },
+      { key: 'ihmiset', label: '❤️ Ihmiset, opetus ja hoiva', labelPlain: '❤️ Ihmiset ja hoiva' },
+      { key: 'luonto', label: '🌳 Luonto ja ympäristö', labelPlain: '🌳 Luonto ja ympäristö' },
+      { key: 'kaytanto', label: '🔨 Rakentaminen ja käytännön työ', labelPlain: '🔨 Rakentaminen ja käytännön työ' },
+      { key: 'luova', label: '🎨 Luova työ ja media', labelPlain: '🎨 Luova työ ja media' },
+      { key: 'liiketoiminta', label: '📈 Liiketoiminta ja yrittäjyys', labelPlain: '📈 Liiketoiminta' },
+      { key: 'turvallisuus', label: '🚓 Turvallisuus ja yhteiskunta', labelPlain: '🚓 Turvallisuus ja yhteiskunta' },
+      { key: 'liikenne', label: '🚚 Liikenne, logistiikka ja palvelut', labelPlain: '🚚 Liikenne ja palvelut' },
     ],
   },
   {
@@ -280,13 +299,16 @@ const INTEREST_Q = [
     hint: 'Valitse yksi.',
     hintPlain: 'Valitse yksi.',
     multi: 1,
+    grid: true,
     options: [
-      { key: 'solve', label: 'Ratkaisen ongelman — laskenta, koodi, data tai suunnittelu', labelPlain: 'Ratkaisen ongelman' },
-      { key: 'help', label: 'Autan ihmistä — hoiva, opetus, neuvonta', labelPlain: 'Autan ihmistä' },
-      { key: 'build', label: 'Rakennan tai korjaan jotain konkreettista', labelPlain: 'Rakennan tai korjaan' },
-      { key: 'create', label: 'Luon jotain uutta — kuva, teksti, video, peli', labelPlain: 'Luon jotain uutta' },
-      { key: 'connect', label: 'Keskustelen asiakkaiden tai tiimin kanssa', labelPlain: 'Keskustelen muiden kanssa' },
-      { key: 'organize', label: 'Varmistan, että asiat toimivat ja sujuvat', labelPlain: 'Järjestän asioita' },
+      { key: 'solve', label: '🧠 Ratkaisen ongelmia', labelPlain: '🧠 Ratkaisen ongelmia' },
+      { key: 'help', label: '❤️ Autan ihmisiä käytännössä', labelPlain: '❤️ Autan ihmisiä' },
+      { key: 'build', label: '🔨 Rakennan tai korjaan', labelPlain: '🔨 Rakennan tai korjaan' },
+      { key: 'connect', label: '🗣️ Keskustelen ja teen yhteistyötä ihmisten kanssa', labelPlain: '🗣️ Keskustelen ja teen yhteistyötä' },
+      { key: 'organize', label: '📋 Suunnittelen ja järjestän asioita', labelPlain: '📋 Suunnittelen ja järjestän' },
+      { key: 'create', label: '💡 Keksin ja luon uutta', labelPlain: '💡 Keksin ja luon uutta' },
+      { key: 'nature', label: '🌿 Työskentelen luonnon tai ympäristön parissa', labelPlain: '🌿 Luonto ja ympäristö' },
+      { key: 'data', label: '📊 Työskentelen numeroiden, tiedon tai talouden parissa', labelPlain: '📊 Numerot, tieto ja talous' },
     ],
   },
 ];
@@ -394,7 +416,7 @@ const PATHS = [
     desc: 'Ideat, prototyypit, kehitys — luovuus ja sinnikkyys ratkaisevat; pieni hajamielisyys ei haittaa.',
     sectors: ['tekniikka'],
     subjects: ['matematiikka', 'fysiikka', 'kemia', 'kasityo'],
-    workday: ['solve', 'build'],
+    workday: ['solve', 'build', 'data'],
     topics: ['tech', 'how'],
     lxp: { q2: ['c'], q5: ['a', 'b'], q1: ['a', 'b', 'd'], q10: ['a', 'b'] },
     tet: 'TET teknisellä alalla — tehdas, insinööritoimisto tai tuotekehitys',
@@ -407,7 +429,7 @@ const PATHS = [
     desc: 'Koodi, pelit, data — digitaalinen luominen ja ongelmanratkaisu.',
     sectors: ['tekniikka', 'luova'],
     subjects: ['matematiikka', 'englanti'],
-    workday: ['solve', 'create'],
+    workday: ['solve', 'create', 'data'],
     topics: ['tech'],
     lxp: { q5: ['a'], q2: ['c'], q3: ['a'] },
     tet: 'TET IT-yrityksessä tai pelistudiossa',
@@ -420,7 +442,7 @@ const PATHS = [
     desc: 'Auttaminen, hoiva, hyvinvointi — ihmisten parissa.',
     sectors: ['terveys'],
     subjects: ['biologia', 'kemia', 'kotitalous'],
-    workday: ['help'],
+    workday: ['help', 'connect'],
     topics: ['people'],
     lxp: { q2: ['d'], q4: ['c', 'd'], q1: ['c', 'd', 'e'] },
     tet: 'TET sairaalassa, hoivakodissa tai terveysasemalla',
@@ -446,7 +468,7 @@ const PATHS = [
     desc: 'Työmaa, korjaus, asennus — näet mitä teit.',
     sectors: ['kaytanto'],
     subjects: ['kasityo', 'fysiikka', 'matematiikka'],
-    workday: ['build'],
+    workday: ['build', 'nature'],
     topics: ['how'],
     lxp: { q2: ['a', 'b'], q5: ['c', 'd'], q3: ['b'] },
     tet: 'TET rakennustyömaalla tai korjaamolla',
@@ -459,7 +481,7 @@ const PATHS = [
     desc: 'Mittaus, testaus, laatu — tarkkuutta vaativa työ.',
     sectors: ['tekniikka', 'terveys'],
     subjects: ['kemia', 'biologia', 'fysiikka', 'matematiikka'],
-    workday: ['solve', 'organize'],
+    workday: ['solve', 'organize', 'data'],
     topics: ['how', 'tech'],
     lxp: { q2: ['c'], q3: ['a'], q10: ['a', 'b'] },
     tet: 'TET laboratoriossa tai tehtaalla',
@@ -485,7 +507,7 @@ const PATHS = [
     desc: 'Myynti, hallinto, projektit — asioiden vieminen eteenpäin.',
     sectors: ['liiketoiminta'],
     subjects: ['matematiikka', 'yhteiskunta', 'englanti'],
-    workday: ['connect', 'organize'],
+    workday: ['connect', 'organize', 'data'],
     topics: ['business'],
     lxp: { q1: ['d'], q4: ['b', 'c'], q9: ['a', 'b'] },
     tet: 'TET yrityksessä — myynti, hallinto tai markkinointi',
@@ -498,7 +520,7 @@ const PATHS = [
     desc: 'Metsä, maatalous, ympäristö — ulkoilma ja kestävyys.',
     sectors: ['luonto'],
     subjects: ['biologia', 'maantieto'],
-    workday: ['build'],
+    workday: ['build', 'nature'],
     topics: ['nature'],
     lxp: { q3: ['b'], q2: ['a', 'b'] },
     tet: 'TET metsäyrityksessä, tilalla tai ympäristötehtävissä',
@@ -511,7 +533,7 @@ const PATHS = [
     desc: 'Hallinto, oikeus, turvallisuus — yhteiskunnan toiminta.',
     sectors: ['yhteiskunta'],
     subjects: ['historia', 'yhteiskunta', 'uskonto'],
-    workday: ['organize', 'help'],
+    workday: ['organize', 'help', 'connect'],
     topics: ['people'],
     lxp: { q2: ['c', 'd'], q7: ['a', 'd'], q8: ['b'] },
     tet: 'TET kunnassa, poliisilla tai järjestössä',
@@ -839,6 +861,9 @@ function applyResultPayload(data) {
   state.tyoohjaus = { ...data.t };
   state.subjects = new Set(data.s || []);
   state.interest = { ...data.i };
+  if (Array.isArray(state.interest.i1)) {
+    state.interest.i1 = state.interest.i1.map((k) => (k === 'terveys' ? 'ihmiset' : k));
+  }
   state.plainLanguage = !!data.p;
   state.screen = 'result';
   state.lxpIndex = 0;
@@ -940,11 +965,12 @@ function inferTopics(interests) {
   const topics = new Set();
   (interests.i1 || []).forEach((key) => {
     if (key === 'tekniikka') { topics.add('tech'); topics.add('how'); }
-    if (key === 'terveys') topics.add('people');
+    if (key === 'ihmiset' || key === 'terveys') topics.add('people');
     if (key === 'luonto') topics.add('nature');
     if (key === 'kaytanto') topics.add('how');
     if (key === 'luova') topics.add('creative');
-    if (key === 'liiketoiminta') topics.add('business');
+    if (key === 'liiketoiminta' || key === 'liikenne') topics.add('business');
+    if (key === 'turvallisuus') topics.add('people');
   });
   state.subjects.forEach((subId) => {
     if (['matematiikka', 'fysiikka', 'kemia', 'kasityo'].includes(subId)) topics.add('tech');
@@ -1021,10 +1047,12 @@ function scorePaths(answers, sectors, interests, tyoohjaus = {}) {
     });
 
     i1.forEach((key) => {
-      if (path.sectors.includes(key)) {
-        score += 18;
-        reasons.push('kiinnostus');
-      }
+      sectorsFromInterest(key).forEach((sec) => {
+        if (path.sectors.includes(sec)) {
+          score += 18;
+          reasons.push('kiinnostus');
+        }
+      });
     });
 
     if (path.workday.includes(i2)) {
@@ -1104,7 +1132,7 @@ function scorePaths(answers, sectors, interests, tyoohjaus = {}) {
         score += 10;
         if (answers.q10 === 'a' || answers.q10 === 'b') score += 12;
         if (i1.includes('tekniikka') || i1.includes('luova')) score += 8;
-        if (i2 === 'solve' || i2 === 'create') score += 8;
+        if (i2 === 'solve' || i2 === 'create' || i2 === 'data') score += 8;
         i3.forEach((key) => {
           if (key === 'tech' || key === 'creative') score += 6;
         });
@@ -1119,7 +1147,7 @@ function scorePaths(answers, sectors, interests, tyoohjaus = {}) {
     } else if (drive === 'c') {
       if (['engineer', 'it', 'creative'].includes(path.id)) score += 18;
       if (i1.includes('tekniikka') || i1.includes('luova')) score += 8;
-      if (i2 === 'solve' || i2 === 'create') score += 8;
+      if (i2 === 'solve' || i2 === 'create' || i2 === 'data') score += 8;
     } else if (drive === 'd') {
       if (['engineer', 'lab'].includes(path.id)) score -= 14;
       if (['service', 'build', 'health'].includes(path.id)) score += 8;
@@ -1184,20 +1212,25 @@ function buildNarrative(answers, tyoohjaus = {}) {
 
 const SECTOR_WHY = {
   tekniikka: 'Valitsit kiinnostukseksi tekniikan ja digin',
-  terveys: 'Valitsit kiinnostukseksi ihmiset ja hoidon',
+  ihmiset: 'Valitsit kiinnostukseksi ihmiset, opetuksen ja hoidon',
+  terveys: 'Valitsit kiinnostukseksi ihmiset, opetuksen ja hoidon',
   luonto: 'Valitsit kiinnostukseksi luonnon ja ympäristön',
-  kaytanto: 'Valitsit kiinnostukseksi rakentamisen ja käytännön tekemisen',
-  luova: 'Valitsit kiinnostukseksi luovan työn',
-  liiketoiminta: 'Valitsit kiinnostukseksi liiketoiminnan ja järjestämisen',
+  kaytanto: 'Valitsit kiinnostukseksi rakentamisen ja käytännön työn',
+  luova: 'Valitsit kiinnostukseksi luovan työn ja median',
+  liiketoiminta: 'Valitsit kiinnostukseksi liiketoiminnan ja yrittäjyyden',
+  turvallisuus: 'Valitsit kiinnostukseksi turvallisuuden ja yhteiskunnan',
+  liikenne: 'Valitsit kiinnostukseksi liikenteen, logistiikan ja palvelut',
 };
 
 const WORKDAY_WHY = {
   solve: 'Työpäiväsi unelma: ratkaista ongelmia',
-  help: 'Työpäiväsi unelma: auttaa ihmisiä',
-  build: 'Työpäiväsi unelma: rakentaa tai korjata konkreettisesti',
-  create: 'Työpäiväsi unelma: luoda jotain uutta',
-  connect: 'Työpäiväsi unelma: kohdata ihmisiä ja tiimiä',
-  organize: 'Työpäiväsi unelma: saada asiat sujumaan',
+  help: 'Työpäiväsi unelma: auttaa ihmisiä käytännössä',
+  build: 'Työpäiväsi unelma: rakentaa tai korjata',
+  connect: 'Työpäiväsi unelma: keskustella ja tehdä yhteistyötä',
+  organize: 'Työpäiväsi unelma: suunnitella ja järjestää asioita',
+  create: 'Työpäiväsi unelma: keksiä ja luoda uutta',
+  nature: 'Työpäiväsi unelma: työskennellä luonnon ja ympäristön parissa',
+  data: 'Työpäiväsi unelma: työskennellä numeroiden, tiedon tai talouden parissa',
 };
 
 const TOPIC_WHY = {
@@ -1223,7 +1256,8 @@ function explainPathWhy(path, answers, interests, tyoohjaus) {
   const i3 = interests.i3 || [];
 
   i1.forEach((key) => {
-    if (path.sectors.includes(key) && SECTOR_WHY[key]) bullets.push(SECTOR_WHY[key]);
+    const matched = sectorsFromInterest(key).some((sec) => path.sectors.includes(sec));
+    if (matched && SECTOR_WHY[key]) bullets.push(SECTOR_WHY[key]);
   });
 
   if (i2 && path.workday.includes(i2) && WORKDAY_WHY[i2]) {
@@ -1858,7 +1892,7 @@ function render() {
         <div class="phase-tag">Kiinnostus ${state.interestIndex + 1}/${INTEREST_Q.length}</div>
         <h2 id="${headingId}">${qText(q)}</h2>
         <p class="hint">${qHint(q)}</p>
-        <div class="options" id="opts" data-qid="${q.id}" role="${q.multi > 1 ? 'group' : 'radiogroup'}" aria-labelledby="${headingId}">
+        <div class="options${q.grid ? ' interest-sector-grid' : ''}" id="opts" data-qid="${q.id}" role="${q.multi > 1 ? 'group' : 'radiogroup'}" aria-labelledby="${headingId}">
           ${q.options.map((o) => {
             const sel = isSelected(o.key);
             const role = q.multi > 1 ? 'checkbox' : 'radio';

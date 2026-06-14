@@ -328,6 +328,24 @@ body {
 
 .options { display: flex; flex-direction: column; gap: 10px; }
 
+.interest-sector-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 8px;
+}
+
+@media (min-width: 400px) {
+  .interest-sector-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.interest-sector-grid .opt {
+  font-size: 0.85rem;
+  padding: 12px;
+  min-height: 52px;
+}
+
 .opt {
   text-align: left;
   padding: 14px 16px;
