@@ -878,6 +878,211 @@ function buildNarrative(answers, tyoohjaus = {}) {
   return lines.slice(0, 6);
 }
 
+const SECTOR_WHY = {
+  tekniikka: 'Valitsit kiinnostukseksi tekniikan ja digin',
+  terveys: 'Valitsit kiinnostukseksi ihmiset ja hoidon',
+  luonto: 'Valitsit kiinnostukseksi luonnon ja ympäristön',
+  kaytanto: 'Valitsit kiinnostukseksi rakentamisen ja käytännön tekemisen',
+  luova: 'Valitsit kiinnostukseksi luovan työn',
+  liiketoiminta: 'Valitsit kiinnostukseksi liiketoiminnan ja järjestämisen',
+};
+
+const WORKDAY_WHY = {
+  solve: 'Työpäiväsi unelma: ratkaista ongelmia',
+  help: 'Työpäiväsi unelma: auttaa ihmisiä',
+  build: 'Työpäiväsi unelma: rakentaa tai korjata konkreettisesti',
+  create: 'Työpäiväsi unelma: luoda jotain uutta',
+  connect: 'Työpäiväsi unelma: kohdata ihmisiä ja tiimiä',
+  organize: 'Työpäiväsi unelma: saada asiat sujumaan',
+};
+
+const TOPIC_WHY = {
+  tech: 'Seuraat vapaaehtoisesti teknologiaa tai pelejä',
+  people: 'Kiinnostuksen aiheena ihmiset ja hyvinvointi',
+  business: 'Kiinnostuksen aiheena liiketoiminta ja talous',
+  nature: 'Kiinnostuksen aiheena luonto ja ilmasto',
+  creative: 'Kiinnostuksen aiheena taide, design tai tarinat',
+  how: 'Kiinnostuksen aiheena miten asiat toimivat',
+};
+
+const LXP_WHY = {
+  q1: 'Työtyylisi: itsenäinen tai vastuullinen tekeminen',
+  q2: 'Arvostat työympäristöä, joka sopii tälle polulle',
+  q5: 'Digitaaliset työkalut sopivat työtyyliisi',
+  q10: 'Haluat kehittää osaamistasi — sinnikkyyttä polulle',
+};
+
+function explainPathWhy(path, answers, interests, tyoohjaus) {
+  const bullets = [];
+  const i1 = interests.i1 || [];
+  const i2 = interests.i2;
+  const i3 = interests.i3 || [];
+
+  i1.forEach((key) => {
+    if (path.sectors.includes(key) && SECTOR_WHY[key]) bullets.push(SECTOR_WHY[key]);
+  });
+
+  if (i2 && path.workday.includes(i2) && WORKDAY_WHY[i2]) {
+    bullets.push(WORKDAY_WHY[i2]);
+  }
+
+  (i3 || []).forEach((key) => {
+    if (path.topics.includes(key) && TOPIC_WHY[key]) bullets.push(TOPIC_WHY[key]);
+  });
+
+  state.subjects.forEach((subId) => {
+    if (path.subjects.includes(subId)) {
+      const sub = SUBJECTS.find((s) => s.id === subId);
+      if (sub) bullets.push(`Pidät kouluaineesta: ${sub.label}`);
+    }
+  });
+
+  Object.keys(path.lxp || {}).forEach((qKey) => {
+    const ans = answers[qKey];
+    if (ans && path.lxp[qKey].includes(ans) && LXP_WHY[qKey]) {
+      bullets.push(LXP_WHY[qKey]);
+    }
+  });
+
+  const precision = tyoohjaus.precision;
+  if (precision === 'a' && ['lab', 'engineer', 'it', 'health'].includes(path.id)) {
+    bullets.push('Olet tarkka tekijä — tämä polku arvostaa huolellisuutta');
+  }
+  if ((precision === 'c' || precision === 'd') && ['engineer', 'it', 'creative'].includes(path.id)) {
+    bullets.push('Suurpiirteinen työtyyli sopii ideointiin ja tuotekehitykseen');
+  }
+
+  const drive = tyoohjaus.drive;
+  if (drive === 'c' && ['engineer', 'it', 'creative'].includes(path.id)) {
+    bullets.push('Luovuus ja sinnikkyys — vahva yhdistelmä tälle polulle');
+  }
+  if (drive === 'd' && ['service', 'build', 'health'].includes(path.id)) {
+    bullets.push('Arvostat selkeää etenemistä — käytännön polku voi sopia');
+  }
+
+  if (hasHigherEdBackground(answers) && ['engineer', 'it', 'lab', 'society', 'creative', 'business'].includes(path.id)) {
+    bullets.push('Korkeakoulutaso huomioitu — ammatit korkeamman tason tehtävistä');
+  }
+
+  return [...new Set(bullets)].slice(0, 4);
+}
+
+function fitBadge(rank, score, topScore) {
+  if (rank === 0 && score >= topScore * 0.82) {
+    return { label: 'Vahva osuma', className: 'fit-strong' };
+  }
+  if (rank <= 1 && score >= topScore * 0.6) {
+    return { label: 'Sopii sinulle', className: 'fit-good' };
+  }
+  return { label: 'Kokeile ensin', className: 'fit-try' };
+}
+
+function buildHeroSentence(archetype, tyoohjaus, topPath) {
+  const driveLines = {
+    a: 'keksit mielellään uusia ratkaisuja',
+    b: 'viennät asiat loppuun, vaikka homma on hankala',
+    c: 'yhdistät ideoinnin ja sinnikkyyden',
+    d: 'arvostat selkeää etenemistä etkä hae turhaan pitkiä grindausprojekteja',
+    e: 'työtyylisi on vielä muotoutumassa',
+  };
+  const drive = tyoohjaus.drive;
+  const styleBit = drive && driveLines[drive] ? driveLines[drive] : archetype.tagline.toLowerCase();
+  const pathBit = topPath
+    ? ` Ensisijainen suunta kokeiltavaksi: ${topPath.name.toLowerCase()}.`
+    : '';
+  return `Olet ${archetype.title} — ${styleBit}.${pathBit} Tämä ei ole lopullinen ura vaan suunta, jota kannattaa testata käytännössä.`;
+}
+
+function primaryCta(interest, topPath, answers) {
+  const i4 = interest.i4 || 'explore';
+  const study = topPath ? studyLineForPath(topPath, answers) : '';
+  const ctas = {
+    tet: {
+      label: 'Seuraava askel: Ohjaamo — TET ja kesätyö',
+      url: 'https://ohjaamot.fi',
+      desc: topPath
+        ? `${topPath.tet}. Ohjaamo auttaa alle 30-vuotiaita käytännön työnhakuun.`
+        : 'Ohjaamo auttaa alle 30-vuotiaita löytämään TET-jakson tai kesätyön.',
+    },
+    study: {
+      label: 'Seuraava askel: Tutustu opintoihin',
+      url: 'https://opintopolku.fi',
+      desc: study
+        ? `Aloita polusta: ${study}`
+        : 'Opintopolussa näet koulutukset ja hakemisen vaiheet.',
+    },
+    mentor: {
+      label: 'Seuraava askel: Keskustele ammattilaisen kanssa',
+      url: 'https://ohjaamot.fi',
+      desc: 'Ohjaamossa voit kuulla, millaista työ on oikeassa elämässä — ilman että päätät vielä ammattia.',
+    },
+    explore: {
+      label: 'Seuraava askel: Tutki vaihtoehtoja',
+      url: 'https://opintopolku.fi',
+      desc: topPath
+        ? `Pidä ${topPath.name.toLowerCase()} mielessä, mutta vertaa myös muita polkuja alla.`
+        : 'Vertaa polkuja alla ja palaa testiin, jos kiinnostuksesi muuttuu.',
+    },
+  };
+  return ctas[i4] || ctas.explore;
+}
+
+function renderPathCard(p, i, answers, interests, tyoohjaus, topScore) {
+  const study = studyLineForPath(p, answers);
+  const occCount = occupationCountForPath(p.id, answers);
+  const occHint = occupationHintFor(answers);
+  const fit = fitBadge(i, p.score, topScore);
+  const why = explainPathWhy(p, answers, interests, tyoohjaus);
+
+  return `
+    <div class="path-card">
+      <span class="path-emoji">${p.emoji}</span>
+      <div class="path-card-body">
+        <h3>${i + 1}. ${p.name}</h3>
+        <span class="fit-badge ${fit.className}">${fit.label}</span>
+        <p>${p.desc}</p>
+        ${study ? `<p class="path-study">📚 ${study}</p>` : ''}
+        ${why.length ? `
+        <button type="button" class="path-why-toggle" aria-expanded="false">Miksi tämä polku? ▾</button>
+        <div class="path-why" hidden>
+          <ul class="why-list">${why.map((w) => `<li>${w}</li>`).join('')}</ul>
+        </div>` : ''}
+        ${occCount ? `
+        <button type="button" class="path-toggle" data-count="${occCount}" aria-expanded="false">
+          Näytä ammatit (${occCount}) ▾
+        </button>
+        <div class="path-occupations" hidden>
+          <p class="occupation-hint">${occHint}</p>
+          ${renderOccupationList(p.id, answers)}
+        </div>` : ''}
+      </div>
+    </div>`;
+}
+
+function bindPathWhyToggles() {
+  document.querySelectorAll('.path-why-toggle').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const panel = btn.parentElement.querySelector('.path-why');
+      if (!panel) return;
+      const open = panel.classList.toggle('open');
+      panel.hidden = !open;
+      btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+      btn.textContent = open ? 'Piilota selitys ▴' : 'Miksi tämä polku? ▾';
+    });
+  });
+}
+
+function bindShowMorePaths(extraCount) {
+  const btn = document.getElementById('showMorePathsBtn');
+  const extra = document.getElementById('extraPaths');
+  if (!btn || !extra) return;
+  btn.addEventListener('click', () => {
+    const open = extra.classList.toggle('open');
+    extra.hidden = !open;
+    btn.textContent = open ? 'Piilota lisäpolkut ▴' : `Näytä ${extraCount} muuta polkua ▾`;
+  });
+}
+
 function nextStepLabel() {
   const map = {
     tet: 'Seuraavaksi: kokeile työtä käytännössä',
@@ -890,7 +1095,7 @@ function nextStepLabel() {
 
 function shareText(archetype, paths) {
   const top = paths[0]?.name || 'uusia polkuja';
-  return `Työtyylini on ${archetype.title} ${archetype.emoji}\n\nYoron ohjausmoottori ehdotti mulle polkua: ${top}\n\nEt tarvitse tietää vielä mitä haluat — kokeile 5 min testi:\nhttps://yoro.fi/ohjausmoottori/`;
+  return `Työtyylini on ${archetype.title} ${archetype.emoji}\n\nYoron ohjausmoottori ehdotti mulle polkua: ${top}\n\nEi yhtä oikeaa ammattia — kokeile 5 min:\nhttps://yoro.fi/ohjausmoottori/`;
 }
 
 function spawnConfetti() {
@@ -920,7 +1125,7 @@ function render() {
       <section class="hero">
         <div class="pill">Ilmainen · 5 min</div>
         <h1 style="margin-top:14px">Et tiedä mitä haluat?<br><span>Hyvä.</span></h1>
-        <p>Tämä testi ei kerro sinulle ammattia. Se kertoo <strong style="color:var(--text)">miten sinä työskentelet parhaiten</strong> — ja ehdottaa polkuja kokeiltavaksi.</p>
+        <p>Tämä testi ei kerro sinulle ammattia. Se kertoo <strong style="color:var(--text)">miten sinä työskentelet parhaiten</strong> — ja ehdottaa <strong style="color:var(--text)">3 polkua</strong> kokeiltavaksi.</p>
         <p class="hook">✦ Saat oman työtyyli-tyypin + jaettavan kortin</p>
         <div class="stats-row">
           <div class="stat"><strong>10</strong><span>LxP-kysymystä</span></div>
@@ -1133,28 +1338,33 @@ function render() {
     const archetype = pickArchetype(answers);
     const sectors = getSectorWeights();
     const paths = scorePaths(answers, sectors, state.interest, state.tyoohjaus);
-    const topPaths = paths.slice(0, 5);
+    const topPaths = paths.slice(0, 3);
+    const extraPaths = paths.slice(3, 5);
+    const topScore = topPaths[0]?.score || 1;
     const narrative = buildNarrative(answers, state.tyoohjaus);
     const top = topPaths[0];
-    const nextLabel = nextStepLabel();
+    const heroSentence = buildHeroSentence(archetype, state.tyoohjaus, top);
+    const cta = primaryCta(state.interest, top, answers);
     const higherEdNote = hasHigherEdBackground(answers)
-      ? '<p style="font-size:0.85rem;color:var(--accent3);margin-bottom:12px;padding:12px;background:rgba(52,211,153,0.08);border-radius:12px;border:1px solid rgba(52,211,153,0.2)">🎓 Korkeakoulutaso huomioitu — ammattilistat näyttävät vain korkeamman tason tehtäviä (ei sihteeri-, varasto- tai perushallintotyötä).</p>'
+      ? '<p class="trust-inline">Korkeakoulutaso huomioitu — ammattilistat näyttävät vain korkeamman tason tehtäviä.</p>'
       : wantsHigherEd(answers)
-        ? '<p style="font-size:0.85rem;color:var(--accent3);margin-bottom:12px;padding:12px;background:rgba(52,211,153,0.08);border-radius:12px;border:1px solid rgba(52,211,153,0.2)">🎓 Valintojesi perusteella mukana myös korkeakoulutason jatko-opintopolkuja (AMK/yliopisto).</p>'
+        ? '<p class="trust-inline">Mukana myös korkeakoulutason jatko-opintopolkuja (AMK/yliopisto).</p>'
         : '';
 
     app.innerHTML = `
+      <p class="trust-banner">Tämä ei ole arvosana eikä uraennuste — vain suuntaa kokeiltavaksi.</p>
+
       <div class="result-hero">
         <div class="result-emoji">${archetype.emoji}</div>
         <div class="result-type">Sinun työtyyli-tyyppisi</div>
         <h2 class="result-title">${archetype.title}</h2>
-        <p class="result-tagline">${archetype.tagline}</p>
+        <p class="hero-sentence">${heroSentence}</p>
       </div>
 
       <div class="card">
-        <div class="section-title" style="margin-top:0">Työtyylisi</div>
+        <div class="section-title" style="margin-top:0">Työtyylisi lyhyesti</div>
         <ul style="padding-left:18px;color:var(--muted);font-size:0.9rem">
-          ${narrative.map((n) => `<li style="margin-bottom:6px">${n}</li>`).join('')}
+          ${narrative.slice(0, 4).map((n) => `<li style="margin-bottom:6px">${n}</li>`).join('')}
         </ul>
 
         <div class="trait-bars">
@@ -1166,46 +1376,28 @@ function render() {
         </div>
       </div>
 
-      <div class="section-title">Polkuja kokeiltavaksi</div>
-      <p style="font-size:0.85rem;color:var(--muted);margin-bottom:12px">Ei lopullista uraa — ehdotuksia suuntaan. Avaa polku nähdäksesi esimerkkiammatteja (TE24).</p>
+      <a class="btn btn-primary cta-primary" href="${cta.url}" target="_blank" rel="noopener noreferrer">${cta.label}</a>
+      <p class="cta-desc">${cta.desc}</p>
+
+      <div class="section-title">3 polkua kokeiltavaksi</div>
+      <p class="section-lead">Ei lopullista uraa — valitse yksi ja kokeile käytännössä. Avaa polku nähdäksesi miksi se ehdotettiin.</p>
       ${higherEdNote}
-      ${topPaths.map((p, i) => {
-        const study = studyLineForPath(p, answers);
-        const occCount = occupationCountForPath(p.id, answers);
-        const occHint = occupationHintFor(answers);
-        return `
-        <div class="path-card">
-          <span class="path-emoji">${p.emoji}</span>
-          <div class="path-card-body">
-            <h3>${i + 1}. ${p.name}</h3>
-            <p>${p.desc}</p>
-            ${study ? `<p class="path-study">📚 ${study}</p>` : ''}
-            <div class="path-score">Sopivuus ${Math.min(98, 55 + p.score)}%</div>
-            ${occCount ? `
-            <button type="button" class="path-toggle" data-count="${occCount}" aria-expanded="false">
-              Näytä ammatit (${occCount}) ▾
-            </button>
-            <div class="path-occupations" hidden>
-              <p class="occupation-hint">${occHint}</p>
-              ${renderOccupationList(p.id, answers)}
-            </div>` : ''}
-          </div>
-        </div>`;
-      }).join('')}
-
-      <div class="next-step">
-        <h3>${nextLabel}</h3>
-        <p style="font-size:0.9rem;color:var(--muted)">${top ? top.tet : 'Kokeile eri aloja TET-jaksolla tai kesätyöllä.'}</p>
-        ${top && studyLineForPath(top, answers) ? `<p style="font-size:0.85rem;color:var(--muted);margin-top:8px">📚 ${studyLineForPath(top, answers)}</p>` : ''}
+      ${topPaths.map((p, i) => renderPathCard(p, i, answers, state.interest, state.tyoohjaus, topScore)).join('')}
+      ${extraPaths.length ? `
+      <div id="extraPaths" class="extra-paths" hidden>
+        ${extraPaths.map((p, i) => renderPathCard(p, i + 3, answers, state.interest, state.tyoohjaus, topScore)).join('')}
       </div>
+      <button type="button" class="btn btn-ghost" id="showMorePathsBtn">Näytä ${extraPaths.length} muuta polkua ▾</button>` : ''}
 
-      <button class="btn btn-share" id="shareBtn" style="margin-top:20px">Jaa kaverille 📲</button>
+      <button class="btn btn-share" id="shareBtn" style="margin-top:20px">Jaa kaverille</button>
       <button class="btn btn-ghost" id="retryBtn">Tee testi uudelleen</button>
       <a href="https://yoro.fi/" class="btn btn-ghost" style="text-decoration:none;margin-top:8px">← Palaa Yoro.fi-sivuille</a>
 
-      <p class="disclaimer">Tulos perustuu 10 kysymyksen LxP-työtyyliin, työohjauskerrokseen, lempikouluaineisiin ja kiinnostukseen. Ei vaikuta työnantajan LxP-hakuun (lxp.yoro.fi).</p>`;
+      <p class="disclaimer">Tulos perustuu 10 kysymyksen LxP-työtyyliin, työohjauskerrokseen, lempikouluaineisiin ja kiinnostukseen. Ei vaikuta työnantajan LxP-hakuun (lxp.yoro.fi). Emme mittaa älykkyyttä tai arvosanoja.</p>`;
 
     bindPathToggles();
+    bindPathWhyToggles();
+    bindShowMorePaths(extraPaths.length);
 
     document.getElementById('shareBtn').onclick = async () => {
       const text = shareText(archetype, topPaths);
