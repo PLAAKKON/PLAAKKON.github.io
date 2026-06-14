@@ -621,15 +621,68 @@ function occupationCountForPath(pathId, answers) {
 
 function occupationHintFor(answers) {
   if (hasHigherEdBackground(answers)) {
-    return 'Esimerkkejä korkeakoulutasoiseen polkuun sopivista ammateista (TE24) — ei perustason toimisto- tai käytännön tehtäviä.';
+    return 'Esimerkkejä korkeakoulutasoiseen polkuun sopivista ammateista (TE24) — ei perustason toimisto- tai käytännön tehtäviä. Jokainen ammatti linkittyy Opintopolkuun ja Työmarkkinatoriin.';
   }
-  return 'Esimerkkejä tämän polun ammateista (TE24) — kokeile TET:llä tai tutustu opintoihin.';
+  return 'Esimerkkejä tämän polun ammateista (TE24) — avaa opinnot tai työpaikkahaku yhdellä klikillä.';
+}
+
+/** Polkukohtaiset hakusanat ulkoisiin palveluihin (P2) */
+const PATH_LINKS = {
+  engineer: { opinto: 'insinööri ammattikoulu', opintoHigher: 'insinööri AMK', jobs: 'insinööri', tet: 'teknologia' },
+  it: { opinto: 'tieto- ja viestintätekniikka', opintoHigher: 'tietotekniikka', jobs: 'ohjelmistokehittäjä', tet: 'tietotekniikka' },
+  health: { opinto: 'lähihoitaja', opintoHigher: 'sairaanhoitaja', jobs: 'sairaanhoitaja', tet: 'sosiaali- ja terveysala' },
+  creative: { opinto: 'media-alan koulutus', opintoHigher: 'medianomi', jobs: 'graafinen suunnittelija', tet: 'media' },
+  build: { opinto: 'rakennusala ammattikoulu', opintoHigher: 'rakennusmestari', jobs: 'rakennustyöntekijä', tet: 'rakennus' },
+  lab: { opinto: 'laboratorioala', opintoHigher: 'laboratorioanalyytikko', jobs: 'laboratorio', tet: 'teollisuus' },
+  service: { opinto: 'kauppa-alan ammattikoulu', opintoHigher: 'matkailuala', jobs: 'myyjä', tet: 'asiakaspalvelu' },
+  business: { opinto: 'tradenomi', opintoHigher: 'kauppatieteet', jobs: 'myynti', tet: 'yritys' },
+  nature: { opinto: 'luonnonvara-ala', opintoHigher: 'metsätalous', jobs: 'metsätyöntekijä', tet: 'luonto' },
+  society: { opinto: 'sosiaali- ja terveysala', opintoHigher: 'sosiaalityö', jobs: 'sosiaalityöntekijä', tet: 'kunta' },
+};
+
+const TE24_SOURCE_URL = 'https://stat.fi/fi/luokitukset/ammatti/';
+
+function opintopolkuUrl(term) {
+  return `https://opintopolku.fi/konfo/fi/haku/${encodeURIComponent(term)}`;
+}
+
+function tyomarkkinatoriUrl(term) {
+  return `https://tyomarkkinatori.fi/henkiloasiakkaat/avoimet-tyopaikat?lang=fi&q=${encodeURIComponent(term)}`;
+}
+
+function tetPaikatUrl() {
+  return 'https://tetpaikat.tet.fi/fi/home';
+}
+
+function ohjaamoUrl() {
+  return 'https://ohjaamot.fi/';
+}
+
+function pathLinkTerms(path, answers) {
+  const links = PATH_LINKS[path.id] || {};
+  const opinto = (hasHigherEdBackground(answers) && links.opintoHigher)
+    ? links.opintoHigher
+    : (links.opinto || path.study || path.name);
+  const jobs = links.jobs || opinto;
+  const tet = links.tet || jobs;
+  return { opinto, jobs, tet };
 }
 
 function renderOccupationList(pathId, answers) {
   const jobs = occupationsForPath(pathId, answers);
   if (!jobs.length) return '';
-  return `<ul class="occupation-list">${jobs.map((j) => `<li>${j}</li>`).join('')}</ul>`;
+  return `<ul class="occupation-list">${jobs.map((j) => {
+    const opUrl = opintopolkuUrl(j);
+    const jobUrl = tyomarkkinatoriUrl(j);
+    return `<li class="occupation-item">
+      <span class="occupation-name">${j}</span>
+      <span class="occupation-links">
+        <a class="occ-link" href="${opUrl}" target="_blank" rel="noopener noreferrer" data-track="opintopolku" data-term="${j}">Opinnot</a>
+        <a class="occ-link" href="${jobUrl}" target="_blank" rel="noopener noreferrer" data-track="tyomarkkinatori" data-term="${j}">Työpaikat</a>
+      </span>
+    </li>`;
+  }).join('')}</ul>
+  <p class="te24-source">Ammattinimet perustuvat <a href="${TE24_SOURCE_URL}" target="_blank" rel="noopener noreferrer">TE24-luokitukseen</a> (Tilastokeskus).</p>`;
 }
 
 function bindPathToggles() {
@@ -1020,33 +1073,42 @@ function buildHeroSentence(archetype, tyoohjaus, topPath) {
 
 function primaryCta(interest, topPath, answers) {
   const i4 = interest.i4 || 'explore';
+  const terms = topPath ? pathLinkTerms(topPath, answers) : { opinto: 'ammattikoulu', jobs: '', tet: '' };
   const study = topPath ? studyLineForPath(topPath, answers) : '';
   const ctas = {
     tet: {
-      label: 'Seuraava askel: Ohjaamo — TET ja kesätyö',
-      url: 'https://ohjaamot.fi',
+      label: 'Seuraava askel: Etsi TET-paikka (TET.fi)',
+      url: tetPaikatUrl(),
+      secondary: { label: 'Tarvitsetko apua? Ohjaamo →', url: ohjaamoUrl() },
       desc: topPath
-        ? `${topPath.tet}. Ohjaamo auttaa alle 30-vuotiaita käytännön työnhakuun.`
-        : 'Ohjaamo auttaa alle 30-vuotiaita löytämään TET-jakson tai kesätyön.',
+        ? `${topPath.tet}. Hae paikkoja TET.fi:stä — Ohjaamo auttaa alle 30-vuotiaita.`
+        : 'TET.fi kokoaa avoimet harjoittelupaikat. Ohjaamo auttaa hakemisessa.',
     },
     study: {
-      label: 'Seuraava askel: Tutustu opintoihin',
-      url: 'https://opintopolku.fi',
+      label: 'Seuraava askel: Katso koulutukset Opintopolussa',
+      url: opintopolkuUrl(terms.opinto),
+      secondary: { label: 'Katso myös työpaikkoja →', url: tyomarkkinatoriUrl(terms.jobs) },
       desc: study
-        ? `Aloita polusta: ${study}`
-        : 'Opintopolussa näet koulutukset ja hakemisen vaiheet.',
+        ? `Hae Opintopolusta: “${terms.opinto}”. ${study}`
+        : `Hae Opintopolusta koulutuksia hakusanalla “${terms.opinto}”.`,
     },
     mentor: {
-      label: 'Seuraava askel: Keskustele ammattilaisen kanssa',
-      url: 'https://ohjaamot.fi',
+      label: 'Seuraava askel: Varaa aika Ohjaamoon',
+      url: ohjaamoUrl(),
+      secondary: topPath
+        ? { label: 'Tutustu opintoihin polulle →', url: opintopolkuUrl(terms.opinto) }
+        : null,
       desc: 'Ohjaamossa voit kuulla, millaista työ on oikeassa elämässä — ilman että päätät vielä ammattia.',
     },
     explore: {
-      label: 'Seuraava askel: Tutki vaihtoehtoja',
-      url: 'https://opintopolku.fi',
+      label: 'Seuraava askel: Tutki opintoja Opintopolussa',
+      url: topPath ? opintopolkuUrl(terms.opinto) : 'https://opintopolku.fi/konfo/fi/ohjaava-haku',
+      secondary: topPath
+        ? { label: 'Katso työpaikkoja →', url: tyomarkkinatoriUrl(terms.jobs) }
+        : { label: 'En tiedä mitä opiskella →', url: 'https://opintopolku.fi/konfo/fi/ohjaava-haku' },
       desc: topPath
-        ? `Pidä ${topPath.name.toLowerCase()} mielessä, mutta vertaa myös muita polkuja alla.`
-        : 'Vertaa polkuja alla ja palaa testiin, jos kiinnostuksesi muuttuu.',
+        ? `Pidä ${topPath.name.toLowerCase()} mielessä. Aloita Opintopolusta: “${terms.opinto}”.`
+        : 'Opintopolun ohjaava haku auttaa, jos et vielä tiedä mitä haluat opiskella.',
     },
   };
   return ctas[i4] || ctas.explore;
@@ -1058,6 +1120,7 @@ function renderPathCard(p, i, answers, interests, tyoohjaus, topScore) {
   const occHint = occupationHintFor(answers);
   const fit = fitBadge(i, p.score, topScore);
   const why = explainPathWhy(p, answers, interests, tyoohjaus);
+  const terms = pathLinkTerms(p, answers);
 
   return `
     <div class="path-card">
@@ -1067,6 +1130,10 @@ function renderPathCard(p, i, answers, interests, tyoohjaus, topScore) {
         <span class="fit-badge ${fit.className}">${fit.label}</span>
         <p>${p.desc}</p>
         ${study ? `<p class="path-study">📚 ${study}</p>` : ''}
+        <div class="path-actions">
+          <a class="path-action" href="${opintopolkuUrl(terms.opinto)}" target="_blank" rel="noopener noreferrer" data-track="path_opinto" data-path="${p.id}">Opinnot Opintopolussa →</a>
+          <a class="path-action" href="${tyomarkkinatoriUrl(terms.jobs)}" target="_blank" rel="noopener noreferrer" data-track="path_jobs" data-path="${p.id}">Työpaikat Työmarkkinatorilla →</a>
+        </div>
         ${why.length ? `
         <button type="button" class="path-why-toggle" aria-expanded="false">Miksi tämä polku? ▾</button>
         <div class="path-why" hidden>
@@ -1291,7 +1358,22 @@ function bindFeedback(archetype, topPath) {
 function bindCtaTracking() {
   document.querySelectorAll('.cta-primary').forEach((a) => {
     a.addEventListener('click', () => {
-      track('cta_click', { href: a.getAttribute('href') });
+      track('cta_click', { href: a.getAttribute('href'), type: 'primary' });
+    });
+  });
+  document.querySelectorAll('.cta-secondary').forEach((a) => {
+    a.addEventListener('click', () => {
+      track('cta_click', { href: a.getAttribute('href'), type: 'secondary' });
+    });
+  });
+  document.querySelectorAll('[data-track]').forEach((a) => {
+    a.addEventListener('click', () => {
+      track('external_link', {
+        service: a.dataset.track,
+        term: a.dataset.term || null,
+        path: a.dataset.path || null,
+        href: a.getAttribute('href'),
+      });
     });
   });
 }
@@ -1598,6 +1680,7 @@ function render() {
       </div>
 
       <a class="btn btn-primary cta-primary" href="${cta.url}" target="_blank" rel="noopener noreferrer">${cta.label}</a>
+      ${cta.secondary ? `<a class="btn btn-ghost cta-secondary" href="${cta.secondary.url}" target="_blank" rel="noopener noreferrer">${cta.secondary.label}</a>` : ''}
       <p class="cta-desc">${cta.desc}</p>
 
       <div class="section-title">3 polkua kokeiltavaksi</div>
@@ -1625,7 +1708,7 @@ function render() {
       <button class="btn btn-ghost" id="retryBtn">Tee testi uudelleen</button>
       <a href="https://yoro.fi/" class="btn btn-ghost" style="text-decoration:none;margin-top:8px">← Palaa Yoro.fi-sivuille</a>
 
-      <p class="disclaimer">Tulos perustuu 10 kysymyksen LxP-työtyyliin, työohjauskerrokseen, lempikouluaineisiin ja kiinnostukseen. Ei vaikuta työnantajan LxP-hakuun (lxp.yoro.fi). Emme mittaa älykkyyttä tai arvosanoja.</p>`;
+      <p class="disclaimer">Tulos perustuu 10 kysymyksen LxP-työtyyliin, työohjauskerrokseen, lempikouluaineisiin ja kiinnostukseen. Ammattinimet noudattavat <a href="${TE24_SOURCE_URL}" target="_blank" rel="noopener noreferrer">TE24-luokitusta</a>. Ei vaikuta työnantajan LxP-hakuun (lxp.yoro.fi). Emme mittaa älykkyyttä tai arvosanoja.</p>`;
 
     track('result_view', { archetype: archetype.id, topPath: top?.id });
     bindPathToggles();
