@@ -110,41 +110,41 @@ const LXP_QUESTIONS = [
   {
     id: 'q7',
     phase: 'Koulutuspolku',
-    text: 'Missä olet koulutuspolullasi juuri nyt?',
-    hint: 'Ei tarvitse tietää vielä jatko-opintoja — valitse mikä kuvaa sinua nyt.',
+    text: 'Mikä kuvaa koulutuspolkuasi parhaiten?',
+    hint: 'Valitse lähin vaihtoehto — voit olla samanaikaisesti koulussa ja suunnittelemassa jatko-opintoja.',
     options: [
-      { key: 'a', label: 'Olen peruskoulussa (esim. 7.–9. luokka).' },
-      { key: 'b', label: 'Harkitsen lukio-opintoja peruskoulun jälkeen.' },
-      { key: 'c', label: 'Harkitsen ammattikoulu-opintoja peruskoulun jälkeen.' },
-      { key: 'd', label: 'Opiskelen jo lukiossa tai ammattikoulussa.' },
-      { key: 'e', label: 'En tiedä vielä — jatkokoulutusvalinta on auki.' },
+      { key: 'a', label: 'Olen lukiossa tai harkitsen lukio-opintoja peruskoulun jälkeen.' },
+      { key: 'b', label: 'Olen ammattikoulussa tai harkitsen ammattikoulu-opintoja peruskoulun jälkeen.' },
+      { key: 'c', label: 'Minulla on keskiasteen koulutus (lukio- tai ammattitutkinto valmis).' },
+      { key: 'd', label: 'Minulla on korkeakoulututkinto tai harkitsen korkeakoulu-opintoja (AMK/yliopisto).' },
+      { key: 'e', label: 'En tiedä vielä — koulutusvalinta on auki.' },
     ],
     narrative: {
-      a: 'Peruskoulussa — suunta vielä muotoutumassa.',
-      b: 'Lukio kiinnostaa jatkossa.',
-      c: 'Ammattikoulu kiinnostaa jatkossa.',
-      d: 'Jo toisella asteella opiskelussa.',
-      e: 'Jatko-opinnot auki — ei kiirettä valita.',
+      a: 'Lukiopolku — nyt tai suunnitelmissa.',
+      b: 'Ammattikoulupolku — nyt tai suunnitelmissa.',
+      c: 'Keskiaste suoritettu — jatko-opinnot mahdollisia.',
+      d: 'Korkeakoulutaso — nyt, suunnitelmissa tai valmis.',
+      e: 'Koulutusvalinta vielä auki.',
     },
   },
   {
     id: 'q8',
-    phase: 'Jatko-opinnot',
-    text: 'Miten ajattelet jatko-opintoja tällä hetkellä?',
-    hint: 'Voit olla epävarma — tämä auttaa ehdottamaan sopivia polkuja.',
+    phase: 'Seuraava askel',
+    text: 'Mikä kuvaa parhaiten seuraavaa askeltasi?',
+    hint: 'Erityisesti jos sinulla on jo keskiaste — tämä auttaa näyttämään myös korkeakoulutason polkuja.',
     options: [
-      { key: 'a', label: 'Haluan kokeilla eri asioita ennen kuin päätän suunnan.' },
-      { key: 'b', label: 'Kun löydän kiinnostavan suunnan, olen valmis opiskelemaan.' },
-      { key: 'c', label: 'Toivoisin lyhyen polun — ammattikoulu tai käytännön työ.' },
-      { key: 'd', label: 'Kiinnostaa pitkä opintopolku — lukio ja ehkä korkeakoulu.' },
-      { key: 'e', label: 'En osaa vielä sanoa — en halua lukita itseäni mihinkään.' },
+      { key: 'a', label: 'Haluan vielä tutkia vaihtoehtoja — en ole valmis päättämään.' },
+      { key: 'b', label: 'Haluan jatkaa opiskelua korkeakoulutasolla (AMK tai yliopisto).' },
+      { key: 'c', label: 'Haluan ensisijaisesti työelämään — opinnot mahdollisimman käytännönläheisesti.' },
+      { key: 'd', label: 'Haluan yhdistää työn ja opinnot (esim. työssäoppiminen).' },
+      { key: 'e', label: 'En osaa vielä sanoa.' },
     ],
     narrative: {
-      a: 'Kokeilet ensin — päätös myöhemmin.',
-      b: 'Opiskelukin sopii, kun suunta tuntuu omalta.',
-      c: 'Lyhyt ja käytännönläheinen polku kiinnostaa.',
-      d: 'Pitkä opintopolku voisi sopia.',
-      e: 'Opiskeluvalinta auki — stressaamaton suhtautuminen.',
+      a: 'Tutkit vielä — päätös myöhemmin.',
+      b: 'Korkeakoulutason jatko-opinnot kiinnostavat.',
+      c: 'Työelämä ensin — käytännönläheinen polku.',
+      d: 'Työ ja opiskelu rinnakkain.',
+      e: 'Seuraava askel vielä auki.',
     },
   },
   {
@@ -434,7 +434,7 @@ const PATHS = [
     subjects: ['historia', 'yhteiskunta', 'uskonto'],
     workday: ['organize', 'help'],
     topics: ['people'],
-    lxp: { q2: ['c', 'd'], q8: ['d'] },
+    lxp: { q2: ['c', 'd'], q7: ['a', 'd'], q8: ['b'] },
     tet: 'TET kunnassa, poliisilla tai järjestössä',
     study: 'Hallinto- tai oikeusalan opinnot',
   },
@@ -516,16 +516,47 @@ function scorePaths(answers, sectors, interests) {
       }
     });
 
-    const academicPaths = ['engineer', 'it', 'lab', 'society'];
-    const practicalPaths = ['build', 'health', 'service', 'nature'];
-    if (answers.q7 === 'b' || answers.q7 === 'd' || answers.q8 === 'd') {
-      if (academicPaths.includes(path.id)) score += 6;
+    const academicPaths = ['engineer', 'it', 'lab', 'society', 'creative', 'business'];
+    const vocationalPaths = ['build', 'health', 'service', 'nature'];
+
+    switch (answers.q7) {
+      case 'a':
+        if (academicPaths.includes(path.id)) score += 8;
+        break;
+      case 'b':
+        if (vocationalPaths.includes(path.id)) score += 8;
+        if (['it', 'engineer', 'lab'].includes(path.id)) score += 4;
+        break;
+      case 'c':
+        score += 4;
+        if (academicPaths.includes(path.id)) score += 8;
+        break;
+      case 'd':
+        if (academicPaths.includes(path.id)) score += 12;
+        break;
+      case 'e':
+        score += 3;
+        break;
+      default:
+        break;
     }
-    if (answers.q7 === 'c' || answers.q8 === 'c') {
-      if (practicalPaths.includes(path.id)) score += 6;
-    }
-    if (answers.q7 === 'e' || answers.q8 === 'e' || answers.q8 === 'a') {
-      score += 3;
+
+    switch (answers.q8) {
+      case 'b':
+        if (academicPaths.includes(path.id)) score += 10;
+        break;
+      case 'c':
+        if (vocationalPaths.includes(path.id)) score += 8;
+        break;
+      case 'd':
+        score += 5;
+        break;
+      case 'a':
+      case 'e':
+        score += 2;
+        break;
+      default:
+        break;
     }
 
   if (sectorSet.size) {
@@ -538,6 +569,21 @@ function scorePaths(answers, sectors, interests) {
   })
     .sort((a, b) => b.score - a.score)
     .filter((p) => p.score > 0);
+}
+
+function wantsHigherEd(answers) {
+  return answers.q7 === 'd' || answers.q7 === 'c' || answers.q8 === 'b';
+}
+
+function studyLineForPath(path, answers) {
+  let line = path.study;
+  if (!line) return '';
+  if (wantsHigherEd(answers) && ['engineer', 'it', 'lab', 'society', 'health', 'creative', 'business'].includes(path.id)) {
+    if (!line.toLowerCase().includes('amk') && !line.toLowerCase().includes('yliopisto') && !line.toLowerCase().includes('korkeakoulu')) {
+      line += ' · Jatko: AMK tai yliopisto mahdollinen';
+    }
+  }
+  return line;
 }
 
 function getSectorWeights() {
@@ -773,6 +819,9 @@ function render() {
     const narrative = buildNarrative(answers);
     const top = topPaths[0];
     const nextLabel = nextStepLabel();
+    const higherEdNote = wantsHigherEd(answers)
+      ? '<p style="font-size:0.85rem;color:var(--accent3);margin-bottom:12px;padding:12px;background:rgba(52,211,153,0.08);border-radius:12px;border:1px solid rgba(52,211,153,0.2)">🎓 Valintojesi perusteella mukana myös korkeakoulutason jatko-opintopolkuja (AMK/yliopisto).</p>'
+      : '';
 
     app.innerHTML = `
       <div class="result-hero">
@@ -799,20 +848,25 @@ function render() {
 
       <div class="section-title">Polkuja kokeiltavaksi</div>
       <p style="font-size:0.85rem;color:var(--muted);margin-bottom:12px">Ei lopullista uraa — ehdotuksia suuntaan, joka sopii työtyyliisi ja valintoihisi.</p>
-      ${topPaths.map((p, i) => `
+      ${higherEdNote}
+      ${topPaths.map((p, i) => {
+        const study = studyLineForPath(p, answers);
+        return `
         <div class="path-card">
           <span class="path-emoji">${p.emoji}</span>
           <div>
             <h3>${i + 1}. ${p.name}</h3>
             <p>${p.desc}</p>
+            ${study ? `<p style="font-size:0.8rem;color:var(--muted);margin-top:6px">📚 ${study}</p>` : ''}
             <div class="path-score">Sopivuus ${Math.min(98, 55 + p.score)}%</div>
           </div>
-        </div>`).join('')}
+        </div>`;
+      }).join('')}
 
       <div class="next-step">
         <h3>${nextLabel}</h3>
         <p style="font-size:0.9rem;color:var(--muted)">${top ? top.tet : 'Kokeile eri aloja TET-jaksolla tai kesätyöllä.'}</p>
-        ${top?.study ? `<p style="font-size:0.85rem;color:var(--muted);margin-top:8px">📚 ${top.study}</p>` : ''}
+        ${top && studyLineForPath(top, answers) ? `<p style="font-size:0.85rem;color:var(--muted);margin-top:8px">📚 ${studyLineForPath(top, answers)}</p>` : ''}
       </div>
 
       <button class="btn btn-share" id="shareBtn" style="margin-top:20px">Jaa kaverille 📲</button>
