@@ -440,6 +440,113 @@ const PATHS = [
   },
 ];
 
+/** TE24-tyyppiset ammatit polkuryhmittäin (näytetään avattavassa listassa) */
+const OCCUPATIONS_BY_PATH = {
+  health: [
+    'Lähihoitaja', 'Sairaanhoitaja', 'Lastenhoitaja', 'Hoiva-avustaja', 'Kuntoutusohjaaja',
+    'Fysioterapeutti', 'Toimintaterapeutti', 'Farmaseutti', 'Hammashoitaja', 'Kätilö',
+    'Ensihoitaja', 'Mielenterveyshoitaja', 'Kodinhoitaja', 'Radiograafi', 'Laboratoriohoitaja',
+    'Geronomi', 'Optikko', 'Terveydenhoitaja',
+  ],
+  service: [
+    'Myyjä', 'Myyntiedustaja', 'Tarjoilija', 'Kokki', 'Ravintola- ja suurtaloustyöntekijä',
+    'Autonkuljettaja (paketti- ja jakeluautot)', 'Kuorma-auton ja yhdistelmäajoneuvon kuljettaja',
+    'Siivooja', 'Hotellityöntekijä', 'Asiakaspalvelutyöntekijä', 'Kassatyöntekijä',
+    'Parturi-kampaaja', 'Kosmetologi', 'Matkailupalvelutyöntekijä', 'Baarimikko',
+    'Huoltoaseman työntekijä', 'Lentokentän palvelutyöntekijä', 'Turistikokelas',
+  ],
+  business: [
+    'Toimisto- ja hallintosihteeri', 'Kirjanpitäjä', 'Varastotyöntekijä', 'Toimistotyöntekijä',
+    'Henkilöstöhallinnon assistentti', 'Sihteeri', 'Taloushallinnon työntekijä',
+    'Ostorihallinnan työntekijä', 'Logistiikan työntekijä', 'Varasto- ja logistiikkatyöntekijä',
+    'Projektisihteeri', 'Asiantuntijasihteeri', 'Merkonomi', 'Tradenomi', 'Assistentti',
+    'Vienti- ja tuontisihteeri', 'Toimistovirkailija', 'Hallintovirkailija',
+  ],
+  society: [
+    'Peruskoulun opettaja', 'Päiväkodin opettaja', 'Sosiaalityöntekijä', 'Poliisi', 'Vartija',
+    'Erityisopettaja', 'Nuorisotyöntekijä', 'Kuraattori', 'Oikeusavustaja', 'Tullivirkailija',
+    'Rajavartija', 'Kunnanhallinnon työntekijä', 'Sosiaaliohjaaja', 'Lastenohjaaja',
+    'Turvallisuusalan työntekijä', 'Paloesimies', 'Vanhustenhoitaja (sosiaali)', 'Ohjaaja',
+  ],
+  build: [
+    'Rakennustyöntekijä', 'Sähköasentaja', 'Kiinteistönhoitaja', 'Koneenasentaja',
+    'Konepaja- ja metallityöntekijä', 'Putkiasentaja', 'Maalari', 'LVI-asentaja',
+    'Rakennusapumies', 'Hitsaaja', 'Levyseppä', 'Teollisuuspuuseppä', 'Koneistaja',
+    'Autokorimekaanikko', 'Ilmanvaihtoasentaja', 'Rakennusvalvoja', 'Rakennusmestari',
+    'Huoltoasentaja',
+  ],
+  engineer: [
+    'Insinööri', 'Tuotekehittäjä', 'Konetekniikan insinööri', 'Sähköinsinööri', 'Rakennusinsinööri',
+    'Prosessisuunnittelija', 'Projektisuunnittelija', 'Laatuinsinööri', 'Ympäristöinsinööri',
+    'Automaatiosuunnittelija', 'Energiainsinööri', 'Koneinsinööri', 'Mekaniikkasuunnittelija',
+    'Tuotantosuunnittelija', 'Geotekniikan insinööri', 'Tuote- ja muotoiluinsinööri',
+    'Rakennesuunnittelija', 'Tuotanto- ja kehitysinsinööri',
+  ],
+  it: [
+    'Ohjelmistokehittäjä', 'Web-kehittäjä', 'Peliohjelmoija', 'Data-analyytikko', 'IT-tukihenkilö',
+    'Kyberturvallisuusasiantuntija', 'Pilviarkkitehti', 'DevOps-insinööri', 'UX/UI-suunnittelija',
+    'Tietokantasuunnittelija', 'Tekoälyasiantuntija', 'Järjestelmäsuunnittelija',
+    'Mobiilisovelluskehittäjä', 'Testausinsinööri', 'IT-projektipäällikkö', 'Pelisuunnittelija',
+    'Tietoturva-asiantuntija', 'Verkkosuunnittelija',
+  ],
+  lab: [
+    'Teollisuuden prosessityöntekijä', 'Laboratorioanalyytikko', 'Laadunvalvontatyöntekijä',
+    'Kemian laborantti', 'Elintarviketehtaan työntekijä', 'Prosessinhoitaja', 'Mittateknikko',
+    'Tehdastyöntekijä', 'Pakkauskoneen hoitaja', 'Tutkimusavustaja', 'Biotekniikan laborantti',
+    'Ympäristöanalyytikko', 'Kemikaaliteknikko', 'Tuotantolinjan operaattori',
+    'Laadunvalvojan assistentti',
+  ],
+  nature: [
+    'Maatalousyrittäjä', 'Maanviljelijä', 'Karjanhoitaja', 'Metsätyöntekijä', 'Puutarhuri',
+    'Metsänhoitaja', 'Kalastaja', 'Ympäristötyöntekijä', 'Luonnonsuojelutyöntekijä',
+    'Maatalouskoneenkuljettaja', 'Viininviljelijä', 'Metsäkoneenkuljettaja', 'Maaseutuyrittäjä',
+    'Eläintenhoitaja', 'Viljelijä',
+  ],
+  creative: [
+    'Graafinen suunnittelija', 'Valokuvaaja', 'Toimittaja', 'Sisällöntuottaja', 'Muusikko',
+    'Näyttelijä', 'Elokuvaaja', 'Animaattori', 'Muotoilija', 'Sisustussuunnittelija',
+    'Mainosgraafikko', 'Mediapalvelutyöntekijä', 'Kuvataiteilija', 'Tekstiilimuotoilija',
+    'Pelisuunnittelija', 'Visuaalinen suunnittelija', 'Luova kirjoittaja', 'Koreografi',
+  ],
+};
+
+const HIGHER_ED_OCCUPATIONS = [
+  'Sairaanhoitaja', 'Fysioterapeutti', 'Farmaseutti', 'Kätilö', 'Terveydenhoitaja',
+  'Insinööri', 'Ohjelmistokehittäjä', 'Peruskoulun opettaja', 'Päiväkodin opettaja',
+  'Sosiaalityöntekijä', 'Poliisi', 'Tradenomi', 'Erityisopettaja', 'Data-analyytikko',
+  'Tuote- ja muotoiluinsinööri', 'Konetekniikan insinööri', 'Sähköinsinööri',
+];
+
+function occupationsForPath(pathId, answers) {
+  const list = OCCUPATIONS_BY_PATH[pathId] ? [...OCCUPATIONS_BY_PATH[pathId]] : [];
+  if (!wantsHigherEd(answers)) return list;
+  return list.sort((a, b) => {
+    const aHi = HIGHER_ED_OCCUPATIONS.includes(a) ? 0 : 1;
+    const bHi = HIGHER_ED_OCCUPATIONS.includes(b) ? 0 : 1;
+    return aHi - bHi || a.localeCompare(b, 'fi');
+  });
+}
+
+function renderOccupationList(pathId, answers) {
+  const jobs = occupationsForPath(pathId, answers);
+  if (!jobs.length) return '';
+  return `<ul class="occupation-list">${jobs.map((j) => `<li>${j}</li>`).join('')}</ul>`;
+}
+
+function bindPathToggles() {
+  document.querySelectorAll('.path-toggle').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const panel = btn.parentElement.querySelector('.path-occupations');
+      if (!panel) return;
+      const open = panel.classList.toggle('open');
+      panel.hidden = !open;
+      btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+      const count = btn.dataset.count || '';
+      btn.textContent = open ? `Piilota ammatit ▴` : `Näytä ammatit (${count}) ▾`;
+    });
+  });
+}
+
 const state = {
   screen: 'intro',
   lxpIndex: 0,
@@ -847,18 +954,27 @@ function render() {
       </div>
 
       <div class="section-title">Polkuja kokeiltavaksi</div>
-      <p style="font-size:0.85rem;color:var(--muted);margin-bottom:12px">Ei lopullista uraa — ehdotuksia suuntaan, joka sopii työtyyliisi ja valintoihisi.</p>
+      <p style="font-size:0.85rem;color:var(--muted);margin-bottom:12px">Ei lopullista uraa — ehdotuksia suuntaan. Avaa polku nähdäksesi esimerkkiammatteja (TE24).</p>
       ${higherEdNote}
       ${topPaths.map((p, i) => {
         const study = studyLineForPath(p, answers);
+        const occCount = (OCCUPATIONS_BY_PATH[p.id] || []).length;
         return `
         <div class="path-card">
           <span class="path-emoji">${p.emoji}</span>
-          <div>
+          <div class="path-card-body">
             <h3>${i + 1}. ${p.name}</h3>
             <p>${p.desc}</p>
-            ${study ? `<p style="font-size:0.8rem;color:var(--muted);margin-top:6px">📚 ${study}</p>` : ''}
+            ${study ? `<p class="path-study">📚 ${study}</p>` : ''}
             <div class="path-score">Sopivuus ${Math.min(98, 55 + p.score)}%</div>
+            ${occCount ? `
+            <button type="button" class="path-toggle" data-count="${occCount}" aria-expanded="false">
+              Näytä ammatit (${occCount}) ▾
+            </button>
+            <div class="path-occupations" hidden>
+              <p class="occupation-hint">Esimerkkejä tämän polun ammateista (TE24) — kokeile TET:llä tai tutustu opintoihin.</p>
+              ${renderOccupationList(p.id, answers)}
+            </div>` : ''}
           </div>
         </div>`;
       }).join('')}
@@ -874,6 +990,8 @@ function render() {
       <a href="https://yoro.fi/" class="btn btn-ghost" style="text-decoration:none;margin-top:8px">← Palaa Yoro.fi-sivuille</a>
 
       <p class="disclaimer">Tulos perustuu työtyyliin (LxP), lempikouluaineisiin ja kiinnostukseen. Ammatti selkiytyy kokeilemalla — ei yhdestä testistä.</p>`;
+
+    bindPathToggles();
 
     document.getElementById('shareBtn').onclick = async () => {
       const text = shareText(archetype, topPaths);
