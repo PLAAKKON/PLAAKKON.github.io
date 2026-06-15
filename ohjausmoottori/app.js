@@ -235,6 +235,42 @@ const TYOOHJAUS_QUESTIONS = [
       e: 'Työtyyli vielä muotoutumassa.',
     },
   },
+  {
+    id: 'visibility',
+    phase: 'Työohjaus',
+    text: 'Miltä tuntuu puhua ihmisille, esitellä tai olla näkyvässä roolissa?',
+    textPlain: 'Miltä tuntuu puhua ihmisille tai olla näkyvässä roolissa?',
+    hint: 'Vain uraohjaukseen — auttaa karsimaan ammatteja, jotka vaativat paljon esiintymistä.',
+    hintPlain: 'Vain uraohjaukseen. Auttaa valitsemaan sopivia ammatteja.',
+    options: [
+      { key: 'a', label: 'Epämukavalta — en halua olla esillä tai esiintyä.', labelPlain: 'Epämukavalta — en halua esiintyä.' },
+      { key: 'b', label: 'Ihan ok pienessä porukassa tai 1:1-tilanteissa.', labelPlain: 'Ok pienessä porukassa tai 1:1.' },
+      { key: 'c', label: 'Luontevaa — puhuminen ja näkyvyys sopivat minulle.', labelPlain: 'Luontevaa — puhuminen sopii minulle.' },
+    ],
+    narrative: {
+      a: 'Esiintyminen ei ole vahvuutesi — suodatamme näkyvät roolit pois.',
+      b: 'Pärjäät ihmisten kanssa pienessä porukassa — ei tarvitse olla lavalla.',
+      c: 'Sosiaalinen rohkeus on vahvuus — näkyvät roolit sopivat.',
+    },
+  },
+  {
+    id: 'stress',
+    phase: 'Työohjaus',
+    text: 'Miten selviät, kun on kiire, häiriöitä tai epäselvää tilannetta?',
+    textPlain: 'Miten selviät kiireestä tai epäselvistä tilanteista?',
+    hint: 'Vain uraohjaukseen — auttaa karsimaan kiireisiä tai paineisia ammatteja.',
+    hintPlain: 'Vain uraohjaukseen. Auttaa valitsemaan sopivaa työrytmiä.',
+    options: [
+      { key: 'a', label: 'Haluan rauhallisen ja ennustettavan työrytmin.', labelPlain: 'Haluan rauhallisen työrytmin.' },
+      { key: 'b', label: 'Selviän kohtuullisesta paineesta ja kiireestä.', labelPlain: 'Selviän kohtuullisesta paineesta.' },
+      { key: 'c', label: 'Paine ja kiire eivät haittaa — ne pitävät hereillä.', labelPlain: 'Paine ei haittaa.' },
+    ],
+    narrative: {
+      a: 'Arvostat rauhallista työrytmiä — karsimme kiireisimmät ammatit.',
+      b: 'Kohtuullinen paine sopii — useimmat polut käyvät.',
+      c: 'Paine ei haittaa — kiireiset ja vaihtelevat työt voivat sopia.',
+    },
+  },
 ];
 
 const SUBJECTS = [
@@ -668,7 +704,62 @@ function hasHigherEdBackground(answers) {
   return answers.q7 === 'd' || answers.q8 === 'b';
 }
 
-function occupationsForPath(pathId, answers) {
+/** Ammatin näkyvyys- ja stressiprofiili suodatusta varten */
+function occupationWorkProfile(jobName) {
+  const n = jobName.toLowerCase();
+  let visibility = 'medium';
+  let stress = 'medium';
+
+  if (
+    /myyj|myynti|myyntiedustaja|asiakaspalvelu|tarjoilija|ravintola|kokki|baarimikko|hotelli|toimittaja|näyttelijä|elokuvaaja|muusikko|koreografi|medianomi|viestintä|markkinointi|mainos|tapahtuma|turistikokelas|asiakaskokemus|myyntipäällikkö|ravintolapäällikkö|hotellipäällikkö/.test(n)
+  ) {
+    visibility = 'high';
+  } else if (
+    /opettaja|päiväkodin|erityisopettaja|nuorisotyö|luenno|esiinty/.test(n)
+  ) {
+    visibility = 'high';
+  } else if (
+    /laboratorio|analyytikko|ohjelmoija|kehittäjä|sihteeri|hallinto|kirjanpit|varasto|koneistaja|tutkija|tutkimus|metsä|maatalous|puutarhuri|ohjelmoija|data-analyytikko|testausinsinööri/.test(n)
+  ) {
+    visibility = 'low';
+  }
+
+  if (
+    /ensihoitaja|poliisi|päivyst|vartija|turvallisuus|paloesimies|rajavartija|kokki|tarjoilija|ravintola|työmaapäällikkö|rakennusmestari|myyjä|kassatyöntekijä/.test(n)
+  ) {
+    stress = 'high';
+  } else if (
+    /laboratorio|analyytikko|hallinto|sihteeri|kirjanpit|tutkimusavustaja|ohjelmoija|kehittäjä|koneistaja|metsänhoitaja|puutarhuri|lähihoitaja|lastenhoitaja|kodinhoitaja/.test(n)
+  ) {
+    stress = 'low';
+  }
+
+  return { visibility, stress };
+}
+
+function occupationMatchesTyoohjaus(jobName, tyoohjaus = {}) {
+  const { visibility, stress } = occupationWorkProfile(jobName);
+  const vis = tyoohjaus.visibility;
+  const str = tyoohjaus.stress;
+
+  if (vis === 'a' && visibility === 'high') return false;
+  if (vis === 'b' && visibility === 'high') return false;
+
+  if (str === 'a' && stress === 'high') return false;
+
+  return true;
+}
+
+function occupationsForPath(pathId, answers, tyoohjaus = {}) {
+  const tiers = OCCUPATIONS_BY_PATH[pathId];
+  if (!tiers) return [];
+  const list = hasHigherEdBackground(answers)
+    ? (tiers.higherEd.length ? [...tiers.higherEd] : [...tiers.vocational])
+    : [...tiers.vocational, ...tiers.higherEd];
+  return list.filter((job) => occupationMatchesTyoohjaus(job, tyoohjaus));
+}
+
+function allOccupationsForPath(pathId, answers) {
   const tiers = OCCUPATIONS_BY_PATH[pathId];
   if (!tiers) return [];
   if (hasHigherEdBackground(answers)) {
@@ -677,8 +768,16 @@ function occupationsForPath(pathId, answers) {
   return [...tiers.vocational, ...tiers.higherEd];
 }
 
-function occupationCountForPath(pathId, answers) {
-  return occupationsForPath(pathId, answers).length;
+function occupationCountForPath(pathId, answers, tyoohjaus = {}) {
+  return occupationsForPath(pathId, answers, tyoohjaus).length;
+}
+
+function occupationFilterNote(pathId, answers, tyoohjaus = {}) {
+  const all = allOccupationsForPath(pathId, answers);
+  const shown = occupationsForPath(pathId, answers, tyoohjaus);
+  const hidden = all.length - shown.length;
+  if (hidden <= 0) return '';
+  return `Piilotimme ${hidden} ammattia, jotka vaativat enemmän esiintymistä tai kiirettä kuin valitsit.`;
 }
 
 function occupationHintFor(answers) {
@@ -730,9 +829,12 @@ function pathLinkTerms(path, answers) {
   return { opinto, jobs, tet };
 }
 
-function renderOccupationList(pathId, answers) {
-  const jobs = occupationsForPath(pathId, answers);
-  if (!jobs.length) return '';
+function renderOccupationList(pathId, answers, tyoohjaus = {}) {
+  const jobs = occupationsForPath(pathId, answers, tyoohjaus);
+  if (!jobs.length) {
+    return '<p class="occupation-hint">Yksikään ammatti ei täsmännyt kaikkiin valintoihisi — kokeile toista polkua tai tee testi uudelleen myöhemmin.</p>';
+  }
+  const filterNote = occupationFilterNote(pathId, answers, tyoohjaus);
   return `<ul class="occupation-list">${jobs.map((j) => {
     const opUrl = opintopolkuUrl(j);
     const jobUrl = tyomarkkinatoriUrl(j);
@@ -744,6 +846,7 @@ function renderOccupationList(pathId, answers) {
       </span>
     </li>`;
   }).join('')}</ul>
+  ${filterNote ? `<p class="occupation-filter-note">${filterNote}</p>` : ''}
   <p class="te24-source">Ammattinimet perustuvat <a href="${TE24_SOURCE_URL}" target="_blank" rel="noopener noreferrer">TE24-luokitukseen</a> (Tilastokeskus).</p>`;
 }
 
@@ -1153,6 +1256,22 @@ function scorePaths(answers, sectors, interests, tyoohjaus = {}) {
       if (['service', 'build', 'health'].includes(path.id)) score += 8;
     }
 
+    const visibility = tyoohjaus.visibility;
+    if (visibility === 'a') {
+      if (['service', 'creative', 'business', 'society'].includes(path.id)) score -= 14;
+      if (['lab', 'it', 'health'].includes(path.id)) score += 6;
+    } else if (visibility === 'c') {
+      if (['service', 'creative', 'business', 'society'].includes(path.id)) score += 10;
+    }
+
+    const stressLevel = tyoohjaus.stress;
+    if (stressLevel === 'a') {
+      if (['health', 'service', 'build'].includes(path.id)) score -= 12;
+      if (['lab', 'business', 'it'].includes(path.id)) score += 8;
+    } else if (stressLevel === 'c') {
+      if (['health', 'service', 'society', 'build'].includes(path.id)) score += 10;
+    }
+
     if (hasHigherEdBackground(answers)) {
       const vocationalHeavy = ['build', 'service', 'nature'];
       if (vocationalHeavy.includes(path.id)) score -= 6;
@@ -1298,6 +1417,22 @@ function explainPathWhy(path, answers, interests, tyoohjaus) {
     bullets.push('Arvostat selkeää etenemistä — käytännön polku voi sopia');
   }
 
+  const visibility = tyoohjaus.visibility;
+  if (visibility === 'a' && ['lab', 'it', 'health'].includes(path.id)) {
+    bullets.push('Esiintyminen ei ole vahvuutesi — tämä polku sopii taustarooliin');
+  }
+  if (visibility === 'c' && ['service', 'creative', 'business', 'society'].includes(path.id)) {
+    bullets.push('Sosiaalinen rohkeus sopii näkyviin ja ihmisläheisiin rooleihin');
+  }
+
+  const stressLevel = tyoohjaus.stress;
+  if (stressLevel === 'a' && ['lab', 'business', 'it'].includes(path.id)) {
+    bullets.push('Arvostat rauhallista työrytmiä — tämä polku on ennustettavampi');
+  }
+  if (stressLevel === 'c' && ['health', 'service', 'society', 'build'].includes(path.id)) {
+    bullets.push('Paine ei haittaa — kiireiset ja vaihtelevat työt voivat sopia');
+  }
+
   if (hasHigherEdBackground(answers) && ['engineer', 'it', 'lab', 'society', 'creative', 'business'].includes(path.id)) {
     bullets.push('Korkeakoulutaso huomioitu — ammatit korkeamman tason tehtävistä');
   }
@@ -1376,7 +1511,7 @@ function primaryCta(interest, topPath, answers) {
 
 function renderPathCard(p, i, answers, interests, tyoohjaus, topScore) {
   const study = studyLineForPath(p, answers);
-  const occCount = occupationCountForPath(p.id, answers);
+  const occCount = occupationCountForPath(p.id, answers, tyoohjaus);
   const occHint = occupationHintFor(answers);
   const fit = fitBadge(i, p.score, topScore);
   const why = explainPathWhy(p, answers, interests, tyoohjaus);
@@ -1405,7 +1540,7 @@ function renderPathCard(p, i, answers, interests, tyoohjaus, topScore) {
         </button>
         <div class="path-occupations" hidden>
           <p class="occupation-hint">${occHint}</p>
-          ${renderOccupationList(p.id, answers)}
+          ${renderOccupationList(p.id, answers, tyoohjaus)}
         </div>` : ''}
       </div>
     </div>`;
@@ -1690,7 +1825,7 @@ function render() {
         <p class="hook">${txt('introHook')}</p>
         <div class="stats-row">
           <div class="stat"><strong>10</strong><span>LxP-kysymystä</span></div>
-          <div class="stat"><strong>1</strong><span>työohjaus</span></div>
+          <div class="stat"><strong>4</strong><span>työohjauskysymystä</span></div>
           <div class="stat"><strong>2</strong><span>kiinnostusta</span></div>
         </div>
         <button class="btn btn-primary" id="startBtn">${txt('startBtn')}</button>
