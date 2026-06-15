@@ -273,6 +273,78 @@ const TYOOHJAUS_QUESTIONS = [
   },
 ];
 
+/** Motivaatiokerros — ei osa LxP-avainta */
+const MOTIVATION_Q = [
+  {
+    id: 'meaning',
+    phase: 'Motivaatio',
+    type: 'multi',
+    min: 1,
+    max: 2,
+    grid: true,
+    text: 'Mistä työssä tulee sinulle merkitys?',
+    textPlain: 'Mistä työssä tulee merkitys?',
+    hint: 'Valitse 1–2 tärkeintä.',
+    hintPlain: 'Valitse 1–2.',
+    options: [
+      { key: 'help', label: '❤️ Autan muita tai parannan hyvinvointia', labelPlain: '❤️ Autan muita' },
+      { key: 'results', label: '📈 Näen tuloksia ja edistystä', labelPlain: '📈 Näen tuloksia' },
+      { key: 'learn', label: '📚 Opin jatkuvasti uutta', labelPlain: '📚 Opin uutta' },
+      { key: 'solve', label: '🔧 Ratkaisen käytännön tai teknisiä ongelmia', labelPlain: '🔧 Ratkaisen ongelmia' },
+      { key: 'create', label: '💡 Keksin ja kehitän uutta', labelPlain: '💡 Keksin uutta' },
+      { key: 'purpose', label: '🌍 Työllä on merkitystä yhteiskunnalle tai ympäristölle', labelPlain: '🌍 Yhteiskunta tai ympäristö' },
+    ],
+    narrative: {
+      help: 'Merkitsevää on auttaa muita ja nähdä hyöty.',
+      results: 'Motivoidut selkeistä tuloksista ja edistymisestä.',
+      learn: 'Pidät työstä, jossa opit jatkuvasti.',
+      solve: 'Saat virtaa ongelmien ratkaisemisesta.',
+      create: 'Innostut uusien ratkaisujen keksimisestä.',
+      purpose: 'Haluat työn, jolla on laajempi merkitys.',
+    },
+  },
+  {
+    id: 'recognition',
+    phase: 'Motivaatio',
+    type: 'single',
+    text: 'Mikä pitää sinut motivoituneena, jos teet samanlaista työtä vuosia?',
+    textPlain: 'Mikä pitää motivoituneena pitkään?',
+    hint: 'Valitse yksi.',
+    hintPlain: 'Valitse yksi.',
+    options: [
+      {
+        key: 'praise',
+        label: 'Viihdyn selkeästi paremmin, jos ansaisen työstäni kiitosta ja tunnustusta.',
+        labelPlain: 'Tarvitsen kiitosta ja tunnustusta.',
+      },
+      {
+        key: 'mastery',
+        label: 'Minulle riittää viihtyvyyteen se, että näen työni onnistumisen.',
+        labelPlain: 'Riittää kun näen että homma onnistuu.',
+      },
+      {
+        key: 'calm_team',
+        label: 'Minulle riittää viihtyvyyteen se, etten saa negatiivista palautetta ja työyhteisö on hyvä.',
+        labelPlain: 'Riittää kun ei moitita ja tiimi on kunnossa.',
+      },
+    ],
+    narrative: {
+      praise: 'Viihdyt selkeästi paremmin, kun saat ansaitsemasi kiitoksen ja tunnustuksen — kysy työpaikoista, miten palautetta annetaan.',
+      mastery: 'Sinulle riittää, että näet työn onnistumisen — tekniset asiantuntijaroolit voivat sopia hyvin.',
+      calm_team: 'Sinulle riittää hyvä työyhteisö ja se, ettei työtä moitita turhaan — kiitosta et välttämättä saa paljon.',
+    },
+  },
+];
+
+const PATH_BY_MEANING = {
+  help: ['health', 'service', 'society'],
+  results: ['business', 'service'],
+  learn: ['it', 'engineer', 'lab', 'creative'],
+  solve: ['engineer', 'build', 'it', 'lab'],
+  create: ['creative', 'engineer', 'it'],
+  purpose: ['nature', 'society', 'health'],
+};
+
 const SUBJECTS = [
   { id: 'aidinkieli', label: 'Äidinkieli', emoji: '📖', sectors: ['luova', 'palvelu', 'yhteiskunta'] },
   { id: 'englanti', label: 'Englanti', emoji: '🇬🇧', sectors: ['palvelu', 'liiketoiminta', 'tekniikka'] },
@@ -750,13 +822,54 @@ function occupationMatchesTyoohjaus(jobName, tyoohjaus = {}) {
   return true;
 }
 
-function occupationsForPath(pathId, answers, tyoohjaus = {}) {
+function occupationMeaningTags(jobName) {
+  const n = jobName.toLowerCase();
+  const tags = new Set();
+
+  if (/hoiva|hoitaja|sairaan|lähihoit|fysioterap|lastenhoit|kodinhoit|sosiaal|opettaja|päiväkoti|nuorisotyö|psykolog|terapeut|kuntout/.test(n)) {
+    tags.add('help');
+  }
+  if (/myyj|myynti|kauppa|markkinointi|kirjanpit|tilinhoit|asiakaspalvelu|yrittäj|tradenomi|prov|pankki/.test(n)) {
+    tags.add('results');
+  }
+  if (/ohjelmoija|kehittäjä|tutkija|tutkimus|laboratorio|analyytikko|insinööri|suunnittel|data-/.test(n)) {
+    tags.add('learn');
+  }
+  if (/asentaja|koneistaja|rakennus|sähkö|automaatio|kunnossapito|korjaus|mekaniik|lvi|hitsaa|työnjoht/.test(n)) {
+    tags.add('solve');
+  }
+  if (/suunnittelija|muusikko|kuvataite|graafinen|medianomi|koreografi|näyttelijä|muotoil|valokuva|elokuva|mainos/.test(n)) {
+    tags.add('create');
+  }
+  if (/metsä|maatalous|puutarh|ympäristö|luonto|poliisi|paloesimies|vartija|turvallisuus|sairaanhoit/.test(n)) {
+    tags.add('purpose');
+  }
+
+  return [...tags];
+}
+
+function occupationMeaningFit(jobName, meaningPicks = []) {
+  if (!meaningPicks?.length) return 'strong';
+  const tags = occupationMeaningTags(jobName);
+  const overlap = meaningPicks.filter((p) => tags.includes(p)).length;
+  if (overlap >= 2) return 'strong';
+  if (meaningPicks.length === 1 && overlap === 1) return 'strong';
+  if (overlap === 1) return 'partial';
+  return 'none';
+}
+
+function occupationsForPath(pathId, answers, tyoohjaus = {}, motivation = {}) {
   const tiers = OCCUPATIONS_BY_PATH[pathId];
   if (!tiers) return [];
   const list = hasHigherEdBackground(answers)
     ? (tiers.higherEd.length ? [...tiers.higherEd] : [...tiers.vocational])
     : [...tiers.vocational, ...tiers.higherEd];
-  return list.filter((job) => occupationMatchesTyoohjaus(job, tyoohjaus));
+  const meaningPicks = motivation.meaning || [];
+  return list.filter((job) => {
+    if (!occupationMatchesTyoohjaus(job, tyoohjaus)) return false;
+    if (!meaningPicks.length) return true;
+    return occupationMeaningFit(job, meaningPicks) !== 'none';
+  });
 }
 
 function allOccupationsForPath(pathId, answers) {
@@ -768,16 +881,30 @@ function allOccupationsForPath(pathId, answers) {
   return [...tiers.vocational, ...tiers.higherEd];
 }
 
-function occupationCountForPath(pathId, answers, tyoohjaus = {}) {
-  return occupationsForPath(pathId, answers, tyoohjaus).length;
+function occupationCountForPath(pathId, answers, tyoohjaus = {}, motivation = {}) {
+  return occupationsForPath(pathId, answers, tyoohjaus, motivation).length;
 }
 
-function occupationFilterNote(pathId, answers, tyoohjaus = {}) {
+function occupationFilterNote(pathId, answers, tyoohjaus = {}, motivation = {}) {
   const all = allOccupationsForPath(pathId, answers);
-  const shown = occupationsForPath(pathId, answers, tyoohjaus);
-  const hidden = all.length - shown.length;
-  if (hidden <= 0) return '';
-  return `Piilotimme ${hidden} ammattia, jotka vaativat enemmän esiintymistä tai kiirettä kuin valitsit.`;
+  const meaningPicks = motivation.meaning || [];
+  const tyoohjausFiltered = all.filter((job) => occupationMatchesTyoohjaus(job, tyoohjaus));
+  const shown = occupationsForPath(pathId, answers, tyoohjaus, motivation);
+  const notes = [];
+  const tyoohjausHidden = all.length - tyoohjausFiltered.length;
+  if (tyoohjausHidden > 0) {
+    notes.push(`Piilotimme ${tyoohjausHidden} ammattia, jotka vaativat enemmän esiintymistä tai kiirettä kuin valitsit.`);
+  }
+  if (meaningPicks.length) {
+    const meaningHidden = tyoohjausFiltered.filter((job) => occupationMeaningFit(job, meaningPicks) === 'none').length;
+    if (meaningHidden > 0) {
+      notes.push(`Piilotimme ${meaningHidden} ammattia, jotka eivät vastanneet merkitysvalintoihisi.`);
+    }
+  }
+  if (!notes.length && all.length > shown.length) {
+    notes.push(`Piilotimme ${all.length - shown.length} ammattia valintojesi perusteella.`);
+  }
+  return notes.join(' ');
 }
 
 function occupationHintFor(answers) {
@@ -829,23 +956,46 @@ function pathLinkTerms(path, answers) {
   return { opinto, jobs, tet };
 }
 
-function renderOccupationList(pathId, answers, tyoohjaus = {}) {
-  const jobs = occupationsForPath(pathId, answers, tyoohjaus);
+function renderOccupationItem(job, fitClass) {
+  const opUrl = opintopolkuUrl(job);
+  const jobUrl = tyomarkkinatoriUrl(job);
+  return `<li class="occupation-item${fitClass ? ` ${fitClass}` : ''}">
+    <span class="occupation-name">${job}</span>
+    <span class="occupation-links">
+      <a class="occ-link" href="${opUrl}" target="_blank" rel="noopener noreferrer" data-track="opintopolku" data-term="${job}">Opinnot</a>
+      <a class="occ-link" href="${jobUrl}" target="_blank" rel="noopener noreferrer" data-track="tyomarkkinatori" data-term="${job}">Työpaikat</a>
+    </span>
+  </li>`;
+}
+
+function renderOccupationList(pathId, answers, tyoohjaus = {}, motivation = {}) {
+  const jobs = occupationsForPath(pathId, answers, tyoohjaus, motivation);
   if (!jobs.length) {
     return '<p class="occupation-hint">Yksikään ammatti ei täsmännyt kaikkiin valintoihisi — kokeile toista polkua tai tee testi uudelleen myöhemmin.</p>';
   }
-  const filterNote = occupationFilterNote(pathId, answers, tyoohjaus);
-  return `<ul class="occupation-list">${jobs.map((j) => {
-    const opUrl = opintopolkuUrl(j);
-    const jobUrl = tyomarkkinatoriUrl(j);
-    return `<li class="occupation-item">
-      <span class="occupation-name">${j}</span>
-      <span class="occupation-links">
-        <a class="occ-link" href="${opUrl}" target="_blank" rel="noopener noreferrer" data-track="opintopolku" data-term="${j}">Opinnot</a>
-        <a class="occ-link" href="${jobUrl}" target="_blank" rel="noopener noreferrer" data-track="tyomarkkinatori" data-term="${j}">Työpaikat</a>
-      </span>
-    </li>`;
-  }).join('')}</ul>
+  const meaningPicks = motivation.meaning || [];
+  const filterNote = occupationFilterNote(pathId, answers, tyoohjaus, motivation);
+  const withFit = jobs.map((j) => ({ name: j, fit: occupationMeaningFit(j, meaningPicks) }));
+  const strong = withFit.filter((x) => x.fit === 'strong');
+  const partial = withFit.filter((x) => x.fit === 'partial');
+
+  let listHtml = '';
+  if (meaningPicks.length && partial.length) {
+    if (strong.length) {
+      listHtml += `<p class="occupation-fit-heading">Sopii parhaiten valintoihisi</p>
+        <ul class="occupation-list">${strong.map((x) => renderOccupationItem(x.name, 'fit-strong')).join('')}</ul>`;
+    }
+    listHtml += `<p class="occupation-fit-heading${strong.length ? ' occupation-fit-heading--partial' : ''}">Sopii osittain</p>
+      <ul class="occupation-list occupation-list--partial">${partial.map((x) => renderOccupationItem(x.name, 'fit-partial')).join('')}</ul>`;
+    if (!strong.length) {
+      listHtml = `<p class="occupation-fit-heading">Sopii osittain valintoihisi</p>
+        <ul class="occupation-list occupation-list--partial">${partial.map((x) => renderOccupationItem(x.name, 'fit-partial')).join('')}</ul>`;
+    }
+  } else {
+    listHtml = `<ul class="occupation-list">${jobs.map((j) => renderOccupationItem(j, meaningPicks.length ? 'fit-strong' : '')).join('')}</ul>`;
+  }
+
+  return `${listHtml}
   ${filterNote ? `<p class="occupation-filter-note">${filterNote}</p>` : ''}
   <p class="te24-source">Ammattinimet perustuvat <a href="${TE24_SOURCE_URL}" target="_blank" rel="noopener noreferrer">TE24-luokitukseen</a> (Tilastokeskus).</p>`;
 }
@@ -935,6 +1085,7 @@ function serializeResultState() {
     v: 1,
     l: state.lxp,
     t: state.tyoohjaus,
+    m: state.motivation,
     s: [...state.subjects],
     i: state.interest,
     p: state.plainLanguage ? 1 : 0,
@@ -962,6 +1113,9 @@ function decodeResultPayload(encoded) {
 function applyResultPayload(data) {
   state.lxp = { ...data.l };
   state.tyoohjaus = { ...data.t };
+  state.motivation = data.m
+    ? { meaning: [...(data.m.meaning || [])], recognition: data.m.recognition || '' }
+    : { meaning: [], recognition: '' };
   state.subjects = new Set(data.s || []);
   state.interest = { ...data.i };
   if (Array.isArray(state.interest.i1)) {
@@ -1089,6 +1243,12 @@ function tyoohjausComplete() {
   return TYOOHJAUS_QUESTIONS.every((q) => state.tyoohjaus[q.id]);
 }
 
+function motivationComplete() {
+  const meaning = state.motivation.meaning;
+  const recognition = state.motivation.recognition;
+  return Array.isArray(meaning) && meaning.length >= 1 && meaning.length <= 2 && !!recognition;
+}
+
 function interestStepValid(index) {
   if (index === 0) {
     return Array.isArray(state.interest.i1) && state.interest.i1.length >= 2;
@@ -1101,6 +1261,7 @@ const state = {
   lxpIndex: 0,
   lxp: {},
   tyoohjaus: {},
+  motivation: { meaning: [], recognition: '' },
   subjects: new Set(),
   interest: {},
   interestIndex: 0,
@@ -1108,14 +1269,15 @@ const state = {
 };
 
 function totalSteps() {
-  return LXP_QUESTIONS.length + 1 + 1 + INTEREST_Q.length;
+  return LXP_QUESTIONS.length + 1 + 1 + 1 + INTEREST_Q.length;
 }
 
 function currentStep() {
   if (state.screen === 'lxp') return state.lxpIndex + 1;
   if (state.screen === 'tyoohjaus') return LXP_QUESTIONS.length + 1;
-  if (state.screen === 'subjects') return LXP_QUESTIONS.length + 2;
-  if (state.screen === 'interest') return LXP_QUESTIONS.length + 3 + state.interestIndex;
+  if (state.screen === 'motivation') return LXP_QUESTIONS.length + 2;
+  if (state.screen === 'subjects') return LXP_QUESTIONS.length + 3;
+  if (state.screen === 'interest') return LXP_QUESTIONS.length + 4 + state.interestIndex;
   return 0;
 }
 
@@ -1132,7 +1294,7 @@ function pickArchetype(answers) {
   return ARCHETYPES[0];
 }
 
-function scorePaths(answers, sectors, interests, tyoohjaus = {}) {
+function scorePaths(answers, sectors, interests, tyoohjaus = {}, motivation = {}) {
   const sectorSet = new Set(sectors);
   const i1 = interests.i1 || [];
   const i2 = interests.i2;
@@ -1272,6 +1434,10 @@ function scorePaths(answers, sectors, interests, tyoohjaus = {}) {
       if (['health', 'service', 'society', 'build'].includes(path.id)) score += 10;
     }
 
+    (motivation.meaning || []).forEach((key) => {
+      if ((PATH_BY_MEANING[key] || []).includes(path.id)) score += 10;
+    });
+
     if (hasHigherEdBackground(answers)) {
       const vocationalHeavy = ['build', 'service', 'nature'];
       if (vocationalHeavy.includes(path.id)) score -= 6;
@@ -1316,6 +1482,19 @@ function getSectorWeights() {
   return Object.entries(weights).sort((a, b) => b[1] - a[1]).map(([s]) => s);
 }
 
+function buildMotivationNarrative(motivation = {}) {
+  const lines = [];
+  const meaningQ = MOTIVATION_Q.find((q) => q.id === 'meaning');
+  const recognitionQ = MOTIVATION_Q.find((q) => q.id === 'recognition');
+  (motivation.meaning || []).forEach((key) => {
+    if (meaningQ?.narrative?.[key]) lines.push(meaningQ.narrative[key]);
+  });
+  if (motivation.recognition && recognitionQ?.narrative?.[motivation.recognition]) {
+    lines.push(recognitionQ.narrative[motivation.recognition]);
+  }
+  return lines;
+}
+
 function buildNarrative(answers, tyoohjaus = {}) {
   const lines = [];
   LXP_QUESTIONS.forEach((q) => {
@@ -1326,7 +1505,7 @@ function buildNarrative(answers, tyoohjaus = {}) {
     const key = tyoohjaus[q.id];
     if (key && q.narrative[key]) lines.push(q.narrative[key]);
   });
-  return lines.slice(0, 6);
+  return lines.slice(0, 4);
 }
 
 const SECTOR_WHY = {
@@ -1509,9 +1688,9 @@ function primaryCta(interest, topPath, answers) {
   return ctas[i4] || ctas.explore;
 }
 
-function renderPathCard(p, i, answers, interests, tyoohjaus, topScore) {
+function renderPathCard(p, i, answers, interests, tyoohjaus, motivation, topScore) {
   const study = studyLineForPath(p, answers);
-  const occCount = occupationCountForPath(p.id, answers, tyoohjaus);
+  const occCount = occupationCountForPath(p.id, answers, tyoohjaus, motivation);
   const occHint = occupationHintFor(answers);
   const fit = fitBadge(i, p.score, topScore);
   const why = explainPathWhy(p, answers, interests, tyoohjaus);
@@ -1540,7 +1719,7 @@ function renderPathCard(p, i, answers, interests, tyoohjaus, topScore) {
         </button>
         <div class="path-occupations" hidden>
           <p class="occupation-hint">${occHint}</p>
-          ${renderOccupationList(p.id, answers, tyoohjaus)}
+          ${renderOccupationList(p.id, answers, tyoohjaus, motivation)}
         </div>` : ''}
       </div>
     </div>`;
@@ -1826,6 +2005,7 @@ function render() {
         <div class="stats-row">
           <div class="stat"><strong>10</strong><span>LxP-kysymystä</span></div>
           <div class="stat"><strong>4</strong><span>työohjauskysymystä</span></div>
+          <div class="stat"><strong>2</strong><span>motivaatiota</span></div>
           <div class="stat"><strong>2</strong><span>kiinnostusta</span></div>
         </div>
         <button class="btn btn-primary" id="startBtn">${txt('startBtn')}</button>
@@ -1929,7 +2109,7 @@ function render() {
       </div>
       <div class="nav-row">
         <button class="btn btn-ghost" id="backBtn">← Takaisin</button>
-        <button class="btn btn-primary" id="nextBtn" ${tyoohjausComplete() ? '' : 'disabled style="opacity:0.5"'}>Lempiaineet →</button>
+        <button class="btn btn-primary" id="nextBtn" ${tyoohjausComplete() ? '' : 'disabled style="opacity:0.5"'}>Motivaatio →</button>
       </div>`;
 
     document.querySelectorAll('.tyoohjaus-block .opt').forEach((btn) => {
@@ -1947,6 +2127,70 @@ function render() {
     document.getElementById('nextBtn').onclick = () => {
       if (!tyoohjausComplete()) return;
       track('tyoohjaus_complete', { ...state.tyoohjaus });
+      state.screen = 'motivation';
+      render();
+    };
+    announceProgress(step, totalSteps(), pct);
+    focusMainHeading();
+    return;
+  }
+
+  if (state.screen === 'motivation') {
+    const meaningQ = MOTIVATION_Q.find((q) => q.id === 'meaning');
+    const recognitionQ = MOTIVATION_Q.find((q) => q.id === 'recognition');
+    app.innerHTML = `
+      ${progressHtml}
+      <div class="card">
+        <div class="phase-tag">Motivaatio · ei LxP-hakua</div>
+        <p class="hint" style="margin-bottom:16px">${state.plainLanguage ? 'Nämä kysymykset auttavat arvioimaan merkitystä ja pitkän aikavälin motivaatiota.' : 'Nämä kysymykset auttavat arvioimaan, mikä tekee työstä merkityksellistä ja mikä pitää sinut motivoituneena pitkällä aikavälillä.'}</p>
+        <div class="tyoohjaus-block">
+          <h2 class="tyoohjaus-q" id="q-meaning">${qText(meaningQ)}</h2>
+          <p class="hint">${qHint(meaningQ)}</p>
+          <div class="options interest-sector-grid" data-qid="meaning" role="group" aria-labelledby="q-meaning">
+            ${meaningQ.options.map((o) => {
+              const selected = (state.motivation.meaning || []).includes(o.key);
+              return `<button type="button" class="opt${selected ? ' multi selected' : ''}" data-key="${o.key}" data-qid="meaning" role="checkbox" aria-checked="${selected ? 'true' : 'false'}">${optLabel(o)}</button>`;
+            }).join('')}
+          </div>
+        </div>
+        <div class="tyoohjaus-block">
+          <h2 class="tyoohjaus-q" id="q-recognition">${qText(recognitionQ)}</h2>
+          <p class="hint">${qHint(recognitionQ)}</p>
+          <div class="options" data-qid="recognition" role="radiogroup" aria-labelledby="q-recognition">
+            ${recognitionQ.options.map((o) => {
+              const selected = state.motivation.recognition === o.key;
+              return `<button type="button" class="opt${selected ? ' selected' : ''}" data-key="${o.key}" data-qid="recognition" role="radio" aria-checked="${selected ? 'true' : 'false'}">${optLabel(o)}</button>`;
+            }).join('')}
+          </div>
+        </div>
+      </div>
+      <div class="nav-row">
+        <button class="btn btn-ghost" id="backBtn">← Takaisin</button>
+        <button class="btn btn-primary" id="nextBtn" ${motivationComplete() ? '' : 'disabled style="opacity:0.5"'}>Lempiaineet →</button>
+      </div>`;
+
+    document.querySelectorAll('.tyoohjaus-block .opt').forEach((btn) => {
+      btn.onclick = () => {
+        const key = btn.dataset.key;
+        const qid = btn.dataset.qid;
+        if (qid === 'meaning') {
+          let arr = state.motivation.meaning || [];
+          if (arr.includes(key)) arr = arr.filter((k) => k !== key);
+          else if (arr.length < meaningQ.max) arr = [...arr, key];
+          state.motivation.meaning = arr;
+        } else {
+          state.motivation.recognition = key;
+        }
+        render();
+      };
+    });
+    document.getElementById('backBtn').onclick = () => {
+      state.screen = 'tyoohjaus';
+      render();
+    };
+    document.getElementById('nextBtn').onclick = () => {
+      if (!motivationComplete()) return;
+      track('motivation_complete', { ...state.motivation });
       state.screen = 'subjects';
       render();
     };
@@ -1983,7 +2227,7 @@ function render() {
       };
     });
     document.getElementById('backBtn').onclick = () => {
-      state.screen = 'tyoohjaus';
+      state.screen = 'motivation';
       render();
     };
     document.getElementById('nextBtn').onclick = () => {
@@ -2089,11 +2333,12 @@ function render() {
     const answers = { ...state.lxp };
     const archetype = pickArchetype(answers);
     const sectors = getSectorWeights();
-    const paths = scorePaths(answers, sectors, state.interest, state.tyoohjaus);
+    const paths = scorePaths(answers, sectors, state.interest, state.tyoohjaus, state.motivation);
     const topPaths = paths.slice(0, 3);
     const extraPaths = paths.slice(3, 5);
     const topScore = topPaths[0]?.score || 1;
     const narrative = buildNarrative(answers, state.tyoohjaus);
+    const motivationLines = buildMotivationNarrative(state.motivation);
     const top = topPaths[0];
     const heroSentence = buildHeroSentence(archetype, state.tyoohjaus, top);
     const cta = primaryCta(state.interest, top, answers);
@@ -2120,6 +2365,11 @@ function render() {
         <ul class="narrative-list">
           ${narrative.slice(0, 4).map((n) => `<li>${n}</li>`).join('')}
         </ul>
+        ${motivationLines.length ? `
+        <div class="section-title" style="margin-top:18px">${state.plainLanguage ? 'Motivaatio' : 'Motivaatio pitkällä aikavälillä'}</div>
+        <ul class="narrative-list motivation-list">
+          ${motivationLines.map((n) => `<li>${n}</li>`).join('')}
+        </ul>` : ''}
       </div>
 
       <a class="btn btn-primary cta-primary" href="${cta.url}" target="_blank" rel="noopener noreferrer">${cta.label}</a>
@@ -2129,10 +2379,10 @@ function render() {
       <div class="section-title">${txt('pathsTitle')}</div>
       <p class="section-lead">${txt('pathsLead')}</p>
       ${higherEdNote}
-      ${topPaths.map((p, i) => renderPathCard(p, i, answers, state.interest, state.tyoohjaus, topScore)).join('')}
+      ${topPaths.map((p, i) => renderPathCard(p, i, answers, state.interest, state.tyoohjaus, state.motivation, topScore)).join('')}
       ${extraPaths.length ? `
       <div id="extraPaths" class="extra-paths" hidden>
-        ${extraPaths.map((p, i) => renderPathCard(p, i + 3, answers, state.interest, state.tyoohjaus, topScore)).join('')}
+        ${extraPaths.map((p, i) => renderPathCard(p, i + 3, answers, state.interest, state.tyoohjaus, state.motivation, topScore)).join('')}
       </div>
       <button type="button" class="btn btn-ghost" id="showMorePathsBtn">Näytä ${extraPaths.length} muuta polkua ▾</button>` : ''}
 
@@ -2199,6 +2449,7 @@ function render() {
         lxpIndex: 0,
         lxp: {},
         tyoohjaus: {},
+        motivation: { meaning: [], recognition: '' },
         subjects: new Set(),
         interest: {},
         interestIndex: 0,
