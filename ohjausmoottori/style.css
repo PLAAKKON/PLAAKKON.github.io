@@ -805,33 +805,6 @@ body {
   font-style: italic;
 }
 
-.occupation-fit-heading {
-  font-size: 0.72rem;
-  font-weight: 600;
-  color: var(--text);
-  margin: 0 0 8px;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-}
-
-.occupation-fit-heading--partial {
-  margin-top: 14px;
-}
-
-.occupation-item.fit-strong .occupation-name {
-  color: var(--text);
-  font-weight: 600;
-}
-
-.occupation-item.fit-partial .occupation-name {
-  color: var(--muted);
-  font-weight: 400;
-}
-
-.occupation-list--partial {
-  opacity: 0.92;
-}
-
 .motivation-list {
   margin-top: 0;
 }

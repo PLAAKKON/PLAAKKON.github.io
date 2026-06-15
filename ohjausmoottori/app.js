@@ -956,10 +956,10 @@ function pathLinkTerms(path, answers) {
   return { opinto, jobs, tet };
 }
 
-function renderOccupationItem(job, fitClass) {
+function renderOccupationItem(job) {
   const opUrl = opintopolkuUrl(job);
   const jobUrl = tyomarkkinatoriUrl(job);
-  return `<li class="occupation-item${fitClass ? ` ${fitClass}` : ''}">
+  return `<li class="occupation-item">
     <span class="occupation-name">${job}</span>
     <span class="occupation-links">
       <a class="occ-link" href="${opUrl}" target="_blank" rel="noopener noreferrer" data-track="opintopolku" data-term="${job}">Opinnot</a>
@@ -973,29 +973,8 @@ function renderOccupationList(pathId, answers, tyoohjaus = {}, motivation = {}) 
   if (!jobs.length) {
     return '<p class="occupation-hint">Yksikään ammatti ei täsmännyt kaikkiin valintoihisi — kokeile toista polkua tai tee testi uudelleen myöhemmin.</p>';
   }
-  const meaningPicks = motivation.meaning || [];
   const filterNote = occupationFilterNote(pathId, answers, tyoohjaus, motivation);
-  const withFit = jobs.map((j) => ({ name: j, fit: occupationMeaningFit(j, meaningPicks) }));
-  const strong = withFit.filter((x) => x.fit === 'strong');
-  const partial = withFit.filter((x) => x.fit === 'partial');
-
-  let listHtml = '';
-  if (meaningPicks.length && partial.length) {
-    if (strong.length) {
-      listHtml += `<p class="occupation-fit-heading">Sopii parhaiten valintoihisi</p>
-        <ul class="occupation-list">${strong.map((x) => renderOccupationItem(x.name, 'fit-strong')).join('')}</ul>`;
-    }
-    listHtml += `<p class="occupation-fit-heading${strong.length ? ' occupation-fit-heading--partial' : ''}">Sopii osittain</p>
-      <ul class="occupation-list occupation-list--partial">${partial.map((x) => renderOccupationItem(x.name, 'fit-partial')).join('')}</ul>`;
-    if (!strong.length) {
-      listHtml = `<p class="occupation-fit-heading">Sopii osittain valintoihisi</p>
-        <ul class="occupation-list occupation-list--partial">${partial.map((x) => renderOccupationItem(x.name, 'fit-partial')).join('')}</ul>`;
-    }
-  } else {
-    listHtml = `<ul class="occupation-list">${jobs.map((j) => renderOccupationItem(j, meaningPicks.length ? 'fit-strong' : '')).join('')}</ul>`;
-  }
-
-  return `${listHtml}
+  return `<ul class="occupation-list">${jobs.map((j) => renderOccupationItem(j)).join('')}</ul>
   ${filterNote ? `<p class="occupation-filter-note">${filterNote}</p>` : ''}
   <p class="te24-source">Ammattinimet perustuvat <a href="${TE24_SOURCE_URL}" target="_blank" rel="noopener noreferrer">TE24-luokitukseen</a> (Tilastokeskus).</p>`;
 }
@@ -1019,6 +998,7 @@ const FEEDBACK_KEY = 'yoro_ohjaus_feedback_v1';
 const RESULT_STORAGE_KEY = 'yoro_ohjaus_result_v1';
 const PLAIN_LANG_KEY = 'yoro_plain_lang_v1';
 const RESULT_HASH_PREFIX = '#r=';
+const FEEDBACK_ENDPOINT = 'https://yoro.fi/api/ohjausmoottori/feedback';
 
 const COPY = {
   trustBanner: {
@@ -1216,6 +1196,30 @@ function track(event, data = {}) {
     log.push(row);
     sessionStorage.setItem(ANALYTICS_KEY, JSON.stringify(log.slice(-80)));
   } catch (_) { /* ignore */ }
+}
+
+function postToEndpoint(url, payload) {
+  const body = JSON.stringify(payload);
+  try {
+    if (navigator.sendBeacon) {
+      const blob = new Blob([body], { type: 'application/json' });
+      if (navigator.sendBeacon(url, blob)) return Promise.resolve();
+    }
+  } catch (_) { /* fallback to fetch */ }
+  return fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body,
+    keepalive: true,
+  }).catch(() => {});
+}
+
+function submitFeedbackPayload(payload) {
+  postToEndpoint(FEEDBACK_ENDPOINT, {
+    source: 'ohjausmoottori',
+    v: 1,
+    ...payload,
+  });
 }
 
 function inferTopics(interests) {
@@ -1547,7 +1551,16 @@ const LXP_WHY = {
   q10: 'Haluat kehittää osaamistasi — sinnikkyyttä polulle',
 };
 
-function explainPathWhy(path, answers, interests, tyoohjaus) {
+const MEANING_WHY = {
+  help: 'Valitsit merkitykseksi auttaa muita',
+  results: 'Valitsit merkitykseksi nähdä tuloksia',
+  learn: 'Valitsit merkitykseksi oppimisen',
+  solve: 'Valitsit merkitykseksi ongelmien ratkaisemisen',
+  create: 'Valitsit merkitykseksi uuden kehittämisen',
+  purpose: 'Valitsit merkitykseksi yhteiskunta- ja ympäristötyön',
+};
+
+function explainPathWhy(path, answers, interests, tyoohjaus, motivation = {}) {
   const bullets = [];
   const i1 = interests.i1 || [];
   const i2 = interests.i2;
@@ -1611,6 +1624,10 @@ function explainPathWhy(path, answers, interests, tyoohjaus) {
   if (stressLevel === 'c' && ['health', 'service', 'society', 'build'].includes(path.id)) {
     bullets.push('Paine ei haittaa — kiireiset ja vaihtelevat työt voivat sopia');
   }
+
+  (motivation.meaning || []).forEach((key) => {
+    if (MEANING_WHY[key]) bullets.push(MEANING_WHY[key]);
+  });
 
   if (hasHigherEdBackground(answers) && ['engineer', 'it', 'lab', 'society', 'creative', 'business'].includes(path.id)) {
     bullets.push('Korkeakoulutaso huomioitu — ammatit korkeamman tason tehtävistä');
@@ -1693,7 +1710,7 @@ function renderPathCard(p, i, answers, interests, tyoohjaus, motivation, topScor
   const occCount = occupationCountForPath(p.id, answers, tyoohjaus, motivation);
   const occHint = occupationHintFor(answers);
   const fit = fitBadge(i, p.score, topScore);
-  const why = explainPathWhy(p, answers, interests, tyoohjaus);
+  const why = explainPathWhy(p, answers, interests, tyoohjaus, motivation);
   const terms = pathLinkTerms(p, answers);
 
   return `
@@ -1762,7 +1779,7 @@ function nextStepLabel() {
 function shareText(archetype, paths) {
   const top = paths[0]?.name || 'uusia polkuja';
   const url = state.screen === 'result' ? resultPageUrl() : 'https://yoro.fi/ohjausmoottori/';
-  return `Työtyylini on ${archetype.title} ${archetype.emoji}\n\nYoron ohjausmoottori ehdotti mulle polkua: ${top}\n\nEi yhtä oikeaa ammattia — kokeile 5 min:\n${url}`;
+  return `Työtyylini on ${archetype.title} ${archetype.emoji}\n\nYoron ohjausmoottori ehdotti mulle polkua: ${top}\n\nEi yhtä oikeaa ammattia — kokeile noin 10 min:\n${url}`;
 }
 
 function drawGlowCurve(ctx, x1, y1, cx, cy, x2, y2, color, width = 3) {
@@ -1883,7 +1900,7 @@ function drawShareCard(archetype, topPath) {
 
   ctx.fillStyle = '#64748b';
   ctx.font = '22px Inter, system-ui, sans-serif';
-  ctx.fillText('5 min · ilmainen · ei uraennustetta', 72, 392);
+  ctx.fillText('Noin 10 min · ilmainen · ei uraennustetta', 72, 392);
 
   ctx.fillStyle = '#22d3ee';
   ctx.font = '600 24px Inter, system-ui, sans-serif';
@@ -1911,18 +1928,26 @@ function bindFeedback(archetype, topPath) {
   card.querySelectorAll('[data-feedback]').forEach((btn) => {
     btn.addEventListener('click', () => {
       const rating = btn.dataset.feedback;
+      const events = JSON.parse(sessionStorage.getItem(ANALYTICS_KEY) || '[]').slice(-20);
+      const entry = {
+        rating,
+        archetype: archetype.id,
+        path: topPath?.id,
+        motivation: { ...state.motivation },
+        interest: {
+          i1: state.interest.i1,
+          i2: state.interest.i2,
+          i4: state.interest.i4,
+        },
+        t: Date.now(),
+        events,
+      };
       try {
-        const entry = {
-          rating,
-          archetype: archetype.id,
-          path: topPath?.id,
-          t: Date.now(),
-          events: JSON.parse(sessionStorage.getItem(ANALYTICS_KEY) || '[]').slice(-20),
-        };
         const all = JSON.parse(sessionStorage.getItem(FEEDBACK_KEY) || '[]');
         all.push(entry);
         sessionStorage.setItem(FEEDBACK_KEY, JSON.stringify(all.slice(-50)));
       } catch (_) { /* ignore */ }
+      submitFeedbackPayload(entry);
       track('feedback', { rating });
       card.querySelectorAll('[data-feedback]').forEach((b) => { b.disabled = true; });
       if (thanks) thanks.hidden = false;
@@ -1986,7 +2011,7 @@ function render() {
     app.innerHTML = `
       <section class="hero">
         ${savedBanner}
-        <div class="pill">Ilmainen · 5 min</div>
+        <div class="pill">Ilmainen · n. 10 min</div>
         <svg class="hero-art" viewBox="0 0 320 180" aria-hidden="true" focusable="false">
           <path class="path-cyan" d="M160 155 Q145 110 95 55" stroke-width="2.5"/>
           <path class="path-purple" d="M160 155 Q160 95 160 40" stroke-width="2.5"/>
@@ -2402,7 +2427,7 @@ function render() {
       <button class="btn btn-ghost" id="retryBtn">Tee testi uudelleen</button>
       <a href="https://yoro.fi/" class="btn btn-ghost" style="text-decoration:none;margin-top:8px">← Palaa Yoro.fi-sivuille</a>
 
-      <p class="disclaimer">Tulos perustuu 10 kysymyksen LxP-työtyyliin, työohjauskerrokseen, lempikouluaineisiin ja kiinnostukseen. Ammattinimet noudattavat <a href="${TE24_SOURCE_URL}" target="_blank" rel="noopener noreferrer">TE24-luokitusta</a>. Ei vaikuta työnantajan LxP-hakuun (lxp.yoro.fi). Emme mittaa älykkyyttä tai arvosanoja.</p>`;
+      <p class="disclaimer">Tulos perustuu 10 kysymyksen LxP-työtyyliin, työohjauskerrokseen, motivaatioon, lempikouluaineisiin ja kiinnostukseen. Ammattinimet noudattavat <a href="${TE24_SOURCE_URL}" target="_blank" rel="noopener noreferrer">TE24-luokitusta</a>. Ei vaikuta työnantajan LxP-hakuun (lxp.yoro.fi). Emme mittaa älykkyyttä tai arvosanoja.</p>`;
 
     track('result_view', { archetype: archetype.id, topPath: top?.id });
     bindPathToggles();
