@@ -998,7 +998,12 @@ const FEEDBACK_KEY = 'yoro_ohjaus_feedback_v1';
 const RESULT_STORAGE_KEY = 'yoro_ohjaus_result_v1';
 const PLAIN_LANG_KEY = 'yoro_plain_lang_v1';
 const RESULT_HASH_PREFIX = '#r=';
-const FEEDBACK_ENDPOINT = 'https://yoro.fi/api/ohjausmoottori/feedback';
+const FIREBASE_CONFIG = {
+  apiKey: 'AIzaSyBdY2Xl5q2gW0ZlqjvHwmx2wIo1c3vZKfA',
+  authDomain: 'urapolku-7781a.firebaseapp.com',
+  projectId: 'urapolku-7781a',
+};
+const FEEDBACK_COLLECTION = 'ohjausmoottori_feedback';
 
 const COPY = {
   trustBanner: {
@@ -1198,28 +1203,31 @@ function track(event, data = {}) {
   } catch (_) { /* ignore */ }
 }
 
-function postToEndpoint(url, payload) {
-  const body = JSON.stringify(payload);
+function getFeedbackFirestore() {
+  if (typeof firebase === 'undefined') return null;
   try {
-    if (navigator.sendBeacon) {
-      const blob = new Blob([body], { type: 'application/json' });
-      if (navigator.sendBeacon(url, blob)) return Promise.resolve();
-    }
-  } catch (_) { /* fallback to fetch */ }
-  return fetch(url, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body,
-    keepalive: true,
-  }).catch(() => {});
+    const app = firebase.apps.length ? firebase.app() : firebase.initializeApp(FIREBASE_CONFIG);
+    return app.firestore();
+  } catch (_) {
+    return null;
+  }
 }
 
 function submitFeedbackPayload(payload) {
-  postToEndpoint(FEEDBACK_ENDPOINT, {
+  const db = getFeedbackFirestore();
+  if (!db) return;
+  db.collection(FEEDBACK_COLLECTION).add({
     source: 'ohjausmoottori',
     v: 1,
-    ...payload,
-  });
+    rating: payload.rating || '',
+    archetype: payload.archetype || '',
+    path: payload.path || '',
+    motivation: payload.motivation || {},
+    interest: payload.interest || {},
+    events: payload.events || [],
+    clientTs: payload.t || Date.now(),
+    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+  }).catch(() => {});
 }
 
 function inferTopics(interests) {
