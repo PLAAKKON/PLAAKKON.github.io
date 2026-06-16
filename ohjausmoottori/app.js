@@ -271,6 +271,24 @@ const TYOOHJAUS_QUESTIONS = [
       c: 'Paine ei haittaa — kiireiset ja vaihtelevat työt voivat sopia.',
     },
   },
+  {
+    id: 'leisure',
+    phase: 'Työohjaus',
+    text: 'Miten vapaa-aikasi kuluu useimmiten?',
+    textPlain: 'Miten vapaa-aikasi kuluu?',
+    hint: 'Vain uraohjaukseen — auttaa arvioimaan, mikä työrytmi tuntuu luontevalta.',
+    hintPlain: 'Vain uraohjaukseen. Auttaa valitsemaan sopivaa työrytmiä.',
+    options: [
+      { key: 'a', label: 'Yksin omaa juttua — pelit, sarjat, harrastus rauhassa', labelPlain: 'Yksin — pelit, sarjat tai harrastus rauhassa' },
+      { key: 'b', label: 'Sekä yksin että kavereiden kanssa — riippuu päivästä', labelPlain: 'Vähän molempia — joskus yksin, joskus kavereiden kanssa' },
+      { key: 'c', label: 'Usein muiden kanssa — porukassa, tapahtumissa, yhdessä tekemistä', labelPlain: 'Porukassa — tapahtumissa tai yhdessä tekemistä' },
+    ],
+    narrative: {
+      a: 'Lataudut yksin — suosimme vähemmän jatkuvaa asiakaskontaktia.',
+      b: 'Joustava vapaa-aika — emme painota sosiaalista rytmiä suuntaan tai toiseen.',
+      c: 'Vietät aikaa muiden kanssa — sosiaalinen rytmi sopii ihmisläheisiin rooleihin.',
+    },
+  },
 ];
 
 /** Motivaatiokerros — ei osa LxP-avainta */
@@ -441,80 +459,356 @@ const ARCHETYPES = [
     emoji: '🎯',
     title: 'Syvä Sukeltaja',
     tagline: 'Itsenäinen, tarkka, syvennyt kun löydät oikean jutun.',
-    match: (a) => (a.q1 === 'a' || a.q1 === 'b') && a.q2 === 'c' && (a.q5 === 'a' || a.q5 === 'b'),
     strengths: [
       'Pärjäät hyvin omillasi, kun ohjeet ovat selkeät.',
       'Huolellisuus ja tarkkuus ovat vahvuuksiasi.',
       'Syvennyt mielelläsi, kun aihe tuntuu omalta.',
       'Digitaaliset työkalut tuntuvat luontevilta.',
     ],
+    score(c) {
+      let s = 0;
+      if (c.independent) s += 8;
+      if (c.precisionEnv) s += 7;
+      if (c.digiStrong || c.digiOk) s += 6;
+      if (c.leisureAlone) s += 6;
+      if (c.visibilityLow) s += 5;
+      if (c.precisionHigh) s += 5;
+      if (c.recognitionMastery) s += 4;
+      if (c.calmPace) s += 4;
+      if (c.meaningLearn) s += 4;
+      if (c.techSubject) s += 3;
+      if (c.teamOriented && c.leisureSocial) s -= 6;
+      return s;
+    },
   },
   {
     id: 'ratkaisija',
     emoji: '💡',
     title: 'Ongelmanratkaisija',
     tagline: 'Analysoit, lasket, korjaat — aivot työssä.',
-    match: (a) => a.q2 === 'c' && (a.q5 === 'a' || a.q5 === 'b') && (a.q4 === 'a' || a.q4 === 'b'),
     strengths: [
       'Ratkaiset mielelläsi ongelmia ajattelemalla.',
       'Pidät työstä, jossa pitää olla tarkka.',
       'Pystyt työskentelemään itsenäisesti.',
       'Digitaaliset työkalut ovat sinulle luontevia.',
     ],
+    score(c) {
+      let s = 0;
+      if (c.precisionEnv) s += 8;
+      if (c.digiStrong) s += 8;
+      if (c.soloDecisions) s += 6;
+      if (c.meaningSolve) s += 8;
+      if (c.interestSolve) s += 8;
+      if (c.precisionHigh) s += 6;
+      if (c.techSubject) s += 5;
+      if (c.meaningLearn) s += 4;
+      if (c.curious) s += 4;
+      if (c.leisureAlone) s += 3;
+      return s;
+    },
   },
   {
-    id: 'tiimipro',
-    emoji: '🤝',
-    title: 'Tiimipeli-Pro',
-    tagline: 'Energia tulee ihmisistä ja yhteisestä tekemisestä.',
-    match: (a) => (a.q1 === 'd' || a.q1 === 'e') || a.q2 === 'd' || a.q4 === 'c' || a.q4 === 'd',
+    id: 'taustatekija',
+    emoji: '🌿',
+    title: 'Rauhallinen Taustatekijä',
+    tagline: 'Teet parhaasi rauhassa — tarkkuus ja rytmi ennen näkyvyyttä.',
     strengths: [
-      'Saat energiaa ihmisistä ja yhteisestä tekemisestä.',
-      'Tiimi ja selkeä ohjaus tuovat parhaan tuloksen.',
-      'Ihmisläheinen työympäristö sopii sinulle.',
-      'Kommunikointi on vahvuutesi.',
+      'Arvostat rauhallista ja ennustettavaa työrytmiä.',
+      'Lataudut yksin — taustaroolit voivat sopia sinulle.',
+      'Huolellisuus korostuu, kun kiire ei paina.',
+      'Pärjäät hyvin, kun tehtävä on selkeä ja oma.',
     ],
+    score(c) {
+      let s = 0;
+      if (c.visibilityLow) s += 10;
+      if (c.leisureAlone) s += 10;
+      if (c.calmPace) s += 8;
+      if (c.recognitionCalm) s += 7;
+      if (c.steadyProgress) s += 5;
+      if (c.soloDecisions) s += 5;
+      if (c.interests?.i2 === 'data' || c.interestSolve) s += 4;
+      if (c.visibilityHigh) s -= 18;
+      if (c.leisureSocial) s -= 6;
+      return s;
+    },
+  },
+  {
+    id: 'auttaja',
+    emoji: '❤️',
+    title: 'Ihmisläheinen Auttaja',
+    tagline: 'Merkitsevää on auttaa — ihmiset ovat työn ydin.',
+    strengths: [
+      'Haluat, että työlläsi on merkitystä toisille.',
+      'Auttaminen ja hoiva motivoivat sinua.',
+      'Pärjäät parhaiten, kun vuorovaikutus tuntuu luontevalta.',
+      'Ihmisläheiset tehtävät voivat sopia sinulle.',
+    ],
+    score(c) {
+      let s = 0;
+      if (c.meaningHelp) s += 10;
+      if (c.interestHelp) s += 10;
+      if (c.peopleFocus) s += 7;
+      if (c.peopleEnv) s += 6;
+      if (c.visibilityMid) s += 5;
+      if (c.leisureMixed) s += 4;
+      if (c.leisureSocial) s += 5;
+      if (c.recognitionCalm) s += 4;
+      if (c.leisureAlone && c.visibilityLow) s -= 22;
+      if (c.visibilityLow && !c.leisureSocial) s -= 8;
+      return s;
+    },
+  },
+  {
+    id: 'tiimipelaaja',
+    emoji: '🤝',
+    title: 'Tiimipelaaja',
+    tagline: 'Energia tulee yhteisestä tekemisestä — porukassa parempi.',
+    strengths: [
+      'Saat energiaa tiimistä ja yhteisestä tekemisestä.',
+      'Yhteistyö ja keskustelu tuovat parhaan tuloksen.',
+      'Vietät vapaa-aikaasi mielelläsi muiden kanssa.',
+      'Selkeä ohjaus ja tiimi tukevat sinua.',
+    ],
+    score(c) {
+      let s = 0;
+      if (c.teamOriented) s += 7;
+      if (c.teamDecisions) s += 8;
+      if (c.interestConnect) s += 8;
+      if (c.leisureSocial) s += 8;
+      if (c.leisureMixed) s += 4;
+      if (c.peopleEnv) s += 5;
+      if (c.recognitionCalm) s += 4;
+      if (c.leisureAlone) s -= 14;
+      if (c.visibilityLow) s -= 12;
+      if (c.soloDecisions) s -= 6;
+      const socialHits = [c.teamOriented, c.teamDecisions, c.interestConnect, c.leisureSocial].filter(Boolean).length;
+      if (socialHits < 2) s -= 10;
+      return s;
+    },
+  },
+  {
+    id: 'nakyva',
+    emoji: '🎤',
+    title: 'Näkyvä Tekijä',
+    tagline: 'Esiintyminen ja vuorovaikutus ovat vahvuuksiasi.',
+    strengths: [
+      'Puhuminen ja näkyvyys tuntuvat luontevilta.',
+      'Vietät aikaa muiden kanssa — sosiaalisuus on osa arkea.',
+      'Pidät tilanteista, joissa olet esillä.',
+      'Palaute ja tunnustus motivoivat sinua.',
+    ],
+    score(c) {
+      let s = 0;
+      if (c.visibilityHigh) s += 12;
+      if (c.leisureSocial) s += 8;
+      if (c.socialLocation) s += 7;
+      if (c.recognitionPraise) s += 7;
+      if (c.peopleFocus) s += 6;
+      if (c.pressureOk) s += 4;
+      if (c.interestConnect) s += 5;
+      if (c.visibilityLow) s -= 20;
+      if (c.leisureAlone) s -= 16;
+      return s;
+    },
   },
   {
     id: 'tekija',
     emoji: '🔧',
     title: 'Käytännön Tekijä',
     tagline: 'Näet kädet työssä — konkreettinen tulos motivoi.',
-    match: (a) => a.q2 === 'a' || a.q5 === 'c' || a.q5 === 'd',
     strengths: [
       'Pidät käytännön tekemisestä ja näet työn tuloksen.',
       'Konkreettinen tekeminen motivoi sinua.',
       'Fyysinen tai käytännönläheinen työ sopii sinulle.',
       'Toimit mielelläsi ilman jatkuvaa ruutuaikaa.',
     ],
-  },
-  {
-    id: 'monitekija',
-    emoji: '🚀',
-    title: 'Monitekijä',
-    tagline: 'Vaihtelu pitää sinut hereillä — et jaksa rutiinia.',
-    match: (a) => a.q3 === 'c' || a.q5 === 'e',
-    strengths: [
-      'Vaihtelu ja monipuolisuus pitävät sinut mukana.',
-      'Joustat helposti erilaisissa tehtävissä.',
-      'Et jaksa pitkää samanlaista rutiinia.',
-      'Sovit erilaisiin työympäristöihin.',
-    ],
+    score(c) {
+      let s = 0;
+      if (c.physicalEnv) s += 10;
+      if (c.practicalWork) s += 9;
+      if (c.interestBuild) s += 10;
+      if (c.persistentDrive) s += 5;
+      if (c.calmPace) s += 4;
+      if (c.meaningSolve) s += 4;
+      if (c.interestSolve) s += 3;
+      return s;
+    },
   },
   {
     id: 'luova',
     emoji: '✨',
     title: 'Luova Muotoilija',
     tagline: 'Ideat, kuvat, tarinat — luot uutta.',
-    match: () => false,
     strengths: [
       'Luot mielelläsi uutta — ideat, kuvat tai tarinat.',
       'Luovuus on sinulle luonteva tapa toimia.',
       'Pidät työstä, jossa näkyy oma jälkesi.',
       'Digitaaliset ja luovat työkalut inspiroivat sinua.',
     ],
+    score(c) {
+      let s = 0;
+      if (c.meaningCreate) s += 10;
+      if (c.interestCreate) s += 10;
+      if (c.creativeDrive) s += 8;
+      if (c.creativeSubject) s += 12;
+      if (c.precisionLow) s += 5;
+      if (c.flexibleWork) s += 4;
+      return s;
+    },
+  },
+  {
+    id: 'monitekija',
+    emoji: '🚀',
+    title: 'Monitekijä',
+    tagline: 'Vaihtelu pitää sinut hereillä — et jaksa rutiinia.',
+    strengths: [
+      'Vaihtelu ja monipuolisuus pitävät sinut mukana.',
+      'Joustat helposti erilaisissa tehtävissä.',
+      'Et jaksa pitkää samanlaista rutiinia.',
+      'Sovit erilaisiin työympäristöihin.',
+    ],
+    score(c) {
+      let s = 0;
+      if (c.varietyEnv) s += 10;
+      if (c.flexibleWork) s += 8;
+      if (c.steadyProgress) s += 6;
+      if (c.meaningResults) s += 5;
+      if (c.pressureOk) s += 4;
+      if (c.leisureMixed) s += 5;
+      if (c.meaningPurpose) s += 3;
+      return s;
+    },
+  },
+  {
+    id: 'viimeistelija',
+    emoji: '⚡',
+    title: 'Sinnikäs Viimeistelijä',
+    tagline: 'Vien asiat loppuun — tarkkuus ja kestävyys ratkaisevat.',
+    strengths: [
+      'Viennät hankalatkin hommat maaliin.',
+      'Tarkkuus ja huolellisuus ovat vahvuuksiasi.',
+      'Haluat kehittää osaamistasi jatkuvasti.',
+      'Tulokset ja edistyminen motivoivat sinua.',
+    ],
+    score(c) {
+      let s = 0;
+      if (c.persistentDrive) s += 12;
+      if (c.precisionHigh) s += 10;
+      if (c.curious) s += 6;
+      if (c.meaningResults) s += 6;
+      if (c.recognitionMastery) s += 5;
+      if (c.interestSolve) s += 4;
+      if (c.precisionEnv) s += 4;
+      return s;
+    },
+  },
+  {
+    id: 'tutkiva',
+    emoji: '🔍',
+    title: 'Tutkiva Tekijä',
+    tagline: 'Vielä kartoitat — moni suunta voi avautua.',
+    strengths: [
+      'Olet avoin erilaisille työtavoille.',
+      'Et ole vielä lukittu yhteen rooliin — se on vahvuus.',
+      'Joustavuus auttaa löytämään oman polun.',
+      'Kokeileminen käytännössä kertoo enemmän kuin testi.',
+    ],
+    score(c) {
+      let s = 0;
+      if (c.leisureMixed) s += 8;
+      if (c.flexibleWork) s += 6;
+      if (c.visibilityMid) s += 6;
+      if (c.steadyProgress) s += 4;
+      if (c.tyoohjaus.drive === 'e') s += 8;
+      if (c.meaning.length >= 2) s += 5;
+      if (c.teamOriented && c.soloDecisions) s += 4;
+      return s;
+    },
   },
 ];
+
+function buildArchetypeContext(answers, tyoohjaus = {}, motivation = {}, interests = {}) {
+  const meaning = motivation.meaning || [];
+  const subjects = [...state.subjects];
+  return {
+    answers,
+    tyoohjaus,
+    motivation,
+    interests,
+    subjects,
+    meaning,
+    independent: answers.q1 === 'a' || answers.q1 === 'b',
+    teamOriented: answers.q1 === 'd' || answers.q1 === 'e',
+    precisionEnv: answers.q2 === 'c',
+    physicalEnv: answers.q2 === 'a',
+    peopleEnv: answers.q2 === 'd',
+    varietyEnv: answers.q3 === 'c',
+    socialLocation: answers.q3 === 'd',
+    soloDecisions: answers.q4 === 'a' || answers.q4 === 'b',
+    teamDecisions: answers.q4 === 'c',
+    peopleFocus: answers.q4 === 'd',
+    digiStrong: answers.q5 === 'a',
+    digiOk: answers.q5 === 'b',
+    practicalWork: answers.q5 === 'c' || answers.q5 === 'd',
+    flexibleWork: answers.q5 === 'e',
+    curious: answers.q10 === 'a' || answers.q10 === 'b',
+    precisionHigh: tyoohjaus.precision === 'a',
+    precisionLow: tyoohjaus.precision === 'c' || tyoohjaus.precision === 'd',
+    creativeDrive: tyoohjaus.drive === 'a' || tyoohjaus.drive === 'c',
+    persistentDrive: tyoohjaus.drive === 'b',
+    steadyProgress: tyoohjaus.drive === 'd',
+    visibilityLow: tyoohjaus.visibility === 'a',
+    visibilityMid: tyoohjaus.visibility === 'b',
+    visibilityHigh: tyoohjaus.visibility === 'c',
+    calmPace: tyoohjaus.stress === 'a',
+    pressureOk: tyoohjaus.stress === 'c',
+    leisureAlone: tyoohjaus.leisure === 'a',
+    leisureMixed: tyoohjaus.leisure === 'b',
+    leisureSocial: tyoohjaus.leisure === 'c',
+    meaningHelp: meaning.includes('help'),
+    meaningCreate: meaning.includes('create'),
+    meaningSolve: meaning.includes('solve'),
+    meaningLearn: meaning.includes('learn'),
+    meaningResults: meaning.includes('results'),
+    meaningPurpose: meaning.includes('purpose'),
+    recognitionPraise: motivation.recognition === 'praise',
+    recognitionMastery: motivation.recognition === 'mastery',
+    recognitionCalm: motivation.recognition === 'calm_team',
+    interestHelp: interests.i2 === 'help',
+    interestConnect: interests.i2 === 'connect',
+    interestBuild: interests.i2 === 'build',
+    interestCreate: interests.i2 === 'create',
+    interestSolve: interests.i2 === 'solve',
+    creativeSubject: subjects.some((s) => ['kuvataide', 'musiikki'].includes(s)),
+    techSubject: subjects.some((s) => ['matematiikka', 'fysiikka', 'kemia'].includes(s)),
+  };
+}
+
+function pickArchetype(answers, tyoohjaus = {}, motivation = {}, interests = {}) {
+  const ctx = buildArchetypeContext(answers, tyoohjaus, motivation, interests);
+  const ranked = ARCHETYPES
+    .map((arch) => ({ arch, score: arch.score(ctx) }))
+    .sort((x, y) => y.score - x.score);
+
+  const top = ranked[0];
+  const second = ranked[1];
+  if (!top || top.score <= 0) {
+    return ARCHETYPES.find((a) => a.id === 'tutkiva');
+  }
+  if (top.score < 12) {
+    return ARCHETYPES.find((a) => a.id === 'tutkiva');
+  }
+  if (second && top.score - second.score <= 3 && second.score >= 12) {
+    const layerWeight = (arch) => {
+      const id = arch.id;
+      if (['taustatekija', 'auttaja', 'nakyva', 'tiimipelaaja'].includes(id)) return 1;
+      if (['luova', 'viimeistelija', 'ratkaisija'].includes(id)) return 1;
+      return 0;
+    };
+    if (layerWeight(second.arch) > layerWeight(top.arch)) return second.arch;
+  }
+  return top.arch;
+}
 
 const PATHS = [
   {
@@ -809,15 +1103,39 @@ function occupationWorkProfile(jobName) {
   return { visibility, stress };
 }
 
-function occupationMatchesTyoohjaus(jobName, tyoohjaus = {}) {
+function hasHighHelpInterest(motivation = {}, interests = {}) {
+  return (motivation.meaning || []).includes('help') || interests.i2 === 'help';
+}
+
+function detectAspirationMismatch(tyoohjaus = {}, motivation = {}, interests = {}) {
+  return tyoohjaus.leisure === 'a'
+    && tyoohjaus.visibility === 'a'
+    && hasHighHelpInterest(motivation, interests);
+}
+
+function occupationMatchesTyoohjaus(jobName, tyoohjaus = {}, motivation = {}, interests = {}) {
   const { visibility, stress } = occupationWorkProfile(jobName);
   const vis = tyoohjaus.visibility;
   const str = tyoohjaus.stress;
+  const leisure = tyoohjaus.leisure;
+  const n = jobName.toLowerCase();
 
   if (vis === 'a' && visibility === 'high') return false;
   if (vis === 'b' && visibility === 'high') return false;
 
   if (str === 'a' && stress === 'high') return false;
+
+  if (leisure === 'a' && vis === 'a') {
+    if (/myyj|myynti|tarjoilija|ravintola|asiakaspalvelu|myyntiedustaja|baarimikko|kassatyöntekijä/.test(n)) {
+      return false;
+    }
+  }
+
+  if (detectAspirationMismatch(tyoohjaus, motivation, interests)) {
+    if (/myyj|myynti|tarjoilija|ravintola|asiakaspalvelu|myyntiedustaja|markkinointi/.test(n)) {
+      return false;
+    }
+  }
 
   return true;
 }
@@ -858,7 +1176,7 @@ function occupationMeaningFit(jobName, meaningPicks = []) {
   return 'none';
 }
 
-function occupationsForPath(pathId, answers, tyoohjaus = {}, motivation = {}) {
+function occupationsForPath(pathId, answers, tyoohjaus = {}, motivation = {}, interests = {}) {
   const tiers = OCCUPATIONS_BY_PATH[pathId];
   if (!tiers) return [];
   const list = hasHigherEdBackground(answers)
@@ -866,7 +1184,7 @@ function occupationsForPath(pathId, answers, tyoohjaus = {}, motivation = {}) {
     : [...tiers.vocational, ...tiers.higherEd];
   const meaningPicks = motivation.meaning || [];
   return list.filter((job) => {
-    if (!occupationMatchesTyoohjaus(job, tyoohjaus)) return false;
+    if (!occupationMatchesTyoohjaus(job, tyoohjaus, motivation, interests)) return false;
     if (!meaningPicks.length) return true;
     return occupationMeaningFit(job, meaningPicks) !== 'none';
   });
@@ -881,19 +1199,19 @@ function allOccupationsForPath(pathId, answers) {
   return [...tiers.vocational, ...tiers.higherEd];
 }
 
-function occupationCountForPath(pathId, answers, tyoohjaus = {}, motivation = {}) {
-  return occupationsForPath(pathId, answers, tyoohjaus, motivation).length;
+function occupationCountForPath(pathId, answers, tyoohjaus = {}, motivation = {}, interests = {}) {
+  return occupationsForPath(pathId, answers, tyoohjaus, motivation, interests).length;
 }
 
-function occupationFilterNote(pathId, answers, tyoohjaus = {}, motivation = {}) {
+function occupationFilterNote(pathId, answers, tyoohjaus = {}, motivation = {}, interests = {}) {
   const all = allOccupationsForPath(pathId, answers);
   const meaningPicks = motivation.meaning || [];
-  const tyoohjausFiltered = all.filter((job) => occupationMatchesTyoohjaus(job, tyoohjaus));
-  const shown = occupationsForPath(pathId, answers, tyoohjaus, motivation);
+  const tyoohjausFiltered = all.filter((job) => occupationMatchesTyoohjaus(job, tyoohjaus, motivation, interests));
+  const shown = occupationsForPath(pathId, answers, tyoohjaus, motivation, interests);
   const notes = [];
   const tyoohjausHidden = all.length - tyoohjausFiltered.length;
   if (tyoohjausHidden > 0) {
-    notes.push(`Piilotimme ${tyoohjausHidden} ammattia, jotka vaativat enemmän esiintymistä tai kiirettä kuin valitsit.`);
+    notes.push(`Piilotimme ${tyoohjausHidden} ammattia, jotka vaativat enemmän esiintymistä, kiirettä tai asiakaskontaktia kuin valitsit.`);
   }
   if (meaningPicks.length) {
     const meaningHidden = tyoohjausFiltered.filter((job) => occupationMeaningFit(job, meaningPicks) === 'none').length;
@@ -968,12 +1286,27 @@ function renderOccupationItem(job) {
   </li>`;
 }
 
-function renderOccupationList(pathId, answers, tyoohjaus = {}, motivation = {}) {
-  const jobs = occupationsForPath(pathId, answers, tyoohjaus, motivation);
+function buildAspirationMismatchHtml(tyoohjaus = {}, motivation = {}, interests = {}) {
+  if (!detectAspirationMismatch(tyoohjaus, motivation, interests)) return '';
+  const title = state.plainLanguage
+    ? 'Huomio'
+    : 'Huomio: toive ja arki voivat vetää eri suuntiin';
+  const body = state.plainLanguage
+    ? 'Haluat auttaa ihmisiä, mutta vietät vapaa-aikasi useimmiten yksin etkä halua olla näkyvässä roolissa. Näkyvä asiakaspalvelu tai myynti voi tuntua aluksi raskaalta. Kokeile ensin TETiä tai rooleja, joissa on vähemmän jatkuvaa asiakaskontaktia.'
+    : 'Haluat auttaa ihmisiä, mutta arvostat rauhallista työrytmiä ja vietät vapaa-aikasi useimmiten yksin. Näkyvä asiakaspalvelu tai myynti voi tuntua aluksi raskaalta. Kokeile ensin TETiä hoiva- tai palvelualalla tai rooleissa, joissa on vähemmän jatkuvaa asiakaskontaktia (esim. taustatyö, valmistelu, laboratorio).';
+  return `<div class="aspiration-alert" role="note">
+    <p class="aspiration-alert-title">${title}</p>
+    <p class="aspiration-alert-body">${body}</p>
+    <a class="aspiration-alert-link" href="${tetPaikatUrl()}" target="_blank" rel="noopener noreferrer" data-track="aspiration_tet">Etsi TET-paikka (TET.fi) →</a>
+  </div>`;
+}
+
+function renderOccupationList(pathId, answers, tyoohjaus = {}, motivation = {}, interests = {}) {
+  const jobs = occupationsForPath(pathId, answers, tyoohjaus, motivation, interests);
   if (!jobs.length) {
     return '<p class="occupation-hint">Yksikään ammatti ei täsmännyt kaikkiin valintoihisi — kokeile toista polkua tai tee testi uudelleen myöhemmin.</p>';
   }
-  const filterNote = occupationFilterNote(pathId, answers, tyoohjaus, motivation);
+  const filterNote = occupationFilterNote(pathId, answers, tyoohjaus, motivation, interests);
   return `<ul class="occupation-list">${jobs.map((j) => renderOccupationItem(j)).join('')}</ul>
   ${filterNote ? `<p class="occupation-filter-note">${filterNote}</p>` : ''}
   <p class="te24-source">Ammattinimet perustuvat <a href="${TE24_SOURCE_URL}" target="_blank" rel="noopener noreferrer">TE24-luokitukseen</a> (Tilastokeskus).</p>`;
@@ -1297,15 +1630,6 @@ function progressPct() {
   return Math.round((currentStep() / totalSteps()) * 100);
 }
 
-function pickArchetype(answers) {
-  for (const arch of ARCHETYPES) {
-    if (arch.match(answers)) return arch;
-  }
-  const subs = [...state.subjects];
-  if (subs.some((s) => ['kuvataide', 'musiikki'].includes(s))) return ARCHETYPES.find((a) => a.id === 'luova');
-  return ARCHETYPES[0];
-}
-
 function scorePaths(answers, sectors, interests, tyoohjaus = {}, motivation = {}) {
   const sectorSet = new Set(sectors);
   const i1 = interests.i1 || [];
@@ -1444,6 +1768,24 @@ function scorePaths(answers, sectors, interests, tyoohjaus = {}, motivation = {}
       if (['lab', 'business', 'it'].includes(path.id)) score += 8;
     } else if (stressLevel === 'c') {
       if (['health', 'service', 'society', 'build'].includes(path.id)) score += 10;
+    }
+
+    const leisure = tyoohjaus.leisure;
+    const highHelp = hasHighHelpInterest(motivation, interests);
+    const aspirationMismatch = leisure === 'a' && visibility === 'a' && highHelp;
+
+    if (leisure === 'a' && visibility === 'a') {
+      if (['service', 'business'].includes(path.id)) score -= 12;
+      if (['lab', 'it'].includes(path.id)) score += 6;
+      if (path.id === 'health') score += 2;
+    } else if (leisure === 'c' && (highHelp || i2 === 'connect')) {
+      if (['service', 'health', 'society'].includes(path.id)) score += 8;
+    }
+
+    if (aspirationMismatch) {
+      if (['service', 'business'].includes(path.id)) score -= 10;
+      if (path.id === 'health') score -= 4;
+      if (['lab', 'it'].includes(path.id)) score += 8;
     }
 
     (motivation.meaning || []).forEach((key) => {
@@ -1633,6 +1975,14 @@ function explainPathWhy(path, answers, interests, tyoohjaus, motivation = {}) {
     bullets.push('Paine ei haittaa — kiireiset ja vaihtelevat työt voivat sopia');
   }
 
+  const leisure = tyoohjaus.leisure;
+  if (leisure === 'a' && visibility === 'a' && ['lab', 'it'].includes(path.id)) {
+    bullets.push('Vietät vapaa-aikasi useimmiten yksin — tämä polku sopii taustarooliin');
+  }
+  if (leisure === 'c' && ['service', 'health', 'society'].includes(path.id)) {
+    bullets.push('Vietät aikaa muiden kanssa — sosiaalinen rytmi sopii tälle polulle');
+  }
+
   (motivation.meaning || []).forEach((key) => {
     if (MEANING_WHY[key]) bullets.push(MEANING_WHY[key]);
   });
@@ -1715,7 +2065,7 @@ function primaryCta(interest, topPath, answers) {
 
 function renderPathCard(p, i, answers, interests, tyoohjaus, motivation, topScore) {
   const study = studyLineForPath(p, answers);
-  const occCount = occupationCountForPath(p.id, answers, tyoohjaus, motivation);
+  const occCount = occupationCountForPath(p.id, answers, tyoohjaus, motivation, interests);
   const occHint = occupationHintFor(answers);
   const fit = fitBadge(i, p.score, topScore);
   const why = explainPathWhy(p, answers, interests, tyoohjaus, motivation);
@@ -1744,7 +2094,7 @@ function renderPathCard(p, i, answers, interests, tyoohjaus, motivation, topScor
         </button>
         <div class="path-occupations" hidden>
           <p class="occupation-hint">${occHint}</p>
-          ${renderOccupationList(p.id, answers, tyoohjaus, motivation)}
+          ${renderOccupationList(p.id, answers, tyoohjaus, motivation, interests)}
         </div>` : ''}
       </div>
     </div>`;
@@ -1787,7 +2137,7 @@ function nextStepLabel() {
 function shareText(archetype, paths) {
   const top = paths[0]?.name || 'uusia polkuja';
   const url = state.screen === 'result' ? resultPageUrl() : 'https://yoro.fi/ohjausmoottori/';
-  return `Työtyylini on ${archetype.title} ${archetype.emoji}\n\nYoron ohjausmoottori ehdotti mulle polkua: ${top}\n\nEi yhtä oikeaa ammattia — kokeile noin 10 min:\n${url}`;
+  return `Työtyylini on ${archetype.title} ${archetype.emoji}\n\nYoron ohjausmoottori ehdotti mulle polkua: ${top}\n\nEi yhtä oikeaa ammattia — kokeile noin 10–12 min:\n${url}`;
 }
 
 function drawGlowCurve(ctx, x1, y1, cx, cy, x2, y2, color, width = 3) {
@@ -1908,7 +2258,7 @@ function drawShareCard(archetype, topPath) {
 
   ctx.fillStyle = '#64748b';
   ctx.font = '22px Inter, system-ui, sans-serif';
-  ctx.fillText('Noin 10 min · ilmainen · ei uraennustetta', 72, 392);
+  ctx.fillText('Noin 10–12 min · ilmainen · ei uraennustetta', 72, 392);
 
   ctx.fillStyle = '#22d3ee';
   ctx.font = '600 24px Inter, system-ui, sans-serif';
@@ -2019,7 +2369,7 @@ function render() {
     app.innerHTML = `
       <section class="hero">
         ${savedBanner}
-        <div class="pill">Ilmainen · n. 10 min</div>
+        <div class="pill">Ilmainen · n. 10–12 min</div>
         <svg class="hero-art" viewBox="0 0 320 180" aria-hidden="true" focusable="false">
           <path class="path-cyan" d="M160 155 Q145 110 95 55" stroke-width="2.5"/>
           <path class="path-purple" d="M160 155 Q160 95 160 40" stroke-width="2.5"/>
@@ -2364,7 +2714,7 @@ function render() {
   if (state.screen === 'result') {
     persistResult();
     const answers = { ...state.lxp };
-    const archetype = pickArchetype(answers);
+    const archetype = pickArchetype(answers, state.tyoohjaus, state.motivation, state.interest);
     const sectors = getSectorWeights();
     const paths = scorePaths(answers, sectors, state.interest, state.tyoohjaus, state.motivation);
     const topPaths = paths.slice(0, 3);
@@ -2381,6 +2731,8 @@ function render() {
         ? '<p class="trust-inline">Mukana myös korkeakoulutason jatko-opintopolkuja (AMK/yliopisto).</p>'
         : '';
 
+    const aspirationAlert = buildAspirationMismatchHtml(state.tyoohjaus, state.motivation, state.interest);
+
     app.innerHTML = `
       <p class="trust-banner">${txt('trustBanner')}</p>
 
@@ -2390,6 +2742,8 @@ function render() {
         <h2 class="result-title" tabindex="-1">${archetype.title}</h2>
         <p class="hero-sentence">${heroSentence}</p>
       </div>
+
+      ${aspirationAlert}
 
       <div class="card">
         <div class="section-title" style="margin-top:0">${txt('strengthsTitle')}</div>
@@ -2435,9 +2789,13 @@ function render() {
       <button class="btn btn-ghost" id="retryBtn">Tee testi uudelleen</button>
       <a href="https://yoro.fi/" class="btn btn-ghost" style="text-decoration:none;margin-top:8px">← Palaa Yoro.fi-sivuille</a>
 
-      <p class="disclaimer">Tulos perustuu 10 kysymyksen LxP-työtyyliin, työohjauskerrokseen, motivaatioon, lempikouluaineisiin ja kiinnostukseen. Ammattinimet noudattavat <a href="${TE24_SOURCE_URL}" target="_blank" rel="noopener noreferrer">TE24-luokitusta</a>. Ei vaikuta työnantajan LxP-hakuun (lxp.yoro.fi). Emme mittaa älykkyyttä tai arvosanoja.</p>`;
+      <p class="disclaimer">Tulos perustuu 10 kysymyksen LxP-työtyyliin, työohjauskerrokseen (mukaan lukien vapaa-aika), motivaatioon, lempikouluaineisiin ja kiinnostukseen. Ammattinimet noudattavat <a href="${TE24_SOURCE_URL}" target="_blank" rel="noopener noreferrer">TE24-luokitusta</a>. Ei vaikuta työnantajan LxP-hakuun (lxp.yoro.fi). Emme mittaa älykkyyttä tai arvosanoja.</p>`;
 
-    track('result_view', { archetype: archetype.id, topPath: top?.id });
+    track('result_view', {
+      archetype: archetype.id,
+      topPath: top?.id,
+      aspirationMismatch: detectAspirationMismatch(state.tyoohjaus, state.motivation, state.interest),
+    });
     bindPathToggles();
     bindPathWhyToggles();
     bindShowMorePaths(extraPaths.length);
