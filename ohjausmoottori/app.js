@@ -1372,6 +1372,35 @@ const COPY = {
   introHook: { fi: '✦ Saat oman tekijätyypin + jaettavan kortin', plain: '✦ Saat oman tyypin ja kuvan jaettavaksi' },
   startBtn: { fi: 'Aloita testi →', plain: 'Aloita →' },
   introDisclaimer: { fi: 'Ei rekisteröitymistä. Tulos on ohjausta, ei ennustetta.', plain: 'Ei tarvitse rekisteröityä. Tulos on vain ohjausta.' },
+  shareSectionTitle: { fi: 'Jaa tuloksesi', plain: 'Jaa tulos' },
+  shareToCounselor: { fi: 'Lähetä ohjaajalle', plain: 'Lähetä ohjaajalle' },
+  counselorModalTitle: { fi: 'Lähetä tulos ohjaajalle', plain: 'Lähetä tulos ohjaajalle' },
+  counselorEmailLabel: { fi: 'Ohjaajan sähköpostiosoite', plain: 'Ohjaajan sähköposti' },
+  counselorEmailHint: { fi: 'Lähetys avaa sähköpostiohjelmasi — viesti lähtee sinun osoitteestasi.', plain: 'Lähetys avaa sähköpostin. Viesti lähtee sinun osoitteestasi.' },
+  counselorNameLabel: { fi: 'Sinun nimesi', plain: 'Nimesi' },
+  counselorNameHint: { fi: 'Nimi allekirjoitukseen, esim. T. Pasi Laakkonen', plain: 'Nimi allekirjoitukseen' },
+  counselorMessageLabel: { fi: 'Lyhyt viesti', plain: 'Lyhyt viesti' },
+  counselorMessageDefault: { fi: 'Tässä testini.', plain: 'Tässä testini.' },
+  counselorPrivacy: { fi: 'Linkissä on testituloksesi — lähetä vain luotetulle ohjaajalle.', plain: 'Linkissä on tuloksesi. Lähetä vain luotetulle ohjaajalle.' },
+  counselorInvalidEmail: { fi: 'Tarkista sähköpostiosoite.', plain: 'Tarkista sähköposti.' },
+  counselorNameRequired: { fi: 'Kirjoita nimesi allekirjoitukseen.', plain: 'Kirjoita nimesi.' },
+  shareToFriend: { fi: 'Lähetä ystävälle', plain: 'Lähetä ystävälle' },
+  friendModalTitle: { fi: 'Lähetä tulos ystävälle', plain: 'Lähetä tulos ystävälle' },
+  friendEmailLabel: { fi: 'Ystäväsi sähköpostiosoite', plain: 'Ystävän sähköposti' },
+  friendEmailHint: { fi: 'Lähetys avaa sähköpostiohjelmasi — viesti lähtee sinun osoitteestasi.', plain: 'Lähetys avaa sähköpostin. Viesti lähtee sinun osoitteestasi.' },
+  friendMessageDefault: { fi: 'Tein tämän testin — kokeile sinäkin!', plain: 'Tein tämän testin. Kokeile sinäkin!' },
+  friendPrivacy: { fi: 'Viestissä on linkki tulokseesi ja linkki testiin. Lähetä vain luotetulle ystävälle.', plain: 'Viestissä on linkki tulokseesi ja testiin. Lähetä vain luotetulle ystävälle.' },
+  advisorCtaTitle: { fi: 'AI-opinto-ohjaaja', plain: 'AI-opinto-ohjaaja' },
+  advisorCtaBody: { fi: 'Haluatko jutella tuloksistasi? Tunnen vastauksesi ja voin auttaa pohtimaan polkuja ja seuraavia askelia.', plain: 'Haluatko jutella tuloksistasi? Voin auttaa pohtimaan polkuja ja seuraavia askelia.' },
+  advisorCtaBtn: { fi: 'Jutella tuloksista →', plain: 'Jutella tuloksista →' },
+  advisorChatTitle: { fi: 'AI-opinto-ohjaaja', plain: 'AI-opinto-ohjaaja' },
+  advisorDisclaimer: { fi: 'AI ei ole virallinen ohjaus eikä uraennuste. Tärkeissä päätöksissä keskustele aina opettajan tai Ohjaamon kanssa.', plain: 'AI ei ole virallinen ohjaus. Keskustele aina opettajan tai Ohjaamon kanssa.' },
+  advisorPlaceholder: { fi: 'Kirjoita kysymys…', plain: 'Kirjoita kysymys…' },
+  advisorSend: { fi: 'Lähetä', plain: 'Lähetä' },
+  advisorClose: { fi: 'Sulje chat', plain: 'Sulje' },
+  advisorThinking: { fi: 'Kirjoittaa…', plain: 'Kirjoittaa…' },
+  advisorError: { fi: 'Viesti ei mennyt läpi. Yritä uudelleen tai ota yhteyttä Ohjaamoon.', plain: 'Viesti ei mennyt läpi. Yritä uudelleen.' },
+  advisorOffline: { fi: 'AI-opinto-ohjaaja ei ole vielä käytössä tässä ympäristössä. Voit silti käyttää linkkejä Opintopolkuun ja Ohjaamoon.', plain: 'AI-opinto-ohjaaja ei ole vielä käytössä. Käytä linkkejä Opintopolkuun ja Ohjaamoon.' },
 };
 
 function txt(key) {
@@ -1622,6 +1651,7 @@ const state = {
   subjects: new Set(),
   interest: {},
   plainLanguage: false,
+  advisorChat: { open: false, messages: [], loading: false, error: '' },
 };
 
 function totalSteps() {
@@ -2166,6 +2196,471 @@ function shareText(archetype, paths) {
   const top = paths[0]?.name || 'uusia polkuja';
   const url = state.screen === 'result' ? resultPageUrl() : 'https://yoro.fi/ohjausmoottori/';
   return `Työtyylini on ${archetype.title} ${archetype.emoji}\n\nYoron ohjausmoottori ehdotti mulle polkua: ${top}\n\nEi yhtä oikeaa ammattia — kokeile noin 10–12 min:\n${url}`;
+}
+
+function isValidEmail(email) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(email || '').trim());
+}
+
+function shareSignature(senderName) {
+  const n = senderName.trim();
+  return n.startsWith('T.') ? n : `T. ${n}`;
+}
+
+function testStartUrl() {
+  return `${location.origin}${location.pathname}${location.search || ''}`;
+}
+
+function buildCounselorEmailBody(archetype, paths, senderName, message) {
+  const url = resultPageUrl();
+  const pathLines = paths.slice(0, 3).map((p, i) => `${i + 1}. ${p.name}`).join('\n');
+  const intro = (message || txt('counselorMessageDefault')).trim();
+  return `${intro}
+
+${shareSignature(senderName)}
+
+---
+Tekijätyyppi: ${archetype.title} ${archetype.emoji}
+Polkuja kokeiltavaksi:
+${pathLines}
+
+Tuloslinkki (sisältää testivastaukset):
+${url}
+
+Tämä on suuntaa antava ohjaustulos, ei ammattivalinta eikä arvosana.
+Yoro Ohjausmoottori — yoro.fi/ohjausmoottori`;
+}
+
+function buildFriendEmailBody(archetype, paths, senderName, message) {
+  const resultUrl = resultPageUrl();
+  const testUrl = testStartUrl();
+  const pathLines = paths.slice(0, 3).map((p, i) => `${i + 1}. ${p.name}`).join('\n');
+  const intro = (message || txt('friendMessageDefault')).trim();
+  return `${intro}
+
+${shareSignature(senderName)}
+
+---
+Minun tekijätyyppi: ${archetype.title} ${archetype.emoji}
+Polkuja kokeiltavaksi:
+${pathLines}
+
+Katso minun tulokseni:
+${resultUrl}
+
+Kokeile testiä itse (noin 10–12 min, ilmainen):
+${testUrl}
+
+Tämä on suuntaa antava ohjaustulos, ei ammattivalinta eikä arvosana.
+Yoro Ohjausmoottori`;
+}
+
+function buildCounselorMailto(counselorEmail, archetype, paths, senderName, message) {
+  const subject = `Ohjausmoottorin tulos — ${senderName.trim()}`;
+  const body = buildCounselorEmailBody(archetype, paths, senderName, message);
+  return `mailto:${encodeURIComponent(counselorEmail.trim())}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+}
+
+function buildFriendMailto(friendEmail, archetype, paths, senderName, message) {
+  const subject = state.plainLanguage
+    ? `Kokeile tätä testiä — ${senderName.trim()}`
+    : `Katso testitulokseni ja kokeile itse — ${senderName.trim()}`;
+  const body = buildFriendEmailBody(archetype, paths, senderName, message);
+  return `mailto:${encodeURIComponent(friendEmail.trim())}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+}
+
+function bindShareEmailWizard({
+  modalId,
+  buttonId,
+  titleId,
+  copy,
+  buildMailto,
+  trackEvent,
+  trackData = {},
+}) {
+  const existing = document.getElementById(modalId);
+  if (existing) existing.remove();
+
+  const wizard = { step: 1, recipientEmail: '' };
+
+  const modal = document.createElement('div');
+  modal.id = modalId;
+  modal.className = 'share-modal';
+  modal.hidden = true;
+  modal.setAttribute('role', 'dialog');
+  modal.setAttribute('aria-modal', 'true');
+  modal.setAttribute('aria-labelledby', titleId);
+
+  function closeModal() {
+    modal.hidden = true;
+    document.body.classList.remove('modal-open');
+    document.getElementById(buttonId)?.focus();
+  }
+
+  function renderStep() {
+    const panel = modal.querySelector('.share-modal-panel');
+    if (!panel) return;
+
+    if (wizard.step === 1) {
+      panel.innerHTML = `
+        <button type="button" class="share-modal-close" aria-label="Sulje">×</button>
+        <h2 id="${titleId}" class="share-modal-title">${copy.title}</h2>
+        <p class="share-modal-lead">${copy.emailHint}</p>
+        <label class="share-field">
+          <span class="share-field-label">${copy.emailLabel}</span>
+          <input type="email" id="shareEmailInput" class="share-input" autocomplete="email" inputmode="email" value="${wizard.recipientEmail}" placeholder="${copy.emailPlaceholder || 'sahko@posti.fi'}" />
+        </label>
+        <p class="share-field-error" id="shareEmailError" hidden>${copy.invalidEmail}</p>
+        <div class="share-modal-actions">
+          <button type="button" class="btn btn-ghost" id="shareCancelBtn">Peruuta</button>
+          <button type="button" class="btn btn-primary" id="shareNextBtn">Seuraava →</button>
+        </div>`;
+
+      const input = panel.querySelector('#shareEmailInput');
+      input?.focus();
+      panel.querySelector('#shareCancelBtn')?.addEventListener('click', closeModal);
+      panel.querySelector('.share-modal-close')?.addEventListener('click', closeModal);
+      panel.querySelector('#shareNextBtn')?.addEventListener('click', () => {
+        const email = input?.value || '';
+        if (!isValidEmail(email)) {
+          const err = panel.querySelector('#shareEmailError');
+          if (err) err.hidden = false;
+          input?.focus();
+          return;
+        }
+        wizard.recipientEmail = email.trim();
+        wizard.step = 2;
+        renderStep();
+      });
+      input?.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') panel.querySelector('#shareNextBtn')?.click();
+      });
+      return;
+    }
+
+    panel.innerHTML = `
+      <button type="button" class="share-modal-close" aria-label="Sulje">×</button>
+      <h2 id="${titleId}" class="share-modal-title">${copy.title}</h2>
+      <p class="share-modal-lead">${copy.nameHint}</p>
+      <label class="share-field">
+        <span class="share-field-label">${copy.nameLabel}</span>
+        <input type="text" id="shareNameInput" class="share-input" autocomplete="name" placeholder="${copy.namePlaceholder || 'Pasi Laakkonen'}" />
+      </label>
+      <p class="share-field-error" id="shareNameError" hidden>${copy.nameRequired}</p>
+      <label class="share-field">
+        <span class="share-field-label">${copy.messageLabel}</span>
+        <textarea id="shareMessageInput" class="share-textarea" rows="3">${copy.messageDefault}</textarea>
+      </label>
+      <p class="share-modal-privacy">${copy.privacy}</p>
+      <div class="share-modal-actions">
+        <button type="button" class="btn btn-ghost" id="shareBackBtn">← Takaisin</button>
+        <button type="button" class="btn btn-primary" id="shareSendBtn">${copy.sendLabel}</button>
+      </div>`;
+
+    const nameInput = panel.querySelector('#shareNameInput');
+    nameInput?.focus();
+    panel.querySelector('.share-modal-close')?.addEventListener('click', closeModal);
+    panel.querySelector('#shareBackBtn')?.addEventListener('click', () => {
+      wizard.step = 1;
+      renderStep();
+    });
+    panel.querySelector('#shareSendBtn')?.addEventListener('click', () => {
+      const name = nameInput?.value?.trim() || '';
+      if (!name) {
+        const err = panel.querySelector('#shareNameError');
+        if (err) err.hidden = false;
+        nameInput?.focus();
+        return;
+      }
+      const message = panel.querySelector('#shareMessageInput')?.value || '';
+      const mailto = buildMailto(wizard.recipientEmail, name, message);
+      track(trackEvent, trackData);
+      window.location.href = mailto;
+      closeModal();
+    });
+  }
+
+  modal.innerHTML = '<div class="share-modal-backdrop" data-close="1"></div><div class="share-modal-panel"></div>';
+  document.body.appendChild(modal);
+
+  modal.querySelector('.share-modal-backdrop')?.addEventListener('click', closeModal);
+  modal.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeModal();
+  });
+
+  const openBtn = document.getElementById(buttonId);
+  if (!openBtn) return;
+  openBtn.addEventListener('click', () => {
+    wizard.step = 1;
+    wizard.recipientEmail = '';
+    modal.hidden = false;
+    document.body.classList.add('modal-open');
+    renderStep();
+  });
+}
+
+function bindShareToCounselor(archetype, topPaths) {
+  bindShareEmailWizard({
+    modalId: 'shareCounselorModal',
+    buttonId: 'shareToCounselorBtn',
+    titleId: 'shareCounselorTitle',
+    copy: {
+      title: txt('counselorModalTitle'),
+      emailHint: txt('counselorEmailHint'),
+      emailLabel: txt('counselorEmailLabel'),
+      emailPlaceholder: 'ohjaaja@koulu.fi',
+      nameHint: txt('counselorNameHint'),
+      nameLabel: txt('counselorNameLabel'),
+      namePlaceholder: 'Pasi Laakkonen',
+      messageLabel: txt('counselorMessageLabel'),
+      messageDefault: txt('counselorMessageDefault'),
+      privacy: txt('counselorPrivacy'),
+      invalidEmail: txt('counselorInvalidEmail'),
+      nameRequired: txt('counselorNameRequired'),
+      sendLabel: 'Lähetä sähköpostilla',
+    },
+    buildMailto: (email, name, message) => buildCounselorMailto(email, archetype, topPaths, name, message),
+    trackEvent: 'share_to_counselor',
+    trackData: { archetype: archetype.id },
+  });
+}
+
+function bindShareToFriend(archetype, topPaths) {
+  bindShareEmailWizard({
+    modalId: 'shareFriendModal',
+    buttonId: 'shareToFriendBtn',
+    titleId: 'shareFriendTitle',
+    copy: {
+      title: txt('friendModalTitle'),
+      emailHint: txt('friendEmailHint'),
+      emailLabel: txt('friendEmailLabel'),
+      emailPlaceholder: 'ystava@posti.fi',
+      nameHint: txt('counselorNameHint'),
+      nameLabel: txt('counselorNameLabel'),
+      namePlaceholder: 'Pasi Laakkonen',
+      messageLabel: txt('counselorMessageLabel'),
+      messageDefault: txt('friendMessageDefault'),
+      privacy: txt('friendPrivacy'),
+      invalidEmail: txt('counselorInvalidEmail'),
+      nameRequired: txt('counselorNameRequired'),
+      sendLabel: 'Lähetä sähköpostilla',
+    },
+    buildMailto: (email, name, message) => buildFriendMailto(email, archetype, topPaths, name, message),
+    trackEvent: 'share_to_friend',
+    trackData: { archetype: archetype.id },
+  });
+}
+
+function answerLabelForQuestion(questionList, qId, key) {
+  if (!key) return '';
+  const q = questionList.find((item) => item.id === qId);
+  const o = q?.options?.find((opt) => opt.key === key);
+  if (!o) return key;
+  return state.plainLanguage && o.labelPlain ? o.labelPlain : o.label;
+}
+
+function buildAdvisorContext(archetype, topPaths, answers, tyoohjaus, motivation, interests) {
+  const meaningQ = MOTIVATION_Q.find((q) => q.id === 'meaning');
+  const meaningLabels = (motivation.meaning || []).map((key) => {
+    const o = meaningQ?.options?.find((opt) => opt.key === key);
+    return o ? optLabel(o) : key;
+  });
+  const recognitionQ = MOTIVATION_Q.find((q) => q.id === 'recognition');
+  const recognitionOpt = recognitionQ?.options?.find((o) => o.key === motivation.recognition);
+
+  const interestLabels = (interests.i1 || []).map((key) => {
+    const q = INTEREST_Q[0];
+    const o = q?.options?.find((opt) => opt.key === key);
+    return o ? optLabel(o) : key;
+  });
+
+  const exploreOpt = EXPLORE_Q.options.find((o) => o.key === interests.i4);
+  const subjectLabels = [...state.subjects].map((id) => SUBJECTS.find((s) => s.id === id)?.label).filter(Boolean);
+
+  const tyoohjausSummary = {};
+  TYOOHJAUS_QUESTIONS.forEach((q) => {
+    const key = tyoohjaus[q.id];
+    if (key) tyoohjausSummary[q.id] = answerLabelForQuestion(TYOOHJAUS_QUESTIONS, q.id, key);
+  });
+
+  const lxpSummary = {};
+  ['q1', 'q2', 'q4', 'q7'].forEach((qId) => {
+    if (answers[qId]) lxpSummary[qId] = answerLabelForQuestion(LXP_QUESTIONS, qId, answers[qId]);
+  });
+
+  return {
+    plainLanguage: state.plainLanguage,
+    archetype: {
+      id: archetype.id,
+      title: archetype.title,
+      tagline: archetype.tagline,
+    },
+    topPaths: topPaths.slice(0, 3).map((p) => ({
+      id: p.id,
+      name: p.name,
+      description: p.desc,
+      study: studyLineForPath(p, answers),
+    })),
+    motivation: {
+      meaning: meaningLabels,
+      recognition: recognitionOpt ? optLabel(recognitionOpt) : '',
+    },
+    interests: {
+      sectors: interestLabels,
+      nextStep: exploreOpt ? optLabel(exploreOpt) : '',
+    },
+    favoriteSubjects: subjectLabels,
+    workStyle: tyoohjausSummary,
+    lxpHighlights: lxpSummary,
+    aspirationMismatch: detectAspirationMismatch(tyoohjaus, motivation, interests),
+    disclaimer: 'Suuntaa antava ohjaustulos, ei uraennuste',
+  };
+}
+
+function advisorWelcomeMessage(archetype, topPaths) {
+  const paths = topPaths.slice(0, 3).map((p) => p.name).join(', ');
+  if (state.plainLanguage) {
+    return `Hei! Olen AI-opinto-ohjaaja. Tyyppisi on ${archetype.title}. Polkusi: ${paths}. Mistä haluaisit jutella?`;
+  }
+  return `Hei! Olen AI-opinto-ohjaaja — tunnen testituloksesi. Tekijätyyppisi on ${archetype.title} ${archetype.emoji}, ja ehdotetut polut ovat: ${paths}. Haluatko pohtia jotain polkua, opintoja tai seuraavaa askelta?`;
+}
+
+function getAdvisorCallable() {
+  if (typeof firebase === 'undefined' || !firebase.functions) return null;
+  try {
+    const app = firebase.apps.length ? firebase.app() : firebase.initializeApp(FIREBASE_CONFIG);
+    return app.functions('europe-west1').httpsCallable('ohjausmoottoriAdvisor');
+  } catch (_) {
+    return null;
+  }
+}
+
+function renderAdvisorMessages(messages) {
+  return messages.map((m) => {
+    const roleClass = m.role === 'user' ? 'advisor-msg-user' : 'advisor-msg-bot';
+    const safe = m.content
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/\n/g, '<br>');
+    return `<div class="advisor-msg ${roleClass}"><div class="advisor-msg-bubble">${safe}</div></div>`;
+  }).join('');
+}
+
+function renderAdvisorChatHtml(archetype, topPaths) {
+  const chat = state.advisorChat;
+  if (!chat.open) {
+    return `
+      <div class="advisor-cta card">
+        <div class="advisor-cta-icon" aria-hidden="true">🤖</div>
+        <div class="advisor-cta-body">
+          <h3 class="advisor-cta-title">${txt('advisorCtaTitle')}</h3>
+          <p class="advisor-cta-text">${txt('advisorCtaBody')}</p>
+          <button type="button" class="btn btn-primary" id="openAdvisorBtn">${txt('advisorCtaBtn')}</button>
+        </div>
+      </div>`;
+  }
+
+  const messages = chat.messages.length
+    ? chat.messages
+    : [{ role: 'assistant', content: advisorWelcomeMessage(archetype, topPaths) }];
+
+  return `
+    <div class="advisor-chat card" id="advisorChatPanel">
+      <div class="advisor-chat-header">
+        <h3 class="advisor-chat-title">🤖 ${txt('advisorChatTitle')}</h3>
+        <button type="button" class="advisor-chat-close" id="closeAdvisorBtn" aria-label="${txt('advisorClose')}">×</button>
+      </div>
+      <p class="advisor-chat-disclaimer">${txt('advisorDisclaimer')}</p>
+      <div class="advisor-suggestions" id="advisorSuggestions">
+        <button type="button" class="advisor-chip" data-prompt="Miksi sain juuri nämä polut?">Miksi nämä polut?</button>
+        <button type="button" class="advisor-chip" data-prompt="Mikä opintopolku voisi sopia minulle?">Mikä opintopolku?</button>
+        <button type="button" class="advisor-chip" data-prompt="Mitä voisin tehdä seuraavaksi käytännössä?">Seuraava askel?</button>
+      </div>
+      <div class="advisor-messages" id="advisorMessages" role="log" aria-live="polite" aria-relevant="additions">
+        ${renderAdvisorMessages(messages)}
+        ${chat.loading ? `<div class="advisor-msg advisor-msg-bot"><div class="advisor-msg-bubble advisor-thinking">${txt('advisorThinking')}</div></div>` : ''}
+      </div>
+      ${chat.error ? `<p class="advisor-error" role="alert">${chat.error}</p>` : ''}
+      <form class="advisor-form" id="advisorForm">
+        <label class="sr-only" for="advisorInput">${txt('advisorPlaceholder')}</label>
+        <textarea id="advisorInput" class="advisor-input" rows="2" maxlength="600" placeholder="${txt('advisorPlaceholder')}" ${chat.loading ? 'disabled' : ''}></textarea>
+        <button type="submit" class="btn btn-primary advisor-send" ${chat.loading ? 'disabled' : ''}>${txt('advisorSend')}</button>
+      </form>
+    </div>`;
+}
+
+function bindAdvisorChat(archetype, topPaths, answers, tyoohjaus, motivation, interests) {
+  const openBtn = document.getElementById('openAdvisorBtn');
+  if (openBtn) {
+    openBtn.onclick = () => {
+      state.advisorChat.open = true;
+      if (!state.advisorChat.messages.length) {
+        state.advisorChat.messages = [{ role: 'assistant', content: advisorWelcomeMessage(archetype, topPaths) }];
+      }
+      track('advisor_open', { archetype: archetype.id });
+      render();
+    };
+    return;
+  }
+
+  const closeBtn = document.getElementById('closeAdvisorBtn');
+  closeBtn?.addEventListener('click', () => {
+    state.advisorChat.open = false;
+    render();
+  });
+
+  const context = buildAdvisorContext(archetype, topPaths, answers, tyoohjaus, motivation, interests);
+  const callable = getAdvisorCallable();
+
+  async function sendUserMessage(text) {
+    const trimmed = text.trim();
+    if (!trimmed || state.advisorChat.loading) return;
+
+    if (!callable) {
+      state.advisorChat.error = txt('advisorOffline');
+      render();
+      return;
+    }
+
+    const messages = [...state.advisorChat.messages, { role: 'user', content: trimmed }];
+    state.advisorChat.messages = messages;
+    state.advisorChat.loading = true;
+    state.advisorChat.error = '';
+    render();
+
+    try {
+      const result = await callable({ messages, context });
+      const reply = result?.data?.reply;
+      if (!reply) throw new Error('empty');
+      state.advisorChat.messages = [...messages, { role: 'assistant', content: reply }];
+      track('advisor_message', { archetype: archetype.id, len: trimmed.length });
+    } catch (err) {
+      state.advisorChat.error = txt('advisorError');
+      console.warn('advisor chat failed', err?.message || err);
+    } finally {
+      state.advisorChat.loading = false;
+      render();
+      document.getElementById('advisorInput')?.focus();
+    }
+  }
+
+  document.getElementById('advisorForm')?.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const input = document.getElementById('advisorInput');
+    const text = input?.value || '';
+    if (input) input.value = '';
+    sendUserMessage(text);
+  });
+
+  document.querySelectorAll('.advisor-chip').forEach((chip) => {
+    chip.addEventListener('click', () => {
+      sendUserMessage(chip.dataset.prompt || chip.textContent || '');
+    });
+  });
+
+  const msgBox = document.getElementById('advisorMessages');
+  if (msgBox) msgBox.scrollTop = msgBox.scrollHeight;
 }
 
 function drawGlowCurve(ctx, x1, y1, cx, cy, x2, y2, color, width = 3) {
@@ -2810,6 +3305,8 @@ function render() {
       </div>
       <button type="button" class="btn btn-ghost" id="showMorePathsBtn">Näytä ${extraPaths.length} muuta polkua ▾</button>` : ''}
 
+      ${renderAdvisorChatHtml(archetype, topPaths)}
+
       <div class="feedback-card" id="feedbackCard">
         <p class="feedback-title">Osuiko tulos sinuun?</p>
         <div class="feedback-btns">
@@ -2820,9 +3317,14 @@ function render() {
         <p class="feedback-thanks" id="feedbackThanks" hidden>Kiitos palautteesta — auttaa meitä kehittämään testiä.</p>
       </div>
 
-      <button class="btn btn-share" id="copyResultLinkBtn">${txt('copyResultLink')}</button>
-      <button class="btn btn-share" id="downloadCardBtn">Lataa jaettava kortti (PNG)</button>
-      <button class="btn btn-share" id="shareBtn">Jaa tekstinä</button>
+      <div class="share-section">
+        <div class="section-title" style="margin-top:24px">${txt('shareSectionTitle')}</div>
+        <button type="button" class="btn btn-share" id="shareToCounselorBtn">${txt('shareToCounselor')}</button>
+        <button type="button" class="btn btn-share" id="shareToFriendBtn">${txt('shareToFriend')}</button>
+        <button class="btn btn-share" id="copyResultLinkBtn">${txt('copyResultLink')}</button>
+        <button class="btn btn-share" id="downloadCardBtn">Lataa jaettava kortti (PNG)</button>
+        <button class="btn btn-share" id="shareBtn">Jaa tekstinä</button>
+      </div>
       <button class="btn btn-ghost" id="retryBtn">Tee testi uudelleen</button>
       <a href="https://yoro.fi/" class="btn btn-ghost" style="text-decoration:none;margin-top:8px">← Palaa Yoro.fi-sivuille</a>
 
@@ -2837,6 +3339,9 @@ function render() {
     bindPathWhyToggles();
     bindShowMorePaths(extraPaths.length);
     bindFeedback(archetype, top);
+    bindShareToCounselor(archetype, topPaths);
+    bindShareToFriend(archetype, topPaths);
+    bindAdvisorChat(archetype, topPaths, answers, state.tyoohjaus, state.motivation, state.interest);
     bindCtaTracking();
 
     document.getElementById('downloadCardBtn').onclick = () => downloadShareCard(archetype, top);
@@ -2870,6 +3375,9 @@ function render() {
 
     document.getElementById('retryBtn').onclick = () => {
       track('retry');
+      document.getElementById('shareCounselorModal')?.remove();
+      document.getElementById('shareFriendModal')?.remove();
+      document.body.classList.remove('modal-open');
       history.replaceState(null, '', `${location.pathname}${location.search}`);
       try { localStorage.removeItem(RESULT_STORAGE_KEY); } catch (_) { /* ignore */ }
       Object.assign(state, {
@@ -2882,6 +3390,7 @@ function render() {
         motivation: { meaning: [], recognition: '' },
         subjects: new Set(),
         interest: {},
+        advisorChat: { open: false, messages: [], loading: false, error: '' },
       });
       render();
     };
