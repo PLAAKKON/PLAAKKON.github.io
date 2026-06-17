@@ -159,11 +159,12 @@ body {
   line-height: 1;
 }
 
-.logo-yoro {
-  font-size: 1.35rem;
+    .logo-yoro {
+  font-size: 1.45rem;
   font-weight: 800;
   letter-spacing: -0.04em;
   color: #f8fafc;
+  text-shadow: 0 0 28px rgba(34, 211, 238, 0.15);
 }
 
 .logo-o {
@@ -171,6 +172,7 @@ body {
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
+  filter: drop-shadow(0 0 10px rgba(34, 211, 238, 0.35));
 }
 
 .logo-sub {
@@ -181,7 +183,7 @@ body {
   color: var(--muted);
 }
 
-.logo img { height: 28px; }
+.logo img { height: 32px; filter: drop-shadow(0 0 8px rgba(34, 211, 238, 0.25)); }
 
 .pill {
   font-size: 0.72rem;
