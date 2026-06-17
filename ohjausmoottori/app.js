@@ -418,25 +418,6 @@ const INTEREST_Q = [
       { key: 'liikenne', label: '🚚 Liikenne, logistiikka ja palvelut', labelPlain: '🚚 Liikenne ja palvelut' },
     ],
   },
-  {
-    id: 'i2',
-    text: 'Miltä työpäivä kuulostaa mielenkiintoisimmalta?',
-    textPlain: 'Millainen työpäivä kiinnostaa?',
-    hint: 'Valitse yksi.',
-    hintPlain: 'Valitse yksi.',
-    multi: 1,
-    grid: true,
-    options: [
-      { key: 'solve', label: '🧠 Ratkaisen ongelmia', labelPlain: '🧠 Ratkaisen ongelmia' },
-      { key: 'help', label: '❤️ Autan ihmisiä käytännössä', labelPlain: '❤️ Autan ihmisiä' },
-      { key: 'build', label: '🔨 Rakennan tai korjaan', labelPlain: '🔨 Rakennan tai korjaan' },
-      { key: 'connect', label: '🗣️ Keskustelen ja teen yhteistyötä ihmisten kanssa', labelPlain: '🗣️ Keskustelen ja teen yhteistyötä' },
-      { key: 'organize', label: '📋 Suunnittelen ja järjestän asioita', labelPlain: '📋 Suunnittelen ja järjestän' },
-      { key: 'create', label: '💡 Keksin ja luon uutta', labelPlain: '💡 Keksin ja luon uutta' },
-      { key: 'nature', label: '🌿 Työskentelen luonnon tai ympäristön parissa', labelPlain: '🌿 Luonto ja ympäristö' },
-      { key: 'data', label: '📊 Työskentelen numeroiden, tiedon tai talouden parissa', labelPlain: '📊 Numerot, tieto ja talous' },
-    ],
-  },
 ];
 
 const EXPLORE_Q = {
@@ -526,7 +507,7 @@ const ARCHETYPES = [
       if (c.recognitionCalm) s += 7;
       if (c.steadyProgress) s += 5;
       if (c.soloDecisions) s += 5;
-      if (c.interests?.i2 === 'data' || c.interestSolve) s += 4;
+      if (c.interestSolve || c.meaningResults) s += 4;
       if (c.visibilityHigh) s -= 18;
       if (c.leisureSocial) s -= 6;
       return s;
@@ -774,11 +755,11 @@ function buildArchetypeContext(answers, tyoohjaus = {}, motivation = {}, interes
     recognitionPraise: motivation.recognition === 'praise',
     recognitionMastery: motivation.recognition === 'mastery',
     recognitionCalm: motivation.recognition === 'calm_team',
-    interestHelp: interests.i2 === 'help',
-    interestConnect: interests.i2 === 'connect',
-    interestBuild: interests.i2 === 'build',
-    interestCreate: interests.i2 === 'create',
-    interestSolve: interests.i2 === 'solve',
+    interestHelp: meaning.includes('help'),
+    interestConnect: tyoohjaus.visibility === 'c' || tyoohjaus.leisure === 'c',
+    interestBuild: tyoohjaus.drive === 'b' || answers.q2 === 'a',
+    interestCreate: meaning.includes('create') || tyoohjaus.drive === 'a' || tyoohjaus.drive === 'c',
+    interestSolve: meaning.includes('solve') || meaning.includes('learn'),
     creativeSubject: subjects.some((s) => ['kuvataide', 'musiikki'].includes(s)),
     techSubject: subjects.some((s) => ['matematiikka', 'fysiikka', 'kemia'].includes(s)),
   };
@@ -1104,7 +1085,29 @@ function occupationWorkProfile(jobName) {
 }
 
 function hasHighHelpInterest(motivation = {}, interests = {}) {
-  return (motivation.meaning || []).includes('help') || interests.i2 === 'help';
+  return (motivation.meaning || []).includes('help');
+}
+
+/** Työpäiväsignaalit motivaatiosta ja työohjauksesta (i2-kysymys poistettu) */
+function workdaySignals(motivation = {}, tyoohjaus = {}) {
+  const signals = new Set();
+  const meaningMap = {
+    help: 'help',
+    solve: 'solve',
+    create: 'create',
+    learn: 'solve',
+    results: 'organize',
+    purpose: 'nature',
+  };
+  (motivation.meaning || []).forEach((m) => {
+    if (meaningMap[m]) signals.add(meaningMap[m]);
+  });
+  if (tyoohjaus.drive === 'a' || tyoohjaus.drive === 'c') signals.add('create');
+  if (tyoohjaus.drive === 'b') signals.add('build');
+  if (tyoohjaus.precision === 'a') signals.add('solve');
+  if (tyoohjaus.visibility === 'c') signals.add('connect');
+  if (tyoohjaus.leisure === 'c') signals.add('connect');
+  return [...signals];
 }
 
 function detectAspirationMismatch(tyoohjaus = {}, motivation = {}, interests = {}) {
@@ -1442,7 +1445,8 @@ function applyResultPayload(data) {
   state.plainLanguage = !!data.p;
   state.screen = 'result';
   state.lxpIndex = 0;
-  state.interestIndex = 0;
+  state.tyoohjausIndex = 0;
+  state.motivationIndex = 0;
   localStorage.setItem(PLAIN_LANG_KEY, state.plainLanguage ? '1' : '0');
   document.body.classList.toggle('plain-language', state.plainLanguage);
   syncPlainToggle();
@@ -1584,45 +1588,64 @@ function inferTopics(interests) {
   return [...topics];
 }
 
-function tyoohjausComplete() {
-  return TYOOHJAUS_QUESTIONS.every((q) => state.tyoohjaus[q.id]);
+function tyoohjausStepValid(index) {
+  const q = TYOOHJAUS_QUESTIONS[index];
+  return !!state.tyoohjaus[q?.id];
 }
 
-function motivationComplete() {
-  const meaning = state.motivation.meaning;
-  const recognition = state.motivation.recognition;
-  return Array.isArray(meaning) && meaning.length >= 1 && meaning.length <= 2 && !!recognition;
-}
-
-function interestStepValid(index) {
-  if (index === 0) {
-    return Array.isArray(state.interest.i1) && state.interest.i1.length >= 2;
+function motivationStepValid(index) {
+  const q = MOTIVATION_Q[index];
+  if (!q) return false;
+  if (q.id === 'meaning') {
+    const m = state.motivation.meaning || [];
+    return m.length >= q.min && m.length <= q.max;
   }
-  return !!state.interest.i2 && !!state.interest.i4;
+  return !!state.motivation.recognition;
+}
+
+function interestStepValid() {
+  return Array.isArray(state.interest.i1) && state.interest.i1.length >= 2;
+}
+
+function exploreStepValid() {
+  return !!state.interest.i4;
 }
 
 const state = {
   screen: 'intro',
   lxpIndex: 0,
+  tyoohjausIndex: 0,
+  motivationIndex: 0,
   lxp: {},
   tyoohjaus: {},
   motivation: { meaning: [], recognition: '' },
   subjects: new Set(),
   interest: {},
-  interestIndex: 0,
   plainLanguage: false,
 };
 
 function totalSteps() {
-  return LXP_QUESTIONS.length + 1 + 1 + 1 + INTEREST_Q.length;
+  return LXP_QUESTIONS.length
+    + TYOOHJAUS_QUESTIONS.length
+    + MOTIVATION_Q.length
+    + 1
+    + INTEREST_Q.length
+    + 1;
 }
 
 function currentStep() {
   if (state.screen === 'lxp') return state.lxpIndex + 1;
-  if (state.screen === 'tyoohjaus') return LXP_QUESTIONS.length + 1;
-  if (state.screen === 'motivation') return LXP_QUESTIONS.length + 2;
-  if (state.screen === 'subjects') return LXP_QUESTIONS.length + 3;
-  if (state.screen === 'interest') return LXP_QUESTIONS.length + 4 + state.interestIndex;
+  if (state.screen === 'tyoohjaus') return LXP_QUESTIONS.length + state.tyoohjausIndex + 1;
+  if (state.screen === 'motivation') {
+    return LXP_QUESTIONS.length + TYOOHJAUS_QUESTIONS.length + state.motivationIndex + 1;
+  }
+  if (state.screen === 'subjects') {
+    return LXP_QUESTIONS.length + TYOOHJAUS_QUESTIONS.length + MOTIVATION_Q.length + 1;
+  }
+  if (state.screen === 'interest') {
+    return LXP_QUESTIONS.length + TYOOHJAUS_QUESTIONS.length + MOTIVATION_Q.length + 2;
+  }
+  if (state.screen === 'explore') return totalSteps();
   return 0;
 }
 
@@ -1633,8 +1656,9 @@ function progressPct() {
 function scorePaths(answers, sectors, interests, tyoohjaus = {}, motivation = {}) {
   const sectorSet = new Set(sectors);
   const i1 = interests.i1 || [];
-  const i2 = interests.i2;
   const i3 = interests.i3?.length ? interests.i3 : inferTopics(interests);
+  const workdays = workdaySignals(motivation, tyoohjaus);
+  const techWorkday = workdays.some((wd) => ['solve', 'create', 'data'].includes(wd));
 
   return PATHS.map((path) => {
     let score = 0;
@@ -1656,10 +1680,12 @@ function scorePaths(answers, sectors, interests, tyoohjaus = {}, motivation = {}
       });
     });
 
-    if (path.workday.includes(i2)) {
-      score += 15;
-      reasons.push('työpäivä');
-    }
+    workdays.forEach((wd) => {
+      if (path.workday.includes(wd)) {
+        score += 10;
+        reasons.push('työpäivä');
+      }
+    });
 
     i3.forEach((key) => {
       if (key === 'unsure') return;
@@ -1733,7 +1759,7 @@ function scorePaths(answers, sectors, interests, tyoohjaus = {}, motivation = {}
         score += 10;
         if (answers.q10 === 'a' || answers.q10 === 'b') score += 12;
         if (i1.includes('tekniikka') || i1.includes('luova')) score += 8;
-        if (i2 === 'solve' || i2 === 'create' || i2 === 'data') score += 8;
+        if (techWorkday) score += 8;
         i3.forEach((key) => {
           if (key === 'tech' || key === 'creative') score += 6;
         });
@@ -1748,7 +1774,7 @@ function scorePaths(answers, sectors, interests, tyoohjaus = {}, motivation = {}
     } else if (drive === 'c') {
       if (['engineer', 'it', 'creative'].includes(path.id)) score += 18;
       if (i1.includes('tekniikka') || i1.includes('luova')) score += 8;
-      if (i2 === 'solve' || i2 === 'create' || i2 === 'data') score += 8;
+      if (techWorkday) score += 8;
     } else if (drive === 'd') {
       if (['engineer', 'lab'].includes(path.id)) score -= 14;
       if (['service', 'build', 'health'].includes(path.id)) score += 8;
@@ -1778,7 +1804,7 @@ function scorePaths(answers, sectors, interests, tyoohjaus = {}, motivation = {}
       if (['service', 'business'].includes(path.id)) score -= 12;
       if (['lab', 'it'].includes(path.id)) score += 6;
       if (path.id === 'health') score += 2;
-    } else if (leisure === 'c' && (highHelp || i2 === 'connect')) {
+    } else if (leisure === 'c' && (highHelp || workdays.includes('connect'))) {
       if (['service', 'health', 'society'].includes(path.id)) score += 8;
     }
 
@@ -1913,17 +1939,19 @@ const MEANING_WHY = {
 function explainPathWhy(path, answers, interests, tyoohjaus, motivation = {}) {
   const bullets = [];
   const i1 = interests.i1 || [];
-  const i2 = interests.i2;
   const i3 = interests.i3 || [];
+  const workdays = workdaySignals(motivation, tyoohjaus);
 
   i1.forEach((key) => {
     const matched = sectorsFromInterest(key).some((sec) => path.sectors.includes(sec));
     if (matched && SECTOR_WHY[key]) bullets.push(SECTOR_WHY[key]);
   });
 
-  if (i2 && path.workday.includes(i2) && WORKDAY_WHY[i2]) {
-    bullets.push(WORKDAY_WHY[i2]);
-  }
+  workdays.forEach((wd) => {
+    if (path.workday.includes(wd) && WORKDAY_WHY[wd]) {
+      bullets.push(WORKDAY_WHY[wd]);
+    }
+  });
 
   (i3 || []).forEach((key) => {
     if (path.topics.includes(key) && TOPIC_WHY[key]) bullets.push(TOPIC_WHY[key]);
@@ -2294,7 +2322,6 @@ function bindFeedback(archetype, topPath) {
         motivation: { ...state.motivation },
         interest: {
           i1: state.interest.i1,
-          i2: state.interest.i2,
           i4: state.interest.i4,
         },
         t: Date.now(),
@@ -2443,7 +2470,7 @@ function render() {
       </div>
       <div class="nav-row">
         ${state.lxpIndex > 0 ? '<button class="btn btn-ghost" id="backBtn">← Takaisin</button>' : '<span></span>'}
-        <button class="btn btn-primary" id="nextBtn">${state.lxpIndex < LXP_QUESTIONS.length - 1 ? 'Seuraava →' : 'Työohjaus →'}</button>
+        <button class="btn btn-primary" id="nextBtn" ${state.lxp[q.id] ? '' : 'disabled style="opacity:0.5"'}>Seuraava →</button>
       </div>`;
 
     document.querySelectorAll('.opt').forEach((btn) => {
@@ -2460,8 +2487,8 @@ function render() {
         state.lxpIndex++;
       } else {
         state.screen = 'tyoohjaus';
+        state.tyoohjausIndex = 0;
       }
-      track('lxp_complete');
       render();
     };
     announceProgress(step, totalSteps(), pct);
@@ -2470,47 +2497,52 @@ function render() {
   }
 
   if (state.screen === 'tyoohjaus') {
+    const q = TYOOHJAUS_QUESTIONS[state.tyoohjausIndex];
+    const headingId = `q-${q.id}`;
+    const valid = tyoohjausStepValid(state.tyoohjausIndex);
+    const isLast = state.tyoohjausIndex >= TYOOHJAUS_QUESTIONS.length - 1;
     app.innerHTML = `
       ${progressHtml}
       <div class="card">
-        <div class="phase-tag">Työohjaus · ei LxP-hakua</div>
-        <p class="hint" style="margin-bottom:16px">${state.plainLanguage ? 'Nämä kysymykset vaikuttavat vain uraohjaukseen.' : 'Nämä kysymykset vaikuttavat vain uraohjaukseen — eivät työnantajan LxP-hakuun.'}</p>
-        ${TYOOHJAUS_QUESTIONS.map((q) => {
-          const headingId = `q-${q.id}`;
-          return `
-          <div class="tyoohjaus-block">
-            <h2 class="tyoohjaus-q" id="${headingId}">${qText(q)}</h2>
-            <p class="hint">${qHint(q)}</p>
-            <div class="options" data-qid="${q.id}" role="radiogroup" aria-labelledby="${headingId}">
-              ${q.options.map((o) => {
-                const selected = state.tyoohjaus[q.id] === o.key;
-                return `<button type="button" class="opt${selected ? ' selected' : ''}" data-key="${o.key}" role="radio" aria-checked="${selected ? 'true' : 'false'}">${optLabel(o)}</button>`;
-              }).join('')}
-            </div>
-          </div>`;
-        }).join('')}
+        <div class="phase-tag">Työohjaus ${state.tyoohjausIndex + 1}/${TYOOHJAUS_QUESTIONS.length} · ei LxP-hakua</div>
+        <h2 id="${headingId}">${qText(q)}</h2>
+        <p class="hint">${qHint(q)}</p>
+        <div class="options" id="opts" data-qid="${q.id}" role="radiogroup" aria-labelledby="${headingId}">
+          ${q.options.map((o) => {
+            const selected = state.tyoohjaus[q.id] === o.key;
+            return `<button type="button" class="opt${selected ? ' selected' : ''}" data-key="${o.key}" role="radio" aria-checked="${selected ? 'true' : 'false'}">${optLabel(o)}</button>`;
+          }).join('')}
+        </div>
       </div>
       <div class="nav-row">
         <button class="btn btn-ghost" id="backBtn">← Takaisin</button>
-        <button class="btn btn-primary" id="nextBtn" ${tyoohjausComplete() ? '' : 'disabled style="opacity:0.5"'}>Motivaatio →</button>
+        <button class="btn btn-primary" id="nextBtn" ${valid ? '' : 'disabled style="opacity:0.5"'}>Seuraava →</button>
       </div>`;
 
-    document.querySelectorAll('.tyoohjaus-block .opt').forEach((btn) => {
+    document.querySelectorAll('.opt').forEach((btn) => {
       btn.onclick = () => {
-        const qid = btn.parentElement.dataset.qid;
-        state.tyoohjaus[qid] = btn.dataset.key;
+        state.tyoohjaus[q.id] = btn.dataset.key;
         render();
       };
     });
     document.getElementById('backBtn').onclick = () => {
-      state.screen = 'lxp';
-      state.lxpIndex = LXP_QUESTIONS.length - 1;
+      if (state.tyoohjausIndex > 0) {
+        state.tyoohjausIndex--;
+      } else {
+        state.screen = 'lxp';
+        state.lxpIndex = LXP_QUESTIONS.length - 1;
+      }
       render();
     };
     document.getElementById('nextBtn').onclick = () => {
-      if (!tyoohjausComplete()) return;
-      track('tyoohjaus_complete', { ...state.tyoohjaus });
-      state.screen = 'motivation';
+      if (!tyoohjausStepValid(state.tyoohjausIndex)) return;
+      if (isLast) {
+        track('tyoohjaus_complete', { ...state.tyoohjaus });
+        state.screen = 'motivation';
+        state.motivationIndex = 0;
+      } else {
+        state.tyoohjausIndex++;
+      }
       render();
     };
     announceProgress(step, totalSteps(), pct);
@@ -2519,47 +2551,38 @@ function render() {
   }
 
   if (state.screen === 'motivation') {
-    const meaningQ = MOTIVATION_Q.find((q) => q.id === 'meaning');
-    const recognitionQ = MOTIVATION_Q.find((q) => q.id === 'recognition');
+    const q = MOTIVATION_Q[state.motivationIndex];
+    const headingId = `q-${q.id}`;
+    const valid = motivationStepValid(state.motivationIndex);
+    const isLast = state.motivationIndex >= MOTIVATION_Q.length - 1;
+    const isMulti = q.type === 'multi';
     app.innerHTML = `
       ${progressHtml}
       <div class="card">
-        <div class="phase-tag">Motivaatio · ei LxP-hakua</div>
-        <p class="hint" style="margin-bottom:16px">${state.plainLanguage ? 'Nämä kysymykset auttavat arvioimaan merkitystä ja pitkän aikavälin motivaatiota.' : 'Nämä kysymykset auttavat arvioimaan, mikä tekee työstä merkityksellistä ja mikä pitää sinut motivoituneena pitkällä aikavälillä.'}</p>
-        <div class="tyoohjaus-block">
-          <h2 class="tyoohjaus-q" id="q-meaning">${qText(meaningQ)}</h2>
-          <p class="hint">${qHint(meaningQ)}</p>
-          <div class="options interest-sector-grid" data-qid="meaning" role="group" aria-labelledby="q-meaning">
-            ${meaningQ.options.map((o) => {
-              const selected = (state.motivation.meaning || []).includes(o.key);
-              return `<button type="button" class="opt${selected ? ' multi selected' : ''}" data-key="${o.key}" data-qid="meaning" role="checkbox" aria-checked="${selected ? 'true' : 'false'}">${optLabel(o)}</button>`;
-            }).join('')}
-          </div>
-        </div>
-        <div class="tyoohjaus-block">
-          <h2 class="tyoohjaus-q" id="q-recognition">${qText(recognitionQ)}</h2>
-          <p class="hint">${qHint(recognitionQ)}</p>
-          <div class="options" data-qid="recognition" role="radiogroup" aria-labelledby="q-recognition">
-            ${recognitionQ.options.map((o) => {
-              const selected = state.motivation.recognition === o.key;
-              return `<button type="button" class="opt${selected ? ' selected' : ''}" data-key="${o.key}" data-qid="recognition" role="radio" aria-checked="${selected ? 'true' : 'false'}">${optLabel(o)}</button>`;
-            }).join('')}
-          </div>
+        <div class="phase-tag">Motivaatio ${state.motivationIndex + 1}/${MOTIVATION_Q.length} · ei LxP-hakua</div>
+        <h2 id="${headingId}">${qText(q)}</h2>
+        <p class="hint">${qHint(q)}</p>
+        <div class="options${q.grid ? ' interest-sector-grid' : ''}" id="opts" data-qid="${q.id}" role="${isMulti ? 'group' : 'radiogroup'}" aria-labelledby="${headingId}">
+          ${q.options.map((o) => {
+            const selected = isMulti
+              ? (state.motivation.meaning || []).includes(o.key)
+              : state.motivation.recognition === o.key;
+            return `<button type="button" class="opt${selected ? (isMulti ? ' multi selected' : ' selected') : ''}" data-key="${o.key}" role="${isMulti ? 'checkbox' : 'radio'}" aria-checked="${selected ? 'true' : 'false'}">${optLabel(o)}</button>`;
+          }).join('')}
         </div>
       </div>
       <div class="nav-row">
         <button class="btn btn-ghost" id="backBtn">← Takaisin</button>
-        <button class="btn btn-primary" id="nextBtn" ${motivationComplete() ? '' : 'disabled style="opacity:0.5"'}>Lempiaineet →</button>
+        <button class="btn btn-primary" id="nextBtn" ${valid ? '' : 'disabled style="opacity:0.5"'}>Seuraava →</button>
       </div>`;
 
-    document.querySelectorAll('.tyoohjaus-block .opt').forEach((btn) => {
+    document.querySelectorAll('.opt').forEach((btn) => {
       btn.onclick = () => {
         const key = btn.dataset.key;
-        const qid = btn.dataset.qid;
-        if (qid === 'meaning') {
+        if (q.id === 'meaning') {
           let arr = state.motivation.meaning || [];
           if (arr.includes(key)) arr = arr.filter((k) => k !== key);
-          else if (arr.length < meaningQ.max) arr = [...arr, key];
+          else if (arr.length < q.max) arr = [...arr, key];
           state.motivation.meaning = arr;
         } else {
           state.motivation.recognition = key;
@@ -2568,13 +2591,22 @@ function render() {
       };
     });
     document.getElementById('backBtn').onclick = () => {
-      state.screen = 'tyoohjaus';
+      if (state.motivationIndex > 0) {
+        state.motivationIndex--;
+      } else {
+        state.screen = 'tyoohjaus';
+        state.tyoohjausIndex = TYOOHJAUS_QUESTIONS.length - 1;
+      }
       render();
     };
     document.getElementById('nextBtn').onclick = () => {
-      if (!motivationComplete()) return;
-      track('motivation_complete', { ...state.motivation });
-      state.screen = 'subjects';
+      if (!motivationStepValid(state.motivationIndex)) return;
+      if (isLast) {
+        track('motivation_complete', { ...state.motivation });
+        state.screen = 'subjects';
+      } else {
+        state.motivationIndex++;
+      }
       render();
     };
     announceProgress(step, totalSteps(), pct);
@@ -2598,7 +2630,7 @@ function render() {
       </div>
       <div class="nav-row">
         <button class="btn btn-ghost" id="backBtn">← Takaisin</button>
-        <button class="btn btn-primary" id="nextBtn" ${state.subjects.size >= 1 ? '' : 'disabled style="opacity:0.5"'}>Kiinnostus →</button>
+        <button class="btn btn-primary" id="nextBtn" ${state.subjects.size >= 1 ? '' : 'disabled style="opacity:0.5"'}>Seuraava →</button>
       </div>`;
 
     document.querySelectorAll('#subGrid .opt').forEach((btn) => {
@@ -2611,13 +2643,13 @@ function render() {
     });
     document.getElementById('backBtn').onclick = () => {
       state.screen = 'motivation';
+      state.motivationIndex = MOTIVATION_Q.length - 1;
       render();
     };
     document.getElementById('nextBtn').onclick = () => {
       if (state.subjects.size < 1) return;
       track('subjects_complete', { count: state.subjects.size });
       state.screen = 'interest';
-      state.interestIndex = 0;
       render();
     };
     announceProgress(step, totalSteps(), pct);
@@ -2626,84 +2658,89 @@ function render() {
   }
 
   if (state.screen === 'interest') {
-    const isCombo = state.interestIndex === 1;
-    const q = INTEREST_Q[state.interestIndex];
-    const selected = state.interest[q.id] || (q.multi > 1 ? [] : null);
+    const q = INTEREST_Q[0];
     const headingId = `q-${q.id}`;
-    const isSelected = (key, qid) => {
-      const sel = qid ? state.interest[qid] : selected;
-      if (Array.isArray(sel)) return sel.includes(key);
-      return sel === key;
-    };
-
-    const comboHtml = isCombo ? `
-        <div class="tyoohjaus-block" style="margin-top:20px">
-          <h2 class="tyoohjaus-q" id="q-i4">${qText(EXPLORE_Q)}</h2>
-          <p class="hint">${qHint(EXPLORE_Q)}</p>
-          <div class="options" data-qid="i4" role="radiogroup" aria-labelledby="q-i4">
-            ${EXPLORE_Q.options.map((o) => {
-              const selectedI4 = state.interest.i4 === o.key;
-              return `<button type="button" class="opt${selectedI4 ? ' selected' : ''}" data-key="${o.key}" data-qid="i4" role="radio" aria-checked="${selectedI4 ? 'true' : 'false'}">${optLabel(o)}</button>`;
-            }).join('')}
-          </div>
-        </div>` : '';
-
+    const valid = interestStepValid();
     app.innerHTML = `
       ${progressHtml}
       <div class="card">
-        <div class="phase-tag">Kiinnostus ${state.interestIndex + 1}/${INTEREST_Q.length}</div>
+        <div class="phase-tag">Kiinnostus · ${currentStep()}/${totalSteps()}</div>
         <h2 id="${headingId}">${qText(q)}</h2>
         <p class="hint">${qHint(q)}</p>
-        <div class="options${q.grid ? ' interest-sector-grid' : ''}" id="opts" data-qid="${q.id}" role="${q.multi > 1 ? 'group' : 'radiogroup'}" aria-labelledby="${headingId}">
+        <div class="options interest-sector-grid" id="opts" data-qid="${q.id}" role="group" aria-labelledby="${headingId}">
           ${q.options.map((o) => {
-            const sel = isSelected(o.key);
-            const role = q.multi > 1 ? 'checkbox' : 'radio';
-            return `<button type="button" class="opt${sel ? (q.multi > 1 ? ' multi selected' : ' selected') : ''}" data-key="${o.key}" role="${role}" aria-checked="${sel ? 'true' : 'false'}">${optLabel(o)}</button>`;
+            const sel = (state.interest.i1 || []).includes(o.key);
+            return `<button type="button" class="opt${sel ? ' multi selected' : ''}" data-key="${o.key}" role="checkbox" aria-checked="${sel ? 'true' : 'false'}">${optLabel(o)}</button>`;
           }).join('')}
         </div>
-        ${comboHtml}
       </div>
       <div class="nav-row">
         <button class="btn btn-ghost" id="backBtn">← Takaisin</button>
-        <button class="btn btn-primary" id="nextBtn">${state.interestIndex < INTEREST_Q.length - 1 ? 'Seuraava →' : 'Näytä tulokseni ✨'}</button>
+        <button class="btn btn-primary" id="nextBtn" ${valid ? '' : 'disabled style="opacity:0.5"'}>Seuraava →</button>
       </div>`;
 
     document.querySelectorAll('.opt').forEach((btn) => {
       btn.onclick = () => {
         const key = btn.dataset.key;
-        const qid = btn.dataset.qid || btn.parentElement.dataset.qid || q.id;
-        const target = INTEREST_Q.find((item) => item.id === qid) || (qid === 'i4' ? { id: 'i4', multi: 1 } : q);
-        if (target.multi > 1) {
-          let arr = state.interest[qid] || [];
-          if (arr.includes(key)) arr = arr.filter((k) => k !== key);
-          else if (arr.length < target.multi) arr = [...arr, key];
-          state.interest[qid] = arr;
-        } else {
-          state.interest[qid] = key;
-        }
+        let arr = state.interest.i1 || [];
+        if (arr.includes(key)) arr = arr.filter((k) => k !== key);
+        else if (arr.length < q.multi) arr = [...arr, key];
+        state.interest.i1 = arr;
         render();
       };
     });
 
-    const valid = interestStepValid(state.interestIndex);
-    const nextBtn = document.getElementById('nextBtn');
-    if (!valid) nextBtn.setAttribute('disabled', '');
-    else nextBtn.removeAttribute('disabled');
-
     document.getElementById('backBtn').onclick = () => {
-      if (state.interestIndex > 0) state.interestIndex--;
-      else state.screen = 'subjects';
+      state.screen = 'subjects';
       render();
     };
-    nextBtn.onclick = () => {
-      if (!valid) return;
-      if (state.interestIndex < INTEREST_Q.length - 1) {
-        state.interestIndex++;
-      } else {
-        track('interest_complete', { i1: state.interest.i1, i2: state.interest.i2, i4: state.interest.i4 });
-        state.screen = 'result';
-        spawnConfetti();
-      }
+    document.getElementById('nextBtn').onclick = () => {
+      if (!interestStepValid()) return;
+      state.screen = 'explore';
+      render();
+    };
+    announceProgress(step, totalSteps(), pct);
+    focusMainHeading();
+    return;
+  }
+
+  if (state.screen === 'explore') {
+    const headingId = 'q-i4';
+    const valid = exploreStepValid();
+    app.innerHTML = `
+      ${progressHtml}
+      <div class="card">
+        <div class="phase-tag">Seuraava askel · ${currentStep()}/${totalSteps()}</div>
+        <h2 id="${headingId}">${qText(EXPLORE_Q)}</h2>
+        <p class="hint">${qHint(EXPLORE_Q)}</p>
+        <div class="options" id="opts" data-qid="i4" role="radiogroup" aria-labelledby="${headingId}">
+          ${EXPLORE_Q.options.map((o) => {
+            const selected = state.interest.i4 === o.key;
+            return `<button type="button" class="opt${selected ? ' selected' : ''}" data-key="${o.key}" role="radio" aria-checked="${selected ? 'true' : 'false'}">${optLabel(o)}</button>`;
+          }).join('')}
+        </div>
+      </div>
+      <div class="nav-row">
+        <button class="btn btn-ghost" id="backBtn">← Takaisin</button>
+        <button class="btn btn-primary" id="nextBtn" ${valid ? '' : 'disabled style="opacity:0.5"'}>Näytä tulokseni ✨</button>
+      </div>`;
+
+    document.querySelectorAll('.opt').forEach((btn) => {
+      btn.onclick = () => {
+        state.interest.i4 = btn.dataset.key;
+        render();
+      };
+    });
+
+    document.getElementById('backBtn').onclick = () => {
+      state.screen = 'interest';
+      render();
+    };
+    document.getElementById('nextBtn').onclick = () => {
+      if (!exploreStepValid()) return;
+      track('interest_complete', { i1: state.interest.i1, i4: state.interest.i4 });
+      state.screen = 'result';
+      spawnConfetti();
       render();
     };
     announceProgress(step, totalSteps(), pct);
@@ -2838,12 +2875,13 @@ function render() {
       Object.assign(state, {
         screen: 'intro',
         lxpIndex: 0,
+        tyoohjausIndex: 0,
+        motivationIndex: 0,
         lxp: {},
         tyoohjaus: {},
         motivation: { meaning: [], recognition: '' },
         subjects: new Set(),
         interest: {},
-        interestIndex: 0,
       });
       render();
     };
