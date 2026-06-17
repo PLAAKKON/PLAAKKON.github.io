@@ -2957,7 +2957,7 @@ function render() {
       <section class="hero">
         ${savedBanner}
         <div class="pill">Ilmainen · n. 10–12 min</div>
-        <svg class="hero-art" viewBox="0 0 320 180" aria-hidden="true" focusable="false">
+        <svg class="hero-art hero-art--mobile" viewBox="0 0 320 180" aria-hidden="true" focusable="false">
           <path class="path-cyan" d="M160 155 Q145 110 95 55" stroke-width="2.5"/>
           <path class="path-purple" d="M160 155 Q160 95 160 40" stroke-width="2.5"/>
           <path class="path-magenta" d="M160 155 Q175 110 225 55" stroke-width="2.5"/>
@@ -2968,6 +2968,24 @@ function render() {
           <text x="160" y="45" text-anchor="middle" font-size="18">🧭</text>
           <circle class="node path-magenta" cx="225" cy="55" r="22"/>
           <text x="225" y="60" text-anchor="middle" font-size="18">🚩</text>
+        </svg>
+        <svg class="hero-art hero-art--desktop" viewBox="0 0 480 280" aria-hidden="true" focusable="false">
+          <path class="path-cyan" d="M240 228 Q210 170 120 72" stroke-width="3"/>
+          <path class="path-purple" d="M240 228 Q240 140 240 48" stroke-width="3"/>
+          <path class="path-magenta" d="M240 228 Q270 170 360 72" stroke-width="3"/>
+          <path class="path-cyan" d="M240 228 Q188 188 72 148" stroke-width="2.5" opacity="0.75"/>
+          <path class="path-magenta" d="M240 228 Q292 188 408 148" stroke-width="2.5" opacity="0.75"/>
+          <circle class="origin" cx="240" cy="228" r="7"/>
+          <circle class="node path-cyan" cx="120" cy="72" r="28"/>
+          <text x="120" y="79" text-anchor="middle" font-size="22">💼</text>
+          <circle class="node path-purple" cx="240" cy="48" r="28"/>
+          <text x="240" y="55" text-anchor="middle" font-size="22">🧭</text>
+          <circle class="node path-magenta" cx="360" cy="72" r="28"/>
+          <text x="360" y="79" text-anchor="middle" font-size="22">🚩</text>
+          <circle class="node path-cyan" cx="72" cy="148" r="22"/>
+          <text x="72" y="154" text-anchor="middle" font-size="17">📚</text>
+          <circle class="node path-magenta" cx="408" cy="148" r="22"/>
+          <text x="408" y="154" text-anchor="middle" font-size="17">🤝</text>
         </svg>
         <h1 style="margin-top:0">${txt('introTitle1')}<br><span>${txt('introTitle2')}</span></h1>
         <p>${txt('introBody')}</p>
@@ -3333,11 +3351,25 @@ function render() {
     app.innerHTML = `
       <p class="trust-banner">${txt('trustBanner')}</p>
 
+      <div class="result-visual">
+      <svg class="result-path-art" viewBox="0 0 280 320" aria-hidden="true" focusable="false">
+        <path class="path-cyan" d="M140 290 Q110 220 56 120" stroke-width="2.5"/>
+        <path class="path-purple" d="M140 290 Q140 200 140 70" stroke-width="2.5"/>
+        <path class="path-magenta" d="M140 290 Q170 220 224 120" stroke-width="2.5"/>
+        <circle class="origin" cx="140" cy="290" r="6"/>
+        <circle class="node path-cyan" cx="56" cy="120" r="20"/>
+        <text x="56" y="126" text-anchor="middle" font-size="16">💼</text>
+        <circle class="node path-purple" cx="140" cy="70" r="20"/>
+        <text x="140" y="76" text-anchor="middle" font-size="16">🧭</text>
+        <circle class="node path-magenta" cx="224" cy="120" r="20"/>
+        <text x="224" y="126" text-anchor="middle" font-size="16">🚩</text>
+      </svg>
       <div class="result-hero">
         <div class="result-emoji" aria-hidden="true">${archetype.emoji}</div>
         <div class="result-type">${txt('resultType')}</div>
         <h2 class="result-title" tabindex="-1">${archetype.title}</h2>
         <p class="hero-sentence">${heroSentence}</p>
+      </div>
       </div>
 
       ${aspirationAlert}
@@ -3363,9 +3395,11 @@ function render() {
       <div class="section-title">${txt('pathsTitle')}</div>
       <p class="section-lead">${txt('pathsLead')}</p>
       ${higherEdNote}
+      <div class="path-list">
       ${topPaths.map((p, i) => renderPathCard(p, i, answers, state.interest, state.tyoohjaus, state.motivation, topScore)).join('')}
+      </div>
       ${extraPaths.length ? `
-      <div id="extraPaths" class="extra-paths" hidden>
+      <div id="extraPaths" class="extra-paths path-list" hidden>
         ${extraPaths.map((p, i) => renderPathCard(p, i + 3, answers, state.interest, state.tyoohjaus, state.motivation, topScore)).join('')}
       </div>
       <button type="button" class="btn btn-ghost" id="showMorePathsBtn">Näytä ${extraPaths.length} muuta polkua ▾</button>` : ''}
