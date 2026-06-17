@@ -1339,6 +1339,8 @@ const FIREBASE_CONFIG = {
   authDomain: 'urapolku-7781a.firebaseapp.com',
   projectId: 'urapolku-7781a',
 };
+/** Sama LxP-projektin Cloud Function kuin analysoi — HTTP, ei callable */
+const ADVISOR_API_URL = 'https://europe-west1-urapolku-7780a.cloudfunctions.net/ohjausmoottoriAdvisor';
 const FEEDBACK_COLLECTION = 'ohjausmoottori_feedback';
 
 const COPY = {
@@ -1569,11 +1571,18 @@ function track(event, data = {}) {
   } catch (_) { /* ignore */ }
 }
 
+function getDefaultFirebaseApp() {
+  try {
+    return firebase.app();
+  } catch (_) {
+    return firebase.initializeApp(FIREBASE_CONFIG);
+  }
+}
+
 function getFeedbackFirestore() {
   if (typeof firebase === 'undefined') return null;
   try {
-    const app = firebase.apps.length ? firebase.app() : firebase.initializeApp(FIREBASE_CONFIG);
-    return app.firestore();
+    return getDefaultFirebaseApp().firestore();
   } catch (_) {
     return null;
   }
@@ -2525,14 +2534,25 @@ function advisorWelcomeMessage(archetype, topPaths) {
   return `Hei! Olen AI-opinto-ohjaaja — tunnen testituloksesi. Tekijätyyppisi on ${archetype.title} ${archetype.emoji}, ja ehdotetut polut ovat: ${paths}. Haluatko pohtia jotain polkua, opintoja tai seuraavaa askelta?`;
 }
 
-function getAdvisorCallable() {
-  if (typeof firebase === 'undefined' || !firebase.functions) return null;
+async function callAdvisorApi(messages, context) {
+  const res = await fetch(ADVISOR_API_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ messages, context }),
+  });
+  let data = {};
   try {
-    const app = firebase.apps.length ? firebase.app() : firebase.initializeApp(FIREBASE_CONFIG);
-    return app.functions('europe-west1').httpsCallable('ohjausmoottoriAdvisor');
+    data = await res.json();
   } catch (_) {
-    return null;
+    /* ignore */
   }
+  if (!res.ok) {
+    throw new Error(data.error || `HTTP ${res.status}`);
+  }
+  if (!data.reply) {
+    throw new Error('empty');
+  }
+  return data.reply;
 }
 
 function renderAdvisorMessages(messages) {
@@ -2611,17 +2631,10 @@ function bindAdvisorChat(archetype, topPaths, answers, tyoohjaus, motivation, in
   });
 
   const context = buildAdvisorContext(archetype, topPaths, answers, tyoohjaus, motivation, interests);
-  const callable = getAdvisorCallable();
 
   async function sendUserMessage(text) {
     const trimmed = text.trim();
     if (!trimmed || state.advisorChat.loading) return;
-
-    if (!callable) {
-      state.advisorChat.error = txt('advisorOffline');
-      render();
-      return;
-    }
 
     const messages = [...state.advisorChat.messages, { role: 'user', content: trimmed }];
     state.advisorChat.messages = messages;
@@ -2630,9 +2643,7 @@ function bindAdvisorChat(archetype, topPaths, answers, tyoohjaus, motivation, in
     render();
 
     try {
-      const result = await callable({ messages, context });
-      const reply = result?.data?.reply;
-      if (!reply) throw new Error('empty');
+      const reply = await callAdvisorApi(messages, context);
       state.advisorChat.messages = [...messages, { role: 'assistant', content: reply }];
       track('advisor_message', { archetype: archetype.id, len: trimmed.length });
     } catch (err) {

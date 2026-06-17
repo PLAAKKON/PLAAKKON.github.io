@@ -1,5 +1,6 @@
 {
   "projects": {
-    "default": "urapolku-7781a"
+    "default": "urapolku-7781a",
+    "lxp": "urapolku-7780a"
   }
 }

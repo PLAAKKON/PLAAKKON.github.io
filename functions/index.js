@@ -1,17 +1,29 @@
 /**
  * Ohjausmoottori AI-opinto-ohjaaja
  *
+ * Käyttää samaa OpenAI-avainta kuin LxP-profilointi:
+ * Firestore asetukset/ai-avain (kenttä openai) projektissa urapolku-7780a.
+ *
  * Deploy:
- *   firebase functions:secrets:set GEMINI_API_KEY
- *   firebase deploy --only functions:ohjausmoottoriAdvisor --project urapolku-7781a
+ *   cd functions && npm install
+ *   firebase deploy --only functions:ohjausmoottoriAdvisor --project urapolku-7780a
  */
-const { onCall, HttpsError } = require('firebase-functions/v2/https');
-const { defineSecret } = require('firebase-functions/params');
+const admin = require('firebase-admin');
+const { onRequest } = require('firebase-functions/v2/https');
 const { setGlobalOptions } = require('firebase-functions/v2');
 
 setGlobalOptions({ region: 'europe-west1', maxInstances: 20 });
 
-const geminiApiKey = defineSecret('GEMINI_API_KEY');
+if (!admin.apps.length) {
+  admin.initializeApp();
+}
+
+const OPENAI_MODEL = 'gpt-3.5-turbo';
+const OPENAI_URL = 'https://api.openai.com/v1/chat/completions';
+
+let cachedOpenAiKey = null;
+let cachedOpenAiKeyAt = 0;
+const KEY_CACHE_MS = 5 * 60 * 1000;
 
 const SYSTEM_PROMPT_FI = `Olet Yoron ohjausmoottorin AI-opinto-ohjaaja. Autat nuoria (noin 14–25-vuotiaita) pohtimaan ura- ja opintopolkuja testitulosten pohjalta.
 
@@ -53,60 +65,95 @@ function sanitizeMessages(messages) {
     .slice(-24);
 }
 
-exports.ohjausmoottoriAdvisor = onCall(
-  { secrets: [geminiApiKey], cors: true, maxInstances: 15, timeoutSeconds: 60 },
-  async (request) => {
-    const apiKey = geminiApiKey.value();
-    if (!apiKey) {
-      throw new HttpsError('failed-precondition', 'AI-opinto-ohjaaja ei ole vielä käytössä.');
+async function getOpenAiKey() {
+  const now = Date.now();
+  if (cachedOpenAiKey && now - cachedOpenAiKeyAt < KEY_CACHE_MS) {
+    return cachedOpenAiKey;
+  }
+
+  const doc = await admin.firestore().collection('asetukset').doc('ai-avain').get();
+  const key = doc.data()?.openai;
+  if (!key || typeof key !== 'string') {
+    const err = new Error('AI-opinto-ohjaaja ei ole vielä käytössä.');
+    err.status = 503;
+    throw err;
+  }
+
+  cachedOpenAiKey = key;
+  cachedOpenAiKeyAt = now;
+  return key;
+}
+
+async function callOpenAi(apiKey, context, safeMessages) {
+  const body = {
+    model: OPENAI_MODEL,
+    messages: [
+      { role: 'system', content: buildSystemPrompt(context || {}) },
+      ...safeMessages.map((m) => ({ role: m.role, content: m.content })),
+    ],
+    max_tokens: 900,
+    temperature: 0.65,
+  };
+
+  const res = await fetch(OPENAI_URL, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${apiKey}`,
+    },
+    body: JSON.stringify(body),
+  });
+
+  if (!res.ok) {
+    const errText = await res.text();
+    console.error('OpenAI error', res.status, errText.slice(0, 500));
+    const err = new Error('AI-vastaus epäonnistui. Yritä hetken päästä uudelleen.');
+    err.status = 502;
+    throw err;
+  }
+
+  const data = await res.json();
+  const reply = data?.choices?.[0]?.message?.content?.trim();
+  if (!reply) {
+    const err = new Error('AI ei palauttanut vastausta. Kokeile uudelleen.');
+    err.status = 502;
+    throw err;
+  }
+
+  return reply;
+}
+
+async function runAdvisor({ messages, context }) {
+  const safeMessages = sanitizeMessages(messages);
+  if (!safeMessages.length) {
+    const err = new Error('Viestejä ei ole.');
+    err.status = 400;
+    throw err;
+  }
+
+  const apiKey = await getOpenAiKey();
+  return callOpenAi(apiKey, context, safeMessages);
+}
+
+/** HTTP API — sama malli kuin LxP:n analysoi (toimii yoro.fi:stä ilman callable-SDK:ta) */
+exports.ohjausmoottoriAdvisor = onRequest(
+  { cors: true, maxInstances: 15, timeoutSeconds: 60 },
+  async (req, res) => {
+    if (req.method === 'OPTIONS') {
+      res.status(204).send('');
+      return;
+    }
+    if (req.method !== 'POST') {
+      res.status(405).json({ error: 'Vain POST-pyynnöt sallittu' });
+      return;
     }
 
-    const { messages, context } = request.data || {};
-    const safeMessages = sanitizeMessages(messages);
-    if (!safeMessages.length) {
-      throw new HttpsError('invalid-argument', 'Viestejä ei ole.');
+    try {
+      const reply = await runAdvisor(req.body || {});
+      res.json({ reply });
+    } catch (err) {
+      console.error('ohjausmoottoriAdvisor error', err?.message || err);
+      res.status(err.status || 500).json({ error: err.message || 'AI-vastaus epäonnistui' });
     }
-
-    const contents = safeMessages.map((m) => ({
-      role: m.role === 'assistant' ? 'model' : 'user',
-      parts: [{ text: m.content }],
-    }));
-
-    const body = {
-      system_instruction: { parts: [{ text: buildSystemPrompt(context || {}) }] },
-      contents,
-      generationConfig: {
-        temperature: 0.65,
-        maxOutputTokens: 900,
-        topP: 0.9,
-      },
-      safetySettings: [
-        { category: 'HARM_CATEGORY_HARASSMENT', threshold: 'BLOCK_MEDIUM_AND_ABOVE' },
-        { category: 'HARM_CATEGORY_HATE_SPEECH', threshold: 'BLOCK_MEDIUM_AND_ABOVE' },
-        { category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT', threshold: 'BLOCK_MEDIUM_AND_ABOVE' },
-        { category: 'HARM_CATEGORY_DANGEROUS_CONTENT', threshold: 'BLOCK_MEDIUM_AND_ABOVE' },
-      ],
-    };
-
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${encodeURIComponent(apiKey)}`;
-    const res = await fetch(url, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body),
-    });
-
-    if (!res.ok) {
-      const errText = await res.text();
-      console.error('Gemini error', res.status, errText.slice(0, 500));
-      throw new HttpsError('internal', 'AI-vastaus epäonnistui. Yritä hetken päästä uudelleen.');
-    }
-
-    const data = await res.json();
-    const reply = data?.candidates?.[0]?.content?.parts?.map((p) => p.text || '').join('').trim();
-    if (!reply) {
-      throw new HttpsError('internal', 'AI ei palauttanut vastausta. Kokeile uudelleen.');
-    }
-
-    return { reply };
   },
 );
