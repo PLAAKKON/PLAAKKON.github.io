@@ -167,7 +167,7 @@ body {
 }
 
 .logo-o {
-  background: linear-gradient(135deg, var(--accent) 0%, var(--accent2) 100%);
+  background: linear-gradient(135deg, #22d3ee 0%, #a78bfa 100%);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;

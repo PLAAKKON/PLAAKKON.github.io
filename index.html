@@ -3,8 +3,8 @@
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <title>Yoro Oy — LxP-pohjainen työmarkkinaohjaus</title>
-  <meta name="description" content="LxP mittaa työympäristön sopivuuden — mitä muut järjestelmät jättävät pois. Ohjausmoottori yhdistää profiilin, TE24-polut ja Yoro Valmentajan, joka tuntee nuoren testitulokset."/>
+  <title>Yoro — työmarkkinaohjaus LxP-profiililla</title>
+  <meta name="description" content="LxP mittaa työympäristön sopivuutta — asiaa, jota CV:ssä ei näy. Ohjausmoottorissa nuori saa työtyyli-tyypin, polkuja ja Yoro Valmentajan keskustelun. Ilmainen beta."/>
   <meta name="theme-color" content="#0d9488">
   <link rel="apple-touch-icon" href="/logo_transparent.png">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -66,7 +66,16 @@
       display:flex; align-items:center; gap:12px;
       font-weight: 700; letter-spacing: -0.01em;
     }
-    .brand img{height:36px; width:auto}
+    .brand img.brand-fish{height:36px; width:auto; flex-shrink:0}
+    .logo-wordmark{display:flex; flex-direction:column; line-height:1.05; gap:0}
+    .logo-yoro{
+      font-size:1.35rem; font-weight:800; letter-spacing:-0.04em;
+      color:var(--text);
+    }
+    .logo-o{
+      background:linear-gradient(135deg, #22d3ee 0%, #a78bfa 100%);
+      -webkit-background-clip:text; background-clip:text; color:transparent;
+    }
     .brand span{font-size: 1.05rem; color: var(--text)}
 
     .lang{
@@ -289,9 +298,11 @@
   <header class="topbar">
     <div class="wrap inner">
       <div class="brand">
-        <a href="/" style="display:flex;align-items:center;gap:12px;color:inherit;text-decoration:none">
-          <img src="logo_transparent.png" alt="Yoro Oy"/>
-          <span>Yoro Oy</span>
+        <a href="/" style="display:flex;align-items:center;gap:12px;color:inherit;text-decoration:none" aria-label="Yoro — etusivu">
+          <img src="logo_transparent.png" alt="" class="brand-fish" aria-hidden="true"/>
+          <span class="logo-wordmark" aria-hidden="true">
+            <span class="logo-yoro">Yor<span class="logo-o">o</span></span>
+          </span>
         </a>
       </div>
       <nav class="topnav lang-content active" data-lang="fi" aria-label="Sivusto">
@@ -320,9 +331,9 @@
       <div>
         <!-- FI hero -->
         <div class="lang-content active" data-lang="fi">
-          <span class="badge">Työmarkkinaohjaus</span>
-          <h1>Maailman tehokkain ohjaus alkaa työympäristön sopivuudesta</h1>
-          <p class="sub">LxP mittaa sen, mitä muut järjestelmät jättävät pois — miten ihminen työskentelee ja missä ympäristössä pysyy hyvänä. Ohjausmoottorissa nuori saa polkuja, jaettavan tuloksen ja <strong>Yoro Valmentajan</strong>, joka tuntee testivastaukset ja auttaa pohtimaan seuraavia askelia.</p>
+          <span class="badge">LxP &amp; ohjaus</span>
+          <h1>Työmarkkinaohjaus, joka huomioi työtyylin</h1>
+          <p class="sub">LxP kuvaa, millaisessa työympäristössä ihminen pärjää paremmin — asiaa, jota CV:ssä ja perinteisissä hakujärjestelmissä harvoin mitataan. <strong>Ohjausmoottorissa</strong> nuori tekee noin 10–12 minuutin testin, saa työtyyli-tyypin ja polkuja kokeiltavaksi sekä voi jutella <strong>Yoro Valmentajan</strong> kanssa tuloksista. Ilmainen beta, ei rekisteröitymistä.</p>
           <div class="cta">
             <a class="btn primary" href="https://yoro.fi/ohjausmoottori/">Kokeile työtyyli-testiä</a>
             <a class="btn primary" href="https://yoro.fi/profiilitesti/">Aloita profiilitestillä</a>
@@ -333,9 +344,9 @@
         </div>
         <!-- EN hero -->
         <div class="lang-content" data-lang="en">
-          <span class="badge">Labor market guidance</span>
-          <h1>The world's best guidance starts with work-environment fit</h1>
-          <p class="sub">LxP measures what other systems miss — how a person works and where they thrive. In the guidance engine, young people get career paths, a shareable result, and an <strong>Yoro Valmentaja</strong> that knows their test answers and helps reflect on next steps.</p>
+          <span class="badge">LxP &amp; guidance</span>
+          <h1>Labor market guidance that includes work style</h1>
+          <p class="sub">LxP describes the kind of work environment where someone is more likely to thrive — something a CV rarely captures. In the <strong>guidance engine</strong>, young people take a 10–12 minute test, get a work style type and paths to explore, and can chat with <strong>Yoro Valmentaja</strong> about the results. Free beta, no sign-up required.</p>
           <div class="cta">
             <a class="btn primary" href="https://yoro.fi/ohjausmoottori/">Try work style test</a>
             <a class="btn primary" href="https://yoro.fi/profiilitesti/">Start with profile test</a>
@@ -359,23 +370,23 @@
     <div class="wrap">
       <!-- Miksi LxP -->
       <section class="section section-alt" id="miksi-lxp">
-        <h2 class="h2 lang-content active" data-lang="fi">Miksi LxP on erilainen?</h2>
-        <h2 class="h2 lang-content" data-lang="en">Why is LxP different?</h2>
-        <p class="intro lang-content active" data-lang="fi">Useimmat järjestelmät perustuvat osaamiseen, ammattinimikkeeseen ja sijaintiin. LxP tuo <strong>neljännen dimension</strong>, jota ei löydy CV:stä eikä globaaleista rekrytointityökaluista.</p>
-        <p class="intro lang-content" data-lang="en">Most systems rely on skills, job titles, and location. LxP adds a <strong>fourth dimension</strong> you cannot read from a CV or global ATS tools.</p>
+        <h2 class="h2 lang-content active" data-lang="fi">Mikä on LxP?</h2>
+        <h2 class="h2 lang-content" data-lang="en">What is LxP?</h2>
+        <p class="intro lang-content active" data-lang="fi">Rekrytoinnissa ja ohjauksessa näkyvät usein osaaminen, koulutus ja sijainti. LxP tuo mukaan <strong>työympäristön sopivuuden</strong>: itsenäisyys, tiimityö, rytmi ja oppimistapa — mitattuna kyselyllä, ei arviona.</p>
+        <p class="intro lang-content" data-lang="en">Hiring and guidance usually focus on skills, education, and location. LxP adds <strong>work-environment fit</strong>: independence, teamwork, rhythm, and learning style — measured with a short questionnaire, not a gut-feel score.</p>
 
         <div class="grid-2">
           <div class="card card-accent">
             <h3 class="lang-content active" data-lang="fi">Työympäristön sopivuus</h3>
             <h3 class="lang-content" data-lang="en">Work-environment fit</h3>
-            <p class="lang-content active" data-lang="fi">Itsenäisyys, tiimityö, rytmi, IT-käyttö, oppimishalukkuus — mitattu ja toistettava parametri, ei HR-arvio.</p>
-            <p class="lang-content" data-lang="en">Independence, teamwork, rhythm, digital tools, learning appetite — measured and repeatable, not a gut-feel HR score.</p>
+            <p class="lang-content active" data-lang="fi">Itsenäisyys, tiimityö, rytmi, IT-käyttö ja oppimishalukkuus — sama mittari nuorelle, työnantajalle ja ohjaajalle.</p>
+            <p class="lang-content" data-lang="en">Independence, teamwork, rhythm, digital tools, and learning appetite — the same metric for young people, employers, and counsellors.</p>
           </div>
           <div class="card card-green">
             <h3 class="lang-content active" data-lang="fi">Työtoiveet (TE24)</h3>
             <h3 class="lang-content" data-lang="en">Job wishes (TE24)</h3>
-            <p class="lang-content active" data-lang="fi">Ei “haen mitä tahansa” vaan mihin ihminen <em>haluaa</em> mennä — innokkaampi ja aikaansaavampi työntekijä.</p>
-            <p class="lang-content" data-lang="en">Not “I'll take anything” but where a person <em>wants</em> to go — a more motivated, productive hire.</p>
+            <p class="lang-content active" data-lang="fi">Mihin ihminen haluaa mennä — ei pelkkä “haen mitä tahansa”. TE24-ammatit linkittävät toiveet konkreettisiin polkuihin.</p>
+            <p class="lang-content" data-lang="en">Where someone wants to go — not just “I'll take anything”. TE24 occupations link wishes to concrete paths.</p>
           </div>
         </div>
 
@@ -383,24 +394,24 @@
           <thead><tr><th>Muut järjestelmät</th><th>Yoro + LxP</th></tr></thead>
           <tbody>
             <tr><td>Osaaminen + titteli</td><td>LxP + työtoiveet + osaaminen</td></tr>
-            <tr><td>Culture fit = arvio</td><td>Culture fit = mitattu parametri</td></tr>
-            <tr><td>Työllistyi kerran</td><td>Pysyi — polku dokumentoitu</td></tr>
+            <tr><td>Culture fit = arvio</td><td>Työtyyli näkyy profiilissa</td></tr>
+            <tr><td>Ohjaus irrallaan datasta</td><td>Polku ja tulos jaettavissa</td></tr>
           </tbody>
         </table>
         <table class="compare-table lang-content" data-lang="en">
           <thead><tr><th>Other systems</th><th>Yoro + LxP</th></tr></thead>
           <tbody>
             <tr><td>Skills + title</td><td>LxP + job wishes + skills</td></tr>
-            <tr><td>Culture fit = opinion</td><td>Culture fit = measured parameter</td></tr>
-            <tr><td>Got hired once</td><td>Stayed — path documented</td></tr>
+            <tr><td>Culture fit = opinion</td><td>Work style visible in profile</td></tr>
+            <tr><td>Guidance separate from data</td><td>Path and result shareable</td></tr>
           </tbody>
         </table>
 
         <div class="coal-quote lang-content active" data-lang="fi">
-          <strong>Kuuma hiili:</strong> Muutos on pieni — yksi puuttuva mittari — mutta kuten kuuma hiili koko hiilloksessa, se voi saada koko järjestelmän hehkumaan: parempi ensimmäinen työpaikka, pidempi työsuhde, enemmän dataa poluista, parempi seuraava suositus.
+          <strong>Käytännössä:</strong> Kun sopivuus huomioidaan jo ohjauksessa, ensimmäinen työpaikka osuu useammin oikein — ja työsuhde kestää pidempään. Pieni lisä mittari, selkeä hyöty.
         </div>
         <div class="coal-quote lang-content" data-lang="en">
-          <strong>The hot coal:</strong> The change is small — one missing metric — but like a hot coal in the embers, it can make the whole system glow: better first job, longer tenure, richer path data, better next recommendation.
+          <strong>In practice:</strong> When fit is considered early in guidance, the first job match is more often right — and tenure improves. One extra metric, a clear benefit.
         </div>
       </section>
 
@@ -408,8 +419,8 @@
       <section class="section" id="kaavio">
         <h2 class="h2 lang-content active" data-lang="fi">Ohjausmoottori — miten se toimii</h2>
         <h2 class="h2 lang-content" data-lang="en">Guidance engine — how it works</h2>
-        <p class="intro lang-content active" data-lang="fi">Nuoren syöte kulkee parametripohjaisen moottorin läpi ja tuottaa konkreettisen ohjauksen — tulosten jälkeen voi jutella <strong>Yoro Valmentajan</strong> kanssa.</p>
-        <p class="intro lang-content" data-lang="en">Youth input flows through a parameter-based engine and produces concrete guidance — then chat with the <strong>Yoro Valmentaja</strong> about the results.</p>
+        <p class="intro lang-content active" data-lang="fi">Nuori vastaa kysymyksiin työtyylistä, aineista ja tavoitteista. Moottori yhdistää vastaukset TE24-ammatteihin ja alueen dataan — tuloksena työtyyli-tyyppi, polkuja ja linkkejä virallisiin palveluihin. Sen jälkeen voi jutella <strong>Yoro Valmentajan</strong> kanssa.</p>
+        <p class="intro lang-content" data-lang="en">Young people answer questions about work style, subjects, and goals. The engine combines answers with TE24 occupations and regional data — producing a work style type, paths, and links to official services. Then chat with <strong>Yoro Valmentaja</strong>.</p>
 
         <div class="engine-diagram lang-content active" data-lang="fi">
           <div class="engine-band">
@@ -492,28 +503,28 @@
 
       <!-- Audiences -->
       <section class="section">
-        <h2 class="h2 lang-content active" data-lang="fi">Kolmelle käyttäjäryhmälle</h2>
-        <h2 class="h2 lang-content" data-lang="en">Built for three audiences</h2>
-        <p class="intro lang-content active" data-lang="fi">Sama data ja parametrit — eri näkymä työttömälle, työnantajalle ja kunnalle.</p>
-        <p class="intro lang-content" data-lang="en">Same data and parameters — different views for job seekers, employers, and municipalities.</p>
+        <h2 class="h2 lang-content active" data-lang="fi">Kolme käyttäjäryhmää</h2>
+        <h2 class="h2 lang-content" data-lang="en">Three user groups</h2>
+        <p class="intro lang-content active" data-lang="fi">Sama LxP-profiili ja TE24-data — eri näkymä nuorelle, työnantajalle ja kunnalle. Osa ominaisuuksista on jo käytössä, osa pilottivaiheessa.</p>
+        <p class="intro lang-content" data-lang="en">The same LxP profile and TE24 data — different views for young people, employers, and municipalities. Some features are live today, others in pilot.</p>
         <div class="grid">
           <div class="card card-accent">
-            <h3 class="lang-content active" data-lang="fi">Työttömät ja työnhakijat</h3>
-            <h3 class="lang-content" data-lang="en">Job seekers</h3>
-            <p class="lang-content active" data-lang="fi">Näe työllistymistodennäköisyys omalla työnhakualueellasi ja miten se muuttuu muualla Suomessa. Saat ehdotuksia poluista, joilla vastaavassa tilanteessa olevat ovat työllistyneet.</p>
-            <p class="lang-content" data-lang="en">See employment probability in your search area and how it compares across Finland. Get path suggestions based on what worked for people in similar situations.</p>
+            <h3 class="lang-content active" data-lang="fi">Nuoret ja työnhakijat</h3>
+            <h3 class="lang-content" data-lang="en">Young people &amp; job seekers</h3>
+            <p class="lang-content active" data-lang="fi">Tee LxP- tai Ohjausmoottori-testi ja saa työtyyli-kuvaus sekä polkuja kokeiltavaksi. Työllistymistodennäköisyyslaskelmat ovat kehitteillä pilottiasiakkaille.</p>
+            <p class="lang-content" data-lang="en">Take the LxP or guidance engine test and get a work style description plus paths to explore. Employment probability models are in development for pilot customers.</p>
           </div>
           <div class="card card-green">
             <h3 class="lang-content active" data-lang="fi">Työnantajat ja rekrytoijat</h3>
             <h3 class="lang-content" data-lang="en">Employers & recruiters</h3>
-            <p class="lang-content active" data-lang="fi">Löydä parhaat kandidaatit LxP- ja TE24-pohjaisella haulla. Parametrit näkyvät: työtyyli, ammatti, kokemus, alue ja koulutus — läpinäkyvästi.</p>
-            <p class="lang-content" data-lang="en">Find the best candidates with LxP and TE24-based matching. Parameters are visible: work style, occupation, experience, region, and education.</p>
+            <p class="lang-content active" data-lang="fi">Etsi kandidaatteja LxP- ja TE24-pohjaisella haulla. Profiilissa näkyvät työtyyli, ammatti, kokemus, alue ja koulutus — läpinäkyvästi, ei mustaa laatikkoa.</p>
+            <p class="lang-content" data-lang="en">Search candidates with LxP and TE24-based matching. Profiles show work style, occupation, experience, region, and education — transparently, not a black box.</p>
           </div>
           <div class="card card-warn">
             <h3 class="lang-content active" data-lang="fi">Kunnat ja alueet</h3>
             <h3 class="lang-content" data-lang="en">Municipalities & regions</h3>
-            <p class="lang-content active" data-lang="fi">Seuraa ammatteja, joihin työllistyy vähemmän ihmisiä kuin valmistuu. Näe työvoiman jakautuminen, työttömyys ja koulutustarpeet toimialoittain — selkeästi ja päivittyvästi.</p>
-            <p class="lang-content" data-lang="en">Track occupations where employment lags behind graduations. View labor distribution, unemployment, and training needs by sector — clearly and continuously updated.</p>
+            <p class="lang-content active" data-lang="fi">Seuraa toimialakohtaista työvoimanäkymää: valmistuvat määrät, työttömyys ja työllistyminen rinnakkain. Hälytys, kun valmistuvia on enemmän kuin alueelle työllistyy — pilottikunnille.</p>
+            <p class="lang-content" data-lang="en">Track sector-level labor outlook: graduates, unemployment, and employment side by side. Alerts when graduates exceed local uptake — for pilot municipalities.</p>
           </div>
         </div>
       </section>
@@ -523,14 +534,14 @@
         <div>
           <h2 class="h2 lang-content active" data-lang="fi">Mitä moottori laskee</h2>
           <h2 class="h2 lang-content" data-lang="en">What the engine computes</h2>
-          <p class="intro lang-content active" data-lang="fi" style="margin-bottom:16px">Kaavion <a href="#kaavio">matcher + selitys</a> -kerros tuottaa nämä analyysit parametreista — ei arvauksista.</p>
-          <p class="intro lang-content" data-lang="en" style="margin-bottom:16px">The diagram's <a href="#kaavio">matcher + explanation</a> layer produces these analyses from parameters — not guesswork.</p>
+          <p class="intro lang-content active" data-lang="fi" style="margin-bottom:16px">Matcher-kerros yhdistää profiilin, TE24-ammatit ja aluedatan. Osa analyysistä on jo käytössä, osa pilottivaiheessa — ei arvauksia ilman dataa.</p>
+          <p class="intro lang-content" data-lang="en" style="margin-bottom:16px">The matcher layer combines profile, TE24 occupations, and regional data. Some analyses are live, others in pilot — no guesses without data.</p>
           <div class="grid-2">
             <div class="card">
               <h3 class="lang-content active" data-lang="fi">Työllistymistodennäköisyys</h3>
               <h3 class="lang-content" data-lang="en">Employment probability</h3>
-              <p class="lang-content active" data-lang="fi">Lasketaan omalle työnhakualueelle: ammatti + profiili + markkinatilanne.</p>
-              <p class="lang-content" data-lang="en">Calculated for your search area: occupation + profile + market conditions.</p>
+              <p class="lang-content active" data-lang="fi">Lasketaan omalle työnhakualueelle: ammatti + profiili + markkinatilanne. Pilottivaiheessa.</p>
+              <p class="lang-content" data-lang="en">Calculated for your search area: occupation + profile + market conditions. In pilot.</p>
             </div>
             <div class="card">
               <h3 class="lang-content active" data-lang="fi">Aluevertailu</h3>
@@ -541,8 +552,8 @@
             <div class="card">
               <h3 class="lang-content active" data-lang="fi">Polkujen seuranta</h3>
               <h3 class="lang-content" data-lang="en">Path tracking</h3>
-              <p class="lang-content active" data-lang="fi">Järjestelmä havainnoi, miten vastaavassa tilanteessa olleet ovat työllistyneet — anonymisoidusti ja tilastollisesti.</p>
-              <p class="lang-content" data-lang="en">The system observes how people in similar situations got employed — anonymized and statistical.</p>
+              <p class="lang-content active" data-lang="fi">Järjestelmä havainnoi, miten vastaavassa tilanteessa olleet ovat työllistyneet — anonymisoidusti. Kehitteillä.</p>
+              <p class="lang-content" data-lang="en">The system observes how people in similar situations got employed — anonymized. In development.</p>
             </div>
             <div class="card">
               <h3 class="lang-content active" data-lang="fi">Reittiehdotukset</h3>
@@ -553,7 +564,7 @@
           </div>
         </div>
         <div class="preview-box lang-content active" data-lang="fi">
-          <div class="label">Esimerkki — työnhakijan näkymä (konsepti)</div>
+          <div class="label">Esimerkki — työnhakijan näkymä (konsepti, pilotti)</div>
           <div class="metric" style="margin-top:8px">42 %</div>
           <div class="label">Työllistymistodennäköisyys 6 kk:ssa · Uusimaa · Myynti</div>
           <div class="preview-row">
@@ -562,7 +573,7 @@
           </div>
         </div>
         <div class="preview-box lang-content" data-lang="en">
-          <div class="label">Example — job seeker view (concept)</div>
+          <div class="label">Example — job seeker view (concept, pilot)</div>
           <div class="metric" style="margin-top:8px">42%</div>
           <div class="label">Employment probability within 6 mo · Uusimaa · Sales</div>
           <div class="preview-row">
@@ -576,8 +587,8 @@
       <section class="section">
         <h2 class="h2 lang-content active" data-lang="fi">Työllistymispolut</h2>
         <h2 class="h2 lang-content" data-lang="en">Employment paths</h2>
-        <p class="intro lang-content active" data-lang="fi">Kun vastaavassa tilanteessa oleva on työllistynyt, järjestelmä tunnistaa toistuvat reitit ja ehdottaa niitä seuraavaksi askeleeksi.</p>
-        <p class="intro lang-content" data-lang="en">When someone in a similar situation was employed, the system identifies recurring routes and suggests them as next steps.</p>
+        <p class="intro lang-content active" data-lang="fi">Kun vastaavassa tilanteessa oleva on työllistynyt, järjestelmä voi tunnistaa toistuvia reittejä ja ehdottaa niitä seuraavaksi askeleeksi. Alla esimerkki — ei yksittäistä ennustetta.</p>
+        <p class="intro lang-content" data-lang="en">When someone in a similar situation was employed, the system can identify recurring routes and suggest them as next steps. Example below — not a personal prediction.</p>
         <div class="card">
           <p class="lang-content active" data-lang="fi" style="margin:0 0 8px;color:var(--text);font-weight:600">Esimerkkipolku: nuori · ei työkokemusta · kiinnostus teknologiaan</p>
           <p class="lang-content" data-lang="en" style="margin:0 0 8px;color:var(--text);font-weight:600">Example path: young · no work experience · interest in technology</p>
@@ -629,8 +640,8 @@
       <section class="section section-alt" id="tyokalut">
         <h2 class="h2 lang-content active" data-lang="fi">Käytössä nyt</h2>
         <h2 class="h2 lang-content" data-lang="en">Available now</h2>
-        <p class="intro lang-content active" data-lang="fi">Visio rakentuu vaiheittain. Nämä työkalut ovat jo käytössä — Ohjausmoottorissa myös <strong>Yoro Valmentaja</strong>, joka tuntee nuoren testitulokset.</p>
-        <p class="intro lang-content" data-lang="en">The vision is built in phases. These tools are live today — the guidance engine includes an <strong>Yoro Valmentaja</strong> that knows the young person's test results.</p>
+        <p class="intro lang-content active" data-lang="fi">Visio rakentuu vaiheittain. Nämä työkalut ovat jo käytössä — Ohjausmoottorissa myös <strong>Yoro Valmentaja</strong> (tekoälyavustaja, ei ihmisohjaajan korvike).</p>
+        <p class="intro lang-content" data-lang="en">The vision is built in phases. These tools are live today — the guidance engine includes <strong>Yoro Valmentaja</strong> (AI assistant, not a replacement for human counselling).</p>
         <div class="tools-bar">
             <a class="btn primary lang-content active" data-lang="fi" href="https://yoro.fi/ohjausmoottori/">Ohjausmoottori + Yoro Valmentaja</a>
             <a class="btn primary lang-content" data-lang="en" href="https://yoro.fi/ohjausmoottori/">Guidance engine + Yoro Valmentaja</a>
@@ -662,14 +673,14 @@
           <div class="card">
             <h3 class="lang-content active" data-lang="fi">Mikä on Yoro Valmentaja?</h3>
             <h3 class="lang-content" data-lang="en">What is Yoro Valmentaja?</h3>
-            <p class="lang-content active" data-lang="fi">Ohjausmoottorin tulossivulla voit jutella Yoro Valmentajan kanssa. Se tuntee testivastaukset ja työtyyli-tyypin, auttaa työllistymissuunnitelmassa ja koulutusvaihtoehdoissa — ei korvaa ihmisohjaajaa.</p>
-            <p class="lang-content" data-lang="en">On the guidance engine result page you can chat with Yoro Valmentaja. It knows your test answers and work style type, helps with employment plans and training options, and points to official resources — it does not replace a human counsellor.</p>
+            <p class="lang-content active" data-lang="fi">Ohjausmoottorin tulossivulla voit jutella Yoro Valmentajan kanssa. Se tuntee testivastaukset ja työtyyli-tyypin, auttaa pohtimaan seuraavia askelia ja ohjaa virallisiin palveluihin — <strong>ei korvaa ihmisohjaajaa</strong>.</p>
+            <p class="lang-content" data-lang="en">On the guidance engine result page you can chat with Yoro Valmentaja. It knows your test answers and work style type, helps reflect on next steps, and points to official resources — <strong>it does not replace a human counsellor</strong>.</p>
           </div>
           <div class="card">
             <h3 class="lang-content active" data-lang="fi">Miksi LxP puuttuu muista järjestelmistä?</h3>
             <h3 class="lang-content" data-lang="en">Why is LxP missing elsewhere?</h3>
-            <p class="lang-content active" data-lang="fi">Globaalit ATS- ja matching-ratkaisut eivät mittaa työympäristön sopivuutta parametreina. LxP on Yoron erottava kerros — pieni muutos, suuri vaikutus työsuhteen kestoon.</p>
-            <p class="lang-content" data-lang="en">Global ATS and matching tools don't measure work-environment fit as parameters. LxP is Yoro's differentiating layer — a small change with a large impact on tenure.</p>
+            <p class="lang-content active" data-lang="fi">Globaalit ATS- ja matching-ratkaisut eivät yleensä mittaa työympäristön sopivuutta. LxP on Yoron erottava kerros — pieni lisä profiiliin, käytännön hyöty työsuhteen sopivuudessa.</p>
+            <p class="lang-content" data-lang="en">Global ATS and matching tools rarely measure work-environment fit. LxP is Yoro's differentiating layer — a small addition to the profile with practical value for job fit.</p>
           </div>
         </div>
       </section>
