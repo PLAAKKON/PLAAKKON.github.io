@@ -271,6 +271,40 @@ body {
   margin-top: 10px;
 }
 
+.share-section {
+  margin-top: 24px;
+}
+
+.btn-share-toggle {
+  margin-top: 0;
+}
+
+.share-options {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 10px;
+  padding-left: 4px;
+}
+
+.share-options[hidden] {
+  display: none !important;
+}
+
+.btn-share-option {
+  margin-top: 0;
+  background: var(--surface2);
+  color: var(--text);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: none;
+  font-size: 0.95rem;
+}
+
+.btn-share-option:hover {
+  border-color: rgba(251, 113, 133, 0.45);
+  background: rgba(251, 113, 133, 0.08);
+}
+
 .share-section .btn-share:first-of-type {
   margin-top: 0;
 }
@@ -438,7 +472,7 @@ body.modal-open {
   color: var(--accent3);
 }
 
-/* AI-opinto-ohjaaja */
+/* Yoro Valmentaja */
 .advisor-cta {
   display: flex;
   gap: 16px;

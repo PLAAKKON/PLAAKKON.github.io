@@ -1331,6 +1331,7 @@ function bindPathToggles() {
 
 const ANALYTICS_KEY = 'yoro_ohjaus_events_v1';
 const FEEDBACK_KEY = 'yoro_ohjaus_feedback_v1';
+const FEEDBACK_DONE_KEY = 'yoro_ohjaus_feedback_done_v1';
 const RESULT_STORAGE_KEY = 'yoro_ohjaus_result_v1';
 const PLAIN_LANG_KEY = 'yoro_plain_lang_v1';
 const RESULT_HASH_PREFIX = '#r=';
@@ -1357,7 +1358,10 @@ const COPY = {
   },
   savedBanner: { fi: 'Sinulla on tallennettu tulos tästä selaimesta.', plain: 'Tuloksesi on tallessa tässä selaimessa.' },
   resumeResult: { fi: 'Palaa tulokseesi →', plain: 'Näytä tulos uudelleen →' },
-  copyResultLink: { fi: 'Kopioi linkki tulokseen', plain: 'Kopioi linkki' },
+  copyResultLink: { fi: 'Kopioi linkki', plain: 'Kopioi linkki' },
+  shareToggle: { fi: 'Jaa tulos', plain: 'Jaa tulos' },
+  shareDownloadCard: { fi: 'Lataa jaettava kortti (PNG)', plain: 'Lataa kortti (PNG)' },
+  shareText: { fi: 'Jaa tekstinä', plain: 'Jaa tekstinä' },
   linkCopied: { fi: 'Linkki kopioitu!', plain: 'Kopioitu!' },
   plainToggle: { fi: 'Selkokieli', plain: 'Normaali kieli' },
   defaultHint: {
@@ -1374,7 +1378,6 @@ const COPY = {
   introHook: { fi: '✦ Saat oman tekijätyypin + jaettavan kortin', plain: '✦ Saat oman tyypin ja kuvan jaettavaksi' },
   startBtn: { fi: 'Aloita testi →', plain: 'Aloita →' },
   introDisclaimer: { fi: 'Ei rekisteröitymistä. Tulos on ohjausta, ei ennustetta.', plain: 'Ei tarvitse rekisteröityä. Tulos on vain ohjausta.' },
-  shareSectionTitle: { fi: 'Jaa tuloksesi', plain: 'Jaa tulos' },
   shareToCounselor: { fi: 'Lähetä ohjaajalle', plain: 'Lähetä ohjaajalle' },
   counselorModalTitle: { fi: 'Lähetä tulos ohjaajalle', plain: 'Lähetä tulos ohjaajalle' },
   counselorEmailLabel: { fi: 'Ohjaajan sähköpostiosoite', plain: 'Ohjaajan sähköposti' },
@@ -1392,17 +1395,38 @@ const COPY = {
   friendEmailHint: { fi: 'Lähetys avaa sähköpostiohjelmasi — viesti lähtee sinun osoitteestasi.', plain: 'Lähetys avaa sähköpostin. Viesti lähtee sinun osoitteestasi.' },
   friendMessageDefault: { fi: 'Tein tämän testin — kokeile sinäkin!', plain: 'Tein tämän testin. Kokeile sinäkin!' },
   friendPrivacy: { fi: 'Viestissä on linkki tulokseesi ja linkki testiin. Lähetä vain luotetulle ystävälle.', plain: 'Viestissä on linkki tulokseesi ja testiin. Lähetä vain luotetulle ystävälle.' },
-  advisorCtaTitle: { fi: 'AI-opinto-ohjaaja', plain: 'AI-opinto-ohjaaja' },
-  advisorCtaBody: { fi: 'Haluatko jutella tuloksistasi? Tunnen vastauksesi ja voin auttaa pohtimaan polkuja ja seuraavia askelia.', plain: 'Haluatko jutella tuloksistasi? Voin auttaa pohtimaan polkuja ja seuraavia askelia.' },
-  advisorCtaBtn: { fi: 'Jutella tuloksista →', plain: 'Jutella tuloksista →' },
-  advisorChatTitle: { fi: 'AI-opinto-ohjaaja', plain: 'AI-opinto-ohjaaja' },
-  advisorDisclaimer: { fi: 'AI ei ole virallinen ohjaus eikä uraennuste. Tärkeissä päätöksissä keskustele aina opettajan tai Ohjaamon kanssa.', plain: 'AI ei ole virallinen ohjaus. Keskustele aina opettajan tai Ohjaamon kanssa.' },
+  advisorCtaTitle: { fi: 'Yoro Valmentaja', plain: 'Yoro Valmentaja' },
+  advisorCtaBody: {
+    fi: 'Haluatko jutella tuloksistasi? Tunnen testivastauksesi ja voin auttaa työllistymisessä, koulutuksessa ja seuraavissa askeleissa.',
+    plain: 'Haluatko jutella tuloksistasi? Voin auttaa työllistymisessä ja koulutuksessa.',
+  },
+  advisorCtaBtn: { fi: 'Keskustele valmentajan kanssa →', plain: 'Keskustele valmentajan kanssa →' },
+  advisorChatTitle: { fi: 'Yoro Valmentaja', plain: 'Yoro Valmentaja' },
+  advisorDisclaimer: {
+    fi: 'Yoro Valmentaja on tekoälyavusteinen valmentaja — ei virallinen ohjaus eikä uraennuste. Tärkeissä päätöksissä keskustele aina opettajan tai Ohjaamon kanssa.',
+    plain: 'Yoro Valmentaja on tekoälyavusteinen. Keskustele aina opettajan tai Ohjaamon kanssa.',
+  },
+  advisorChipEmploymentPlan: { fi: 'Työllistymissuunnitelma', plain: 'Työllistymissuunnitelma' },
+  advisorPromptEmploymentPlan: {
+    fi: 'Haluan henkilökohtaisen työllistymissuunnitelman.',
+    plain: 'Haluan henkilökohtaisen työllistymissuunnitelman.',
+  },
+  advisorChipTraining: { fi: 'Lisäkoulutusvaihtoehdot', plain: 'Lisäkoulutusvaihtoehdot' },
+  advisorPromptTraining: {
+    fi: 'Kerro minulle lisäkoulutusvaihtoehdoista.',
+    plain: 'Kerro minulle lisäkoulutusvaihtoehdoista.',
+  },
+  advisorChipJobHelp: { fi: 'Auta työllistymään', plain: 'Auta työllistymään' },
+  advisorPromptJobHelp: {
+    fi: 'Auta minua työllistymään.',
+    plain: 'Auta minua työllistymään.',
+  },
   advisorPlaceholder: { fi: 'Kirjoita kysymys…', plain: 'Kirjoita kysymys…' },
   advisorSend: { fi: 'Lähetä', plain: 'Lähetä' },
   advisorClose: { fi: 'Sulje chat', plain: 'Sulje' },
   advisorThinking: { fi: 'Kirjoittaa…', plain: 'Kirjoittaa…' },
   advisorError: { fi: 'Viesti ei mennyt läpi. Yritä uudelleen tai ota yhteyttä Ohjaamoon.', plain: 'Viesti ei mennyt läpi. Yritä uudelleen.' },
-  advisorOffline: { fi: 'AI-opinto-ohjaaja ei ole vielä käytössä tässä ympäristössä. Voit silti käyttää linkkejä Opintopolkuun ja Ohjaamoon.', plain: 'AI-opinto-ohjaaja ei ole vielä käytössä. Käytä linkkejä Opintopolkuun ja Ohjaamoon.' },
+  advisorOffline: { fi: 'Yoro Valmentaja ei ole vielä käytössä tässä ympäristössä. Voit silti käyttää linkkejä Opintopolkuun ja Ohjaamoon.', plain: 'Yoro Valmentaja ei ole vielä käytössä. Käytä linkkejä Opintopolkuun ja Ohjaamoon.' },
 };
 
 function txt(key) {
@@ -1442,6 +1466,24 @@ function serializeResultState() {
     i: state.interest,
     p: state.plainLanguage ? 1 : 0,
   };
+}
+
+function currentResultFingerprint() {
+  return encodeResultPayload(serializeResultState());
+}
+
+function hasFeedbackForCurrentResult() {
+  try {
+    return localStorage.getItem(FEEDBACK_DONE_KEY) === currentResultFingerprint();
+  } catch (_) {
+    return false;
+  }
+}
+
+function markFeedbackForCurrentResult() {
+  try {
+    localStorage.setItem(FEEDBACK_DONE_KEY, currentResultFingerprint());
+  } catch (_) { /* ignore */ }
 }
 
 function encodeResultPayload(payload) {
@@ -1660,6 +1702,7 @@ const state = {
   subjects: new Set(),
   interest: {},
   plainLanguage: false,
+  shareOpen: false,
   advisorChat: { open: false, messages: [], loading: false, error: '' },
 };
 
@@ -2529,9 +2572,21 @@ function buildAdvisorContext(archetype, topPaths, answers, tyoohjaus, motivation
 function advisorWelcomeMessage(archetype, topPaths) {
   const paths = topPaths.slice(0, 3).map((p) => p.name).join(', ');
   if (state.plainLanguage) {
-    return `Hei! Olen AI-opinto-ohjaaja. Tyyppisi on ${archetype.title}. Polkusi: ${paths}. Mistä haluaisit jutella?`;
+    return `Hei! Olen Yoro Valmentaja. Tyyppisi on ${archetype.title}. Polkusi: ${paths}. Voinko auttaa työllistymissuunnitelmassa, koulutuksessa tai työnhaussa?`;
   }
-  return `Hei! Olen AI-opinto-ohjaaja — tunnen testituloksesi. Tekijätyyppisi on ${archetype.title} ${archetype.emoji}, ja ehdotetut polut ovat: ${paths}. Haluatko pohtia jotain polkua, opintoja tai seuraavaa askelta?`;
+  return `Hei! Olen Yoro Valmentaja — tunnen testituloksesi. Tekijätyyppisi on ${archetype.title} ${archetype.emoji}, ja ehdotetut polut ovat: ${paths}. Voinko auttaa henkilökohtaisessa työllistymissuunnitelmassa, lisäkoulutusvaihtoehdoissa tai työllistymisessä?`;
+}
+
+function renderAdvisorChips() {
+  const chips = [
+    { label: txt('advisorChipEmploymentPlan'), prompt: txt('advisorPromptEmploymentPlan') },
+    { label: txt('advisorChipTraining'), prompt: txt('advisorPromptTraining') },
+    { label: txt('advisorChipJobHelp'), prompt: txt('advisorPromptJobHelp') },
+  ];
+  return chips.map((chip) => {
+    const safePrompt = chip.prompt.replace(/&/g, '&amp;').replace(/"/g, '&quot;');
+    return `<button type="button" class="advisor-chip" data-prompt="${safePrompt}">${chip.label}</button>`;
+  }).join('');
 }
 
 async function callAdvisorApi(messages, context) {
@@ -2572,7 +2627,7 @@ function renderAdvisorChatHtml(archetype, topPaths) {
   if (!chat.open) {
     return `
       <div class="advisor-cta card">
-        <div class="advisor-cta-icon" aria-hidden="true">🤖</div>
+        <div class="advisor-cta-icon" aria-hidden="true">🎯</div>
         <div class="advisor-cta-body">
           <h3 class="advisor-cta-title">${txt('advisorCtaTitle')}</h3>
           <p class="advisor-cta-text">${txt('advisorCtaBody')}</p>
@@ -2588,14 +2643,12 @@ function renderAdvisorChatHtml(archetype, topPaths) {
   return `
     <div class="advisor-chat card" id="advisorChatPanel">
       <div class="advisor-chat-header">
-        <h3 class="advisor-chat-title">🤖 ${txt('advisorChatTitle')}</h3>
+        <h3 class="advisor-chat-title">🎯 ${txt('advisorChatTitle')}</h3>
         <button type="button" class="advisor-chat-close" id="closeAdvisorBtn" aria-label="${txt('advisorClose')}">×</button>
       </div>
       <p class="advisor-chat-disclaimer">${txt('advisorDisclaimer')}</p>
       <div class="advisor-suggestions" id="advisorSuggestions">
-        <button type="button" class="advisor-chip" data-prompt="Miksi sain juuri nämä polut?">Miksi nämä polut?</button>
-        <button type="button" class="advisor-chip" data-prompt="Mikä opintopolku voisi sopia minulle?">Mikä opintopolku?</button>
-        <button type="button" class="advisor-chip" data-prompt="Mitä voisin tehdä seuraavaksi käytännössä?">Seuraava askel?</button>
+        ${renderAdvisorChips()}
       </div>
       <div class="advisor-messages" id="advisorMessages" role="log" aria-live="polite" aria-relevant="additions">
         ${renderAdvisorMessages(messages)}
@@ -2839,6 +2892,7 @@ function bindFeedback(archetype, topPath) {
         sessionStorage.setItem(FEEDBACK_KEY, JSON.stringify(all.slice(-50)));
       } catch (_) { /* ignore */ }
       submitFeedbackPayload(entry);
+      markFeedbackForCurrentResult();
       track('feedback', { rating });
       card.querySelectorAll('[data-feedback]').forEach((b) => { b.disabled = true; });
       if (thanks) thanks.hidden = false;
@@ -3318,6 +3372,7 @@ function render() {
 
       ${renderAdvisorChatHtml(archetype, topPaths)}
 
+      ${hasFeedbackForCurrentResult() ? '' : `
       <div class="feedback-card" id="feedbackCard">
         <p class="feedback-title">Osuiko tulos sinuun?</p>
         <div class="feedback-btns">
@@ -3326,15 +3381,19 @@ function render() {
           <button type="button" class="feedback-btn" data-feedback="no">Ei juuri</button>
         </div>
         <p class="feedback-thanks" id="feedbackThanks" hidden>Kiitos palautteesta — auttaa meitä kehittämään testiä.</p>
-      </div>
+      </div>`}
 
       <div class="share-section">
-        <div class="section-title" style="margin-top:24px">${txt('shareSectionTitle')}</div>
-        <button type="button" class="btn btn-share" id="shareToCounselorBtn">${txt('shareToCounselor')}</button>
-        <button type="button" class="btn btn-share" id="shareToFriendBtn">${txt('shareToFriend')}</button>
-        <button class="btn btn-share" id="copyResultLinkBtn">${txt('copyResultLink')}</button>
-        <button class="btn btn-share" id="downloadCardBtn">Lataa jaettava kortti (PNG)</button>
-        <button class="btn btn-share" id="shareBtn">Jaa tekstinä</button>
+        <button type="button" class="btn btn-share btn-share-toggle" id="shareToggleBtn" aria-expanded="${state.shareOpen ? 'true' : 'false'}" aria-controls="shareOptions">
+          ${txt('shareToggle')}${state.shareOpen ? ' ▴' : ' ▾'}
+        </button>
+        <div class="share-options" id="shareOptions" ${state.shareOpen ? '' : 'hidden'}>
+          <button type="button" class="btn btn-share btn-share-option" id="shareToCounselorBtn">${txt('shareToCounselor')}</button>
+          <button type="button" class="btn btn-share btn-share-option" id="shareToFriendBtn">${txt('shareToFriend')}</button>
+          <button type="button" class="btn btn-share btn-share-option" id="copyResultLinkBtn">${txt('copyResultLink')}</button>
+          <button type="button" class="btn btn-share btn-share-option" id="downloadCardBtn">${txt('shareDownloadCard')}</button>
+          <button type="button" class="btn btn-share btn-share-option" id="shareBtn">${txt('shareText')}</button>
+        </div>
       </div>
       <button class="btn btn-ghost" id="retryBtn">Tee testi uudelleen</button>
       <a href="https://yoro.fi/" class="btn btn-ghost" style="text-decoration:none;margin-top:8px">← Palaa Yoro.fi-sivuille</a>
@@ -3349,13 +3408,20 @@ function render() {
     bindPathToggles();
     bindPathWhyToggles();
     bindShowMorePaths(extraPaths.length);
-    bindFeedback(archetype, top);
+    if (!hasFeedbackForCurrentResult()) bindFeedback(archetype, top);
     bindShareToCounselor(archetype, topPaths);
     bindShareToFriend(archetype, topPaths);
     bindAdvisorChat(archetype, topPaths, answers, state.tyoohjaus, state.motivation, state.interest);
     bindCtaTracking();
 
-    document.getElementById('downloadCardBtn').onclick = () => downloadShareCard(archetype, top);
+    document.getElementById('shareToggleBtn')?.addEventListener('click', () => {
+      state.shareOpen = !state.shareOpen;
+      track('share_toggle', { open: state.shareOpen });
+      render();
+    });
+
+    const downloadCardBtn = document.getElementById('downloadCardBtn');
+    if (downloadCardBtn) downloadCardBtn.onclick = () => downloadShareCard(archetype, top);
 
     document.getElementById('copyResultLinkBtn').onclick = async () => {
       const url = resultPageUrl();
@@ -3381,7 +3447,7 @@ function render() {
       await navigator.clipboard.writeText(text);
       const btn = document.getElementById('shareBtn');
       btn.textContent = 'Kopioitu! Lähetä kaverille ✓';
-      setTimeout(() => { btn.textContent = 'Jaa tekstinä'; }, 2500);
+      setTimeout(() => { btn.textContent = txt('shareText'); }, 2500);
     };
 
     document.getElementById('retryBtn').onclick = () => {
@@ -3391,6 +3457,7 @@ function render() {
       document.body.classList.remove('modal-open');
       history.replaceState(null, '', `${location.pathname}${location.search}`);
       try { localStorage.removeItem(RESULT_STORAGE_KEY); } catch (_) { /* ignore */ }
+      try { localStorage.removeItem(FEEDBACK_DONE_KEY); } catch (_) { /* ignore */ }
       Object.assign(state, {
         screen: 'intro',
         lxpIndex: 0,
@@ -3402,6 +3469,7 @@ function render() {
         subjects: new Set(),
         interest: {},
         advisorChat: { open: false, messages: [], loading: false, error: '' },
+        shareOpen: false,
       });
       render();
     };
