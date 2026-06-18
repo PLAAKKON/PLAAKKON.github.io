@@ -2727,13 +2727,13 @@ function bindAdvisorChat(archetype, topPaths, answers, tyoohjaus, motivation, in
   if (msgBox) msgBox.scrollTop = msgBox.scrollHeight;
 }
 
-function drawGlowCurve(ctx, x1, y1, cx, cy, x2, y2, color, width = 3) {
+function drawGlowCurve(ctx, x1, y1, cx, cy, x2, y2, color, width = 3.5) {
   ctx.save();
   ctx.strokeStyle = color;
   ctx.lineWidth = width;
   ctx.lineCap = 'round';
   ctx.shadowColor = color;
-  ctx.shadowBlur = 18;
+  ctx.shadowBlur = 20;
   ctx.beginPath();
   ctx.moveTo(x1, y1);
   ctx.quadraticCurveTo(cx, cy, x2, y2);
@@ -2792,8 +2792,26 @@ function drawYoroMark(ctx, x, y) {
   const grad = ctx.createLinearGradient(oX, y - 28, oX + 24, y);
   grad.addColorStop(0, '#22d3ee');
   grad.addColorStop(1, '#a78bfa');
-  ctx.fillStyle = grad;
-  ctx.fillText('o', oX, y);
+  const cx = oX + 12;
+  const cy = y - 14;
+  const r = 12.5;
+  ctx.strokeStyle = grad;
+  ctx.lineWidth = 5.5;
+  ctx.lineCap = 'round';
+  ctx.shadowColor = 'rgba(34, 211, 238, 0.45)';
+  ctx.shadowBlur = 6;
+  ctx.translate(cx, cy);
+  ctx.rotate(0.84);
+  ctx.beginPath();
+  ctx.setLineDash([68, 15]);
+  ctx.arc(0, 0, r, 0, Math.PI * 2);
+  ctx.stroke();
+  ctx.setLineDash([]);
+  ctx.shadowBlur = 0;
+  ctx.restore();
+  ctx.save();
+  ctx.textAlign = 'left';
+  ctx.textBaseline = 'alphabetic';
   ctx.fillStyle = '#94a3b8';
   ctx.font = '600 11px Inter, system-ui, sans-serif';
   ctx.fillText('OHJAUSMOOTTORI', x, y + 22);
@@ -2957,36 +2975,7 @@ function render() {
       <section class="hero">
         ${savedBanner}
         <div class="pill">Ilmainen · n. 10–12 min</div>
-        <svg class="hero-art hero-art--mobile" viewBox="0 0 320 180" aria-hidden="true" focusable="false">
-          <path class="path-cyan" d="M160 155 Q145 110 95 55" stroke-width="2.5"/>
-          <path class="path-purple" d="M160 155 Q160 95 160 40" stroke-width="2.5"/>
-          <path class="path-magenta" d="M160 155 Q175 110 225 55" stroke-width="2.5"/>
-          <circle class="origin" cx="160" cy="155" r="5"/>
-          <circle class="node path-cyan" cx="95" cy="55" r="22"/>
-          <text x="95" y="60" text-anchor="middle" font-size="18">💼</text>
-          <circle class="node path-purple" cx="160" cy="40" r="22"/>
-          <text x="160" y="45" text-anchor="middle" font-size="18">🧭</text>
-          <circle class="node path-magenta" cx="225" cy="55" r="22"/>
-          <text x="225" y="60" text-anchor="middle" font-size="18">🚩</text>
-        </svg>
-        <svg class="hero-art hero-art--desktop" viewBox="0 0 480 280" aria-hidden="true" focusable="false">
-          <path class="path-cyan" d="M240 228 Q210 170 120 72" stroke-width="3"/>
-          <path class="path-purple" d="M240 228 Q240 140 240 48" stroke-width="3"/>
-          <path class="path-magenta" d="M240 228 Q270 170 360 72" stroke-width="3"/>
-          <path class="path-cyan" d="M240 228 Q188 188 72 148" stroke-width="2.5" opacity="0.75"/>
-          <path class="path-magenta" d="M240 228 Q292 188 408 148" stroke-width="2.5" opacity="0.75"/>
-          <circle class="origin" cx="240" cy="228" r="7"/>
-          <circle class="node path-cyan" cx="120" cy="72" r="28"/>
-          <text x="120" y="79" text-anchor="middle" font-size="22">💼</text>
-          <circle class="node path-purple" cx="240" cy="48" r="28"/>
-          <text x="240" y="55" text-anchor="middle" font-size="22">🧭</text>
-          <circle class="node path-magenta" cx="360" cy="72" r="28"/>
-          <text x="360" y="79" text-anchor="middle" font-size="22">🚩</text>
-          <circle class="node path-cyan" cx="72" cy="148" r="22"/>
-          <text x="72" y="154" text-anchor="middle" font-size="17">📚</text>
-          <circle class="node path-magenta" cx="408" cy="148" r="22"/>
-          <text x="408" y="154" text-anchor="middle" font-size="17">🤝</text>
-        </svg>
+        <img src="/yoro-paths.svg" class="hero-art yoro-paths-art" width="480" height="310" alt="" aria-hidden="true"/>
         <h1 style="margin-top:0">${txt('introTitle1')}<br><span>${txt('introTitle2')}</span></h1>
         <p>${txt('introBody')}</p>
         <p class="hook">${txt('introHook')}</p>
@@ -3352,18 +3341,7 @@ function render() {
       <p class="trust-banner">${txt('trustBanner')}</p>
 
       <div class="result-visual">
-      <svg class="result-path-art" viewBox="0 0 280 320" aria-hidden="true" focusable="false">
-        <path class="path-cyan" d="M140 290 Q110 220 56 120" stroke-width="2.5"/>
-        <path class="path-purple" d="M140 290 Q140 200 140 70" stroke-width="2.5"/>
-        <path class="path-magenta" d="M140 290 Q170 220 224 120" stroke-width="2.5"/>
-        <circle class="origin" cx="140" cy="290" r="6"/>
-        <circle class="node path-cyan" cx="56" cy="120" r="20"/>
-        <text x="56" y="126" text-anchor="middle" font-size="16">💼</text>
-        <circle class="node path-purple" cx="140" cy="70" r="20"/>
-        <text x="140" y="76" text-anchor="middle" font-size="16">🧭</text>
-        <circle class="node path-magenta" cx="224" cy="120" r="20"/>
-        <text x="224" y="126" text-anchor="middle" font-size="16">🚩</text>
-      </svg>
+      <img src="/yoro-paths.svg" class="result-path-art yoro-paths-art" width="480" height="310" alt="" aria-hidden="true"/>
       <div class="result-hero">
         <div class="result-emoji" aria-hidden="true">${archetype.emoji}</div>
         <div class="result-type">${txt('resultType')}</div>

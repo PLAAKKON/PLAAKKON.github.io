@@ -52,6 +52,8 @@ body {
   min-height: 100dvh;
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
+  overflow-x: clip;
+  max-width: 100%;
 }
 
 .bg-glow {
@@ -90,12 +92,14 @@ body {
   justify-content: space-between;
   margin-bottom: 24px;
   gap: 12px;
+  flex-wrap: wrap;
 }
 
 .topbar-actions {
   display: flex;
   align-items: center;
   gap: 8px;
+  flex-shrink: 0;
 }
 
 .plain-toggle {
@@ -150,37 +154,30 @@ body {
   text-decoration: none;
   font-weight: 700;
   font-size: 0.95rem;
+  min-width: 0;
+  flex: 1 1 auto;
 }
 
 .logo-wordmark {
   display: flex;
   flex-direction: column;
-  gap: 1px;
+  gap: 2px;
   line-height: 1;
+  min-width: 0;
 }
 
-    .logo-yoro {
-  font-size: 1.45rem;
-  font-weight: 800;
-  letter-spacing: -0.04em;
-  color: #f8fafc;
-  text-shadow: 0 0 28px rgba(34, 211, 238, 0.15);
-}
-
-.logo-o {
-  background: linear-gradient(135deg, #22d3ee 0%, #a78bfa 100%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-  filter: drop-shadow(0 0 10px rgba(34, 211, 238, 0.35));
+.yoro-mark {
+  display: block;
+  height: 34px;
+  width: auto;
 }
 
 .logo-sub {
-  font-size: 0.62rem;
-  font-weight: 700;
+  font-size: 0.6875rem;
+  font-weight: 600;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: var(--muted);
+  color: #94a3b8;
 }
 
 .logo img { height: 32px; filter: drop-shadow(0 0 8px rgba(34, 211, 238, 0.25)); }
@@ -225,39 +222,18 @@ body {
   margin: 16px 0 24px;
 }
 
+.yoro-paths-art,
 .hero-art {
   display: block;
-  width: min(100%, 320px);
+  width: min(100%, 360px);
   height: auto;
   margin: 8px auto 20px;
-  opacity: 0.95;
+  opacity: 0.98;
 }
-
-.hero-art--desktop {
-  display: none;
-}
-
-.hero-art path,
-.hero-art circle {
-  fill: none;
-  stroke-linecap: round;
-}
-
-.hero-art .path-cyan { stroke: #22d3ee; filter: drop-shadow(0 0 8px rgba(34, 211, 238, 0.55)); }
-.hero-art .path-purple { stroke: #a78bfa; filter: drop-shadow(0 0 8px rgba(167, 139, 250, 0.55)); }
-.hero-art .path-magenta { stroke: #c084fc; filter: drop-shadow(0 0 8px rgba(192, 132, 252, 0.5)); }
-.hero-art .node { fill: rgba(11, 15, 26, 0.9); stroke-width: 2; }
-.hero-art .origin { fill: #22d3ee; stroke: none; filter: drop-shadow(0 0 6px rgba(34, 211, 238, 0.7)); }
 
 .result-path-art {
   display: none;
 }
-
-.result-path-art .path-cyan { stroke: #22d3ee; filter: drop-shadow(0 0 6px rgba(34, 211, 238, 0.45)); }
-.result-path-art .path-purple { stroke: #a78bfa; filter: drop-shadow(0 0 6px rgba(167, 139, 250, 0.45)); }
-.result-path-art .path-magenta { stroke: #c084fc; filter: drop-shadow(0 0 6px rgba(192, 132, 252, 0.4)); }
-.result-path-art .node { fill: rgba(11, 15, 26, 0.9); stroke-width: 2; }
-.result-path-art .origin { fill: #22d3ee; stroke: none; filter: drop-shadow(0 0 5px rgba(34, 211, 238, 0.6)); }
 
 .stats-row {
   display: flex;
@@ -855,6 +831,13 @@ body.modal-open {
   border: 1px solid rgba(255,255,255,0.1);
   margin-bottom: 20px;
   animation: popIn 0.5s ease;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.result-visual {
+  width: 100%;
+  margin-bottom: 20px;
 }
 
 @keyframes popIn {
@@ -1125,7 +1108,7 @@ body.modal-open {
   color: var(--text);
   line-height: 1.55;
   margin-top: 12px;
-  max-width: 36em;
+  max-width: 42em;
   margin-left: auto;
   margin-right: auto;
 }
@@ -1400,6 +1383,42 @@ body.modal-open {
   }
 }
 
+@media (max-width: 639px) {
+  .wrap {
+    padding: 16px 14px 40px;
+  }
+
+  .topbar {
+    row-gap: 8px;
+  }
+
+  .yoro-mark {
+    height: 30px;
+  }
+
+  .logo img {
+    height: 28px;
+  }
+
+  .plain-toggle {
+    font-size: 0.65rem;
+    padding: 5px 8px;
+  }
+
+  .result-hero {
+    padding: 24px 16px;
+  }
+
+  .result-title {
+    font-size: 1.5rem;
+  }
+
+  .hero-sentence {
+    max-width: none;
+    font-size: 0.9rem;
+  }
+}
+
 @media (min-width: 540px) {
   .subject-grid { grid-template-columns: repeat(3, 1fr); }
 }
@@ -1470,57 +1489,54 @@ body.modal-open {
     grid-column: 1 / -1;
   }
 
-  .hero .hero-art--mobile {
-    display: none;
-  }
-
-  .hero .hero-art--desktop {
+  .hero .yoro-paths-art,
+  .hero .hero-art {
     display: block;
     grid-column: 2;
     grid-row: 2 / span 7;
     width: 100%;
-    max-width: 420px;
+    max-width: 400px;
     margin: 0;
     justify-self: end;
     align-self: center;
     opacity: 1;
   }
 
-  .logo-yoro {
-    font-size: 1.55rem;
+  .yoro-mark {
+    height: 38px;
   }
 
   .result-visual {
-    display: flex;
-    flex-direction: column;
+    display: grid;
+    grid-template-columns: 1fr minmax(160px, 220px);
+    gap: 28px;
     align-items: center;
-    gap: 24px;
-    margin: 0 auto 24px;
     width: 100%;
-    max-width: min(100%, 560px);
+    max-width: 100%;
+    margin: 0 auto 28px;
   }
 
   .result-path-art {
     display: block;
-    width: min(220px, 50vw);
-    max-width: 220px;
+    grid-column: 2;
+    grid-row: 1;
+    width: 100%;
+    max-width: 200px;
     height: auto;
-    margin: 0 auto;
-    flex-shrink: 0;
-    opacity: 0.95;
-  }
-
-  .result-path-art path,
-  .result-path-art circle {
-    fill: none;
-    stroke-linecap: round;
+    margin: 0;
+    justify-self: end;
+    opacity: 0.9;
   }
 
   .result-visual .result-hero {
+    grid-column: 1;
+    grid-row: 1;
     width: 100%;
+    max-width: none;
     margin-bottom: 0;
     text-align: center;
-    padding: 32px 28px;
+    padding: 36px 40px;
+    justify-self: stretch;
   }
 
   .result-visual .result-emoji {
@@ -1529,8 +1545,13 @@ body.modal-open {
   }
 
   .result-visual .hero-sentence {
+    max-width: 52ch;
     margin-left: auto;
     margin-right: auto;
+  }
+
+  .result-title {
+    font-size: 2rem;
   }
 
   .hero .pill,

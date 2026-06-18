@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 132 40" aria-hidden="true">
+  <defs>
+    <linearGradient id="yoro-o" x1="74" y1="2" x2="100" y2="26" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#22d3ee"/>
+      <stop offset="1" stop-color="#a78bfa"/>
+    </linearGradient>
+    <filter id="yoro-glow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="2" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  <text x="0" y="30" font-family="Inter, system-ui, -apple-system, sans-serif" font-size="34" font-weight="700" fill="#f8fafc">Yor</text>
+  <circle cx="88" cy="15" r="12.5" fill="none" stroke="url(#yoro-o)" stroke-width="5.5" stroke-linecap="round" stroke-dasharray="68 15" transform="rotate(48 88 15)" filter="url(#yoro-glow)"/>
+</svg>

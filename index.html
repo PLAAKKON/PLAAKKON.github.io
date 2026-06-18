@@ -33,7 +33,7 @@
     }
 
     *{box-sizing:border-box}
-    html,body{margin:0;height:100%}
+    html,body{margin:0;max-width:100%;overflow-x:clip}
     body{
       font-family: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
       color: var(--text);
@@ -54,7 +54,7 @@
         radial-gradient(ellipse 50% 32% at 50% 100%, rgba(52, 211, 153, 0.08), transparent);
     }
 
-    .wrap{max-width:1200px;margin:0 auto;padding:0 20px; position:relative; z-index:1}
+    .wrap{max-width:1200px;margin:0 auto;padding:0 20px; position:relative; z-index:1; width:100%}
     header.topbar{
       position: sticky; top: 0; z-index: 20;
       background: rgba(11, 15, 26, 0.88);
@@ -63,7 +63,30 @@
     }
     .topbar .inner{
       display:flex; align-items:center; justify-content:space-between;
-      height: 64px; gap: 16px;
+      min-height: 64px; gap: 12px; flex-wrap:wrap;
+    }
+    .brand{
+      display:flex; align-items:center; gap:12px;
+      font-weight: 700; letter-spacing: -0.01em;
+      min-width:0; flex:1 1 auto;
+    }
+    .brand a{min-width:0}
+    .brand img.brand-fish{height:36px; width:auto; flex-shrink:0; filter:drop-shadow(0 0 10px rgba(34,211,238,0.3))}
+    .logo-wordmark{display:flex; flex-direction:column; line-height:1; gap:2px}
+    .yoro-mark{display:block; height:34px; width:auto}
+    .yoro-mark--hero{height:clamp(2.75rem, 5.5vw, 3.5rem); margin-left:auto}
+    .logo-sub{
+      font-size:.6875rem; font-weight:600; letter-spacing:.14em;
+      text-transform:uppercase; color:#94a3b8;
+    }
+    .logo-sub--hero{font-size:.78rem; margin-top:2px; text-align:right}
+    .brand span{font-size: 1.05rem; color: var(--text)}
+
+    #auth-menu{flex-shrink:0; min-width:0; max-width:100%}
+    #auth-menu > div{flex-wrap:wrap; justify-content:flex-end}
+    #auth-menu span{
+      max-width:min(160px, 40vw); overflow:hidden;
+      text-overflow:ellipsis; white-space:nowrap;
     }
     .topnav{
       display:flex; gap:4px; flex-wrap:wrap;
@@ -74,31 +97,10 @@
     }
     .topnav a:hover{color:var(--accent); background:var(--brand-50); text-decoration:none}
     @media (max-width:900px){.topnav{display:none}}
-    .brand{
-      display:flex; align-items:center; gap:12px;
-      font-weight: 700; letter-spacing: -0.01em;
-    }
-    .brand img.brand-fish{height:36px; width:auto; flex-shrink:0; filter:drop-shadow(0 0 10px rgba(34,211,238,0.3))}
-    .logo-wordmark{display:flex; flex-direction:column; line-height:1.05; gap:0}
-    .logo-yoro{
-      font-size:1.35rem; font-weight:800; letter-spacing:-0.04em;
-      color:#f8fafc;
-    }
-    .logo-yoro--hero{font-size:clamp(2.4rem, 5vw, 3.2rem)}
-    .logo-o{
-      background:linear-gradient(135deg, #22d3ee 0%, #a78bfa 100%);
-      -webkit-background-clip:text; background-clip:text; color:transparent;
-      filter: drop-shadow(0 0 10px rgba(34, 211, 238, 0.35));
-    }
-    .logo-sub{
-      font-size:.62rem; font-weight:700; letter-spacing:.14em;
-      text-transform:uppercase; color:var(--muted);
-    }
-    .logo-sub--hero{font-size:.72rem; margin-top:4px}
-    .brand span{font-size: 1.05rem; color: var(--text)}
 
     .lang{
       display:flex; align-items:center; gap:8px;
+      flex-shrink:0;
       background: var(--surface-alt);
       border: 1px solid var(--border);
       border-radius: 999px; padding: 4px;
@@ -175,7 +177,8 @@
         radial-gradient(ellipse 55% 45% at 15% 85%, rgba(34, 211, 238, 0.14), transparent);
       pointer-events: none;
     }
-    .hero-path-art{
+    .hero-path-art,
+    .yoro-paths-art{
       display: block;
       width: 100%;
       max-width: 420px;
@@ -184,13 +187,6 @@
       position: relative;
       z-index: 1;
     }
-    .hero-path-art path,
-    .hero-path-art circle { fill: none; stroke-linecap: round; }
-    .hero-path-art .path-cyan { stroke: #22d3ee; filter: drop-shadow(0 0 8px rgba(34, 211, 238, 0.55)); }
-    .hero-path-art .path-purple { stroke: #a78bfa; filter: drop-shadow(0 0 8px rgba(167, 139, 250, 0.55)); }
-    .hero-path-art .path-magenta { stroke: #c084fc; filter: drop-shadow(0 0 8px rgba(192, 132, 252, 0.5)); }
-    .hero-path-art .node { fill: rgba(11, 15, 26, 0.92); stroke-width: 2; }
-    .hero-path-art .origin { fill: #22d3ee; stroke: none; filter: drop-shadow(0 0 6px rgba(34, 211, 238, 0.7)); }
     .hero-brand-mark{
       position: relative;
       z-index: 1;
@@ -374,6 +370,28 @@
         margin-bottom: 32px;
       }
     }
+
+    @media (max-width: 640px) {
+      .wrap{padding:0 14px}
+      .topbar .inner{padding:10px 0; row-gap:8px}
+      #auth-menu{flex:1 1 100%; display:flex; justify-content:flex-end}
+      .yoro-mark{height:30px}
+      .brand-fish{height:30px}
+      .logo-sub{font-size:.58rem}
+      .hero{padding:40px 0 28px}
+      .hero-grid{gap:20px}
+      .cta{flex-direction:column; align-items:stretch}
+      .cta .btn{width:100%; justify-content:center}
+      .hero-brand-panel{min-height:0; padding:16px 14px}
+      .hero-brand-mark{text-align:center}
+      .yoro-mark--hero{margin-left:auto; margin-right:auto}
+      .logo-sub--hero{text-align:center}
+      .section-alt{padding:22px 16px}
+      .tools-bar{padding:14px}
+      .tools-bar .btn{flex:1 1 100%; justify-content:center; text-align:center}
+      .compare-table{font-size:.8rem}
+      .compare-table th,.compare-table td{padding:8px 8px; word-break:break-word}
+    }
   </style>
 </head>
 <body>
@@ -385,7 +403,7 @@
         <a href="/" style="display:flex;align-items:center;gap:12px;color:inherit;text-decoration:none" aria-label="Yoro — etusivu">
           <img src="logo_transparent.png" alt="" class="brand-fish" aria-hidden="true"/>
           <span class="logo-wordmark" aria-hidden="true">
-            <span class="logo-yoro">Yor<span class="logo-o">o</span></span>
+            <img src="/yoro-mark.svg" alt="" class="yoro-mark" width="132" height="40"/>
             <span class="logo-sub">Työmarkkinaohjaus</span>
           </span>
         </a>
@@ -443,21 +461,10 @@
       </div>
       <div>
         <div class="hero-brand-panel" aria-hidden="true">
-          <svg class="hero-path-art" viewBox="0 0 480 280" focusable="false">
-            <path class="path-cyan" d="M240 228 Q210 170 120 72" stroke-width="3"/>
-            <path class="path-purple" d="M240 228 Q240 140 240 48" stroke-width="3"/>
-            <path class="path-magenta" d="M240 228 Q270 170 360 72" stroke-width="3"/>
-            <circle class="origin" cx="240" cy="228" r="7"/>
-            <circle class="node path-cyan" cx="120" cy="72" r="28"/>
-            <text x="120" y="79" text-anchor="middle" font-size="22">💼</text>
-            <circle class="node path-purple" cx="240" cy="48" r="28"/>
-            <text x="240" y="55" text-anchor="middle" font-size="22">🧭</text>
-            <circle class="node path-magenta" cx="360" cy="72" r="28"/>
-            <text x="360" y="79" text-anchor="middle" font-size="22">🚩</text>
-          </svg>
+          <img src="/yoro-paths.svg" class="yoro-paths-art" width="480" height="310" alt="" aria-hidden="true"/>
           <div class="hero-brand-mark">
-            <div class="logo-yoro logo-yoro--hero">Yor<span class="logo-o">o</span></div>
-            <div class="logo-sub logo-sub--hero">Ohjausmoottori</div>
+            <img src="/yoro-mark.svg" alt="" class="yoro-mark yoro-mark--hero" width="132" height="40"/>
+            <span class="logo-sub logo-sub--hero">Ohjausmoottori</span>
           </div>
         </div>
       </div>
