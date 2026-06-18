@@ -166,18 +166,10 @@ body {
   min-width: 0;
 }
 
-.yoro-mark {
+.yoro-logo {
   display: block;
-  height: 34px;
+  height: 36px;
   width: auto;
-}
-
-.logo-sub {
-  font-size: 0.6875rem;
-  font-weight: 600;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: #94a3b8;
 }
 
 .logo img { height: 32px; filter: drop-shadow(0 0 8px rgba(34, 211, 238, 0.25)); }
@@ -195,6 +187,14 @@ body {
 }
 
 /* Intro */
+.logo-sub {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #94a3b8;
+}
+
 .hero h1 {
   font-size: clamp(1.75rem, 6vw, 2.35rem);
   line-height: 1.12;
@@ -222,16 +222,7 @@ body {
   margin: 16px 0 24px;
 }
 
-.yoro-paths-art,
-.hero-art {
-  display: block;
-  width: min(100%, 360px);
-  height: auto;
-  margin: 8px auto 20px;
-  opacity: 0.98;
-}
-
-.result-path-art {
+.hero-deco-logo {
   display: none;
 }
 
@@ -835,11 +826,6 @@ body.modal-open {
   box-sizing: border-box;
 }
 
-.result-visual {
-  width: 100%;
-  margin-bottom: 20px;
-}
-
 @keyframes popIn {
   from { opacity: 0; transform: scale(0.92); }
   to { opacity: 1; transform: scale(1); }
@@ -1392,7 +1378,7 @@ body.modal-open {
     row-gap: 8px;
   }
 
-  .yoro-mark {
+  .yoro-logo {
     height: 30px;
   }
 
@@ -1489,65 +1475,28 @@ body.modal-open {
     grid-column: 1 / -1;
   }
 
-  .hero .yoro-paths-art,
-  .hero .hero-art {
+  .hero .hero-deco-logo {
     display: block;
     grid-column: 2;
     grid-row: 2 / span 7;
-    width: 100%;
-    max-width: 400px;
-    margin: 0;
-    justify-self: end;
-    align-self: center;
-    opacity: 1;
-  }
-
-  .yoro-mark {
-    height: 38px;
-  }
-
-  .result-visual {
-    display: grid;
-    grid-template-columns: 1fr minmax(160px, 220px);
-    gap: 28px;
-    align-items: center;
-    width: 100%;
-    max-width: 100%;
-    margin: 0 auto 28px;
-  }
-
-  .result-path-art {
-    display: block;
-    grid-column: 2;
-    grid-row: 1;
-    width: 100%;
-    max-width: 200px;
+    width: min(100%, 300px);
     height: auto;
     margin: 0;
     justify-self: end;
-    opacity: 0.9;
+    align-self: center;
+    opacity: 0.95;
   }
 
-  .result-visual .result-hero {
-    grid-column: 1;
-    grid-row: 1;
-    width: 100%;
-    max-width: none;
-    margin-bottom: 0;
-    text-align: center;
-    padding: 36px 40px;
-    justify-self: stretch;
+  .yoro-logo {
+    height: 40px;
   }
 
-  .result-visual .result-emoji {
-    margin-bottom: 8px;
-    font-size: 4rem;
+  .result-hero {
+    padding: 36px 48px;
   }
 
-  .result-visual .hero-sentence {
+  .hero-sentence {
     max-width: 52ch;
-    margin-left: auto;
-    margin-right: auto;
   }
 
   .result-title {

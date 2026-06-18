@@ -73,8 +73,8 @@
     .brand a{min-width:0}
     .brand img.brand-fish{height:36px; width:auto; flex-shrink:0; filter:drop-shadow(0 0 10px rgba(34,211,238,0.3))}
     .logo-wordmark{display:flex; flex-direction:column; line-height:1; gap:2px}
-    .yoro-mark{display:block; height:34px; width:auto}
-    .yoro-mark--hero{height:clamp(2.75rem, 5.5vw, 3.5rem); margin-left:auto}
+    .yoro-logo{display:block; height:36px; width:auto}
+    .yoro-logo--hero{height:clamp(3rem, 8vw, 4.5rem); margin:0 auto}
     .logo-sub{
       font-size:.6875rem; font-weight:600; letter-spacing:.14em;
       text-transform:uppercase; color:#94a3b8;
@@ -160,13 +160,14 @@
       background: linear-gradient(160deg, rgba(20, 27, 45, 0.95) 0%, rgba(11, 15, 26, 0.98) 100%);
       border: 1px solid rgba(34, 211, 238, 0.2);
       border-radius: calc(var(--radius) + 4px);
-      padding: 28px 24px 24px;
+      padding: 40px 28px;
       box-shadow: var(--shadow-lg), inset 0 1px 0 rgba(255,255,255,0.04);
       overflow: hidden;
-      min-height: 320px;
+      min-height: 220px;
       display: flex;
       flex-direction: column;
-      justify-content: flex-end;
+      justify-content: center;
+      align-items: center;
     }
     .hero-brand-panel::before{
       content: "";
@@ -177,23 +178,10 @@
         radial-gradient(ellipse 55% 45% at 15% 85%, rgba(34, 211, 238, 0.14), transparent);
       pointer-events: none;
     }
-    .hero-path-art,
-    .yoro-paths-art{
-      display: block;
-      width: 100%;
-      max-width: 420px;
-      height: auto;
-      margin: 0 auto 8px;
-      position: relative;
-      z-index: 1;
-    }
     .hero-brand-mark{
       position: relative;
       z-index: 1;
-      text-align: right;
-      padding-top: 8px;
-      border-top: 1px solid rgba(148, 163, 184, 0.15);
-      margin-top: 4px;
+      text-align: center;
     }
 
     .media-card{
@@ -375,16 +363,14 @@
       .wrap{padding:0 14px}
       .topbar .inner{padding:10px 0; row-gap:8px}
       #auth-menu{flex:1 1 100%; display:flex; justify-content:flex-end}
-      .yoro-mark{height:30px}
+      .yoro-logo{height:32px}
       .brand-fish{height:30px}
       .logo-sub{font-size:.58rem}
       .hero{padding:40px 0 28px}
       .hero-grid{gap:20px}
       .cta{flex-direction:column; align-items:stretch}
       .cta .btn{width:100%; justify-content:center}
-      .hero-brand-panel{min-height:0; padding:16px 14px}
-      .hero-brand-mark{text-align:center}
-      .yoro-mark--hero{margin-left:auto; margin-right:auto}
+      .hero-brand-panel{min-height:0; padding:28px 16px}
       .logo-sub--hero{text-align:center}
       .section-alt{padding:22px 16px}
       .tools-bar{padding:14px}
@@ -403,7 +389,7 @@
         <a href="/" style="display:flex;align-items:center;gap:12px;color:inherit;text-decoration:none" aria-label="Yoro — etusivu">
           <img src="logo_transparent.png" alt="" class="brand-fish" aria-hidden="true"/>
           <span class="logo-wordmark" aria-hidden="true">
-            <img src="/yoro-mark.svg" alt="" class="yoro-mark" width="132" height="40"/>
+            <img src="/yoro-logo.png" alt="" class="yoro-logo" width="160" height="48"/>
             <span class="logo-sub">Työmarkkinaohjaus</span>
           </span>
         </a>
@@ -461,9 +447,8 @@
       </div>
       <div>
         <div class="hero-brand-panel" aria-hidden="true">
-          <img src="/yoro-paths.svg" class="yoro-paths-art" width="480" height="310" alt="" aria-hidden="true"/>
           <div class="hero-brand-mark">
-            <img src="/yoro-mark.svg" alt="" class="yoro-mark yoro-mark--hero" width="132" height="40"/>
+            <img src="/yoro-logo.png" alt="" class="yoro-logo yoro-logo--hero" width="240" height="72"/>
             <span class="logo-sub logo-sub--hero">Ohjausmoottori</span>
           </div>
         </div>

@@ -8,6 +8,9 @@
  * ei LxP-avainta eikä työnantajan hakuprosessia.
  */
 
+const yoroLogoImage = new Image();
+yoroLogoImage.src = '/yoro-logo.png';
+
 const LXP_QUESTIONS = [
   {
     id: 'q1',
@@ -2727,88 +2730,12 @@ function bindAdvisorChat(archetype, topPaths, answers, tyoohjaus, motivation, in
   if (msgBox) msgBox.scrollTop = msgBox.scrollHeight;
 }
 
-function drawGlowCurve(ctx, x1, y1, cx, cy, x2, y2, color, width = 3.5) {
-  ctx.save();
-  ctx.strokeStyle = color;
-  ctx.lineWidth = width;
-  ctx.lineCap = 'round';
-  ctx.shadowColor = color;
-  ctx.shadowBlur = 20;
-  ctx.beginPath();
-  ctx.moveTo(x1, y1);
-  ctx.quadraticCurveTo(cx, cy, x2, y2);
-  ctx.stroke();
-  ctx.restore();
-}
-
-function drawPathNode(ctx, x, y, color, glyph) {
-  ctx.save();
-  ctx.shadowColor = color;
-  ctx.shadowBlur = 22;
-  ctx.strokeStyle = color;
-  ctx.lineWidth = 2;
-  ctx.fillStyle = 'rgba(11, 15, 26, 0.92)';
-  ctx.beginPath();
-  ctx.arc(x, y, 34, 0, Math.PI * 2);
-  ctx.fill();
-  ctx.stroke();
-  ctx.shadowBlur = 0;
-  ctx.fillStyle = '#f8fafc';
-  ctx.font = '28px Inter, system-ui, sans-serif';
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'middle';
-  ctx.fillText(glyph, x, y + 1);
-  ctx.restore();
-}
-
-function drawBranchingPathsArt(ctx, originX, originY) {
-  const nodes = [
-    { x: originX - 130, y: originY - 210, cx: originX - 95, cy: originY - 120, color: '#22d3ee', glyph: '💼' },
-    { x: originX, y: originY - 250, cx: originX, cy: originY - 140, color: '#a78bfa', glyph: '🧭' },
-    { x: originX + 130, y: originY - 210, cx: originX + 95, cy: originY - 120, color: '#c084fc', glyph: '🚩' },
-  ];
-
-  nodes.forEach((node) => drawGlowCurve(ctx, originX, originY, node.cx, node.cy, node.x, node.y, node.color));
-  nodes.forEach((node) => drawPathNode(ctx, node.x, node.y, node.color, node.glyph));
-
-  ctx.save();
-  ctx.fillStyle = '#22d3ee';
-  ctx.shadowColor = '#22d3ee';
-  ctx.shadowBlur = 14;
-  ctx.beginPath();
-  ctx.arc(originX, originY, 8, 0, Math.PI * 2);
-  ctx.fill();
-  ctx.restore();
-}
-
 function drawYoroMark(ctx, x, y) {
-  ctx.save();
-  ctx.textAlign = 'left';
-  ctx.textBaseline = 'alphabetic';
-  ctx.fillStyle = '#f8fafc';
-  ctx.font = 'bold 34px Inter, system-ui, sans-serif';
-  ctx.fillText('Yor', x, y);
-  const oX = x + ctx.measureText('Yor').width;
-  const grad = ctx.createLinearGradient(oX, y - 28, oX + 24, y);
-  grad.addColorStop(0, '#22d3ee');
-  grad.addColorStop(1, '#a78bfa');
-  const cx = oX + 12;
-  const cy = y - 14;
-  const r = 12.5;
-  ctx.strokeStyle = grad;
-  ctx.lineWidth = 5.5;
-  ctx.lineCap = 'round';
-  ctx.shadowColor = 'rgba(34, 211, 238, 0.45)';
-  ctx.shadowBlur = 6;
-  ctx.translate(cx, cy);
-  ctx.rotate(0.84);
-  ctx.beginPath();
-  ctx.setLineDash([68, 15]);
-  ctx.arc(0, 0, r, 0, Math.PI * 2);
-  ctx.stroke();
-  ctx.setLineDash([]);
-  ctx.shadowBlur = 0;
-  ctx.restore();
+  const logoH = 52;
+  if (yoroLogoImage.complete && yoroLogoImage.naturalWidth) {
+    const logoW = (yoroLogoImage.naturalWidth / yoroLogoImage.naturalHeight) * logoH;
+    ctx.drawImage(yoroLogoImage, x, y - logoH + 6, logoW, logoH);
+  }
   ctx.save();
   ctx.textAlign = 'left';
   ctx.textBaseline = 'alphabetic';
@@ -2839,7 +2766,13 @@ function drawShareCard(archetype, topPath) {
     ctx.fillRect(0, 0, 1200, 630);
   });
 
-  drawBranchingPathsArt(ctx, 900, 500);
+  if (yoroLogoImage.complete && yoroLogoImage.naturalWidth) {
+    const decoH = 140;
+    const decoW = (yoroLogoImage.naturalWidth / yoroLogoImage.naturalHeight) * decoH;
+    ctx.globalAlpha = 0.12;
+    ctx.drawImage(yoroLogoImage, 820, 160, decoW, decoH);
+    ctx.globalAlpha = 1;
+  }
 
   ctx.textAlign = 'left';
   ctx.textBaseline = 'alphabetic';
@@ -2875,13 +2808,17 @@ function drawShareCard(archetype, topPath) {
 }
 
 function downloadShareCard(archetype, topPath) {
-  const canvas = drawShareCard(archetype, topPath);
-  if (!canvas) return;
-  const a = document.createElement('a');
-  a.download = 'yoro-tyotyyli.png';
-  a.href = canvas.toDataURL('image/png');
-  a.click();
-  track('share_card_download', { archetype: archetype.id, path: topPath?.id });
+  const render = () => {
+    const canvas = drawShareCard(archetype, topPath);
+    if (!canvas) return;
+    const a = document.createElement('a');
+    a.download = 'yoro-tyotyyli.png';
+    a.href = canvas.toDataURL('image/png');
+    a.click();
+    track('share_card_download', { archetype: archetype.id, path: topPath?.id });
+  };
+  if (yoroLogoImage.complete) render();
+  else yoroLogoImage.onload = render;
 }
 
 function bindFeedback(archetype, topPath) {
@@ -2975,7 +2912,7 @@ function render() {
       <section class="hero">
         ${savedBanner}
         <div class="pill">Ilmainen · n. 10–12 min</div>
-        <img src="/yoro-paths.svg" class="hero-art yoro-paths-art" width="480" height="310" alt="" aria-hidden="true"/>
+        <img src="/yoro-logo.png" class="hero-deco-logo" width="280" height="84" alt="" aria-hidden="true"/>
         <h1 style="margin-top:0">${txt('introTitle1')}<br><span>${txt('introTitle2')}</span></h1>
         <p>${txt('introBody')}</p>
         <p class="hook">${txt('introHook')}</p>
@@ -3340,14 +3277,11 @@ function render() {
     app.innerHTML = `
       <p class="trust-banner">${txt('trustBanner')}</p>
 
-      <div class="result-visual">
-      <img src="/yoro-paths.svg" class="result-path-art yoro-paths-art" width="480" height="310" alt="" aria-hidden="true"/>
       <div class="result-hero">
         <div class="result-emoji" aria-hidden="true">${archetype.emoji}</div>
         <div class="result-type">${txt('resultType')}</div>
         <h2 class="result-title" tabindex="-1">${archetype.title}</h2>
         <p class="hero-sentence">${heroSentence}</p>
-      </div>
       </div>
 
       ${aspirationAlert}
