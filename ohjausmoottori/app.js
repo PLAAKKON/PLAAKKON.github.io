@@ -120,34 +120,34 @@ const LXP_QUESTIONS = [
   },
   {
     id: 'q7',
-    phase: 'Koulutuspolku',
-    text: 'Mikä kuvaa koulutuspolkuasi parhaiten?',
-    hint: 'Valitse lähin vaihtoehto — voit olla samanaikaisesti koulussa ja suunnittelemassa jatko-opintoja.',
+    phase: 'Koulutustausta',
+    text: 'Mikä seuraavista kuvaa parhaiten nykyistä tilannettasi?',
+    hint: '',
     options: [
-      { key: 'a', label: 'Olen lukiossa tai harkitsen lukio-opintoja peruskoulun jälkeen.' },
-      { key: 'b', label: 'Olen ammattikoulussa tai harkitsen ammattikoulu-opintoja peruskoulun jälkeen.' },
-      { key: 'c', label: 'Minulla on keskiasteen koulutus (lukio- tai ammattitutkinto valmis).' },
-      { key: 'd', label: 'Minulla on korkeakoulututkinto tai harkitsen korkeakoulu-opintoja (AMK/yliopisto).' },
-      { key: 'e', label: 'En tiedä vielä — koulutusvalinta on auki.' },
+      { key: 'a', label: 'Opiskelen lukiossa tai harkitsen lukio-opintoja.' },
+      { key: 'b', label: 'Opiskelen ammatillisessa koulutuksessa tai harkitsen ammatillisia opintoja.' },
+      { key: 'c', label: 'Minulla on toisen asteen tutkinto (lukio tai ammatillinen tutkinto).' },
+      { key: 'd', label: 'Minulla on korkeakoulututkinto tai harkitsen korkeakouluopintoja (AMK tai yliopisto).' },
+      { key: 'e', label: 'En ole vielä varma seuraavasta koulutuspolustani.' },
     ],
     narrative: {
       a: 'Lukiopolku — nyt tai suunnitelmissa.',
-      b: 'Ammattikoulupolku — nyt tai suunnitelmissa.',
-      c: 'Keskiaste suoritettu — jatko-opinnot mahdollisia.',
+      b: 'Ammatillinen koulutus — nyt tai suunnitelmissa.',
+      c: 'Toinen aste suoritettu — jatko-opinnot mahdollisia.',
       d: 'Korkeakoulutaso — nyt, suunnitelmissa tai valmis.',
-      e: 'Koulutusvalinta vielä auki.',
+      e: 'Koulutuspolku vielä auki.',
     },
   },
   {
     id: 'q8',
     phase: 'Seuraava askel',
-    text: 'Mikä kuvaa parhaiten seuraavaa askeltasi?',
-    hint: 'Erityisesti jos sinulla on jo keskiaste — tämä auttaa näyttämään myös korkeakoulutason polkuja.',
+    text: 'Mikä kuvaa parhaiten seuraavaa tavoitettasi?',
+    hint: 'Tämä auttaa löytämään sinulle sopivia opiskelu- ja uravaihtoehtoja.',
     options: [
-      { key: 'a', label: 'Haluan vielä tutkia vaihtoehtoja — en ole valmis päättämään.' },
-      { key: 'b', label: 'Haluan jatkaa opiskelua korkeakoulutasolla (AMK tai yliopisto).' },
-      { key: 'c', label: 'Haluan ensisijaisesti työelämään — opinnot mahdollisimman käytännönläheisesti.' },
-      { key: 'd', label: 'Haluan yhdistää työn ja opinnot (esim. työssäoppiminen).' },
+      { key: 'a', label: 'Haluan vielä tutkia eri vaihtoehtoja ennen päätöksen tekemistä.' },
+      { key: 'b', label: 'Haluan jatkaa opintoja korkeakoulussa (AMK tai yliopisto).' },
+      { key: 'c', label: 'Haluan siirtyä ensisijaisesti työelämään mahdollisimman käytännönläheisen polun kautta.' },
+      { key: 'd', label: 'Haluan yhdistää työn ja opiskelun (esim. oppisopimus, työssäoppiminen tai työn ohella opiskelu).' },
       { key: 'e', label: 'En osaa vielä sanoa.' },
     ],
     narrative: {
@@ -194,20 +194,20 @@ if (LXP_QUESTIONS.length !== 10) {
   throw new Error('LXP_QUESTIONS must stay at 10 items (hire workflow compatibility)');
 }
 
-/** Työohjauskerros — EI osa LxP-avainta / lxp.yoro.fi hire-matchingia */
+/** Uraohjauskerros — EI osa LxP-avainta / lxp.yoro.fi hire-matchingia */
 const TYOOHJAUS_QUESTIONS = [
   {
     id: 'precision',
-    phase: 'Työohjaus',
-    text: 'Miten kuvailisit omaa työskentelyäsi?',
+    phase: 'Uraohjaus',
+    text: 'Miten kuvailisit omaa työskentelytapojasi?',
     textPlain: 'Millaista tekijä olet?',
-    hint: 'Tämä kysymys on vain uraohjaukseen — ei vaikuta työnantajan LxP-hakuun. Ei oikeaa vastausta.',
+    hint: 'Tämä kysymys on tarkoitettu uraohjaukseen eikä vaikuta työnantajien käyttämiin LxP-hakuihin. Oikeita tai vääriä vastauksia ei ole.',
     hintPlain: 'Vain uraohjaukseen. Ei oikeaa vastausta.',
     options: [
-      { key: 'a', label: 'Olen huolellinen ja tarkka — pienetkin virheet häiritsevät minua.', labelPlain: 'Olen tarkka. Pienet virheet häiritsevät.' },
-      { key: 'b', label: 'Pyrin olemaan tarkka, mutta priorisoin usein kokonaiskuvan.', labelPlain: 'Yritän olla tarkka, mutta kokonaiskuva on tärkeämpi.' },
-      { key: 'c', label: 'Olen suurpiirteinen — näen mieluummin kokonaisuuden kuin yksityiskohdat.', labelPlain: 'Olen suurpiirteinen. Näen mieluummin kokonaisuuden.' },
-      { key: 'd', label: 'Teen välillä virheitä, mutta korjaan ne nopeasti eteenpäin mennessä.', labelPlain: 'Teen virheitä, mutta korjaan ne nopeasti.' },
+      { key: 'a', label: 'Olen huolellinen ja tarkka – pienetkin virheet kiinnittävät huomioni.', labelPlain: 'Olen tarkka. Pienet virheet kiinnittävät huomioni.' },
+      { key: 'b', label: 'Pyrin työskentelemään tarkasti, mutta keskityn ennen kaikkea kokonaisuuteen.', labelPlain: 'Yritän olla tarkka, mutta kokonaiskuva on tärkeämpi.' },
+      { key: 'c', label: 'Näen mieluummin suuret linjat kuin yksityiskohdat.', labelPlain: 'Näen mieluummin suuret linjat kuin yksityiskohdat.' },
+      { key: 'd', label: 'Teen joskus virheitä, mutta korjaan ne nopeasti ja jatkan eteenpäin.', labelPlain: 'Teen virheitä, mutta korjaan ne nopeasti.' },
     ],
     narrative: {
       a: 'Tarkkuus ja huolellisuus ovat vahvuuksiasi.',
@@ -218,16 +218,16 @@ const TYOOHJAUS_QUESTIONS = [
   },
   {
     id: 'drive',
-    phase: 'Työohjaus',
-    text: 'Mikä kuvaa sinua parhaiten työssä?',
-    textPlain: 'Mikä sopii sinulle työssä?',
-    hint: 'Vain uraohjaukseen — ei vaikuta työnantajan LxP-hakuun.',
+    phase: 'Uraohjaus',
+    text: 'Mikä kuvaa sinua parhaiten työssä tai opinnoissa?',
+    textPlain: 'Mikä sopii sinulle työssä tai opinnoissa?',
+    hint: 'Tämä kysymys on tarkoitettu uraohjaukseen eikä vaikuta työnantajien käyttämiin LxP-hakuihin.',
     hintPlain: 'Vain uraohjaukseen.',
     options: [
-      { key: 'a', label: 'Keksin mielelläni uusia ratkaisuja ja ideoita.', labelPlain: 'Keksin mielelläni uusia ideoita.' },
-      { key: 'b', label: 'Vienn asiat loppuun, vaikka homma on hankala ja kestää kauan.', labelPlain: 'Vien asiat loppuun, vaikka homma on hankala.' },
-      { key: 'c', label: 'Keksin mielelläni uusia ratkaisuja ja vien hankalatkin asiat loppuun saakka.', labelPlain: 'Keksin ideoita ja vien hankalat asiat loppuun.' },
-      { key: 'd', label: 'Pidän työstä, jossa eteneminen on selkeää — en hae erityisesti pitkäkestoisia hankalia projekteja.', labelPlain: 'Pidän selkeästä etenemisestä. En hae pitkiä hankalia projekteja.' },
+      { key: 'a', label: 'Keksin mielelläni uusia ideoita ja ratkaisuja.', labelPlain: 'Keksin mielelläni uusia ideoita.' },
+      { key: 'b', label: 'Vien asiat määrätietoisesti loppuun asti, vaikka ne olisivat haastavia ja aikaa vieviä.', labelPlain: 'Vien asiat loppuun, vaikka homma on hankala.' },
+      { key: 'c', label: 'Keksin uusia ratkaisuja ja vien myös haastavat tehtävät loppuun saakka.', labelPlain: 'Keksin ideoita ja vien hankalat asiat loppuun.' },
+      { key: 'd', label: 'Viihdyn tehtävissä, joissa eteneminen on selkeää ja tavoitteet helposti hahmotettavia.', labelPlain: 'Pidän selkeästä etenemisestä.' },
       { key: 'e', label: 'En osaa vielä sanoa.', labelPlain: 'En osaa vielä sanoa.' },
     ],
     narrative: {
@@ -240,7 +240,7 @@ const TYOOHJAUS_QUESTIONS = [
   },
   {
     id: 'visibility',
-    phase: 'Työohjaus',
+    phase: 'Uraohjaus',
     text: 'Miltä tuntuu puhua ihmisille, esitellä tai olla näkyvässä roolissa?',
     textPlain: 'Miltä tuntuu puhua ihmisille tai olla näkyvässä roolissa?',
     hint: 'Vain uraohjaukseen — auttaa karsimaan ammatteja, jotka vaativat paljon esiintymistä.',
@@ -258,7 +258,7 @@ const TYOOHJAUS_QUESTIONS = [
   },
   {
     id: 'stress',
-    phase: 'Työohjaus',
+    phase: 'Uraohjaus',
     text: 'Miten selviät, kun on kiire, häiriöitä tai epäselvää tilannetta?',
     textPlain: 'Miten selviät kiireestä tai epäselvistä tilanteista?',
     hint: 'Vain uraohjaukseen — auttaa karsimaan kiireisiä tai paineisia ammatteja.',
@@ -276,15 +276,15 @@ const TYOOHJAUS_QUESTIONS = [
   },
   {
     id: 'leisure',
-    phase: 'Työohjaus',
-    text: 'Miten vapaa-aikasi kuluu useimmiten?',
-    textPlain: 'Miten vapaa-aikasi kuluu?',
-    hint: 'Vain uraohjaukseen — auttaa arvioimaan, mikä työrytmi tuntuu luontevalta.',
-    hintPlain: 'Vain uraohjaukseen. Auttaa valitsemaan sopivaa työrytmiä.',
+    phase: 'Uraohjaus',
+    text: 'Miten vietät vapaa-aikaasi tyypillisen viikon aikana?',
+    textPlain: 'Miten vietät vapaa-aikaasi?',
+    hint: 'Tämä auttaa arvioimaan, millainen työympäristö ja työrytmi voivat tuntua sinulle luontevilta.',
+    hintPlain: 'Auttaa arvioimaan sopivaa työrytmiä.',
     options: [
-      { key: 'a', label: 'Yksin omaa juttua — pelit, sarjat, harrastus rauhassa', labelPlain: 'Yksin — pelit, sarjat tai harrastus rauhassa' },
-      { key: 'b', label: 'Sekä yksin että kavereiden kanssa — riippuu päivästä', labelPlain: 'Vähän molempia — joskus yksin, joskus kavereiden kanssa' },
-      { key: 'c', label: 'Usein muiden kanssa — porukassa, tapahtumissa, yhdessä tekemistä', labelPlain: 'Porukassa — tapahtumissa tai yhdessä tekemistä' },
+      { key: 'a', label: 'Vietän suurimman osan vapaa-ajastani omien kiinnostuksenkohteideni parissa.', labelPlain: 'Yksin omien kiinnostusten parissa' },
+      { key: 'b', label: 'Vietän aikaa sekä yksin että muiden kanssa tilanteesta riippuen.', labelPlain: 'Sekä yksin että muiden kanssa' },
+      { key: 'c', label: 'Vietän vapaa-aikaani usein muiden ihmisten seurassa, tapahtumissa tai yhteisissä aktiviteeteissa.', labelPlain: 'Usein muiden kanssa — tapahtumissa tai yhdessä' },
     ],
     narrative: {
       a: 'Lataudut yksin — suosimme vähemmän jatkuvaa asiakaskontaktia.',
@@ -2850,6 +2850,10 @@ function bindFeedback(archetype, topPath) {
       markFeedbackForCurrentResult();
       track('feedback', { rating });
       card.querySelectorAll('[data-feedback]').forEach((b) => { b.disabled = true; });
+      const title = card.querySelector('.feedback-title');
+      const btns = card.querySelector('.feedback-btns');
+      if (title) title.hidden = true;
+      if (btns) btns.hidden = true;
       if (thanks) thanks.hidden = false;
     });
   });
@@ -2912,13 +2916,13 @@ function render() {
       <section class="hero">
         ${savedBanner}
         <div class="pill">Ilmainen · n. 10–12 min</div>
-        <img src="/yoro-logo.png" class="hero-deco-logo" width="280" height="84" alt="" aria-hidden="true"/>
+        <img src="/yoro-logo.png" class="hero-deco-logo" alt="" aria-hidden="true"/>
         <h1 style="margin-top:0">${txt('introTitle1')}<br><span>${txt('introTitle2')}</span></h1>
         <p>${txt('introBody')}</p>
         <p class="hook">${txt('introHook')}</p>
         <div class="stats-row">
           <div class="stat"><strong>10</strong><span>LxP-kysymystä</span></div>
-          <div class="stat"><strong>4</strong><span>työohjauskysymystä</span></div>
+          <div class="stat"><strong>4</strong><span>uraohjauskysymystä</span></div>
           <div class="stat"><strong>2</strong><span>motivaatiota</span></div>
           <div class="stat"><strong>2</strong><span>kiinnostusta</span></div>
         </div>
@@ -3008,7 +3012,7 @@ function render() {
     app.innerHTML = `
       ${progressHtml}
       <div class="card">
-        <div class="phase-tag">Työohjaus ${state.tyoohjausIndex + 1}/${TYOOHJAUS_QUESTIONS.length} · ei LxP-hakua</div>
+        <div class="phase-tag">Uraohjaus ${state.tyoohjausIndex + 1}/${TYOOHJAUS_QUESTIONS.length} · Ei vaikuta LxP-hakuun</div>
         <h2 id="${headingId}">${qText(q)}</h2>
         <p class="hint">${qHint(q)}</p>
         <div class="options" id="opts" data-qid="${q.id}" role="radiogroup" aria-labelledby="${headingId}">
@@ -3344,7 +3348,7 @@ function render() {
       <button class="btn btn-ghost" id="retryBtn">Tee testi uudelleen</button>
       <a href="https://yoro.fi/" class="btn btn-ghost" style="text-decoration:none;margin-top:8px">← Palaa Yoro.fi-sivuille</a>
 
-      <p class="disclaimer">Tulos perustuu 10 kysymyksen LxP-työtyyliin, työohjauskerrokseen (mukaan lukien vapaa-aika), motivaatioon, lempikouluaineisiin ja kiinnostukseen. Ammattinimet noudattavat <a href="${TE24_SOURCE_URL}" target="_blank" rel="noopener noreferrer">TE24-luokitusta</a>. Ei vaikuta työnantajan LxP-hakuun (lxp.yoro.fi). Emme mittaa älykkyyttä tai arvosanoja.</p>`;
+      <p class="disclaimer">Tulos perustuu 10 kysymyksen LxP-työtyyliin, uraohjauskerrokseen (mukaan lukien vapaa-aika), motivaatioon, lempikouluaineisiin ja kiinnostukseen. Ammattinimet noudattavat <a href="${TE24_SOURCE_URL}" target="_blank" rel="noopener noreferrer">TE24-luokitusta</a>. Ei vaikuta työnantajan LxP-hakuun (lxp.yoro.fi). Emme mittaa älykkyyttä tai arvosanoja.</p>`;
 
     track('result_view', {
       archetype: archetype.id,

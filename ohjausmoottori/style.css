@@ -170,6 +170,8 @@ body {
   display: block;
   height: 36px;
   width: auto;
+  max-width: 100%;
+  object-fit: contain;
 }
 
 .logo img { height: 32px; filter: drop-shadow(0 0 8px rgba(34, 211, 238, 0.25)); }
@@ -1481,6 +1483,8 @@ body.modal-open {
     grid-row: 2 / span 7;
     width: min(100%, 300px);
     height: auto;
+    max-height: none;
+    object-fit: contain;
     margin: 0;
     justify-self: end;
     align-self: center;
