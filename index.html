@@ -72,8 +72,11 @@
     }
     .brand a{min-width:0}
     .brand img.brand-fish{height:36px; width:auto; flex-shrink:0; filter:drop-shadow(0 0 10px rgba(34,211,238,0.3))}
-    .logo-wordmark{display:flex; flex-direction:column; line-height:1; gap:2px}
-    .yoro-logo{display:block; height:36px; width:auto; max-width:100%; object-fit:contain}
+    .logo-wordmark{display:flex; flex-direction:column; line-height:1; gap:2px; align-items:flex-start}
+    .yoro-logo{
+      display:block; height:36px; width:auto; aspect-ratio:2/1;
+      max-width:none; object-fit:contain; flex-shrink:0; align-self:flex-start
+    }
     .yoro-logo--hero{height:clamp(3rem, 8vw, 4.5rem); margin:0 auto; width:auto; max-width:100%; object-fit:contain}
     .logo-sub{
       font-size:.6875rem; font-weight:600; letter-spacing:.14em;
@@ -82,8 +85,8 @@
     .logo-sub--hero{font-size:.78rem; margin-top:2px; text-align:right}
     .brand span{font-size: 1.05rem; color: var(--text)}
 
-    #auth-menu{flex-shrink:0; min-width:0; max-width:100%}
-    #auth-menu > div{flex-wrap:wrap; justify-content:flex-end}
+    #auth-menu{flex-shrink:0; min-width:0}
+    #auth-menu > div{display:flex; align-items:center; gap:8px; flex-wrap:nowrap}
     #auth-menu span{
       max-width:min(160px, 40vw); overflow:hidden;
       text-overflow:ellipsis; white-space:nowrap;
@@ -97,6 +100,11 @@
     }
     .topnav a:hover{color:var(--accent); background:var(--brand-50); text-decoration:none}
     @media (max-width:900px){.topnav{display:none}}
+
+    .topbar-end{
+      display:flex; align-items:center; gap:8px;
+      flex-shrink:0; margin-left:auto;
+    }
 
     .lang{
       display:flex; align-items:center; gap:8px;
@@ -361,8 +369,9 @@
 
     @media (max-width: 640px) {
       .wrap{padding:0 14px}
-      .topbar .inner{padding:10px 0; row-gap:8px}
-      #auth-menu{flex:1 1 100%; display:flex; justify-content:flex-end}
+      .topbar .inner{padding:10px 0; row-gap:8px; flex-wrap:nowrap; align-items:center}
+      .brand{flex:1 1 auto; min-width:0}
+      .topbar-end{flex:0 0 auto; margin-left:auto; gap:6px}
       .yoro-logo{height:32px}
       .brand-fish{height:30px}
       .logo-sub{font-size:.58rem}
@@ -406,11 +415,13 @@
         <a href="#kunnat">Municipalities</a>
         <a href="#tyokalut">Tools</a>
       </nav>
-      <div class="lang">
-        <button id="btnFi" class="active" onclick="switchLang('fi')">FI</button>
-        <button id="btnEn" onclick="switchLang('en')">EN</button>
-      </div>
+      <div class="topbar-end">
+        <div class="lang">
+          <button id="btnFi" class="active" onclick="switchLang('fi')">FI</button>
+          <button id="btnEn" onclick="switchLang('en')">EN</button>
+        </div>
         <div id="auth-menu"></div>
+      </div>
     </div>
   </header>
 
