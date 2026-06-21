@@ -101,14 +101,35 @@
     .topnav a:hover{color:var(--accent); background:var(--brand-50); text-decoration:none}
     @media (max-width:900px){
       .topnav{display:none}
-      .topbar .inner{flex-wrap:wrap; row-gap:8px}
-      .brand{flex:1 1 100%; min-width:0}
-      .topbar-end{
-        flex:1 1 100%;
-        margin-left:0;
-        justify-content:space-between;
+      .topbar .inner{
+        flex-wrap:nowrap;
+        align-items:center;
         gap:8px;
+        min-height:56px;
       }
+      .brand{
+        flex:1 1 auto;
+        min-width:0;
+      }
+      .brand a{gap:8px}
+      .logo-sub{display:none}
+      .topbar-end{
+        flex:0 0 auto;
+        margin-left:auto;
+        justify-content:flex-end;
+        gap:6px;
+      }
+      .lang button{
+        padding:6px 11px;
+        font-size:.85rem;
+      }
+      #auth-menu .btn{
+        height:32px;
+        padding:0 10px;
+        font-size:.82rem;
+        white-space:nowrap;
+      }
+      #auth-menu span{display:none}
     }
 
     .topbar-end{
@@ -379,10 +400,10 @@
 
     @media (max-width: 640px) {
       .wrap{padding:0 14px}
-      .topbar .inner{padding:10px 0}
-      .yoro-logo{height:32px}
-      .brand-fish{height:45px}
-      .logo-sub{font-size:.58rem}
+      .topbar .inner{padding:8px 0; gap:6px; min-height:48px}
+      .brand a{gap:6px}
+      .yoro-logo{height:28px}
+      .brand-fish{height:38px}
       .hero{padding:40px 0 28px}
       .hero-grid{gap:20px}
       .cta{flex-direction:column; align-items:stretch}
