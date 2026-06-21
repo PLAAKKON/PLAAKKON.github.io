@@ -202,25 +202,39 @@
       padding: 40px 28px;
       box-shadow: var(--shadow-lg), inset 0 1px 0 rgba(255,255,255,0.04);
       overflow: hidden;
-      min-height: 220px;
+      min-height: 260px;
       display: flex;
       flex-direction: column;
       justify-content: center;
       align-items: center;
+      isolation: isolate;
     }
-    .hero-brand-panel::before{
-      content: "";
+    .hero-brand-video{
       position: absolute;
       inset: 0;
-      background:
-        radial-gradient(ellipse 70% 55% at 85% 15%, rgba(167, 139, 250, 0.18), transparent),
-        radial-gradient(ellipse 55% 45% at 15% 85%, rgba(34, 211, 238, 0.14), transparent);
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      z-index: 0;
       pointer-events: none;
+    }
+    .hero-brand-overlay{
+      position: absolute;
+      inset: 0;
+      z-index: 1;
+      pointer-events: none;
+      background:
+        linear-gradient(160deg, rgba(11, 15, 26, 0.9) 0%, rgba(11, 15, 26, 0.78) 42%, rgba(20, 27, 45, 0.86) 100%),
+        radial-gradient(ellipse 70% 55% at 85% 15%, rgba(167, 139, 250, 0.14), transparent),
+        radial-gradient(ellipse 55% 45% at 15% 85%, rgba(34, 211, 238, 0.12), transparent);
     }
     .hero-brand-mark{
       position: relative;
-      z-index: 1;
+      z-index: 2;
       text-align: center;
+    }
+    @media (prefers-reduced-motion: reduce){
+      .hero-brand-video{display:none}
     }
 
     .media-card{
@@ -487,6 +501,10 @@
       </div>
       <div>
         <div class="hero-brand-panel" aria-hidden="true">
+          <video class="hero-brand-video" autoplay muted loop playsinline preload="metadata" tabindex="-1">
+            <source src="/Yoro1_final_1080p_30s.mp4" type="video/mp4">
+          </video>
+          <div class="hero-brand-overlay" aria-hidden="true"></div>
           <div class="hero-brand-mark">
             <img src="/yoro-logo.png" alt="" class="yoro-logo yoro-logo--hero"/>
             <span class="logo-sub logo-sub--hero">Ohjausmoottori</span>
@@ -992,6 +1010,24 @@
     (function initLang(){
       const saved = localStorage.getItem('preferred-language');
       if(saved && saved!=='fi') switchLang(saved);
+    })();
+
+    (function initHeroVideo(){
+      const video = document.querySelector('.hero-brand-video');
+      if(!video) return;
+      const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+      function syncHeroVideo(){
+        if(reduceMotion.matches){
+          video.pause();
+          video.style.display = 'none';
+        }
+      }
+      syncHeroVideo();
+      reduceMotion.addEventListener('change', syncHeroVideo);
+      document.addEventListener('visibilitychange', function(){
+        if(document.hidden) video.pause();
+        else if(!reduceMotion.matches) video.play().catch(function(){});
+      });
     })();
   </script>
 </body>
