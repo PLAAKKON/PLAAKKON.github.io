@@ -156,6 +156,26 @@
       color: #fff;
     }
 
+    .ui-lang-note{
+      font-size: 0.78em;
+      font-weight: 600;
+      color: #fbbf24;
+      white-space: nowrap;
+    }
+
+    .translation-services-note{
+      font-size: 0.88rem;
+      color: var(--muted);
+      background: rgba(251, 191, 36, 0.06);
+      border: 1px solid rgba(251, 191, 36, 0.2);
+      border-radius: 10px;
+      padding: 12px 14px;
+      margin: 14px 0 0;
+      line-height: 1.5;
+    }
+
+    .translation-services-note strong{color:#fbbf24}
+
     .hero{
       padding: 72px 0 56px;
       background: transparent;
@@ -494,11 +514,12 @@
           <p class="sub">LxP describes the kind of work environment where someone is more likely to thrive — something a CV rarely captures. In the <strong>guidance engine</strong>, young people take a 10–12 minute test, get a work style type and paths to explore, and can chat with <strong>Yoro Valmentaja</strong> about the results. Free beta, no sign-up required.</p>
           <div class="cta">
             <a class="btn primary" href="https://yoro.fi/ohjausmoottori/">Try work style test</a>
-            <a class="btn primary" href="https://yoro.fi/profiilitesti/">Start with profile test</a>
-            <a class="btn primary" href="https://lxp.yoro.fi/test-workflow.html?mode=hire" target="_blank">Find candidates</a>
+            <a class="btn primary" href="https://yoro.fi/profiilitesti/">Start with profile test <span class="ui-lang-note">(Finnish only)</span></a>
+            <a class="btn primary" href="https://lxp.yoro.fi/test-workflow.html?mode=hire" target="_blank">Find candidates <span class="ui-lang-note">(Finnish only)</span></a>
             <a class="btn" href="#kunnat">For municipalities</a>
             <a class="btn" href="mailto:myynti@yoro.fi">Partnership / pilot</a>
           </div>
+          <p class="translation-services-note">English UI today: <strong>guidance engine test</strong> (link above). Profile test, employer search, education matching, and login remain Finnish.</p>
         </div>
       </div>
       <div>
@@ -795,12 +816,18 @@
         <div class="tools-bar">
             <a class="btn primary lang-content active" data-lang="fi" href="https://yoro.fi/ohjausmoottori/">Ohjausmoottori + Yoro Valmentaja</a>
             <a class="btn primary lang-content" data-lang="en" href="https://yoro.fi/ohjausmoottori/">Guidance engine + Yoro Valmentaja</a>
-            <a class="btn primary" href="https://yoro.fi/profiilitesti/">LxP Profiilitesti</a>
-          <a class="btn primary" href="https://lxp.yoro.fi/test-workflow.html?mode=hire" target="_blank">Kandidaattihaku</a>
-          <a class="btn" href="https://yoro.fi/profiiliselain/" target="_blank">Profiiliselain</a>
-          <a class="btn" href="https://lxp.yoro.fi/test-workflow.html?mode=course" target="_blank">Koulutuksen kohdistus</a>
-          <a class="btn" href="/kirjaudu">Kirjaudu</a>
+            <a class="btn primary lang-content active" data-lang="fi" href="https://yoro.fi/profiilitesti/">LxP Profiilitesti</a>
+            <a class="btn primary lang-content" data-lang="en" href="https://yoro.fi/profiilitesti/">LxP profile test <span class="ui-lang-note">(Finnish only)</span></a>
+          <a class="btn primary lang-content active" data-lang="fi" href="https://lxp.yoro.fi/test-workflow.html?mode=hire" target="_blank">Kandidaattihaku</a>
+          <a class="btn primary lang-content" data-lang="en" href="https://lxp.yoro.fi/test-workflow.html?mode=hire" target="_blank">Candidate search <span class="ui-lang-note">(Finnish only)</span></a>
+          <a class="btn lang-content active" data-lang="fi" href="https://yoro.fi/profiiliselain/" target="_blank">Profiiliselain</a>
+          <a class="btn lang-content" data-lang="en" href="https://yoro.fi/profiiliselain/" target="_blank">Profile browser <span class="ui-lang-note">(partial EN)</span></a>
+          <a class="btn lang-content active" data-lang="fi" href="https://lxp.yoro.fi/test-workflow.html?mode=course" target="_blank">Koulutuksen kohdistus</a>
+          <a class="btn lang-content" data-lang="en" href="https://lxp.yoro.fi/test-workflow.html?mode=course" target="_blank">Education matching <span class="ui-lang-note">(Finnish only)</span></a>
+          <a class="btn lang-content active" data-lang="fi" href="/kirjaudu">Kirjaudu</a>
+          <a class="btn lang-content" data-lang="en" href="/kirjaudu">Log in <span class="ui-lang-note">(Finnish only)</span></a>
         </div>
+        <p class="translation-services-note lang-content" data-lang="en">Service language status: guidance engine = English UI; profile browser = partial English; all other tools above = Finnish only. Yoro Valmentaja chat replies are still Finnish.</p>
       </section>
 
       <!-- FAQ -->

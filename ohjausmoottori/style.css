@@ -1085,6 +1085,46 @@ body.modal-open {
   line-height: 1.45;
 }
 
+.translation-notice {
+  font-size: 0.8rem;
+  color: var(--muted);
+  background: rgba(251, 191, 36, 0.06);
+  border: 1px solid rgba(251, 191, 36, 0.22);
+  border-radius: 12px;
+  padding: 14px 16px;
+  margin: 0 0 20px;
+  line-height: 1.5;
+}
+
+.translation-notice-title {
+  margin: 0 0 8px;
+  font-size: 0.84rem;
+  font-weight: 700;
+  color: #fbbf24;
+}
+
+.translation-notice-intro {
+  margin: 0 0 12px;
+}
+
+.translation-notice-heading {
+  margin: 10px 0 6px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #94a3b8;
+}
+
+.translation-notice-list {
+  margin: 0 0 4px;
+  padding-left: 1.15rem;
+}
+
+.translation-notice-list--partial li {
+  color: #cbd5e1;
+}
+
 .trust-inline {
   font-size: 0.82rem;
   color: var(--accent3);

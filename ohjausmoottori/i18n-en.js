@@ -595,6 +595,8 @@ const I18N_EN = {
     modalClose: 'Close',
     modalCancel: 'Cancel',
     modalSendEmail: 'Send by email',
+    logoSub: 'Guidance engine',
+    betaPill: 'Beta',
   },
   pathWhy: {
     sector: {
@@ -661,6 +663,33 @@ const I18N_EN = {
     pathsFallback: '3 paths to try',
     tryLabel: 'worth trying',
     footer: 'About 10–12 min · free · not a career forecast',
+  },
+  translationCoverage: {
+    title: 'English UI — what is and is not translated',
+    intro: 'This guidance engine has an English interface. The items below stay Finnish on purpose or because the linked service has no English version yet.',
+    translatedTitle: 'Translated in this tool',
+    translated: [
+      'Test questions, options, and result screens',
+      'Work style types, path cards, and “why this path” explanations',
+      'Share texts, email templates, and most buttons',
+    ],
+    notTranslatedTitle: 'Still Finnish or Finland-specific',
+    notTranslated: [
+      'TE24 occupation names (official Finnish job titles)',
+      'Pages opened via Opintopolku, Työmarkkinatori, and TET.fi links',
+      'Yoro Valmentaja AI chat replies (server not localized yet)',
+      'Search keywords embedded in external education and job links',
+      'Share-card watermark text “OHJAUSMOOTTORI”',
+    ],
+    otherServicesTitle: 'Other Yoro services',
+    otherServices: [
+      'yoro.fi homepage — English marketing copy available',
+      'LxP profile test (profiilitesti) — Finnish only',
+      'LxP candidate search (lxp.yoro.fi) — Finnish only',
+      'Education matching workflow — Finnish only',
+      'Profile browser — partial English',
+      'Login and employer tools — Finnish only',
+    ],
   },
   narratives: {},
 };

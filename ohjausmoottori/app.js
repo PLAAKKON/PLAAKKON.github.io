@@ -1506,6 +1506,8 @@ const UI_FI = {
   modalClose: 'Sulje',
   modalCancel: 'Peruuta',
   modalSendEmail: 'Lähetä sähköpostilla',
+  logoSub: 'Ohjausmoottori',
+  betaPill: 'Beta',
 };
 
 function isEn() {
@@ -1604,6 +1606,25 @@ function setDocumentLang() {
   document.title = ui('documentTitle');
   const metaDesc = document.querySelector('meta[name="description"]');
   if (metaDesc) metaDesc.content = ui('documentDescription');
+  const logoSub = document.querySelector('.logo-sub');
+  if (logoSub) logoSub.textContent = ui('logoSub');
+  const betaPill = document.querySelector('.topbar-actions .pill');
+  if (betaPill) betaPill.textContent = ui('betaPill');
+}
+
+function renderTranslationNotice() {
+  if (!isEn() || typeof I18N_EN === 'undefined' || !I18N_EN.translationCoverage) return '';
+  const c = I18N_EN.translationCoverage;
+  return `<aside class="translation-notice" role="note" aria-label="${c.title}">
+    <p class="translation-notice-title">${c.title}</p>
+    <p class="translation-notice-intro">${c.intro}</p>
+    <p class="translation-notice-heading">${c.translatedTitle}</p>
+    <ul class="translation-notice-list">${c.translated.map((item) => `<li>${item}</li>`).join('')}</ul>
+    <p class="translation-notice-heading">${c.notTranslatedTitle}</p>
+    <ul class="translation-notice-list translation-notice-list--partial">${c.notTranslated.map((item) => `<li>${item}</li>`).join('')}</ul>
+    <p class="translation-notice-heading">${c.otherServicesTitle}</p>
+    <ul class="translation-notice-list translation-notice-list--partial">${c.otherServices.map((item) => `<li>${item}</li>`).join('')}</ul>
+  </aside>`;
 }
 
 function pathWhy(category, key) {
@@ -3214,6 +3235,7 @@ function render() {
           <div class="stat"><strong>2</strong><span>${ui('introStatsInterest')}</span></div>
         </div>
         <button class="btn btn-primary" id="startBtn">${txt('startBtn')}</button>
+        ${renderTranslationNotice()}
         <p class="disclaimer" style="margin-top:20px">${txt('introDisclaimer')}</p>
       </section>`;
     const resumeBtn = document.getElementById('resumeResultBtn');
@@ -3567,6 +3589,7 @@ function render() {
 
     app.innerHTML = `
       <p class="trust-banner">${txt('trustBanner')}</p>
+      ${renderTranslationNotice()}
 
       <div class="result-hero">
         <div class="result-emoji" aria-hidden="true">${archetype.emoji}</div>
