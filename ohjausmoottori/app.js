@@ -1217,25 +1217,23 @@ function occupationFilterNote(pathId, answers, tyoohjaus = {}, motivation = {}, 
   const notes = [];
   const tyoohjausHidden = all.length - tyoohjausFiltered.length;
   if (tyoohjausHidden > 0) {
-    notes.push(`Piilotimme ${tyoohjausHidden} ammattia, jotka vaativat enemmän esiintymistä, kiirettä tai asiakaskontaktia kuin valitsit.`);
+    notes.push(ui('occupationFilterTyoohjaus').replace('{n}', tyoohjausHidden));
   }
   if (meaningPicks.length) {
     const meaningHidden = tyoohjausFiltered.filter((job) => occupationMeaningFit(job, meaningPicks) === 'none').length;
     if (meaningHidden > 0) {
-      notes.push(`Piilotimme ${meaningHidden} ammattia, jotka eivät vastanneet merkitysvalintoihisi.`);
+      notes.push(ui('occupationFilterMeaning').replace('{n}', meaningHidden));
     }
   }
   if (!notes.length && all.length > shown.length) {
-    notes.push(`Piilotimme ${all.length - shown.length} ammattia valintojesi perusteella.`);
+    notes.push(ui('occupationFilterGeneric').replace('{n}', all.length - shown.length));
   }
   return notes.join(' ');
 }
 
 function occupationHintFor(answers) {
-  if (hasHigherEdBackground(answers)) {
-    return 'Esimerkkejä korkeakoulutasoiseen polkuun sopivista ammateista (TE24) — ei perustason toimisto- tai käytännön tehtäviä. Jokainen ammatti linkittyy Opintopolkuun ja Työmarkkinatoriin.';
-  }
-  return 'Esimerkkejä tämän polun ammateista (TE24) — avaa opinnot tai työpaikkahaku yhdellä klikillä.';
+  if (hasHigherEdBackground(answers)) return ui('occupationHintHigherEd');
+  return ui('occupationHintDefault');
 }
 
 /** Polkukohtaiset hakusanat ulkoisiin palveluihin (P2) */
@@ -1286,36 +1284,30 @@ function renderOccupationItem(job) {
   return `<li class="occupation-item">
     <span class="occupation-name">${job}</span>
     <span class="occupation-links">
-      <a class="occ-link" href="${opUrl}" target="_blank" rel="noopener noreferrer" data-track="opintopolku" data-term="${job}">Opinnot</a>
-      <a class="occ-link" href="${jobUrl}" target="_blank" rel="noopener noreferrer" data-track="tyomarkkinatori" data-term="${job}">Työpaikat</a>
+      <a class="occ-link" href="${opUrl}" target="_blank" rel="noopener noreferrer" data-track="opintopolku" data-term="${job}">${ui('occupationStudiesLink')}</a>
+      <a class="occ-link" href="${jobUrl}" target="_blank" rel="noopener noreferrer" data-track="tyomarkkinatori" data-term="${job}">${ui('occupationJobsLink')}</a>
     </span>
   </li>`;
 }
 
 function buildAspirationMismatchHtml(tyoohjaus = {}, motivation = {}, interests = {}) {
   if (!detectAspirationMismatch(tyoohjaus, motivation, interests)) return '';
-  const title = state.plainLanguage
-    ? 'Huomio'
-    : 'Huomio: toive ja arki voivat vetää eri suuntiin';
-  const body = state.plainLanguage
-    ? 'Haluat auttaa ihmisiä, mutta vietät vapaa-aikasi useimmiten yksin etkä halua olla näkyvässä roolissa. Näkyvä asiakaspalvelu tai myynti voi tuntua aluksi raskaalta. Kokeile ensin TETiä tai rooleja, joissa on vähemmän jatkuvaa asiakaskontaktia.'
-    : 'Haluat auttaa ihmisiä, mutta arvostat rauhallista työrytmiä ja vietät vapaa-aikasi useimmiten yksin. Näkyvä asiakaspalvelu tai myynti voi tuntua aluksi raskaalta. Kokeile ensin TETiä hoiva- tai palvelualalla tai rooleissa, joissa on vähemmän jatkuvaa asiakaskontaktia (esim. taustatyö, valmistelu, laboratorio).';
   return `<div class="aspiration-alert" role="note">
-    <p class="aspiration-alert-title">${title}</p>
-    <p class="aspiration-alert-body">${body}</p>
-    <a class="aspiration-alert-link" href="${tetPaikatUrl()}" target="_blank" rel="noopener noreferrer" data-track="aspiration_tet">Etsi TET-paikka (TET.fi) →</a>
+    <p class="aspiration-alert-title">${ui('aspirationTitle')}</p>
+    <p class="aspiration-alert-body">${ui('aspirationBody')}</p>
+    <a class="aspiration-alert-link" href="${tetPaikatUrl()}" target="_blank" rel="noopener noreferrer" data-track="aspiration_tet">${ui('aspirationLink')}</a>
   </div>`;
 }
 
 function renderOccupationList(pathId, answers, tyoohjaus = {}, motivation = {}, interests = {}) {
   const jobs = occupationsForPath(pathId, answers, tyoohjaus, motivation, interests);
   if (!jobs.length) {
-    return '<p class="occupation-hint">Yksikään ammatti ei täsmännyt kaikkiin valintoihisi — kokeile toista polkua tai tee testi uudelleen myöhemmin.</p>';
+    return `<p class="occupation-hint">${ui('occupationNone')}</p>`;
   }
   const filterNote = occupationFilterNote(pathId, answers, tyoohjaus, motivation, interests);
   return `<ul class="occupation-list">${jobs.map((j) => renderOccupationItem(j)).join('')}</ul>
   ${filterNote ? `<p class="occupation-filter-note">${filterNote}</p>` : ''}
-  <p class="te24-source">Ammattinimet perustuvat <a href="${TE24_SOURCE_URL}" target="_blank" rel="noopener noreferrer">TE24-luokitukseen</a> (Tilastokeskus).</p>`;
+  <p class="te24-source">${ui('te24Source').replace('{te24}', TE24_SOURCE_URL)}</p>`;
 }
 
 function bindPathToggles() {
@@ -1327,7 +1319,7 @@ function bindPathToggles() {
       panel.hidden = !open;
       btn.setAttribute('aria-expanded', open ? 'true' : 'false');
       const count = btn.dataset.count || '';
-      btn.textContent = open ? `Piilota ammatit ▴` : `Näytä ammatit (${count}) ▾`;
+      btn.textContent = open ? `${ui('hideOccupations')} ▴` : `${ui('showOccupations')} (${count}) ▾`;
     });
   });
 }
@@ -1336,7 +1328,7 @@ const ANALYTICS_KEY = 'yoro_ohjaus_events_v1';
 const FEEDBACK_KEY = 'yoro_ohjaus_feedback_v1';
 const FEEDBACK_DONE_KEY = 'yoro_ohjaus_feedback_done_v1';
 const RESULT_STORAGE_KEY = 'yoro_ohjaus_result_v1';
-const PLAIN_LANG_KEY = 'yoro_plain_lang_v1';
+const LANG_KEY = 'yoro_ohjaus_lang_v1';
 const RESULT_HASH_PREFIX = '#r=';
 const FIREBASE_CONFIG = {
   apiKey: 'AIzaSyBdY2Xl5q2gW0ZlqjvHwmx2wIo1c3vZKfA',
@@ -1350,112 +1342,285 @@ const FEEDBACK_COLLECTION = 'ohjausmoottori_feedback';
 const COPY = {
   trustBanner: {
     fi: 'Tämä ei ole arvosana eikä uraennuste — vain suuntaa kokeiltavaksi.',
-    plain: 'Tämä ei ole arvosana. Se on vain ehdotus suunnasta.',
+    plain: 'This is not a grade or a career prediction — only a direction to try.',
+    en: 'This is not a grade or a career prediction — only a direction to try.',
   },
-  resultType: { fi: 'Sinun tekijätyyppisi', plain: 'Sinun tyyppisi' },
-  strengthsTitle: { fi: 'Vahvuutesi työssä', plain: 'Miten työskentelet' },
-  pathsTitle: { fi: '3 polkua kokeiltavaksi', plain: '3 polkua kokeiltavaksi' },
+  resultType: { fi: 'Sinun tekijätyyppisi', plain: 'Sinun tyyppisi', en: 'Your work style type' },
+  strengthsTitle: { fi: 'Vahvuutesi työssä', plain: 'Miten työskentelet', en: 'Your strengths at work' },
+  pathsTitle: { fi: '3 polkua kokeiltavaksi', plain: '3 polkua kokeiltavaksi', en: '3 paths to try' },
   pathsLead: {
     fi: 'Ei lopullista uraa — valitse yksi ja kokeile käytännössä. Avaa polku nähdäksesi miksi se ehdotettiin.',
     plain: 'Valitse yksi polku ja kokeile sitä käytännössä. Voit avata polun ja lukea miksi se sopii.',
+    en: 'This is not a final career — pick one path and try it in practice. Open a path to see why it was suggested.',
   },
-  savedBanner: { fi: 'Sinulla on tallennettu tulos tästä selaimesta.', plain: 'Tuloksesi on tallessa tässä selaimessa.' },
-  resumeResult: { fi: 'Palaa tulokseesi →', plain: 'Näytä tulos uudelleen →' },
-  copyResultLink: { fi: 'Kopioi linkki', plain: 'Kopioi linkki' },
-  shareToggle: { fi: 'Jaa tulos', plain: 'Jaa tulos' },
-  shareDownloadCard: { fi: 'Lataa jaettava kortti (PNG)', plain: 'Lataa kortti (PNG)' },
-  shareText: { fi: 'Jaa tekstinä', plain: 'Jaa tekstinä' },
-  linkCopied: { fi: 'Linkki kopioitu!', plain: 'Kopioitu!' },
+  savedBanner: { fi: 'Sinulla on tallennettu tulos tästä selaimesta.', plain: 'Tuloksesi on tallessa tässä selaimessa.', en: 'You have a saved result in this browser.' },
+  resumeResult: { fi: 'Palaa tulokseesi →', plain: 'Näytä tulos uudelleen →', en: 'Return to your result →' },
+  copyResultLink: { fi: 'Kopioi linkki', plain: 'Kopioi linkki', en: 'Copy link' },
+  shareToggle: { fi: 'Jaa tulos', plain: 'Jaa tulos', en: 'Share result' },
+  shareDownloadCard: { fi: 'Lataa jaettava kortti (PNG)', plain: 'Lataa kortti (PNG)', en: 'Download share card (PNG)' },
+  shareText: { fi: 'Jaa tekstinä', plain: 'Jaa tekstinä', en: 'Share as text' },
+  linkCopied: { fi: 'Linkki kopioitu!', plain: 'Kopioitu!', en: 'Link copied!' },
   plainToggle: { fi: 'Selkokieli', plain: 'Normaali kieli' },
   defaultHint: {
     fi: 'Valitse yksi — ei oikeita tai vääriä vastauksia.',
     plain: 'Valitse yksi. Kaikki vastaukset käyvät.',
+    en: 'Choose one — there are no right or wrong answers.',
   },
-  progressAlmost: { fi: ' · melkein valmis!', plain: ' · melkein valmis!' },
-  introTitle1: { fi: 'Et tiedä mitä haluat?', plain: 'Et tiedä vielä mitä haluat?' },
-  introTitle2: { fi: 'Hyvä.', plain: 'Se on ok.' },
+  progressAlmost: { fi: ' · melkein valmis!', plain: ' · melkein valmis!', en: ' · almost done!' },
+  introTitle1: { fi: 'Et tiedä mitä haluat?', plain: 'Et tiedä vielä mitä haluat?', en: "Not sure what you want?" },
+  introTitle2: { fi: 'Hyvä.', plain: 'Se on ok.', en: "That's okay." },
   introBody: {
     fi: 'Tämä testi ei kerro sinulle ammattia. Se kertoo <strong style="color:var(--text)">miten sinä työskentelet parhaiten</strong> — ja ehdottaa <strong style="color:var(--text)">3 polkua</strong> kokeiltavaksi.',
     plain: 'Testi ei kerro ammattia. Se kertoo <strong style="color:var(--text)">miten työskentelet</strong>. Saat <strong style="color:var(--text)">3 polkua</strong> kokeiltavaksi.',
+    en: 'This test does not tell you a job title. It describes <strong style="color:var(--text)">how you work best</strong> — and suggests <strong style="color:var(--text)">3 paths</strong> to try.',
   },
-  introHook: { fi: '✦ Saat oman tekijätyypin + jaettavan kortin', plain: '✦ Saat oman tyypin ja kuvan jaettavaksi' },
-  startBtn: { fi: 'Aloita testi →', plain: 'Aloita →' },
-  introDisclaimer: { fi: 'Ei rekisteröitymistä. Tulos on ohjausta, ei ennustetta.', plain: 'Ei tarvitse rekisteröityä. Tulos on vain ohjausta.' },
-  shareToCounselor: { fi: 'Lähetä ohjaajalle', plain: 'Lähetä ohjaajalle' },
-  counselorModalTitle: { fi: 'Lähetä tulos ohjaajalle', plain: 'Lähetä tulos ohjaajalle' },
-  counselorEmailLabel: { fi: 'Ohjaajan sähköpostiosoite', plain: 'Ohjaajan sähköposti' },
-  counselorEmailHint: { fi: 'Lähetys avaa sähköpostiohjelmasi — viesti lähtee sinun osoitteestasi.', plain: 'Lähetys avaa sähköpostin. Viesti lähtee sinun osoitteestasi.' },
-  counselorNameLabel: { fi: 'Sinun nimesi', plain: 'Nimesi' },
-  counselorNameHint: { fi: 'Nimi allekirjoitukseen, esim. T. Pasi Laakkonen', plain: 'Nimi allekirjoitukseen' },
-  counselorMessageLabel: { fi: 'Lyhyt viesti', plain: 'Lyhyt viesti' },
-  counselorMessageDefault: { fi: 'Tässä testini.', plain: 'Tässä testini.' },
-  counselorPrivacy: { fi: 'Linkissä on testituloksesi — lähetä vain luotetulle ohjaajalle.', plain: 'Linkissä on tuloksesi. Lähetä vain luotetulle ohjaajalle.' },
-  counselorInvalidEmail: { fi: 'Tarkista sähköpostiosoite.', plain: 'Tarkista sähköposti.' },
-  counselorNameRequired: { fi: 'Kirjoita nimesi allekirjoitukseen.', plain: 'Kirjoita nimesi.' },
-  shareToFriend: { fi: 'Lähetä ystävälle', plain: 'Lähetä ystävälle' },
-  friendModalTitle: { fi: 'Lähetä tulos ystävälle', plain: 'Lähetä tulos ystävälle' },
-  friendEmailLabel: { fi: 'Ystäväsi sähköpostiosoite', plain: 'Ystävän sähköposti' },
-  friendEmailHint: { fi: 'Lähetys avaa sähköpostiohjelmasi — viesti lähtee sinun osoitteestasi.', plain: 'Lähetys avaa sähköpostin. Viesti lähtee sinun osoitteestasi.' },
-  friendMessageDefault: { fi: 'Tein tämän testin — kokeile sinäkin!', plain: 'Tein tämän testin. Kokeile sinäkin!' },
-  friendPrivacy: { fi: 'Viestissä on linkki tulokseesi ja linkki testiin. Lähetä vain luotetulle ystävälle.', plain: 'Viestissä on linkki tulokseesi ja testiin. Lähetä vain luotetulle ystävälle.' },
-  advisorCtaTitle: { fi: 'Yoro Valmentaja', plain: 'Yoro Valmentaja' },
+  introHook: { fi: '✦ Saat oman tekijätyypin + jaettavan kortin', plain: '✦ Saat oman tyypin ja kuvan jaettavaksi', en: '✦ You get your own work style type and a shareable card' },
+  startBtn: { fi: 'Aloita testi →', plain: 'Aloita →', en: 'Start the test →' },
+  introDisclaimer: { fi: 'Ei rekisteröitymistä. Tulos on ohjausta, ei ennustetta.', plain: 'Ei tarvitse rekisteröityä. Tulos on vain ohjausta.', en: 'No sign-up required. The result is guidance, not a prediction.' },
+  shareToCounselor: { fi: 'Lähetä ohjaajalle', plain: 'Lähetä ohjaajalle', en: 'Send to counsellor' },
+  counselorModalTitle: { fi: 'Lähetä tulos ohjaajalle', plain: 'Lähetä tulos ohjaajalle', en: 'Send result to counsellor' },
+  counselorEmailLabel: { fi: 'Ohjaajan sähköpostiosoite', plain: 'Ohjaajan sähköposti', en: "Counsellor's email" },
+  counselorEmailHint: { fi: 'Lähetys avaa sähköpostiohjelmasi — viesti lähtee sinun osoitteestasi.', plain: 'Lähetys avaa sähköpostin. Viesti lähtee sinun osoitteestasi.', en: 'This opens your email app — the message is sent from your address.' },
+  counselorNameLabel: { fi: 'Sinun nimesi', plain: 'Nimesi', en: 'Your name' },
+  counselorNameHint: { fi: 'Nimi allekirjoitukseen, esim. T. Pasi Laakkonen', plain: 'Nimi allekirjoitukseen', en: 'Name for the signature, e.g. T. Alex Smith' },
+  counselorMessageLabel: { fi: 'Lyhyt viesti', plain: 'Lyhyt viesti', en: 'Short message' },
+  counselorMessageDefault: { fi: 'Tässä testini.', plain: 'Tässä testini.', en: 'Here is my test result.' },
+  counselorPrivacy: { fi: 'Linkissä on testituloksesi — lähetä vain luotetulle ohjaajalle.', plain: 'Linkissä on tuloksesi. Lähetä vain luotetulle ohjaajalle.', en: 'The link contains your test result — only send it to someone you trust.' },
+  counselorInvalidEmail: { fi: 'Tarkista sähköpostiosoite.', plain: 'Tarkista sähköposti.', en: 'Check the email address.' },
+  counselorNameRequired: { fi: 'Kirjoita nimesi allekirjoitukseen.', plain: 'Kirjoita nimesi.', en: 'Enter your name for the signature.' },
+  shareToFriend: { fi: 'Lähetä ystävälle', plain: 'Lähetä ystävälle', en: 'Send to a friend' },
+  friendModalTitle: { fi: 'Lähetä tulos ystävälle', plain: 'Lähetä tulos ystävälle', en: 'Send result to a friend' },
+  friendEmailLabel: { fi: 'Ystäväsi sähköpostiosoite', plain: 'Ystävän sähköposti', en: "Friend's email" },
+  friendEmailHint: { fi: 'Lähetys avaa sähköpostiohjelmasi — viesti lähtee sinun osoitteestasi.', plain: 'Lähetys avaa sähköpostin. Viesti lähtee sinun osoitteestasi.', en: 'This opens your email app — the message is sent from your address.' },
+  friendMessageDefault: { fi: 'Tein tämän testin — kokeile sinäkin!', plain: 'Tein tämän testin. Kokeile sinäkin!', en: 'I took this test — try it too!' },
+  friendPrivacy: { fi: 'Viestissä on linkki tulokseesi ja linkki testiin. Lähetä vain luotetulle ystävälle.', plain: 'Viestissä on linkki tulokseesi ja testiin. Lähetä vain luotetulle ystävälle.', en: 'The message includes links to your result and the test. Only send it to someone you trust.' },
+  advisorCtaTitle: { fi: 'Yoro Valmentaja', plain: 'Yoro Valmentaja', en: 'Yoro Valmentaja' },
   advisorCtaBody: {
     fi: 'Haluatko jutella tuloksistasi? Tunnen testivastauksesi ja voin auttaa työllistymisessä, koulutuksessa ja seuraavissa askeleissa.',
     plain: 'Haluatko jutella tuloksistasi? Voin auttaa työllistymisessä ja koulutuksessa.',
+    en: 'Want to talk about your results? I know your answers and can help with employment, training, and next steps.',
   },
-  advisorCtaBtn: { fi: 'Keskustele valmentajan kanssa →', plain: 'Keskustele valmentajan kanssa →' },
-  advisorChatTitle: { fi: 'Yoro Valmentaja', plain: 'Yoro Valmentaja' },
+  advisorCtaBtn: { fi: 'Keskustele valmentajan kanssa →', plain: 'Keskustele valmentajan kanssa →', en: 'Chat with the coach →' },
+  advisorChatTitle: { fi: 'Yoro Valmentaja', plain: 'Yoro Valmentaja', en: 'Yoro Valmentaja' },
   advisorDisclaimer: {
     fi: 'Yoro Valmentaja on tekoälyavusteinen valmentaja — ei virallinen ohjaus eikä uraennuste. Tärkeissä päätöksissä keskustele aina opettajan tai Ohjaamon kanssa.',
     plain: 'Yoro Valmentaja on tekoälyavusteinen. Keskustele aina opettajan tai Ohjaamon kanssa.',
+    en: 'Yoro Valmentaja is an AI-assisted coach — not official guidance or a career forecast. For important decisions, always talk with a teacher or Ohjaamo.',
   },
-  advisorChipEmploymentPlan: { fi: 'Työllistymissuunnitelma', plain: 'Työllistymissuunnitelma' },
+  advisorChipEmploymentPlan: { fi: 'Työllistymissuunnitelma', plain: 'Työllistymissuunnitelma', en: 'Employment plan' },
   advisorPromptEmploymentPlan: {
     fi: 'Haluan henkilökohtaisen työllistymissuunnitelman.',
     plain: 'Haluan henkilökohtaisen työllistymissuunnitelman.',
+    en: 'I want a personal employment plan.',
   },
-  advisorChipTraining: { fi: 'Lisäkoulutusvaihtoehdot', plain: 'Lisäkoulutusvaihtoehdot' },
+  advisorChipTraining: { fi: 'Lisäkoulutusvaihtoehdot', plain: 'Lisäkoulutusvaihtoehdot', en: 'Further training options' },
   advisorPromptTraining: {
     fi: 'Kerro minulle lisäkoulutusvaihtoehdoista.',
     plain: 'Kerro minulle lisäkoulutusvaihtoehdoista.',
+    en: 'Tell me about further training options.',
   },
-  advisorChipJobHelp: { fi: 'Auta työllistymään', plain: 'Auta työllistymään' },
+  advisorChipJobHelp: { fi: 'Auta työllistymään', plain: 'Auta työllistymään', en: 'Help me find work' },
   advisorPromptJobHelp: {
     fi: 'Auta minua työllistymään.',
     plain: 'Auta minua työllistymään.',
+    en: 'Help me find work.',
   },
-  advisorPlaceholder: { fi: 'Kirjoita kysymys…', plain: 'Kirjoita kysymys…' },
-  advisorSend: { fi: 'Lähetä', plain: 'Lähetä' },
-  advisorClose: { fi: 'Sulje chat', plain: 'Sulje' },
-  advisorThinking: { fi: 'Kirjoittaa…', plain: 'Kirjoittaa…' },
-  advisorError: { fi: 'Viesti ei mennyt läpi. Yritä uudelleen tai ota yhteyttä Ohjaamoon.', plain: 'Viesti ei mennyt läpi. Yritä uudelleen.' },
-  advisorOffline: { fi: 'Yoro Valmentaja ei ole vielä käytössä tässä ympäristössä. Voit silti käyttää linkkejä Opintopolkuun ja Ohjaamoon.', plain: 'Yoro Valmentaja ei ole vielä käytössä. Käytä linkkejä Opintopolkuun ja Ohjaamoon.' },
+  advisorPlaceholder: { fi: 'Kirjoita kysymys…', plain: 'Kirjoita kysymys…', en: 'Write a question…' },
+  advisorSend: { fi: 'Lähetä', plain: 'Lähetä', en: 'Send' },
+  advisorClose: { fi: 'Sulje chat', plain: 'Sulje', en: 'Close chat' },
+  advisorThinking: { fi: 'Kirjoittaa…', plain: 'Kirjoittaa…', en: 'Typing…' },
+  advisorError: { fi: 'Viesti ei mennyt läpi. Yritä uudelleen tai ota yhteyttä Ohjaamoon.', plain: 'Viesti ei mennyt läpi. Yritä uudelleen.', en: 'Message failed. Try again or contact Ohjaamo.' },
+  advisorOffline: { fi: 'Yoro Valmentaja ei ole vielä käytössä tässä ympäristössä. Voit silti käyttää linkkejä Opintopolkuun ja Ohjaamoon.', plain: 'Yoro Valmentaja ei ole vielä käytössä. Käytä linkkejä Opintopolkuun ja Ohjaamoon.', en: 'Yoro Valmentaja is not available in this environment yet. You can still use links to Studyinfo and Ohjaamo.' },
 };
+
+const UI_FI = {
+  back: '← Takaisin',
+  next: 'Seuraava →',
+  showResult: 'Näytä tulokseni ✨',
+  progressStep: 'Vaihe',
+  progressPct: 'prosenttia valmis',
+  phaseLxpNote: 'LxP-työtyyli',
+  phaseUraohjaus: 'Uraohjaus',
+  phaseUraohjausNote: 'Ei vaikuta LxP-hakuun',
+  phaseMotivation: 'Motivaatio',
+  phaseMotivationNote: 'ei LxP-hakua',
+  phaseSubjects: 'Kouluaineet',
+  phaseSubjectsTitle: 'Valitse aineet, joista pidät',
+  phaseSubjectsHint: '1–6 kpl — ei arvosanoja, vain mistä tykkäät.',
+  phaseInterest: 'Kiinnostus',
+  phaseExplore: 'Seuraava askel',
+  freeBeta: 'Ilmainen · n. 10–12 min',
+  introStatsLxp: 'LxP-kysymystä',
+  introStatsUraohjaus: 'uraohjauskysymystä',
+  introStatsMotivation: 'motivaatiota',
+  introStatsInterest: 'kiinnostusta',
+  workStyleSection: 'Työtyylisi lyhyesti',
+  motivationSection: 'Motivaatio pitkällä aikavälillä',
+  pathStudies: 'Opinnot Opintopolussa →',
+  pathJobs: 'Työpaikat Työmarkkinatorilla →',
+  fitGreat: 'Erittäin sopiva',
+  fitGood: 'Sopii sinulle',
+  fitTry: 'Kokeile ensin',
+  linkCopiedShare: 'Kopioitu! Lähetä kaverille ✓',
+  resultDisclaimer: 'Tulos perustuu 10 kysymyksen LxP-työtyyliin, uraohjauskerrokseen (mukaan lukien vapaa-aika), motivaatioon, lempikouluaineisiin ja kiinnostukseen. Ammattinimet noudattavat <a href="{te24}" target="_blank" rel="noopener noreferrer">TE24-luokitusta</a>. Ei vaikuta työnantajan LxP-hakuun (lxp.yoro.fi). Emme mittaa älykkyyttä tai arvosanoja.',
+  skipLink: 'Siirry sisältöön',
+  whyPath: 'Miksi tämä polku?',
+  hideWhy: 'Piilota selitys',
+  showMorePaths: 'Näytä muuta polkua',
+  hideMorePaths: 'Piilota lisäpolkut',
+  showOccupations: 'Näytä ammatit',
+  hideOccupations: 'Piilota ammatit',
+  feedbackTitle: 'Oliko tulos hyödyllinen?',
+  feedbackYes: 'Kyllä',
+  feedbackPartly: 'Osittain',
+  feedbackNo: 'Ei',
+  feedbackThanks: 'Kiitos palautteesta.',
+  retry: 'Tee testi uudelleen',
+  backToYoro: 'Takaisin Yoroon',
+  fitStrong: 'Vahva osuma',
+  shareTitle: 'Millainen tekijä olet? — Yoro',
+  documentTitle: 'Millainen tekijä olet? — Yoro Ohjausmoottori',
+  documentDescription: 'Noin 10–12 minuutin testi nuorille: et tarvitse tietää vielä mitä haluat. Selvitä millainen tekijä olet ja saa polkuja kokeiltavaksi. Ilmainen, ei rekisteröitymistä.',
+  aspirationTitle: 'Huomio: toive ja arki voivat vetää eri suuntiin',
+  aspirationBody: 'Haluat auttaa ihmisiä, mutta arvostat rauhallista työrytmiä ja vietät vapaa-aikasi useimmiten yksin. Näkyvä asiakaspalvelu tai myynti voi tuntua aluksi raskaalta. Kokeile ensin TETiä hoiva- tai palvelualalla tai rooleissa, joissa on vähemmän jatkuvaa asiakaskontaktia (esim. taustatyö, valmistelu, laboratorio).',
+  aspirationLink: 'Etsi TET-paikka (TET.fi) →',
+  occupationHintDefault: 'Esimerkkejä tämän polun ammateista (TE24) — avaa opinnot tai työpaikkahaku yhdellä klikillä.',
+  occupationHintHigherEd: 'Esimerkkejä korkeakoulutasoiseen polkuun sopivista ammateista (TE24) — ei perustason toimisto- tai käytännön tehtäviä. Jokainen ammatti linkittyy Opintopolkuun ja Työmarkkinatoriin.',
+  occupationNone: 'Yksikään ammatti ei täsmännyt kaikkiin valintoihisi — kokeile toista polkua tai tee testi uudelleen myöhemmin.',
+  occupationStudiesLink: 'Opinnot',
+  occupationJobsLink: 'Työpaikat',
+  te24Source: 'Ammattinimet perustuvat <a href="{te24}" target="_blank" rel="noopener noreferrer">TE24-luokitukseen</a> (Tilastokeskus).',
+  advisorDisclaimerShort: 'Suuntaa antava ohjaustulos, ei uraennuste',
+  ctaTetLabel: 'Seuraava askel: Etsi TET-paikka (TET.fi)',
+  ctaTetSecondary: 'Tarvitsetko apua? Ohjaamo →',
+  ctaStudyLabel: 'Seuraava askel: Katso koulutukset Opintopolussa',
+  ctaStudySecondary: 'Katso myös työpaikkoja →',
+  ctaMentorLabel: 'Seuraava askel: Varaa aika Ohjaamoon',
+  ctaMentorSecondary: 'Tutustu opintoihin polulle →',
+  ctaExploreLabel: 'Seuraava askel: Tutki opintoja Opintopolussa',
+  ctaExploreSecondaryJobs: 'Katso työpaikkoja →',
+  ctaExploreSecondaryUndecided: 'En tiedä mitä opiskella →',
+  occupationFilterTyoohjaus: 'Piilotimme {n} ammattia, jotka vaativat enemmän esiintymistä, kiirettä tai asiakaskontaktia kuin valitsit.',
+  occupationFilterMeaning: 'Piilotimme {n} ammattia, jotka eivät vastanneet merkitysvalintoihisi.',
+  occupationFilterGeneric: 'Piilotimme {n} ammattia valintojesi perusteella.',
+  modalClose: 'Sulje',
+  modalCancel: 'Peruuta',
+  modalSendEmail: 'Lähetä sähköpostilla',
+};
+
+function isEn() {
+  return state.lang === 'en';
+}
+
+function ui(key) {
+  if (isEn() && typeof I18N_EN !== 'undefined' && I18N_EN.ui?.[key]) return I18N_EN.ui[key];
+  return UI_FI[key] || key;
+}
+
+function i18nQuestion(qid) {
+  return (isEn() && typeof I18N_EN !== 'undefined' && I18N_EN.questions?.[qid]) ? I18N_EN.questions[qid] : null;
+}
 
 function txt(key) {
   const entry = COPY[key];
   if (!entry) return key;
-  return state.plainLanguage ? entry.plain : entry.fi;
+  if (isEn()) return entry.en || entry.plain || entry.fi;
+  return entry.fi;
 }
 
 function qText(q) {
-  if (state.plainLanguage && q.textPlain) return q.textPlain;
-  return q.text;
+  const t = i18nQuestion(q.id);
+  return t?.text || q.text;
+}
+
+function qPhase(q) {
+  const t = i18nQuestion(q.id);
+  return t?.phase || q.phase;
 }
 
 function qHint(q, fallbackKey = 'defaultHint') {
-  if (state.plainLanguage && q.hintPlain) return q.hintPlain;
+  const t = i18nQuestion(q.id);
+  if (t && Object.prototype.hasOwnProperty.call(t, 'hint') && t.hint !== '') return t.hint;
   if (q.hint) return q.hint;
   return txt(fallbackKey);
 }
 
-function optLabel(o) {
-  if (state.plainLanguage && o.labelPlain) return o.labelPlain;
+function optLabel(o, qId) {
+  const t = qId ? i18nQuestion(qId) : null;
+  if (t?.options?.[o.key]) return t.options[o.key];
   return o.label;
 }
 
+function narrativeLine(q, key) {
+  const t = i18nQuestion(q.id);
+  if (t?.narrative?.[key]) return t.narrative[key];
+  return q.narrative?.[key] || '';
+}
+
+function archetypeTitle(a) {
+  if (isEn() && I18N_EN?.archetypes?.[a.id]?.title) return I18N_EN.archetypes[a.id].title;
+  return a.title;
+}
+
+function archetypeTagline(a) {
+  if (isEn() && I18N_EN?.archetypes?.[a.id]?.tagline) return I18N_EN.archetypes[a.id].tagline;
+  return a.tagline;
+}
+
+function archetypeStrengths(a) {
+  if (isEn() && I18N_EN?.archetypes?.[a.id]?.strengths) return I18N_EN.archetypes[a.id].strengths;
+  return a.strengths || [];
+}
+
+function pathName(p) {
+  if (isEn() && I18N_EN?.paths?.[p.id]?.name) return I18N_EN.paths[p.id].name;
+  return p.name;
+}
+
+function pathDesc(p) {
+  if (isEn() && I18N_EN?.paths?.[p.id]?.desc) return I18N_EN.paths[p.id].desc;
+  return p.desc;
+}
+
+function pathTet(p) {
+  if (isEn() && I18N_EN?.paths?.[p.id]?.tet) return I18N_EN.paths[p.id].tet;
+  return p.tet;
+}
+
+function pathStudyDefault(p) {
+  if (isEn() && I18N_EN?.paths?.[p.id]?.study) return I18N_EN.paths[p.id].study;
+  return p.study;
+}
+
+function subjectLabel(subject) {
+  if (isEn() && I18N_EN?.subjects?.[subject.id]) return I18N_EN.subjects[subject.id];
+  return subject.label;
+}
+
+function setDocumentLang() {
+  document.documentElement.lang = state.lang;
+  const skip = document.querySelector('.skip-link');
+  if (skip) skip.textContent = ui('skipLink');
+  document.title = ui('documentTitle');
+  const metaDesc = document.querySelector('meta[name="description"]');
+  if (metaDesc) metaDesc.content = ui('documentDescription');
+}
+
+function pathWhy(category, key) {
+  if (isEn() && typeof I18N_EN !== 'undefined' && I18N_EN.pathWhy?.[category]?.[key]) {
+    return I18N_EN.pathWhy[category][key];
+  }
+  if (category === 'sector') return SECTOR_WHY[key] || '';
+  if (category === 'workday') return WORKDAY_WHY[key] || '';
+  if (category === 'topic') return TOPIC_WHY[key] || '';
+  if (category === 'lxp') return LXP_WHY[key] || '';
+  if (category === 'meaning') return MEANING_WHY[key] || '';
+  if (category === 'extra') return PATH_WHY_EXTRA[key] || '';
+  return '';
+}
+
 function renderStrengths(archetype) {
-  const items = archetype.strengths || [];
+  const items = archetypeStrengths(archetype);
   return `<ul class="strength-list">${items.map((s) => `<li>${s}</li>`).join('')}</ul>`;
 }
 
@@ -1467,7 +1632,8 @@ function serializeResultState() {
     m: state.motivation,
     s: [...state.subjects],
     i: state.interest,
-    p: state.plainLanguage ? 1 : 0,
+    p: state.lang === 'en' ? 1 : 0,
+    lg: state.lang,
   };
 }
 
@@ -1518,14 +1684,14 @@ function applyResultPayload(data) {
   if (Array.isArray(state.interest.i1)) {
     state.interest.i1 = state.interest.i1.map((k) => (k === 'terveys' ? 'ihmiset' : k));
   }
-  state.plainLanguage = !!data.p;
+  state.lang = data.lg === 'en' ? 'en' : 'fi';
   state.screen = 'result';
   state.lxpIndex = 0;
   state.tyoohjausIndex = 0;
   state.motivationIndex = 0;
-  localStorage.setItem(PLAIN_LANG_KEY, state.plainLanguage ? '1' : '0');
-  document.body.classList.toggle('plain-language', state.plainLanguage);
-  syncPlainToggle();
+  localStorage.setItem(LANG_KEY, state.lang);
+  setDocumentLang();
+  syncLangToggle();
 }
 
 function persistResult() {
@@ -1563,39 +1729,49 @@ function tryRestoreResultFromUrl() {
 
 function loadPreferences() {
   try {
-    state.plainLanguage = localStorage.getItem(PLAIN_LANG_KEY) === '1';
+    const saved = localStorage.getItem(LANG_KEY);
+    if (saved === 'en' || saved === 'fi') state.lang = saved;
+    else if (localStorage.getItem('yoro_plain_lang_v1') === '1') state.lang = 'fi';
   } catch (_) {
-    state.plainLanguage = false;
+    state.lang = 'fi';
   }
-  document.body.classList.toggle('plain-language', state.plainLanguage);
+  setDocumentLang();
 }
 
-function syncPlainToggle() {
-  const btn = document.getElementById('plainLangToggle');
-  if (!btn) return;
-  btn.setAttribute('aria-pressed', state.plainLanguage ? 'true' : 'false');
-  btn.textContent = state.plainLanguage ? COPY.plainToggle.plain : COPY.plainToggle.fi;
+function syncLangToggle() {
+  const fiBtn = document.getElementById('langFiBtn');
+  const enBtn = document.getElementById('langEnBtn');
+  if (!fiBtn || !enBtn) return;
+  const en = state.lang === 'en';
+  fiBtn.classList.toggle('active', !en);
+  enBtn.classList.toggle('active', en);
+  fiBtn.setAttribute('aria-pressed', en ? 'false' : 'true');
+  enBtn.setAttribute('aria-pressed', en ? 'true' : 'false');
 }
 
 function bindAccessibilityControls() {
-  const btn = document.getElementById('plainLangToggle');
-  if (!btn) return;
-  syncPlainToggle();
-  btn.addEventListener('click', () => {
-    state.plainLanguage = !state.plainLanguage;
-    try {
-      localStorage.setItem(PLAIN_LANG_KEY, state.plainLanguage ? '1' : '0');
-    } catch (_) { /* ignore */ }
-    document.body.classList.toggle('plain-language', state.plainLanguage);
-    syncPlainToggle();
+  const fiBtn = document.getElementById('langFiBtn');
+  const enBtn = document.getElementById('langEnBtn');
+  if (!fiBtn || !enBtn) return;
+  syncLangToggle();
+  const setLang = (lang) => {
+    if (state.lang === lang) return;
+    state.lang = lang;
+    try { localStorage.setItem(LANG_KEY, lang); } catch (_) { /* ignore */ }
+    setDocumentLang();
+    syncLangToggle();
     render();
-  });
+  };
+  fiBtn.addEventListener('click', () => setLang('fi'));
+  enBtn.addEventListener('click', () => setLang('en'));
 }
 
 function announceProgress(step, total, pct) {
   const el = document.getElementById('liveStatus');
   if (!el) return;
-  el.textContent = `Vaihe ${step} / ${total}, ${pct} prosenttia valmis.`;
+  el.textContent = isEn()
+    ? `${ui('progressStep')} ${step} / ${total}, ${pct}% complete.`
+    : `Vaihe ${step} / ${total}, ${pct} prosenttia valmis.`;
 }
 
 function focusMainHeading() {
@@ -1704,7 +1880,7 @@ const state = {
   motivation: { meaning: [], recognition: '' },
   subjects: new Set(),
   interest: {},
-  plainLanguage: false,
+  lang: 'fi',
   shareOpen: false,
   advisorChat: { open: false, messages: [], loading: false, error: '' },
 };
@@ -1926,11 +2102,12 @@ function wantsHigherEd(answers) {
 }
 
 function studyLineForPath(path, answers) {
-  let line = path.study;
+  let line = pathStudyDefault(path);
   if (!line) return '';
   if (wantsHigherEd(answers) && ['engineer', 'it', 'lab', 'society', 'health', 'creative', 'business'].includes(path.id)) {
-    if (!line.toLowerCase().includes('amk') && !line.toLowerCase().includes('yliopisto') && !line.toLowerCase().includes('korkeakoulu')) {
-      line += ' · Jatko: AMK tai yliopisto mahdollinen';
+    const lower = line.toLowerCase();
+    if (!lower.includes('amk') && !lower.includes('yliopisto') && !lower.includes('korkeakoulu') && !lower.includes('university') && !lower.includes('college')) {
+      line += isEn() ? ' · Next step: university of applied sciences or university possible' : ' · Jatko: AMK tai yliopisto mahdollinen';
     }
   }
   return line;
@@ -1952,10 +2129,12 @@ function buildMotivationNarrative(motivation = {}) {
   const meaningQ = MOTIVATION_Q.find((q) => q.id === 'meaning');
   const recognitionQ = MOTIVATION_Q.find((q) => q.id === 'recognition');
   (motivation.meaning || []).forEach((key) => {
-    if (meaningQ?.narrative?.[key]) lines.push(meaningQ.narrative[key]);
+    const line = meaningQ ? narrativeLine(meaningQ, key) : '';
+    if (line) lines.push(line);
   });
-  if (motivation.recognition && recognitionQ?.narrative?.[motivation.recognition]) {
-    lines.push(recognitionQ.narrative[motivation.recognition]);
+  if (motivation.recognition && recognitionQ) {
+    const line = narrativeLine(recognitionQ, motivation.recognition);
+    if (line) lines.push(line);
   }
   return lines;
 }
@@ -1964,11 +2143,13 @@ function buildNarrative(answers, tyoohjaus = {}) {
   const lines = [];
   LXP_QUESTIONS.forEach((q) => {
     const key = answers[q.id];
-    if (key && q.narrative[key]) lines.push(q.narrative[key]);
+    const line = key ? narrativeLine(q, key) : '';
+    if (line) lines.push(line);
   });
   TYOOHJAUS_QUESTIONS.forEach((q) => {
     const key = tyoohjaus[q.id];
-    if (key && q.narrative[key]) lines.push(q.narrative[key]);
+    const line = key ? narrativeLine(q, key) : '';
+    if (line) lines.push(line);
   });
   return lines.slice(0, 4);
 }
@@ -2021,6 +2202,20 @@ const MEANING_WHY = {
   purpose: 'Valitsit merkitykseksi yhteiskunta- ja ympäristötyön',
 };
 
+const PATH_WHY_EXTRA = {
+  precisionA: 'Olet tarkka tekijä — tämä polku arvostaa huolellisuutta',
+  precisionCD: 'Suurpiirteinen työtyyli sopii ideointiin ja tuotekehitykseen',
+  driveC: 'Luovuus ja sinnikkyys — vahva yhdistelmä tälle polulle',
+  driveD: 'Arvostat selkeää etenemistä — käytännön polku voi sopia',
+  visibilityA: 'Esiintyminen ei ole vahvuutesi — tämä polku sopii taustarooliin',
+  visibilityC: 'Sosiaalinen rohkeus sopii näkyviin ja ihmisläheisiin rooleihin',
+  stressA: 'Arvostat rauhallista työrytmiä — tämä polku on ennustettavampi',
+  stressC: 'Paine ei haittaa — kiireiset ja vaihtelevat työt voivat sopia',
+  leisureA: 'Vietät vapaa-aikasi useimmiten yksin — tämä polku sopii taustarooliin',
+  leisureC: 'Vietät aikaa muiden kanssa — sosiaalinen rytmi sopii tälle polulle',
+  higherEd: 'Korkeakoulutaso huomioitu — ammatit korkeamman tason tehtävistä',
+};
+
 function explainPathWhy(path, answers, interests, tyoohjaus, motivation = {}) {
   const bullets = [];
   const i1 = interests.i1 || [];
@@ -2029,79 +2224,93 @@ function explainPathWhy(path, answers, interests, tyoohjaus, motivation = {}) {
 
   i1.forEach((key) => {
     const matched = sectorsFromInterest(key).some((sec) => path.sectors.includes(sec));
-    if (matched && SECTOR_WHY[key]) bullets.push(SECTOR_WHY[key]);
+    if (matched) {
+      const line = pathWhy('sector', key);
+      if (line) bullets.push(line);
+    }
   });
 
   workdays.forEach((wd) => {
-    if (path.workday.includes(wd) && WORKDAY_WHY[wd]) {
-      bullets.push(WORKDAY_WHY[wd]);
+    if (path.workday.includes(wd)) {
+      const line = pathWhy('workday', wd);
+      if (line) bullets.push(line);
     }
   });
 
   (i3 || []).forEach((key) => {
-    if (path.topics.includes(key) && TOPIC_WHY[key]) bullets.push(TOPIC_WHY[key]);
+    if (path.topics.includes(key)) {
+      const line = pathWhy('topic', key);
+      if (line) bullets.push(line);
+    }
   });
 
   state.subjects.forEach((subId) => {
     if (path.subjects.includes(subId)) {
       const sub = SUBJECTS.find((s) => s.id === subId);
-      if (sub) bullets.push(`Pidät kouluaineesta: ${sub.label}`);
+      if (sub) {
+        const subjectLine = pathWhy('extra', 'subject');
+        bullets.push(subjectLine
+          ? subjectLine.replace('{subject}', subjectLabel(sub))
+          : (isEn() ? `You enjoy: ${subjectLabel(sub)}` : `Pidät kouluaineesta: ${sub.label}`));
+      }
     }
   });
 
   Object.keys(path.lxp || {}).forEach((qKey) => {
     const ans = answers[qKey];
-    if (ans && path.lxp[qKey].includes(ans) && LXP_WHY[qKey]) {
-      bullets.push(LXP_WHY[qKey]);
+    if (ans && path.lxp[qKey].includes(ans)) {
+      const line = pathWhy('lxp', qKey);
+      if (line) bullets.push(line);
     }
   });
 
   const precision = tyoohjaus.precision;
   if (precision === 'a' && ['lab', 'engineer', 'it', 'health'].includes(path.id)) {
-    bullets.push('Olet tarkka tekijä — tämä polku arvostaa huolellisuutta');
+    bullets.push(pathWhy('extra', 'precisionA'));
   }
   if ((precision === 'c' || precision === 'd') && ['engineer', 'it', 'creative'].includes(path.id)) {
-    bullets.push('Suurpiirteinen työtyyli sopii ideointiin ja tuotekehitykseen');
+    bullets.push(pathWhy('extra', 'precisionCD'));
   }
 
   const drive = tyoohjaus.drive;
   if (drive === 'c' && ['engineer', 'it', 'creative'].includes(path.id)) {
-    bullets.push('Luovuus ja sinnikkyys — vahva yhdistelmä tälle polulle');
+    bullets.push(pathWhy('extra', 'driveC'));
   }
   if (drive === 'd' && ['service', 'build', 'health'].includes(path.id)) {
-    bullets.push('Arvostat selkeää etenemistä — käytännön polku voi sopia');
+    bullets.push(pathWhy('extra', 'driveD'));
   }
 
   const visibility = tyoohjaus.visibility;
   if (visibility === 'a' && ['lab', 'it', 'health'].includes(path.id)) {
-    bullets.push('Esiintyminen ei ole vahvuutesi — tämä polku sopii taustarooliin');
+    bullets.push(pathWhy('extra', 'visibilityA'));
   }
   if (visibility === 'c' && ['service', 'creative', 'business', 'society'].includes(path.id)) {
-    bullets.push('Sosiaalinen rohkeus sopii näkyviin ja ihmisläheisiin rooleihin');
+    bullets.push(pathWhy('extra', 'visibilityC'));
   }
 
   const stressLevel = tyoohjaus.stress;
   if (stressLevel === 'a' && ['lab', 'business', 'it'].includes(path.id)) {
-    bullets.push('Arvostat rauhallista työrytmiä — tämä polku on ennustettavampi');
+    bullets.push(pathWhy('extra', 'stressA'));
   }
   if (stressLevel === 'c' && ['health', 'service', 'society', 'build'].includes(path.id)) {
-    bullets.push('Paine ei haittaa — kiireiset ja vaihtelevat työt voivat sopia');
+    bullets.push(pathWhy('extra', 'stressC'));
   }
 
   const leisure = tyoohjaus.leisure;
   if (leisure === 'a' && visibility === 'a' && ['lab', 'it'].includes(path.id)) {
-    bullets.push('Vietät vapaa-aikasi useimmiten yksin — tämä polku sopii taustarooliin');
+    bullets.push(pathWhy('extra', 'leisureA'));
   }
   if (leisure === 'c' && ['service', 'health', 'society'].includes(path.id)) {
-    bullets.push('Vietät aikaa muiden kanssa — sosiaalinen rytmi sopii tälle polulle');
+    bullets.push(pathWhy('extra', 'leisureC'));
   }
 
   (motivation.meaning || []).forEach((key) => {
-    if (MEANING_WHY[key]) bullets.push(MEANING_WHY[key]);
+    const line = pathWhy('meaning', key);
+    if (line) bullets.push(line);
   });
 
   if (hasHigherEdBackground(answers) && ['engineer', 'it', 'lab', 'society', 'creative', 'business'].includes(path.id)) {
-    bullets.push('Korkeakoulutaso huomioitu — ammatit korkeamman tason tehtävistä');
+    bullets.push(pathWhy('extra', 'higherEd'));
   }
 
   return [...new Set(bullets)].slice(0, 4);
@@ -2109,68 +2318,97 @@ function explainPathWhy(path, answers, interests, tyoohjaus, motivation = {}) {
 
 function fitBadge(rank, score, topScore) {
   if (rank === 0 && score >= topScore * 0.82) {
-    return { label: 'Vahva osuma', className: 'fit-strong' };
+    return { label: ui('fitStrong'), className: 'fit-strong' };
   }
   if (rank <= 1 && score >= topScore * 0.6) {
-    return { label: 'Sopii sinulle', className: 'fit-good' };
+    return { label: ui('fitGood'), className: 'fit-good' };
   }
-  return { label: 'Kokeile ensin', className: 'fit-try' };
+  return { label: ui('fitTry'), className: 'fit-try' };
 }
 
 function buildHeroSentence(archetype, tyoohjaus, topPath) {
-  const driveLines = {
-    a: 'keksit mielellään uusia ratkaisuja',
-    b: 'viennät asiat loppuun, vaikka homma on hankala',
-    c: 'yhdistät ideoinnin ja sinnikkyyden',
-    d: 'arvostat selkeää etenemistä etkä hae turhaan pitkiä grindausprojekteja',
-    e: 'työtyylisi on vielä muotoutumassa',
-  };
+  const driveLines = isEn()
+    ? {
+      a: 'you enjoy coming up with new solutions',
+      b: 'you follow through even when work is demanding',
+      c: 'you combine ideas with persistence',
+      d: 'you value clear progress and avoid unnecessary long grind projects',
+      e: 'your work style is still taking shape',
+    }
+    : {
+      a: 'keksit mielellään uusia ratkaisuja',
+      b: 'viennät asiat loppuun, vaikka homma on hankala',
+      c: 'yhdistät ideoinnin ja sinnikkyyden',
+      d: 'arvostat selkeää etenemistä etkä hae turhaan pitkiä grindausprojekteja',
+      e: 'työtyylisi on vielä muotoutumassa',
+    };
   const drive = tyoohjaus.drive;
-  const styleBit = drive && driveLines[drive] ? driveLines[drive] : archetype.tagline.toLowerCase();
+  const title = archetypeTitle(archetype);
+  const styleBit = drive && driveLines[drive] ? driveLines[drive] : archetypeTagline(archetype).toLowerCase();
   const pathBit = topPath
-    ? ` Ensisijainen suunta kokeiltavaksi: ${topPath.name.toLowerCase()}.`
+    ? (isEn()
+      ? ` A good first direction to try: ${pathName(topPath).toLowerCase()}.`
+      : ` Ensisijainen suunta kokeiltavaksi: ${pathName(topPath).toLowerCase()}.`)
     : '';
-  return `Olet ${archetype.title} — ${styleBit}.${pathBit} Tämä ei ole lopullinen ura vaan suunta, jota kannattaa testata käytännössä.`;
+  return isEn()
+    ? `You fit the ${title} profile — ${styleBit}.${pathBit} This is not a final career, but a direction worth testing in practice.`
+    : `Olet ${title} — ${styleBit}.${pathBit} Tämä ei ole lopullinen ura vaan suunta, jota kannattaa testata käytännössä.`;
 }
 
 function primaryCta(interest, topPath, answers) {
   const i4 = interest.i4 || 'explore';
-  const terms = topPath ? pathLinkTerms(topPath, answers) : { opinto: 'ammattikoulu', jobs: '', tet: '' };
+  const terms = topPath ? pathLinkTerms(topPath, answers) : { opinto: isEn() ? 'vocational school' : 'ammattikoulu', jobs: '', tet: '' };
   const study = topPath ? studyLineForPath(topPath, answers) : '';
+  const pathLabel = topPath ? pathName(topPath).toLowerCase() : '';
+  const exploreStudyUrl = topPath ? opintopolkuUrl(terms.opinto) : 'https://opintopolku.fi/konfo/fi/ohjaava-haku';
   const ctas = {
     tet: {
-      label: 'Seuraava askel: Etsi TET-paikka (TET.fi)',
+      label: ui('ctaTetLabel'),
       url: tetPaikatUrl(),
-      secondary: { label: 'Tarvitsetko apua? Ohjaamo →', url: ohjaamoUrl() },
+      secondary: { label: ui('ctaTetSecondary'), url: ohjaamoUrl() },
       desc: topPath
-        ? `${topPath.tet}. Hae paikkoja TET.fi:stä — Ohjaamo auttaa alle 30-vuotiaita.`
-        : 'TET.fi kokoaa avoimet harjoittelupaikat. Ohjaamo auttaa hakemisessa.',
+        ? (isEn()
+          ? `${pathTet(topPath)} Search placements on TET.fi — Ohjaamo helps people under 30.`
+          : `${topPath.tet}. Hae paikkoja TET.fi:stä — Ohjaamo auttaa alle 30-vuotiaita.`)
+        : (isEn()
+          ? 'TET.fi lists open work experience placements. Ohjaamo can help with applications.'
+          : 'TET.fi kokoaa avoimet harjoittelupaikat. Ohjaamo auttaa hakemisessa.'),
     },
     study: {
-      label: 'Seuraava askel: Katso koulutukset Opintopolussa',
+      label: ui('ctaStudyLabel'),
       url: opintopolkuUrl(terms.opinto),
-      secondary: { label: 'Katso myös työpaikkoja →', url: tyomarkkinatoriUrl(terms.jobs) },
+      secondary: { label: ui('ctaStudySecondary'), url: tyomarkkinatoriUrl(terms.jobs) },
       desc: study
-        ? `Hae Opintopolusta: “${terms.opinto}”. ${study}`
-        : `Hae Opintopolusta koulutuksia hakusanalla “${terms.opinto}”.`,
+        ? (isEn()
+          ? `Search Studyinfo for “${terms.opinto}”. ${study}`
+          : `Hae Opintopolusta: “${terms.opinto}”. ${study}`)
+        : (isEn()
+          ? `Search Studyinfo for programmes using “${terms.opinto}”.`
+          : `Hae Opintopolusta koulutuksia hakusanalla “${terms.opinto}”.`),
     },
     mentor: {
-      label: 'Seuraava askel: Varaa aika Ohjaamoon',
+      label: ui('ctaMentorLabel'),
       url: ohjaamoUrl(),
       secondary: topPath
-        ? { label: 'Tutustu opintoihin polulle →', url: opintopolkuUrl(terms.opinto) }
+        ? { label: ui('ctaMentorSecondary'), url: opintopolkuUrl(terms.opinto) }
         : null,
-      desc: 'Ohjaamossa voit kuulla, millaista työ on oikeassa elämässä — ilman että päätät vielä ammattia.',
+      desc: isEn()
+        ? 'At Ohjaamo you can hear what work is really like — without choosing a career yet.'
+        : 'Ohjaamossa voit kuulla, millaista työ on oikeassa elämässä — ilman että päätät vielä ammattia.',
     },
     explore: {
-      label: 'Seuraava askel: Tutki opintoja Opintopolussa',
-      url: topPath ? opintopolkuUrl(terms.opinto) : 'https://opintopolku.fi/konfo/fi/ohjaava-haku',
+      label: ui('ctaExploreLabel'),
+      url: exploreStudyUrl,
       secondary: topPath
-        ? { label: 'Katso työpaikkoja →', url: tyomarkkinatoriUrl(terms.jobs) }
-        : { label: 'En tiedä mitä opiskella →', url: 'https://opintopolku.fi/konfo/fi/ohjaava-haku' },
+        ? { label: ui('ctaExploreSecondaryJobs'), url: tyomarkkinatoriUrl(terms.jobs) }
+        : { label: ui('ctaExploreSecondaryUndecided'), url: 'https://opintopolku.fi/konfo/fi/ohjaava-haku' },
       desc: topPath
-        ? `Pidä ${topPath.name.toLowerCase()} mielessä. Aloita Opintopolusta: “${terms.opinto}”.`
-        : 'Opintopolun ohjaava haku auttaa, jos et vielä tiedä mitä haluat opiskella.',
+        ? (isEn()
+          ? `Keep ${pathLabel} in mind. Start on Studyinfo: “${terms.opinto}”.`
+          : `Pidä ${pathLabel} mielessä. Aloita Opintopolusta: “${terms.opinto}”.`)
+        : (isEn()
+          ? 'Studyinfo guided search helps if you are not sure what to study yet.'
+          : 'Opintopolun ohjaava haku auttaa, jos et vielä tiedä mitä haluat opiskella.'),
     },
   };
   return ctas[i4] || ctas.explore;
@@ -2188,22 +2426,22 @@ function renderPathCard(p, i, answers, interests, tyoohjaus, motivation, topScor
     <div class="path-card">
       <span class="path-emoji">${p.emoji}</span>
       <div class="path-card-body">
-        <h3>${i + 1}. ${p.name}</h3>
+        <h3>${i + 1}. ${pathName(p)}</h3>
         <span class="fit-badge ${fit.className}">${fit.label}</span>
-        <p>${p.desc}</p>
+        <p>${pathDesc(p)}</p>
         ${study ? `<p class="path-study">📚 ${study}</p>` : ''}
         <div class="path-actions">
-          <a class="path-action" href="${opintopolkuUrl(terms.opinto)}" target="_blank" rel="noopener noreferrer" data-track="path_opinto" data-path="${p.id}">Opinnot Opintopolussa →</a>
-          <a class="path-action" href="${tyomarkkinatoriUrl(terms.jobs)}" target="_blank" rel="noopener noreferrer" data-track="path_jobs" data-path="${p.id}">Työpaikat Työmarkkinatorilla →</a>
+          <a class="path-action" href="${opintopolkuUrl(terms.opinto)}" target="_blank" rel="noopener noreferrer" data-track="path_opinto" data-path="${p.id}">${ui('pathStudies')}</a>
+          <a class="path-action" href="${tyomarkkinatoriUrl(terms.jobs)}" target="_blank" rel="noopener noreferrer" data-track="path_jobs" data-path="${p.id}">${ui('pathJobs')}</a>
         </div>
         ${why.length ? `
-        <button type="button" class="path-why-toggle" aria-expanded="false">Miksi tämä polku? ▾</button>
+        <button type="button" class="path-why-toggle" aria-expanded="false">${ui('whyPath')} ▾</button>
         <div class="path-why" hidden>
           <ul class="why-list">${why.map((w) => `<li>${w}</li>`).join('')}</ul>
         </div>` : ''}
         ${occCount ? `
         <button type="button" class="path-toggle" data-count="${occCount}" aria-expanded="false">
-          Näytä ammatit (${occCount}) ▾
+          ${ui('showOccupations')} (${occCount}) ▾
         </button>
         <div class="path-occupations" hidden>
           <p class="occupation-hint">${occHint}</p>
@@ -2221,7 +2459,7 @@ function bindPathWhyToggles() {
       const open = panel.classList.toggle('open');
       panel.hidden = !open;
       btn.setAttribute('aria-expanded', open ? 'true' : 'false');
-      btn.textContent = open ? 'Piilota selitys ▴' : 'Miksi tämä polku? ▾';
+      btn.textContent = open ? `${ui('hideWhy')} ▴` : `${ui('whyPath')} ▾`;
     });
   });
 }
@@ -2233,7 +2471,7 @@ function bindShowMorePaths(extraCount) {
   btn.addEventListener('click', () => {
     const open = extra.classList.toggle('open');
     extra.hidden = !open;
-    btn.textContent = open ? 'Piilota lisäpolkut ▴' : `Näytä ${extraCount} muuta polkua ▾`;
+    btn.textContent = open ? `${ui('hideMorePaths')} ▴` : `${ui('showMorePaths')} (${extraCount}) ▾`;
   });
 }
 
@@ -2248,8 +2486,11 @@ function nextStepLabel() {
 }
 
 function shareText(archetype, paths) {
-  const top = paths[0]?.name || 'uusia polkuja';
+  const top = paths[0] ? pathName(paths[0]) : (isEn() ? 'new paths' : 'uusia polkuja');
   const url = state.screen === 'result' ? resultPageUrl() : 'https://yoro.fi/ohjausmoottori/';
+  if (isEn()) {
+    return `My work style type is ${archetypeTitle(archetype)} ${archetype.emoji}\n\nYoro Ohjausmoottori suggested this path for me: ${top}\n\nThere is no single right career — try the test in about 10–12 min:\n${url}`;
+  }
   return `Työtyylini on ${archetype.title} ${archetype.emoji}\n\nYoron ohjausmoottori ehdotti mulle polkua: ${top}\n\nEi yhtä oikeaa ammattia — kokeile noin 10–12 min:\n${url}`;
 }
 
@@ -2268,8 +2509,24 @@ function testStartUrl() {
 
 function buildCounselorEmailBody(archetype, paths, senderName, message) {
   const url = resultPageUrl();
-  const pathLines = paths.slice(0, 3).map((p, i) => `${i + 1}. ${p.name}`).join('\n');
+  const pathLines = paths.slice(0, 3).map((p, i) => `${i + 1}. ${pathName(p)}`).join('\n');
   const intro = (message || txt('counselorMessageDefault')).trim();
+  if (isEn()) {
+    return `${intro}
+
+${shareSignature(senderName)}
+
+---
+Work style type: ${archetypeTitle(archetype)} ${archetype.emoji}
+Paths to try:
+${pathLines}
+
+Result link (includes your answers):
+${url}
+
+This is guidance only, not a career choice or a grade.
+Yoro Ohjausmoottori — yoro.fi/ohjausmoottori`;
+  }
   return `${intro}
 
 ${shareSignature(senderName)}
@@ -2289,8 +2546,27 @@ Yoro Ohjausmoottori — yoro.fi/ohjausmoottori`;
 function buildFriendEmailBody(archetype, paths, senderName, message) {
   const resultUrl = resultPageUrl();
   const testUrl = testStartUrl();
-  const pathLines = paths.slice(0, 3).map((p, i) => `${i + 1}. ${p.name}`).join('\n');
+  const pathLines = paths.slice(0, 3).map((p, i) => `${i + 1}. ${pathName(p)}`).join('\n');
   const intro = (message || txt('friendMessageDefault')).trim();
+  if (isEn()) {
+    return `${intro}
+
+${shareSignature(senderName)}
+
+---
+My work style type: ${archetypeTitle(archetype)} ${archetype.emoji}
+Paths to try:
+${pathLines}
+
+See my result:
+${resultUrl}
+
+Try the test yourself (about 10–12 min, free):
+${testUrl}
+
+This is guidance only, not a career choice or a grade.
+Yoro Ohjausmoottori`;
+  }
   return `${intro}
 
 ${shareSignature(senderName)}
@@ -2311,14 +2587,16 @@ Yoro Ohjausmoottori`;
 }
 
 function buildCounselorMailto(counselorEmail, archetype, paths, senderName, message) {
-  const subject = `Ohjausmoottorin tulos — ${senderName.trim()}`;
+  const subject = isEn()
+    ? `Ohjausmoottori result — ${senderName.trim()}`
+    : `Ohjausmoottorin tulos — ${senderName.trim()}`;
   const body = buildCounselorEmailBody(archetype, paths, senderName, message);
   return `mailto:${encodeURIComponent(counselorEmail.trim())}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
 }
 
 function buildFriendMailto(friendEmail, archetype, paths, senderName, message) {
-  const subject = state.plainLanguage
-    ? `Kokeile tätä testiä — ${senderName.trim()}`
+  const subject = isEn()
+    ? `Try this test — ${senderName.trim()}`
     : `Katso testitulokseni ja kokeile itse — ${senderName.trim()}`;
   const body = buildFriendEmailBody(archetype, paths, senderName, message);
   return `mailto:${encodeURIComponent(friendEmail.trim())}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
@@ -2358,17 +2636,17 @@ function bindShareEmailWizard({
 
     if (wizard.step === 1) {
       panel.innerHTML = `
-        <button type="button" class="share-modal-close" aria-label="Sulje">×</button>
+        <button type="button" class="share-modal-close" aria-label="${ui('modalClose')}">×</button>
         <h2 id="${titleId}" class="share-modal-title">${copy.title}</h2>
         <p class="share-modal-lead">${copy.emailHint}</p>
         <label class="share-field">
           <span class="share-field-label">${copy.emailLabel}</span>
-          <input type="email" id="shareEmailInput" class="share-input" autocomplete="email" inputmode="email" value="${wizard.recipientEmail}" placeholder="${copy.emailPlaceholder || 'sahko@posti.fi'}" />
+          <input type="email" id="shareEmailInput" class="share-input" autocomplete="email" inputmode="email" value="${wizard.recipientEmail}" placeholder="${copy.emailPlaceholder || (isEn() ? 'name@example.com' : 'sahko@posti.fi')}" />
         </label>
         <p class="share-field-error" id="shareEmailError" hidden>${copy.invalidEmail}</p>
         <div class="share-modal-actions">
-          <button type="button" class="btn btn-ghost" id="shareCancelBtn">Peruuta</button>
-          <button type="button" class="btn btn-primary" id="shareNextBtn">Seuraava →</button>
+          <button type="button" class="btn btn-ghost" id="shareCancelBtn">${ui('modalCancel')}</button>
+          <button type="button" class="btn btn-primary" id="shareNextBtn">${ui('next')}</button>
         </div>`;
 
       const input = panel.querySelector('#shareEmailInput');
@@ -2394,12 +2672,12 @@ function bindShareEmailWizard({
     }
 
     panel.innerHTML = `
-      <button type="button" class="share-modal-close" aria-label="Sulje">×</button>
+      <button type="button" class="share-modal-close" aria-label="${ui('modalClose')}">×</button>
       <h2 id="${titleId}" class="share-modal-title">${copy.title}</h2>
       <p class="share-modal-lead">${copy.nameHint}</p>
       <label class="share-field">
         <span class="share-field-label">${copy.nameLabel}</span>
-        <input type="text" id="shareNameInput" class="share-input" autocomplete="name" placeholder="${copy.namePlaceholder || 'Pasi Laakkonen'}" />
+        <input type="text" id="shareNameInput" class="share-input" autocomplete="name" placeholder="${copy.namePlaceholder || (isEn() ? 'Alex Smith' : 'Pasi Laakkonen')}" />
       </label>
       <p class="share-field-error" id="shareNameError" hidden>${copy.nameRequired}</p>
       <label class="share-field">
@@ -2408,7 +2686,7 @@ function bindShareEmailWizard({
       </label>
       <p class="share-modal-privacy">${copy.privacy}</p>
       <div class="share-modal-actions">
-        <button type="button" class="btn btn-ghost" id="shareBackBtn">← Takaisin</button>
+        <button type="button" class="btn btn-ghost" id="shareBackBtn">${ui('back')}</button>
         <button type="button" class="btn btn-primary" id="shareSendBtn">${copy.sendLabel}</button>
       </div>`;
 
@@ -2463,16 +2741,16 @@ function bindShareToCounselor(archetype, topPaths) {
       title: txt('counselorModalTitle'),
       emailHint: txt('counselorEmailHint'),
       emailLabel: txt('counselorEmailLabel'),
-      emailPlaceholder: 'ohjaaja@koulu.fi',
+      emailPlaceholder: isEn() ? 'counsellor@school.edu' : 'ohjaaja@koulu.fi',
       nameHint: txt('counselorNameHint'),
       nameLabel: txt('counselorNameLabel'),
-      namePlaceholder: 'Pasi Laakkonen',
+      namePlaceholder: isEn() ? 'Alex Smith' : 'Pasi Laakkonen',
       messageLabel: txt('counselorMessageLabel'),
       messageDefault: txt('counselorMessageDefault'),
       privacy: txt('counselorPrivacy'),
       invalidEmail: txt('counselorInvalidEmail'),
       nameRequired: txt('counselorNameRequired'),
-      sendLabel: 'Lähetä sähköpostilla',
+      sendLabel: ui('modalSendEmail'),
     },
     buildMailto: (email, name, message) => buildCounselorMailto(email, archetype, topPaths, name, message),
     trackEvent: 'share_to_counselor',
@@ -2489,16 +2767,16 @@ function bindShareToFriend(archetype, topPaths) {
       title: txt('friendModalTitle'),
       emailHint: txt('friendEmailHint'),
       emailLabel: txt('friendEmailLabel'),
-      emailPlaceholder: 'ystava@posti.fi',
+      emailPlaceholder: isEn() ? 'friend@example.com' : 'ystava@posti.fi',
       nameHint: txt('counselorNameHint'),
       nameLabel: txt('counselorNameLabel'),
-      namePlaceholder: 'Pasi Laakkonen',
+      namePlaceholder: isEn() ? 'Alex Smith' : 'Pasi Laakkonen',
       messageLabel: txt('counselorMessageLabel'),
       messageDefault: txt('friendMessageDefault'),
       privacy: txt('friendPrivacy'),
       invalidEmail: txt('counselorInvalidEmail'),
       nameRequired: txt('counselorNameRequired'),
-      sendLabel: 'Lähetä sähköpostilla',
+      sendLabel: ui('modalSendEmail'),
     },
     buildMailto: (email, name, message) => buildFriendMailto(email, archetype, topPaths, name, message),
     trackEvent: 'share_to_friend',
@@ -2511,14 +2789,14 @@ function answerLabelForQuestion(questionList, qId, key) {
   const q = questionList.find((item) => item.id === qId);
   const o = q?.options?.find((opt) => opt.key === key);
   if (!o) return key;
-  return state.plainLanguage && o.labelPlain ? o.labelPlain : o.label;
+  return optLabel(o, qId);
 }
 
 function buildAdvisorContext(archetype, topPaths, answers, tyoohjaus, motivation, interests) {
   const meaningQ = MOTIVATION_Q.find((q) => q.id === 'meaning');
   const meaningLabels = (motivation.meaning || []).map((key) => {
     const o = meaningQ?.options?.find((opt) => opt.key === key);
-    return o ? optLabel(o) : key;
+    return o ? optLabel(o, 'meaning') : key;
   });
   const recognitionQ = MOTIVATION_Q.find((q) => q.id === 'recognition');
   const recognitionOpt = recognitionQ?.options?.find((o) => o.key === motivation.recognition);
@@ -2526,11 +2804,14 @@ function buildAdvisorContext(archetype, topPaths, answers, tyoohjaus, motivation
   const interestLabels = (interests.i1 || []).map((key) => {
     const q = INTEREST_Q[0];
     const o = q?.options?.find((opt) => opt.key === key);
-    return o ? optLabel(o) : key;
+    return o ? optLabel(o, 'i1') : key;
   });
 
   const exploreOpt = EXPLORE_Q.options.find((o) => o.key === interests.i4);
-  const subjectLabels = [...state.subjects].map((id) => SUBJECTS.find((s) => s.id === id)?.label).filter(Boolean);
+  const subjectLabels = [...state.subjects].map((id) => {
+    const subject = SUBJECTS.find((s) => s.id === id);
+    return subject ? subjectLabel(subject) : '';
+  }).filter(Boolean);
 
   const tyoohjausSummary = {};
   TYOOHJAUS_QUESTIONS.forEach((q) => {
@@ -2544,40 +2825,40 @@ function buildAdvisorContext(archetype, topPaths, answers, tyoohjaus, motivation
   });
 
   return {
-    plainLanguage: state.plainLanguage,
+    language: state.lang,
     archetype: {
       id: archetype.id,
-      title: archetype.title,
-      tagline: archetype.tagline,
+      title: archetypeTitle(archetype),
+      tagline: archetypeTagline(archetype),
     },
     topPaths: topPaths.slice(0, 3).map((p) => ({
       id: p.id,
-      name: p.name,
-      description: p.desc,
+      name: pathName(p),
+      description: pathDesc(p),
       study: studyLineForPath(p, answers),
     })),
     motivation: {
       meaning: meaningLabels,
-      recognition: recognitionOpt ? optLabel(recognitionOpt) : '',
+      recognition: recognitionOpt ? optLabel(recognitionOpt, 'recognition') : '',
     },
     interests: {
       sectors: interestLabels,
-      nextStep: exploreOpt ? optLabel(exploreOpt) : '',
+      nextStep: exploreOpt ? optLabel(exploreOpt, 'i4') : '',
     },
     favoriteSubjects: subjectLabels,
     workStyle: tyoohjausSummary,
     lxpHighlights: lxpSummary,
     aspirationMismatch: detectAspirationMismatch(tyoohjaus, motivation, interests),
-    disclaimer: 'Suuntaa antava ohjaustulos, ei uraennuste',
+    disclaimer: ui('advisorDisclaimerShort'),
   };
 }
 
 function advisorWelcomeMessage(archetype, topPaths) {
-  const paths = topPaths.slice(0, 3).map((p) => p.name).join(', ');
-  if (state.plainLanguage) {
-    return `Hei! Olen Yoro Valmentaja. Tyyppisi on ${archetype.title}. Polkusi: ${paths}. Voinko auttaa työllistymissuunnitelmassa, koulutuksessa tai työnhaussa?`;
+  const paths = topPaths.slice(0, 3).map((p) => pathName(p)).join(', ');
+  if (isEn()) {
+    return `Hi! I'm Yoro Valmentaja. Your type is ${archetypeTitle(archetype)}. Suggested paths: ${paths}. Can I help with an employment plan, training options, or job search?`;
   }
-  return `Hei! Olen Yoro Valmentaja — tunnen testituloksesi. Tekijätyyppisi on ${archetype.title} ${archetype.emoji}, ja ehdotetut polut ovat: ${paths}. Voinko auttaa henkilökohtaisessa työllistymissuunnitelmassa, lisäkoulutusvaihtoehdoissa tai työllistymisessä?`;
+  return `Hei! Olen Yoro Valmentaja — tunnen testituloksesi. Tekijätyyppisi on ${archetypeTitle(archetype)} ${archetype.emoji}, ja ehdotetut polut ovat: ${paths}. Voinko auttaa henkilökohtaisessa työllistymissuunnitelmassa, lisäkoulutusvaihtoehdoissa tai työllistymisessä?`;
 }
 
 function renderAdvisorChips() {
@@ -2778,25 +3059,28 @@ function drawShareCard(archetype, topPath) {
   ctx.textBaseline = 'alphabetic';
   ctx.fillStyle = '#f1f5f9';
   ctx.font = 'bold 52px Inter, system-ui, sans-serif';
-  ctx.fillText('Millainen tekijä olet?', 72, 108);
+  ctx.fillText(isEn() ? I18N_EN.shareCard.title : 'Millainen tekijä olet?', 72, 108);
 
   ctx.font = '64px Inter, system-ui, sans-serif';
-  ctx.fillText(`${archetype.emoji}  ${archetype.title}`, 72, 210);
+  ctx.fillText(`${archetype.emoji}  ${archetypeTitle(archetype)}`, 72, 210);
 
   ctx.fillStyle = '#94a3b8';
   ctx.font = '28px Inter, system-ui, sans-serif';
-  const pathLine = topPath ? `Polku: ${topPath.name}` : '3 polkua kokeiltavaksi';
+  const sc = isEn() ? I18N_EN.shareCard : null;
+  const pathLine = topPath
+    ? `${sc ? sc.pathPrefix : 'Polku:'} ${pathName(topPath)}`
+    : (sc ? sc.pathsFallback : '3 polkua kokeiltavaksi');
   ctx.fillText(pathLine, 72, 278);
 
   ctx.font = '36px Inter, system-ui, sans-serif';
   ctx.fillText('🎯', 72, 338);
   ctx.fillStyle = '#e2e8f0';
   ctx.font = '26px Inter, system-ui, sans-serif';
-  ctx.fillText('kokeiltavaksi', 118, 338);
+  ctx.fillText(sc ? sc.tryLabel : 'kokeiltavaksi', 118, 338);
 
   ctx.fillStyle = '#64748b';
   ctx.font = '22px Inter, system-ui, sans-serif';
-  ctx.fillText('Noin 10–12 min · ilmainen · ei uraennustetta', 72, 392);
+  ctx.fillText(sc ? sc.footer : 'Noin 10–12 min · ilmainen · ei uraennustetta', 72, 392);
 
   ctx.fillStyle = '#22d3ee';
   ctx.font = '600 24px Inter, system-ui, sans-serif';
@@ -2915,16 +3199,19 @@ function render() {
     app.innerHTML = `
       <section class="hero">
         ${savedBanner}
-        <div class="pill">Ilmainen · n. 10–12 min</div>
+        <div class="pill">${ui('freeBeta')}</div>
         <img src="/yoro-logo.png" class="hero-deco-logo" alt="" aria-hidden="true"/>
-        <h1 style="margin-top:0">${txt('introTitle1')}<br><span>${txt('introTitle2')}</span></h1>
+        <h1 class="hero-title">
+          <span class="hero-title-line">${txt('introTitle1')}</span>
+          <span class="hero-title-accent">${txt('introTitle2')}</span>
+        </h1>
         <p>${txt('introBody')}</p>
         <p class="hook">${txt('introHook')}</p>
         <div class="stats-row">
-          <div class="stat"><strong>10</strong><span>LxP-kysymystä</span></div>
-          <div class="stat"><strong>4</strong><span>uraohjauskysymystä</span></div>
-          <div class="stat"><strong>2</strong><span>motivaatiota</span></div>
-          <div class="stat"><strong>2</strong><span>kiinnostusta</span></div>
+          <div class="stat"><strong>10</strong><span>${ui('introStatsLxp')}</span></div>
+          <div class="stat"><strong>5</strong><span>${ui('introStatsUraohjaus')}</span></div>
+          <div class="stat"><strong>2</strong><span>${ui('introStatsMotivation')}</span></div>
+          <div class="stat"><strong>2</strong><span>${ui('introStatsInterest')}</span></div>
         </div>
         <button class="btn btn-primary" id="startBtn">${txt('startBtn')}</button>
         <p class="disclaimer" style="margin-top:20px">${txt('introDisclaimer')}</p>
@@ -2953,7 +3240,7 @@ function render() {
   const progressHtml =
     state.screen !== 'result'
       ? `<div class="progress-wrap">
-          <div class="progress-label"><span>Vaihe ${step}/${totalSteps()}${pct >= 85 ? txt('progressAlmost') : ''}</span><strong>${pct}%</strong></div>
+          <div class="progress-label"><span>${ui('progressStep')} ${step}/${totalSteps()}${pct >= 85 ? txt('progressAlmost') : ''}</span><strong>${pct}%</strong></div>
           <div class="progress-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${pct}" aria-label="Testin eteneminen">
             <div class="progress-fill" style="width:${pct}%"></div>
           </div>
@@ -2966,19 +3253,19 @@ function render() {
     app.innerHTML = `
       ${progressHtml}
       <div class="card">
-        <div class="phase-tag">${state.lxpIndex + 1}/${LXP_QUESTIONS.length} · ${q.phase}</div>
+        <div class="phase-tag">${state.lxpIndex + 1}/${LXP_QUESTIONS.length} · ${qPhase(q)}</div>
         <h2 id="${headingId}">${qText(q)}</h2>
         <p class="hint">${qHint(q)}</p>
         <div class="options" id="opts" role="radiogroup" aria-labelledby="${headingId}">
           ${q.options.map((o) => {
             const selected = state.lxp[q.id] === o.key;
-            return `<button type="button" class="opt${selected ? ' selected' : ''}" data-key="${o.key}" role="radio" aria-checked="${selected ? 'true' : 'false'}">${optLabel(o)}</button>`;
+            return `<button type="button" class="opt${selected ? ' selected' : ''}" data-key="${o.key}" role="radio" aria-checked="${selected ? 'true' : 'false'}">${optLabel(o, q.id)}</button>`;
           }).join('')}
         </div>
       </div>
       <div class="nav-row">
-        ${state.lxpIndex > 0 ? '<button class="btn btn-ghost" id="backBtn">← Takaisin</button>' : '<span></span>'}
-        <button class="btn btn-primary" id="nextBtn" ${state.lxp[q.id] ? '' : 'disabled style="opacity:0.5"'}>Seuraava →</button>
+        ${state.lxpIndex > 0 ? `<button class="btn btn-ghost" id="backBtn">${ui('back')}</button>` : '<span></span>'}
+        <button class="btn btn-primary" id="nextBtn" ${state.lxp[q.id] ? '' : 'disabled style="opacity:0.5"'}>${ui('next')}</button>
       </div>`;
 
     document.querySelectorAll('.opt').forEach((btn) => {
@@ -3012,19 +3299,19 @@ function render() {
     app.innerHTML = `
       ${progressHtml}
       <div class="card">
-        <div class="phase-tag">Uraohjaus ${state.tyoohjausIndex + 1}/${TYOOHJAUS_QUESTIONS.length} · Ei vaikuta LxP-hakuun</div>
+        <div class="phase-tag">${ui('phaseUraohjaus')} ${state.tyoohjausIndex + 1}/${TYOOHJAUS_QUESTIONS.length} · ${ui('phaseUraohjausNote')}</div>
         <h2 id="${headingId}">${qText(q)}</h2>
         <p class="hint">${qHint(q)}</p>
         <div class="options" id="opts" data-qid="${q.id}" role="radiogroup" aria-labelledby="${headingId}">
           ${q.options.map((o) => {
             const selected = state.tyoohjaus[q.id] === o.key;
-            return `<button type="button" class="opt${selected ? ' selected' : ''}" data-key="${o.key}" role="radio" aria-checked="${selected ? 'true' : 'false'}">${optLabel(o)}</button>`;
+            return `<button type="button" class="opt${selected ? ' selected' : ''}" data-key="${o.key}" role="radio" aria-checked="${selected ? 'true' : 'false'}">${optLabel(o, q.id)}</button>`;
           }).join('')}
         </div>
       </div>
       <div class="nav-row">
-        <button class="btn btn-ghost" id="backBtn">← Takaisin</button>
-        <button class="btn btn-primary" id="nextBtn" ${valid ? '' : 'disabled style="opacity:0.5"'}>Seuraava →</button>
+        <button class="btn btn-ghost" id="backBtn">${ui('back')}</button>
+        <button class="btn btn-primary" id="nextBtn" ${valid ? '' : 'disabled style="opacity:0.5"'}>${ui('next')}</button>
       </div>`;
 
     document.querySelectorAll('.opt').forEach((btn) => {
@@ -3067,7 +3354,7 @@ function render() {
     app.innerHTML = `
       ${progressHtml}
       <div class="card">
-        <div class="phase-tag">Motivaatio ${state.motivationIndex + 1}/${MOTIVATION_Q.length} · ei LxP-hakua</div>
+        <div class="phase-tag">${ui('phaseMotivation')} ${state.motivationIndex + 1}/${MOTIVATION_Q.length} · ${ui('phaseMotivationNote')}</div>
         <h2 id="${headingId}">${qText(q)}</h2>
         <p class="hint">${qHint(q)}</p>
         <div class="options${q.grid ? ' interest-sector-grid' : ''}" id="opts" data-qid="${q.id}" role="${isMulti ? 'group' : 'radiogroup'}" aria-labelledby="${headingId}">
@@ -3075,13 +3362,13 @@ function render() {
             const selected = isMulti
               ? (state.motivation.meaning || []).includes(o.key)
               : state.motivation.recognition === o.key;
-            return `<button type="button" class="opt${selected ? (isMulti ? ' multi selected' : ' selected') : ''}" data-key="${o.key}" role="${isMulti ? 'checkbox' : 'radio'}" aria-checked="${selected ? 'true' : 'false'}">${optLabel(o)}</button>`;
+            return `<button type="button" class="opt${selected ? (isMulti ? ' multi selected' : ' selected') : ''}" data-key="${o.key}" role="${isMulti ? 'checkbox' : 'radio'}" aria-checked="${selected ? 'true' : 'false'}">${optLabel(o, q.id)}</button>`;
           }).join('')}
         </div>
       </div>
       <div class="nav-row">
-        <button class="btn btn-ghost" id="backBtn">← Takaisin</button>
-        <button class="btn btn-primary" id="nextBtn" ${valid ? '' : 'disabled style="opacity:0.5"'}>Seuraava →</button>
+        <button class="btn btn-ghost" id="backBtn">${ui('back')}</button>
+        <button class="btn btn-primary" id="nextBtn" ${valid ? '' : 'disabled style="opacity:0.5"'}>${ui('next')}</button>
       </div>`;
 
     document.querySelectorAll('.opt').forEach((btn) => {
@@ -3126,19 +3413,19 @@ function render() {
     app.innerHTML = `
       ${progressHtml}
       <div class="card">
-        <div class="phase-tag">Kouluaineet</div>
-        <h2 id="subjects-heading">${state.plainLanguage ? 'Valitse aineet joista pidät' : 'Valitse aineet, joista pidät'}</h2>
-        <p class="hint">${state.plainLanguage ? '1–6 kpl. Ei arvosanoja.' : '1–6 kpl — ei arvosanoja, vain mistä tykkäät.'}</p>
+        <div class="phase-tag">${ui('phaseSubjects')}</div>
+        <h2 id="subjects-heading">${ui('phaseSubjectsTitle')}</h2>
+        <p class="hint">${ui('phaseSubjectsHint')}</p>
         <div class="subject-grid" id="subGrid" role="group" aria-labelledby="subjects-heading">
           ${SUBJECTS.map((s) => {
             const selected = state.subjects.has(s.id);
-            return `<button type="button" class="opt subject-chip${selected ? ' multi selected' : ''}" data-id="${s.id}" role="checkbox" aria-checked="${selected ? 'true' : 'false'}"><span class="emoji" aria-hidden="true">${s.emoji}</span>${s.label}</button>`;
+            return `<button type="button" class="opt subject-chip${selected ? ' multi selected' : ''}" data-id="${s.id}" role="checkbox" aria-checked="${selected ? 'true' : 'false'}"><span class="emoji" aria-hidden="true">${s.emoji}</span>${subjectLabel(s)}</button>`;
           }).join('')}
         </div>
       </div>
       <div class="nav-row">
-        <button class="btn btn-ghost" id="backBtn">← Takaisin</button>
-        <button class="btn btn-primary" id="nextBtn" ${state.subjects.size >= 1 ? '' : 'disabled style="opacity:0.5"'}>Seuraava →</button>
+        <button class="btn btn-ghost" id="backBtn">${ui('back')}</button>
+        <button class="btn btn-primary" id="nextBtn" ${state.subjects.size >= 1 ? '' : 'disabled style="opacity:0.5"'}>${ui('next')}</button>
       </div>`;
 
     document.querySelectorAll('#subGrid .opt').forEach((btn) => {
@@ -3172,19 +3459,19 @@ function render() {
     app.innerHTML = `
       ${progressHtml}
       <div class="card">
-        <div class="phase-tag">Kiinnostus · ${currentStep()}/${totalSteps()}</div>
+        <div class="phase-tag">${ui('phaseInterest')} · ${currentStep()}/${totalSteps()}</div>
         <h2 id="${headingId}">${qText(q)}</h2>
         <p class="hint">${qHint(q)}</p>
         <div class="options interest-sector-grid" id="opts" data-qid="${q.id}" role="group" aria-labelledby="${headingId}">
           ${q.options.map((o) => {
             const sel = (state.interest.i1 || []).includes(o.key);
-            return `<button type="button" class="opt${sel ? ' multi selected' : ''}" data-key="${o.key}" role="checkbox" aria-checked="${sel ? 'true' : 'false'}">${optLabel(o)}</button>`;
+            return `<button type="button" class="opt${sel ? ' multi selected' : ''}" data-key="${o.key}" role="checkbox" aria-checked="${sel ? 'true' : 'false'}">${optLabel(o, q.id)}</button>`;
           }).join('')}
         </div>
       </div>
       <div class="nav-row">
-        <button class="btn btn-ghost" id="backBtn">← Takaisin</button>
-        <button class="btn btn-primary" id="nextBtn" ${valid ? '' : 'disabled style="opacity:0.5"'}>Seuraava →</button>
+        <button class="btn btn-ghost" id="backBtn">${ui('back')}</button>
+        <button class="btn btn-primary" id="nextBtn" ${valid ? '' : 'disabled style="opacity:0.5"'}>${ui('next')}</button>
       </div>`;
 
     document.querySelectorAll('.opt').forEach((btn) => {
@@ -3218,19 +3505,19 @@ function render() {
     app.innerHTML = `
       ${progressHtml}
       <div class="card">
-        <div class="phase-tag">Seuraava askel · ${currentStep()}/${totalSteps()}</div>
+        <div class="phase-tag">${ui('phaseExplore')} · ${currentStep()}/${totalSteps()}</div>
         <h2 id="${headingId}">${qText(EXPLORE_Q)}</h2>
         <p class="hint">${qHint(EXPLORE_Q)}</p>
         <div class="options" id="opts" data-qid="i4" role="radiogroup" aria-labelledby="${headingId}">
           ${EXPLORE_Q.options.map((o) => {
             const selected = state.interest.i4 === o.key;
-            return `<button type="button" class="opt${selected ? ' selected' : ''}" data-key="${o.key}" role="radio" aria-checked="${selected ? 'true' : 'false'}">${optLabel(o)}</button>`;
+            return `<button type="button" class="opt${selected ? ' selected' : ''}" data-key="${o.key}" role="radio" aria-checked="${selected ? 'true' : 'false'}">${optLabel(o, 'i4')}</button>`;
           }).join('')}
         </div>
       </div>
       <div class="nav-row">
-        <button class="btn btn-ghost" id="backBtn">← Takaisin</button>
-        <button class="btn btn-primary" id="nextBtn" ${valid ? '' : 'disabled style="opacity:0.5"'}>Näytä tulokseni ✨</button>
+        <button class="btn btn-ghost" id="backBtn">${ui('back')}</button>
+        <button class="btn btn-primary" id="nextBtn" ${valid ? '' : 'disabled style="opacity:0.5"'}>${ui('showResult')}</button>
       </div>`;
 
     document.querySelectorAll('.opt').forEach((btn) => {
@@ -3271,9 +3558,9 @@ function render() {
     const heroSentence = buildHeroSentence(archetype, state.tyoohjaus, top);
     const cta = primaryCta(state.interest, top, answers);
     const higherEdNote = hasHigherEdBackground(answers)
-      ? '<p class="trust-inline">Korkeakoulutaso huomioitu — ammattilistat näyttävät vain korkeamman tason tehtäviä.</p>'
+      ? `<p class="trust-inline">${isEn() ? 'Higher education background noted — occupation lists focus on degree-level roles.' : 'Korkeakoulutaso huomioitu — ammattilistat näyttävät vain korkeamman tason tehtäviä.'}</p>`
       : wantsHigherEd(answers)
-        ? '<p class="trust-inline">Mukana myös korkeakoulutason jatko-opintopolkuja (AMK/yliopisto).</p>'
+        ? `<p class="trust-inline">${isEn() ? 'Higher education paths (university of applied sciences / university) are included where relevant.' : 'Mukana myös korkeakoulutason jatko-opintopolkuja (AMK/yliopisto).'}</p>`
         : '';
 
     const aspirationAlert = buildAspirationMismatchHtml(state.tyoohjaus, state.motivation, state.interest);
@@ -3284,7 +3571,7 @@ function render() {
       <div class="result-hero">
         <div class="result-emoji" aria-hidden="true">${archetype.emoji}</div>
         <div class="result-type">${txt('resultType')}</div>
-        <h2 class="result-title" tabindex="-1">${archetype.title}</h2>
+        <h2 class="result-title" tabindex="-1">${archetypeTitle(archetype)}</h2>
         <p class="hero-sentence">${heroSentence}</p>
       </div>
 
@@ -3293,12 +3580,12 @@ function render() {
       <div class="card">
         <div class="section-title" style="margin-top:0">${txt('strengthsTitle')}</div>
         ${renderStrengths(archetype)}
-        <div class="section-title" style="margin-top:18px">${state.plainLanguage ? 'Lisää sinusta' : 'Työtyylisi lyhyesti'}</div>
+        <div class="section-title" style="margin-top:18px">${ui('workStyleSection')}</div>
         <ul class="narrative-list">
           ${narrative.slice(0, 4).map((n) => `<li>${n}</li>`).join('')}
         </ul>
         ${motivationLines.length ? `
-        <div class="section-title" style="margin-top:18px">${state.plainLanguage ? 'Motivaatio' : 'Motivaatio pitkällä aikavälillä'}</div>
+        <div class="section-title" style="margin-top:18px">${ui('motivationSection')}</div>
         <ul class="narrative-list motivation-list">
           ${motivationLines.map((n) => `<li>${n}</li>`).join('')}
         </ul>` : ''}
@@ -3318,19 +3605,19 @@ function render() {
       <div id="extraPaths" class="extra-paths path-list" hidden>
         ${extraPaths.map((p, i) => renderPathCard(p, i + 3, answers, state.interest, state.tyoohjaus, state.motivation, topScore)).join('')}
       </div>
-      <button type="button" class="btn btn-ghost" id="showMorePathsBtn">Näytä ${extraPaths.length} muuta polkua ▾</button>` : ''}
+      <button type="button" class="btn btn-ghost" id="showMorePathsBtn">${ui('showMorePaths')} (${extraPaths.length}) ▾</button>` : ''}
 
       ${renderAdvisorChatHtml(archetype, topPaths)}
 
       ${hasFeedbackForCurrentResult() ? '' : `
       <div class="feedback-card" id="feedbackCard">
-        <p class="feedback-title">Osuiko tulos sinuun?</p>
+        <p class="feedback-title">${ui('feedbackTitle')}</p>
         <div class="feedback-btns">
-          <button type="button" class="feedback-btn" data-feedback="yes">Kyllä</button>
-          <button type="button" class="feedback-btn" data-feedback="partly">Osittain</button>
-          <button type="button" class="feedback-btn" data-feedback="no">Ei juuri</button>
+          <button type="button" class="feedback-btn" data-feedback="yes">${ui('feedbackYes')}</button>
+          <button type="button" class="feedback-btn" data-feedback="partly">${ui('feedbackPartly')}</button>
+          <button type="button" class="feedback-btn" data-feedback="no">${ui('feedbackNo')}</button>
         </div>
-        <p class="feedback-thanks" id="feedbackThanks" hidden>Kiitos palautteesta — auttaa meitä kehittämään testiä.</p>
+        <p class="feedback-thanks" id="feedbackThanks" hidden>${ui('feedbackThanks')}</p>
       </div>`}
 
       <div class="share-section">
@@ -3345,10 +3632,10 @@ function render() {
           <button type="button" class="btn btn-share btn-share-option" id="shareBtn">${txt('shareText')}</button>
         </div>
       </div>
-      <button class="btn btn-ghost" id="retryBtn">Tee testi uudelleen</button>
-      <a href="https://yoro.fi/" class="btn btn-ghost" style="text-decoration:none;margin-top:8px">← Palaa Yoro.fi-sivuille</a>
+      <button class="btn btn-ghost" id="retryBtn">${ui('retry')}</button>
+      <a href="https://yoro.fi/" class="btn btn-ghost" style="text-decoration:none;margin-top:8px">← ${ui('backToYoro')}</a>
 
-      <p class="disclaimer">Tulos perustuu 10 kysymyksen LxP-työtyyliin, uraohjauskerrokseen (mukaan lukien vapaa-aika), motivaatioon, lempikouluaineisiin ja kiinnostukseen. Ammattinimet noudattavat <a href="${TE24_SOURCE_URL}" target="_blank" rel="noopener noreferrer">TE24-luokitusta</a>. Ei vaikuta työnantajan LxP-hakuun (lxp.yoro.fi). Emme mittaa älykkyyttä tai arvosanoja.</p>`;
+      <p class="disclaimer">${ui('resultDisclaimer').replace('{te24}', TE24_SOURCE_URL)}</p>`;
 
     track('result_view', {
       archetype: archetype.id,
@@ -3390,13 +3677,13 @@ function render() {
       track('share_text');
       if (navigator.share) {
         try {
-          await navigator.share({ title: 'Millainen tekijä olet? — Yoro', text, url });
+          await navigator.share({ title: ui('shareTitle'), text, url });
           return;
         } catch (_) { /* fallback */ }
       }
       await navigator.clipboard.writeText(text);
       const btn = document.getElementById('shareBtn');
-      btn.textContent = 'Kopioitu! Lähetä kaverille ✓';
+      btn.textContent = ui('linkCopiedShare');
       setTimeout(() => { btn.textContent = txt('shareText'); }, 2500);
     };
 

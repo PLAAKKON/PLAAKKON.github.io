@@ -116,16 +116,30 @@ body {
   cursor: pointer;
 }
 
-.plain-toggle[aria-pressed="true"] {
-  background: rgba(34, 211, 238, 0.14);
-  border-color: rgba(34, 211, 238, 0.35);
-  color: var(--accent);
+.lang-switch {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--surface-alt);
 }
 
-.plain-language .card h2,
-.plain-language .hero h1,
-.plain-language .hero p {
-  line-height: 1.45;
+.lang-switch-btn {
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  font-weight: 600;
+  font-size: 0.82rem;
+  padding: 7px 12px;
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.lang-switch-btn.active {
+  background: linear-gradient(135deg, #06b6d4, #8b5cf6);
+  color: #fff;
 }
 
 .saved-result-banner {
@@ -201,14 +215,23 @@ body {
   color: #94a3b8;
 }
 
-.hero h1 {
-  font-size: clamp(1.75rem, 6vw, 2.35rem);
-  line-height: 1.12;
+.hero-title {
+  font-size: clamp(1.85rem, 6vw, 2.5rem);
+  line-height: 1.2;
   letter-spacing: -0.03em;
-  margin-bottom: 12px;
+  margin: 0 0 20px;
+  font-weight: 800;
+  max-width: 22ch;
 }
 
-.hero h1 span {
+.hero-title-line {
+  display: block;
+  color: #f8fafc;
+}
+
+.hero-title-accent {
+  display: block;
+  margin-top: 6px;
   background: linear-gradient(135deg, var(--accent), var(--accent2));
   -webkit-background-clip: text;
   background-clip: text;
@@ -234,26 +257,36 @@ body {
 
 .stats-row {
   display: flex;
-  gap: 12px;
-  margin-bottom: 28px;
+  flex-wrap: wrap;
+  gap: 18px 28px;
+  margin-bottom: 32px;
+  max-width: 36rem;
 }
 
 .stat {
-  flex: 1;
-  background: var(--surface);
-  border: 1px solid rgba(255,255,255,0.06);
-  border-radius: 14px;
-  padding: 12px;
-  text-align: center;
+  flex: 0 1 auto;
+  min-width: 5.5rem;
+  padding: 0;
+  background: none;
+  border: none;
+  text-align: left;
 }
 
 .stat strong {
   display: block;
-  font-size: 1.25rem;
+  font-size: 1.5rem;
+  line-height: 1.1;
   color: var(--accent);
+  font-weight: 800;
 }
 
-.stat span { font-size: 0.72rem; color: var(--muted); }
+.stat span {
+  display: block;
+  margin-top: 4px;
+  font-size: 0.78rem;
+  line-height: 1.35;
+  color: var(--muted);
+}
 
 /* Buttons */
 .btn {

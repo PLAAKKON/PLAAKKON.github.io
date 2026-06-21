@@ -34,7 +34,10 @@
         </span>
       </a>
       <div class="topbar-actions">
-        <button type="button" class="plain-toggle" id="plainLangToggle" aria-pressed="false" aria-label="Vaihda selkokieli päälle tai pois">Selkokieli</button>
+        <div class="lang-switch" role="group" aria-label="Language">
+          <button type="button" class="lang-switch-btn active" id="langFiBtn" aria-pressed="true">FI</button>
+          <button type="button" class="lang-switch-btn" id="langEnBtn" aria-pressed="false">EN</button>
+        </div>
         <span class="pill">Beta</span>
       </div>
     </header>
@@ -45,6 +48,7 @@
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-functions-compat.js"></script>
+  <script src="i18n-en.js"></script>
   <script src="app.js"></script>
 </body>
 </html>
