@@ -94,13 +94,15 @@
     .topnav{
       display:flex; gap:4px; flex-wrap:wrap;
     }
+    .topnav.lang-content.active{display:flex}
     .topnav a{
       font-size:.85rem; font-weight:600; color:var(--muted);
       padding:8px 12px; border-radius:8px; text-decoration:none;
     }
     .topnav a:hover{color:var(--accent); background:var(--brand-50); text-decoration:none}
     @media (max-width:900px){
-      .topnav{display:none}
+      .topnav,
+      .topnav.lang-content.active{display:none}
       .topbar .inner{
         flex-wrap:nowrap;
         align-items:center;
