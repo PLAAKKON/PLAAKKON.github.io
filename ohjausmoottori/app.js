@@ -1678,7 +1678,28 @@ function resultAnswersFingerprint() {
 function feedbackFingerprintCandidates() {
   const answers = resultAnswersFingerprint();
   const full = currentResultFingerprint();
-  return [...new Set([answers, full])];
+  const variants = new Set([answers, full]);
+  try {
+    const saved = loadSavedResultEncoded();
+    if (saved) variants.add(saved);
+  } catch (_) { /* ignore */ }
+  if (location.hash.startsWith(RESULT_HASH_PREFIX)) {
+    variants.add(location.hash.slice(RESULT_HASH_PREFIX.length));
+  }
+  return [...variants];
+}
+
+function readFeedbackDoneSet() {
+  try {
+    return JSON.parse(localStorage.getItem(FEEDBACK_DONE_SET_KEY) || '[]');
+  } catch (_) {
+    return [];
+  }
+}
+
+function feedbackMatchesStoredFingerprint(storedFp, candidates) {
+  if (!storedFp || !candidates.length) return false;
+  return candidates.includes(storedFp);
 }
 
 function serializeResultState() {
@@ -1702,12 +1723,11 @@ function hasFeedbackForCurrentResult() {
   try {
     const candidates = feedbackFingerprintCandidates();
     const done = localStorage.getItem(FEEDBACK_DONE_KEY);
-    if (done && candidates.includes(done)) return true;
-    const all = JSON.parse(localStorage.getItem(FEEDBACK_DONE_SET_KEY) || '[]');
+    if (feedbackMatchesStoredFingerprint(done, candidates)) return true;
+    const all = readFeedbackDoneSet();
     if (candidates.some((fp) => all.includes(fp))) return true;
     const sessionFeedbacks = JSON.parse(sessionStorage.getItem(FEEDBACK_KEY) || '[]');
-    const answersFp = resultAnswersFingerprint();
-    return sessionFeedbacks.some((entry) => entry.resultFp === answersFp);
+    return sessionFeedbacks.some((entry) => feedbackMatchesStoredFingerprint(entry.resultFp, candidates));
   } catch (_) {
     return false;
   }
@@ -1717,7 +1737,7 @@ function markFeedbackForCurrentResult() {
   try {
     const candidates = feedbackFingerprintCandidates();
     localStorage.setItem(FEEDBACK_DONE_KEY, candidates[0]);
-    const all = JSON.parse(localStorage.getItem(FEEDBACK_DONE_SET_KEY) || '[]');
+    const all = readFeedbackDoneSet();
     candidates.forEach((fp) => {
       if (!all.includes(fp)) all.push(fp);
     });
@@ -1877,6 +1897,7 @@ function getFeedbackFirestore() {
 }
 
 function submitFeedbackPayload(payload) {
+  if (hasFeedbackForCurrentResult()) return;
   const db = getFeedbackFirestore();
   if (!db) return;
   db.collection(FEEDBACK_COLLECTION).add({
@@ -3201,13 +3222,15 @@ function bindFeedback(archetype, topPath) {
   const thanks = document.getElementById('feedbackThanks');
   card.querySelectorAll('[data-feedback]').forEach((btn) => {
     btn.addEventListener('click', () => {
+      if (hasFeedbackForCurrentResult()) return;
       const rating = btn.dataset.feedback;
       const events = JSON.parse(sessionStorage.getItem(ANALYTICS_KEY) || '[]').slice(-20);
+      const fps = feedbackFingerprintCandidates();
       const entry = {
         rating,
         archetype: archetype.id,
         path: topPath?.id,
-        resultFp: resultAnswersFingerprint(),
+        resultFp: fps[0],
         motivation: { ...state.motivation },
         interest: {
           i1: state.interest.i1,
@@ -3702,16 +3725,17 @@ function render() {
 
       ${renderAdvisorChatHtml(archetype, topPaths)}
 
-      ${hasFeedbackForCurrentResult() ? '' : `
-      <div class="feedback-card" id="feedbackCard">
+      <div class="feedback-card" id="feedbackCard"${hasFeedbackForCurrentResult() ? ' data-feedback-done="1"' : ''}>
+        ${hasFeedbackForCurrentResult() ? `
+        <p class="feedback-thanks">${ui('feedbackThanks')}</p>` : `
         <p class="feedback-title">${ui('feedbackTitle')}</p>
         <div class="feedback-btns">
           <button type="button" class="feedback-btn" data-feedback="yes">${ui('feedbackYes')}</button>
           <button type="button" class="feedback-btn" data-feedback="partly">${ui('feedbackPartly')}</button>
           <button type="button" class="feedback-btn" data-feedback="no">${ui('feedbackNo')}</button>
         </div>
-        <p class="feedback-thanks" id="feedbackThanks" hidden>${ui('feedbackThanks')}</p>
-      </div>`}
+        <p class="feedback-thanks" id="feedbackThanks" hidden>${ui('feedbackThanks')}</p>`}
+      </div>
 
       <div class="share-section">
         <button type="button" class="btn btn-share btn-share-toggle" id="shareToggleBtn" aria-expanded="${state.shareOpen ? 'true' : 'false'}" aria-controls="shareOptions">
