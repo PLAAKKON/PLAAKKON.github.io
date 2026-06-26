@@ -1327,6 +1327,8 @@ function bindPathToggles() {
 const ANALYTICS_KEY = 'yoro_ohjaus_events_v1';
 const FEEDBACK_KEY = 'yoro_ohjaus_feedback_v1';
 const FEEDBACK_DONE_KEY = 'yoro_ohjaus_feedback_done_v1';
+const FEEDBACK_DONE_SET_KEY = 'yoro_ohjaus_feedback_done_set_v1';
+const RESULT_LOGGED_KEY = 'yoro_ohjaus_result_logged_v1';
 const RESULT_STORAGE_KEY = 'yoro_ohjaus_result_v1';
 const LANG_KEY = 'yoro_ohjaus_lang_v1';
 const RESULT_HASH_PREFIX = '#r=';
@@ -1338,6 +1340,7 @@ const FIREBASE_CONFIG = {
 /** Sama LxP-projektin Cloud Function kuin analysoi — HTTP, ei callable */
 const ADVISOR_API_URL = 'https://europe-west1-urapolku-7780a.cloudfunctions.net/ohjausmoottoriAdvisor';
 const FEEDBACK_COLLECTION = 'ohjausmoottori_feedback';
+const RESULTS_COLLECTION = 'ohjausmoottori_results';
 
 const COPY = {
   trustBanner: {
@@ -1645,6 +1648,39 @@ function renderStrengths(archetype) {
   return `<ul class="strength-list">${items.map((s) => `<li>${s}</li>`).join('')}</ul>`;
 }
 
+function normalizeInterestForFingerprint(interest = {}) {
+  const i = { ...interest };
+  if (Array.isArray(i.i1)) {
+    i.i1 = [...i.i1].map((k) => (k === 'terveys' ? 'ihmiset' : k)).sort();
+  }
+  if (Array.isArray(i.i3)) i.i3 = [...i.i3].sort();
+  return i;
+}
+
+function resultAnswersPayload() {
+  return {
+    v: 1,
+    l: state.lxp,
+    t: state.tyoohjaus,
+    m: {
+      meaning: [...(state.motivation.meaning || [])].sort(),
+      recognition: state.motivation.recognition || '',
+    },
+    s: [...state.subjects].sort(),
+    i: normalizeInterestForFingerprint(state.interest),
+  };
+}
+
+function resultAnswersFingerprint() {
+  return encodeResultPayload(resultAnswersPayload());
+}
+
+function feedbackFingerprintCandidates() {
+  const answers = resultAnswersFingerprint();
+  const full = currentResultFingerprint();
+  return [...new Set([answers, full])];
+}
+
 function serializeResultState() {
   return {
     v: 1,
@@ -1664,7 +1700,14 @@ function currentResultFingerprint() {
 
 function hasFeedbackForCurrentResult() {
   try {
-    return localStorage.getItem(FEEDBACK_DONE_KEY) === currentResultFingerprint();
+    const candidates = feedbackFingerprintCandidates();
+    const done = localStorage.getItem(FEEDBACK_DONE_KEY);
+    if (done && candidates.includes(done)) return true;
+    const all = JSON.parse(localStorage.getItem(FEEDBACK_DONE_SET_KEY) || '[]');
+    if (candidates.some((fp) => all.includes(fp))) return true;
+    const sessionFeedbacks = JSON.parse(sessionStorage.getItem(FEEDBACK_KEY) || '[]');
+    const answersFp = resultAnswersFingerprint();
+    return sessionFeedbacks.some((entry) => entry.resultFp === answersFp);
   } catch (_) {
     return false;
   }
@@ -1672,7 +1715,13 @@ function hasFeedbackForCurrentResult() {
 
 function markFeedbackForCurrentResult() {
   try {
-    localStorage.setItem(FEEDBACK_DONE_KEY, currentResultFingerprint());
+    const candidates = feedbackFingerprintCandidates();
+    localStorage.setItem(FEEDBACK_DONE_KEY, candidates[0]);
+    const all = JSON.parse(localStorage.getItem(FEEDBACK_DONE_SET_KEY) || '[]');
+    candidates.forEach((fp) => {
+      if (!all.includes(fp)) all.push(fp);
+    });
+    localStorage.setItem(FEEDBACK_DONE_SET_KEY, JSON.stringify(all.slice(-120)));
   } catch (_) { /* ignore */ }
 }
 
@@ -1701,10 +1750,7 @@ function applyResultPayload(data) {
     ? { meaning: [...(data.m.meaning || [])], recognition: data.m.recognition || '' }
     : { meaning: [], recognition: '' };
   state.subjects = new Set(data.s || []);
-  state.interest = { ...data.i };
-  if (Array.isArray(state.interest.i1)) {
-    state.interest.i1 = state.interest.i1.map((k) => (k === 'terveys' ? 'ihmiset' : k));
-  }
+  state.interest = normalizeInterestForFingerprint({ ...data.i });
   state.lang = data.lg === 'en' ? 'en' : 'fi';
   state.screen = 'result';
   state.lxpIndex = 0;
@@ -1839,10 +1885,33 @@ function submitFeedbackPayload(payload) {
     rating: payload.rating || '',
     archetype: payload.archetype || '',
     path: payload.path || '',
+    resultFp: payload.resultFp || '',
     motivation: payload.motivation || {},
     interest: payload.interest || {},
     events: payload.events || [],
     clientTs: payload.t || Date.now(),
+    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+  }).catch(() => {});
+}
+
+function submitResultViewPayload(archetype, topPath) {
+  const db = getFeedbackFirestore();
+  if (!db) return;
+  const resultFp = resultAnswersFingerprint();
+  try {
+    const logged = JSON.parse(localStorage.getItem(RESULT_LOGGED_KEY) || '[]');
+    if (logged.includes(resultFp)) return;
+    logged.push(resultFp);
+    localStorage.setItem(RESULT_LOGGED_KEY, JSON.stringify(logged.slice(-300)));
+  } catch (_) { /* ignore */ }
+  db.collection(RESULTS_COLLECTION).add({
+    source: 'ohjausmoottori',
+    v: 1,
+    resultFp,
+    archetype: archetype.id,
+    path: topPath?.id || '',
+    lang: state.lang,
+    clientTs: Date.now(),
     createdAt: firebase.firestore.FieldValue.serverTimestamp(),
   }).catch(() => {});
 }
@@ -3138,6 +3207,7 @@ function bindFeedback(archetype, topPath) {
         rating,
         archetype: archetype.id,
         path: topPath?.id,
+        resultFp: resultAnswersFingerprint(),
         motivation: { ...state.motivation },
         interest: {
           i1: state.interest.i1,
@@ -3665,6 +3735,7 @@ function render() {
       topPath: top?.id,
       aspirationMismatch: detectAspirationMismatch(state.tyoohjaus, state.motivation, state.interest),
     });
+    submitResultViewPayload(archetype, top);
     bindPathToggles();
     bindPathWhyToggles();
     bindShowMorePaths(extraPaths.length);
@@ -3718,6 +3789,7 @@ function render() {
       history.replaceState(null, '', `${location.pathname}${location.search}`);
       try { localStorage.removeItem(RESULT_STORAGE_KEY); } catch (_) { /* ignore */ }
       try { localStorage.removeItem(FEEDBACK_DONE_KEY); } catch (_) { /* ignore */ }
+      try { localStorage.removeItem(FEEDBACK_DONE_SET_KEY); } catch (_) { /* ignore */ }
       Object.assign(state, {
         screen: 'intro',
         lxpIndex: 0,

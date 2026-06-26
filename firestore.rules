@@ -1,23 +1,45 @@
-rules_version = '2';
-
-service cloud.firestore {
-  match /databases/{database}/documents {
-    // Ohjausmoottori — anonyymi palaute, vain luonti
-    match /ohjausmoottori_feedback/{docId} {
-      allow read, update, delete: if false;
-      allow create: if validOhjausmoottoriFeedback(request.resource.data);
-    }
-  }
-}
-
-function validOhjausmoottoriFeedback(data) {
-  return data.keys().hasAll(['source', 'v', 'rating', 'clientTs'])
-    && data.source == 'ohjausmoottori'
-    && data.v == 1
-    && data.rating in ['yes', 'partly', 'no']
-    && data.clientTs is int
-    && data.clientTs > 0
-    && (!('archetype' in data) || data.archetype is string)
-    && (!('path' in data) || data.path is string)
-    && data.size() <= 20;
-}
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Ohjausmoottori — anonyymi palaute, vain luonti
+    match /ohjausmoottori_feedback/{docId} {
+      allow read, update, delete: if false;
+      allow create: if validOhjausmoottoriFeedback(request.resource.data);
+    }
+
+    // Ohjausmoottori — valmiit tulokset (yksi rivi / selain / tulos)
+    match /ohjausmoottori_results/{docId} {
+      allow read, update, delete: if false;
+      allow create: if validOhjausmoottoriResult(request.resource.data);
+    }
+  }
+}
+
+function validOhjausmoottoriFeedback(data) {
+  return data.keys().hasAll(['source', 'v', 'rating', 'clientTs'])
+    && data.source == 'ohjausmoottori'
+    && data.v == 1
+    && data.rating in ['yes', 'partly', 'no']
+    && data.clientTs is int
+    && data.clientTs > 0
+    && (!('archetype' in data) || data.archetype is string)
+    && (!('path' in data) || data.path is string)
+    && (!('resultFp' in data) || data.resultFp is string)
+    && data.size() <= 24;
+}
+
+function validOhjausmoottoriResult(data) {
+  return data.keys().hasAll(['source', 'v', 'resultFp', 'archetype', 'clientTs'])
+    && data.source == 'ohjausmoottori'
+    && data.v == 1
+    && data.resultFp is string
+    && data.resultFp.size() > 8
+    && data.archetype is string
+    && data.clientTs is int
+    && data.clientTs > 0
+    && (!('path' in data) || data.path is string)
+    && (!('lang' in data) || data.lang in ['fi', 'en'])
+    && data.size() <= 16;
+}
+
