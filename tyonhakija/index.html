@@ -111,6 +111,16 @@
           <textarea id="pasteProfile" rows="6" data-i18n-placeholder="pastePh" placeholder="Liitä tähän profiilin teksti" style="margin-top:8px"></textarea>
           <button id="importPaste" type="button" style="margin-top:8px" data-i18n="importPaste">Poimi tiedot</button>
         </div>
+        <div class="q">
+          <strong data-i18n="linksTitle">Linkit</strong>
+          <p data-i18n="linksLead">Voit julkaista LinkedIn-profiilin ja muita linkkejä. Ne tallentuvat profiiliin vain, jos valitset julkaisun.</p>
+          <label style="display:flex;align-items:center;gap:8px;color:var(--text)"><input id="publishLinks" type="checkbox" style="width:auto"> <span data-i18n="publishLinks">Julkaise linkit työnantajalle</span></label>
+          <input id="linkedin" data-i18n-placeholder="linkedinPh" placeholder="https://www.linkedin.com/in/oma-profiili" style="margin-top:8px" />
+          <div id="linkList"></div>
+          <input id="linkName" data-i18n-placeholder="linkNamePh" placeholder="Nimi, esimerkiksi portfolio" style="margin-top:8px" />
+          <input id="linkUrl" data-i18n-placeholder="linkUrlPh" placeholder="https://" style="margin-top:8px" />
+          <button id="addLink" type="button" style="margin-top:8px" data-i18n="addLink">Lisää linkki</button>
+        </div>
         <div class="q"><strong data-i18n="experience">Työkokemus</strong>
           <div id="experienceList"></div>
           <input id="expRole" data-i18n-placeholder="rolePh" placeholder="Tehtävä" style="margin-top:8px" />
@@ -177,6 +187,10 @@
         email: 'Sähköposti', password: 'Salasana', emailPh: 'nimi@osoite.fi', passwordPh: 'vähintään 6 merkkiä', register: 'Luo tili', login: 'Kirjaudu',
         lead: 'Sopiiko tämä työ sinulle? Yoro vertaa profiiliasi avoimeen paikkaan ja kirjoittaa hakemuksen, jossa näkyvät vain ne vahvuutesi, joita tehtävä tarvitsee. Jos työ ei sovi, sen näkee ennen lähettämistä.',
         pasteTitle: 'Kopioi LinkedInistä', pasteLead: 'Liitä työkokemus LinkedInistä tai vastaavasta. Sitä ei tarvitse kirjoittaa käsin.',
+        linksTitle: 'Linkit', linksLead: 'Voit julkaista LinkedIn-profiilin ja muita linkkejä. Ne tallentuvat profiiliin vain, jos valitset julkaisun.',
+        publishLinks: 'Julkaise linkit työnantajalle', linkedinPh: 'https://www.linkedin.com/in/oma-profiili',
+        linkNamePh: 'Nimi, esimerkiksi portfolio', linkUrlPh: 'https://', addLink: 'Lisää linkki',
+        badLink: 'Kirjoita linkki muodossa https://...', linkLimit: 'Linkkejä voi lisätä viisi.', badLinkedin: 'LinkedIn-osoite on muotoa https://www.linkedin.com/in/oma-profiili',
         pastePh: 'Liitä tähän profiilin teksti', importPaste: 'Poimi tiedot',
         readingPaste: 'Poimitaan tietoja…', imported: 'Tiedot poimittu. Tarkista ne ja paina Tallenna tämä vaihe.',
         emptyPaste: 'Liitä ensin teksti LinkedInistä tai vastaavasta.',
@@ -215,6 +229,10 @@
         email: 'Email', password: 'Password', emailPh: 'name@address.com', passwordPh: 'at least 6 characters', register: 'Create account', login: 'Log in',
         lead: 'Does this job fit you? Yoro compares your profile with the open role and writes an application that shows only the strengths this job needs. If it does not fit, you see that before you send it.',
         pasteTitle: 'Copy from LinkedIn', pasteLead: 'Paste your experience from LinkedIn or a similar profile. You do not need to type it by hand.',
+        linksTitle: 'Links', linksLead: 'You can publish a LinkedIn profile and other links. They are saved only if you choose to publish them.',
+        publishLinks: 'Publish links to employers', linkedinPh: 'https://www.linkedin.com/in/your-profile',
+        linkNamePh: 'Name, for example a portfolio', linkUrlPh: 'https://', addLink: 'Add link',
+        badLink: 'Enter the link as https://...', linkLimit: 'You can add five links.', badLinkedin: 'A LinkedIn address looks like https://www.linkedin.com/in/your-profile',
         pastePh: 'Paste the profile text here', importPaste: 'Read the details',
         readingPaste: 'Reading the details…', imported: 'Details added. Check them and press Save this step.',
         emptyPaste: 'Paste text from LinkedIn or a similar profile first.',
@@ -313,7 +331,7 @@
     const state = {
       regions: new Set(), wishes: new Set(), occupations: new Set(), skills: new Set(),
       education: '', degree: '', languages: new Set(), license: '', permits: new Set(),
-      start: '', lxp: {}, experience: [], intro: '', skillText: '', pendingLxp: ''
+      start: '', lxp: {}, experience: [], intro: '', skillText: '', links: [], pendingLxp: ''
     };
     const lists = { wishes: [], occupations: [], skills: [] };
     const pickers = {};
@@ -376,6 +394,27 @@
       input.oninput = draw;
       pickers[setName] = draw;
       return draw;
+    }
+    function renderLinks() {
+      const box = document.getElementById('linkList');
+      if (!box) return;
+      box.innerHTML = '';
+      state.links.forEach((item, index) => {
+        const row = document.createElement('div');
+        row.className = 'job';
+        const link = document.createElement('a');
+        link.href = item.url;
+        link.target = '_blank';
+        link.rel = 'noopener noreferrer';
+        link.textContent = item.nimi ? item.nimi + ' — ' + item.url : item.url;
+        const remove = document.createElement('button');
+        remove.type = 'button';
+        remove.textContent = t('remove');
+        remove.onclick = () => { state.links.splice(index, 1); renderLinks(); };
+        row.appendChild(link);
+        row.appendChild(remove);
+        box.appendChild(row);
+      });
     }
     function renderExperience() {
       const box = document.getElementById('experienceList');
@@ -547,7 +586,10 @@
         aloitusajankohta: state.start ? [state.start] : [],
         tyokokemus: state.experience.map(experienceLine).filter((line) => line.replace(/ \|/g, '').trim()),
         esittely: document.getElementById('intro').value.trim(),
-        osaamisteksti: document.getElementById('skillText').value.trim()
+        osaamisteksti: document.getElementById('skillText').value.trim(),
+        julkaiseLinkit: document.getElementById('publishLinks').checked,
+        linkedin: document.getElementById('linkedin').value.trim(),
+        linkit: state.links.map((item) => ({ nimi: item.nimi, url: item.url }))
       };
     }
     function applyLxp(key) {
@@ -574,6 +616,10 @@
       state.start = (data.aloitusajankohta || [])[0] || '';
       state.intro = data.esittely || '';
       state.skillText = data.osaamisteksti || '';
+      state.links = (Array.isArray(data.linkit) ? data.linkit : []).map((item) => ({
+        nimi: String(item.nimi || ''),
+        url: String(item.url || '')
+      })).filter((item) => item.url);
       state.experience = (data.tyokokemus || []).map(parseExperience);
       serverLxp = String(data.LxP || '');
       profileLoaded = true;
@@ -581,6 +627,8 @@
       if (questions.length) applyLxp(state.pendingLxp);
       document.getElementById('intro').value = state.intro;
       document.getElementById('skillText').value = state.skillText;
+      document.getElementById('linkedin').value = data.linkedin || '';
+      document.getElementById('publishLinks').checked = data.julkaiseLinkit === true;
       document.getElementById('degree').value = state.degree;
       refreshChoices();
     }
@@ -593,6 +641,7 @@
       single(document.getElementById('start'), starts, 'start');
       Object.values(pickers).forEach((draw) => draw());
       renderExperience();
+      renderLinks();
       if (questions.length) renderLxp();
     }
     async function api(action, extra) {
@@ -755,7 +804,23 @@
         button.disabled = false;
       }
     };
+    document.getElementById('addLink').onclick = () => {
+      const nimi = document.getElementById('linkName').value.trim().slice(0, 40);
+      const url = document.getElementById('linkUrl').value.trim();
+      if (!/^https:\/\/\S+$/i.test(url)) { setStatus(t('badLink'), true); return; }
+      if (state.links.length >= 5) { setStatus(t('linkLimit'), true); return; }
+      state.links.push({ nimi, url });
+      document.getElementById('linkName').value = '';
+      document.getElementById('linkUrl').value = '';
+      renderLinks();
+    };
     document.getElementById('saveBtn').onclick = async () => {
+      const publishing = document.getElementById('publishLinks').checked;
+      const linkedin = document.getElementById('linkedin').value.trim();
+      if (publishing && linkedin && !/^https:\/\/(www\.)?linkedin\.com\/in\/[\w%-]+\/?$/i.test(linkedin)) {
+        setStatus(t('badLinkedin'), true);
+        return;
+      }
       try { await api('tallenna'); setStatus(t('saved')); }
       catch (error) { setStatus(error.message, true); }
     };
