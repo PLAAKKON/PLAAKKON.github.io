@@ -1,0 +1,102 @@
+[
+  {
+    "id": "Q1",
+    "text": "1/10 Kuvaus työskentelytavastasi:",
+    "options": {
+      "a": "Olen itsenäinen työntekijä ja voin perehtyä työohjeisiin omatoimisesti.",
+      "b": "Haluan opastusta alkuun, mutta voin työskennellä itsenäisesti sen jälkeen.",
+      "c": "Tykkään itsenäisestä työskentelystä, mutta tarvitsen säännöllistä apua ja ohjausta.",
+      "d": "Pidän tiimityöstä, mutta myös vastuusta päätöksenteossa.",
+      "e": "Tykkään tehdä tiimityötä, jossa on selkeä ohjaus."
+    }
+  },
+  {
+    "id": "Q2",
+    "text": "2/10 Millaista työympäristöä arvostat?",
+    "options": {
+      "a": "Olen valmis fyysiseen työhön, joka on raskasta ja käytännönläheistä.",
+      "b": "Pidän aktiivisesta työstä, joka ei ole liian kuormittavaa.",
+      "c": "Pidän keskittymistä ja tarkkuutta vaativasta työstä.",
+      "d": "Pidän ihmisläheisestä ja sosiaalisesta työympäristöstä."
+    }
+  },
+  {
+    "id": "Q3",
+    "text": "3/10 Kumpi kuvaa sinua paremmin?",
+    "options": {
+      "a": "Pidän työskentelystä sisätiloissa rauhallisessa ympäristössä.",
+      "b": "Tykkään työskennellä ulkona tai liikkuvassa työssä.",
+      "c": "Nautin työstä, jossa työympäristö vaihtelee ja teen monenlaisia tehtäviä.",
+      "d": "Sosiaaliset ympäristöt ja asiakaspalvelu motivoivat minua."
+    }
+  },
+  {
+    "id": "Q4",
+    "text": "4/10 Miten suhtaudut päätöksentekoon työssä?",
+    "options": {
+      "a": "Tykkään työskennellä yksin ja kantaa vastuuta.",
+      "b": "Arvostan työskentelyä yksin, mutta myös tiimityö onnistuu.",
+      "c": "Työskentelen mielelläni tiimityössä, jossa yhteistyö on tärkeässä roolissa.",
+      "d": "Toivon, että painopiste on ihmisten kanssa työskentelyssä."
+    }
+  },
+  {
+    "id": "Q5",
+    "text": "5/10 Suhde tietotekniikkaan työssä:",
+    "options": {
+      "a": "Olen taitava tietotekniikan käyttäjä ja hyödynnän sujuvasti erilaisia ohjelmistoja.",
+      "b": "Hyödynnän tietotekniikkaa tarvittaessa ja pidän monipuolisista tehtävistä.",
+      "c": "Viihdyn käytännön tekemiseen painottuvissa työtehtävissä.",
+      "d": "Toivon löytäväni työn, jossa ei juuri tarvitse käyttää tietokonetta.",
+      "e": "Olen joustava tehtävien suhteen, oli tietokoneen käyttöä paljon tai vähän."
+    }
+  },
+  {
+    "id": "Q6",
+    "text": "6/10 Mitä ajattelet työajoista?",
+    "options": {
+      "a": "Arvostan täysin joustavia työaikoja, jotka voin päättää itse.",
+      "b": "Joustavat työajat sopisivat minulle hyvin.",
+      "c": "Pidän kiinteistä työajoista, jotka tuovat selkeyttä arkeen.",
+      "d": "Sopeudun sekä kiinteisiin että joustaviin aikatauluihin."
+    }
+  },
+  {
+    "id": "Q7",
+    "text": "7/10 Mikä on koulutustaustasi?",
+    "options": {
+      "a": "Olen oppinut työni käytännössä, ilman muodollista koulutusta.",
+      "b": "Olen suorittanut keskiasteen koulutuksen (esim. ammattikoulu).",
+      "c": "Minulla on korkeakoulututkinto."
+    }
+  },
+  {
+    "id": "Q8",
+    "text": "8/10 Miten suhtaudut alan vaihtoon ja opiskeluun?",
+    "options": {
+      "a": "Olen avoin uusille mahdollisuuksille ja valmis opiskelemaan uutta alaa varten.",
+      "b": "Haluan syventää osaamistani nykyisellä alallani.",
+      "c": "Olen avoin alanvaihdolle, mutta en voi sitoutua uusiin opintoihin.",
+      "d": "Haluan jatkaa nykyisellä alallani, enkä suunnittele lisäkoulutusta.",
+      "e": "Olen valmis vaihtamaan alaa, jolle nykyiset taitoni riittävät."
+    }
+  },
+  {
+    "id": "Q9",
+    "text": "9/10 Millainen työsuhde sopii sinulle parhaiten?",
+    "options": {
+      "a": "Etsin vakituista työpaikkaa ja arvostan työn vakautta.",
+      "b": "Voin työskennellä sekä vakituisessa että määräaikaisessa työsuhteessa.",
+      "c": "Pidän freelancer-työn vapaudesta ja oman työajan hallinnasta."
+    }
+  },
+  {
+    "id": "Q10",
+    "text": "10/10 Miten suhtaudut osaamisen kehittämiseen työssäsi?",
+    "options": {
+      "a": "Olen sitoutunut jatkuvaan oppimiseen ja kehitän aktiivisesti osaamistani.",
+      "b": "Kehitän mielelläni taitojani, kunhan tahti on kohtuullinen.",
+      "c": "Haluan, että työssäni riittää nykyiset taitoni."
+    }
+  }
+]

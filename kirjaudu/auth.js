@@ -11,8 +11,9 @@ window.addEventListener('load', function() {
 // Get return URL from query parameters
 function getReturnUrl() {
     const urlParams = new URLSearchParams(window.location.search);
-    const returnUrl = urlParams.get('returnUrl');
-    return returnUrl || '../';
+    const returnUrl = urlParams.get('returnUrl') || '';
+    if (returnUrl.startsWith('/') && !returnUrl.startsWith('//')) return returnUrl;
+    return '/tyonhakija/';
 }
 
 // Register user function
@@ -76,11 +77,7 @@ function logoutUser() {
 
 // Check authentication state
 firebase.auth().onAuthStateChanged((user) => {
-    if (user) {
-        console.log('User is signed in:', user.email);
-    } else {
-        console.log('User is signed out');
-    }
+    if (user) window.location.href = getReturnUrl();
 });
 
 // Auto-logout functionality (5 minutes of inactivity)

@@ -500,7 +500,7 @@
           <h1>Tee LxP-profiili ja etsi työtä</h1>
           <p class="sub">Ensin kymmenen monivalintaa, sama testi kuin profiilitestissä. Sitten profiilikortti samoilla ammateilla, osaamisilla ja työtoiveilla kuin muilla työnhakijoilla. Profiilin voi täyttää osissa. Matcher etsii töitä ja tekoäly kirjoittaa työhakemuksen. Maksu tulee myöhemmin.</p>
           <div class="cta">
-            <a class="btn primary" href="https://lxp.yoro.fi/tyonhakija.html">Aloita profiililla</a>
+            <a class="btn primary" href="/tyonhakija/">Aloita profiililla</a>
             <a class="btn" href="https://yoro.fi/profiilitesti/">Katso kymmenen kysymystä</a>
           </div>
         </div>
@@ -510,7 +510,7 @@
           <h1>Build an LxP profile and look for work</h1>
           <p class="sub">Start with the same ten multiple-choice questions as the profile test, then fill the profile card in parts with the same occupations, skills, and wishes as other job seekers. The matcher finds work and AI writes the application. Payment comes later. The flow is in Finnish.</p>
           <div class="cta">
-            <a class="btn primary" href="https://lxp.yoro.fi/tyonhakija.html">Start with your profile <span class="ui-lang-note">(Finnish only)</span></a>
+            <a class="btn primary" href="/tyonhakija/">Start with your profile <span class="ui-lang-note">(Finnish only)</span></a>
             <a class="btn" href="https://yoro.fi/profiilitesti/">See the ten questions <span class="ui-lang-note">(Finnish only)</span></a>
           </div>
           <p class="translation-services-note">English UI today: <strong>guidance engine test</strong> (link above). Profile test, employer search, education matching, and login remain Finnish.</p>
@@ -808,8 +808,8 @@
         <p class="intro lang-content active" data-lang="fi">Visio rakentuu vaiheittain. Nämä työkalut ovat jo käytössä — Ohjausmoottorissa myös <strong>Yoro Valmentaja</strong> (tekoälyavustaja, ei ihmisohjaajan korvike).</p>
         <p class="intro lang-content" data-lang="en">The vision is built in phases. These tools are live today — the guidance engine includes <strong>Yoro Valmentaja</strong> (AI assistant, not a replacement for human counselling).</p>
         <div class="tools-bar">
-            <a class="btn primary lang-content active" data-lang="fi" href="https://lxp.yoro.fi/tyonhakija.html">Työttömän profiili ja työnhaku</a>
-            <a class="btn primary lang-content" data-lang="en" href="https://lxp.yoro.fi/tyonhakija.html">Unemployed profile and job search</a>
+            <a class="btn primary lang-content active" data-lang="fi" href="/tyonhakija/">Työttömän profiili ja työnhaku</a>
+            <a class="btn primary lang-content" data-lang="en" href="/tyonhakija/">Unemployed profile and job search</a>
             <a class="btn primary lang-content active" data-lang="fi" href="https://yoro.fi/profiilitesti/">LxP Profiilitesti</a>
             <a class="btn primary lang-content" data-lang="en" href="https://yoro.fi/profiilitesti/">LxP profile test <span class="ui-lang-note">(Finnish only)</span></a>
           <a class="btn primary lang-content active" data-lang="fi" href="https://lxp.yoro.fi/test-workflow.html?mode=hire" target="_blank">Kandidaattihaku</a>
@@ -1010,6 +1010,7 @@
           el.innerHTML = `
         <div style="display:flex;align-items:center;gap:10px">
           <span style="font-size:.95em;color:var(--muted)">${user.displayName||user.email}</span>
+          <a class="btn" style="height:32px;padding:0 12px;font-size:.95em" href="/tyonhakija/">Oma profiili</a>
           <button class="btn" style="height:32px;padding:0 12px;font-size:.95em" onclick="logout()">Kirjaudu ulos</button>
         </div>
       `;

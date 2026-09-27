@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="fi">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Yoro — oma profiili ja työnhaku</title>
+  <style>
+    :root { --bg:#0b0f1a; --card:#141b2d; --line:rgba(148,163,184,.25); --text:#f1f5f9; --muted:#94a3b8; --accent:#22d3ee; --ok:#34d399; }
+    * { box-sizing: border-box; }
+    body { margin:0; font-family: Inter, Segoe UI, sans-serif; background:var(--bg); color:var(--text); }
+    header { position:sticky; top:0; background:rgba(11,15,26,.92); border-bottom:1px solid var(--line); padding:12px 16px; display:flex; justify-content:space-between; gap:12px; align-items:center; }
+    main { max-width:760px; margin:0 auto; padding:16px; }
+    h1 { font-size:1.15rem; margin:0; }
+    h2 { font-size:1.05rem; margin:0 0 8px; }
+    p { color:var(--muted); }
+    section { background:var(--card); border:1px solid var(--line); border-radius:14px; padding:16px; margin:12px 0; }
+    button, .chip { border:1px solid var(--line); background:#1c2640; color:var(--text); border-radius:999px; padding:8px 12px; cursor:pointer; }
+    button.primary { background:#0891b2; border-color:#0891b2; color:white; border-radius:10px; font-weight:650; }
+    button:disabled { opacity:.5; cursor:not-allowed; }
+    .chips { display:flex; flex-wrap:wrap; gap:8px; }
+    .chip.on { background:#155e75; border-color:var(--accent); }
+    label { display:block; margin:10px 0 4px; color:var(--muted); font-size:.9rem; }
+    input, textarea { width:100%; padding:10px; border-radius:10px; border:1px solid var(--line); background:#0b0f1a; color:var(--text); }
+    .q { margin:14px 0; }
+    .q strong { display:block; margin-bottom:8px; }
+    .row { display:flex; gap:8px; flex-wrap:wrap; }
+    .saldo { font-weight:700; color:var(--ok); }
+    .job { border-top:1px solid var(--line); padding-top:12px; margin-top:12px; }
+    .letter { white-space:pre-wrap; background:#0b0f1a; border-radius:10px; padding:12px; }
+    .error { color:#fecaca; }
+    a { color:var(--accent); }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Yoro</h1>
+    <div id="payState" class="saldo">Oma profiili</div>
+  </header>
+  <main>
+    <section id="authBox">
+      <h2>Työttömän tili</h2>
+      <p>Kirjoita sähköposti ja salasana, vähintään 6 merkkiä. Paina sitten <strong>Luo tili</strong>. Sen jälkeen pääset omalle sivulle ja voit täyttää profiilin osissa. Maksu tulee myöhemmin.</p>
+      <label for="email">Sähköposti</label>
+      <input id="email" type="email" autocomplete="email" placeholder="nimi@osoite.fi" />
+      <label for="password">Salasana</label>
+      <input id="password" type="password" autocomplete="new-password" placeholder="vähintään 6 merkkiä" />
+      <div class="row" style="margin-top:12px">
+        <button class="primary" id="registerBtn" type="button">Luo tili</button>
+        <button id="loginBtn" type="button">Kirjaudu</button>
+      </div>
+      <p id="authError" class="error"></p>
+    </section>
+
+    <div id="app" hidden>
+      <section>
+        <h2>1. LxP-profiili</h2>
+        <p>Samat 10 monivalintaa kuin <a href="https://yoro.fi/profiilitesti/">yoro.fi/profiilitesti</a>. Avain on kysymyksen numero ja vastauskirjain.</p>
+        <p>Avain: <strong id="lxpKey">–</strong></p>
+        <div id="lxp"></div>
+      </section>
+      <section>
+        <h2>2. Profiilikortti</h2>
+        <p>Voit täyttää kohdat missä järjestyksessä tahansa ja palata myöhemmin. Vaihtoehdot ovat samat kuin muissa profiileissa. Hae nimikkeellä, esimerkiksi tuotekehitys. Jos oikeaa ei löydy, lisää se omana.</p>
+        <div class="q"><strong>Esittely</strong>
+          <textarea id="intro" rows="3" placeholder="Lyhyt esittely, vapaaehtoinen"></textarea>
+        </div>
+        <div class="q"><strong>Työtoiveet</strong>
+          <div id="wishChosen" class="chips"></div>
+          <input id="wishFilter" placeholder="Hae työtoivetta, esim. tuotekehitys" style="margin-top:8px" />
+          <div id="wishes" class="chips" style="margin-top:10px"></div>
+        </div>
+        <div class="q"><strong>Ammatit, joissa olet työskennellyt</strong>
+          <div id="occupationChosen" class="chips"></div>
+          <input id="occupationFilter" placeholder="Hae ammattia" style="margin-top:8px" />
+          <div id="occupations" class="chips" style="margin-top:10px"></div>
+        </div>
+        <div class="q"><strong>Osaamiset</strong>
+          <div id="skillChosen" class="chips"></div>
+          <input id="skillFilter" placeholder="Hae osaamista, esim. projektinhallinta" style="margin-top:8px" />
+          <div id="skills" class="chips" style="margin-top:10px"></div>
+          <textarea id="skillText" rows="2" placeholder="Osaaminen omin sanoin, vapaaehtoinen" style="margin-top:8px"></textarea>
+        </div>
+        <div class="q"><strong>Työkokemus</strong>
+          <div id="experienceList"></div>
+          <input id="expRole" placeholder="Tehtävä, esim. tuotekehitysinsinööri" style="margin-top:8px" />
+          <input id="expEmployer" placeholder="Työnantaja" style="margin-top:8px" />
+          <input id="expWhen" placeholder="Ajankohta, esim. 2018–2024" style="margin-top:8px" />
+          <textarea id="expText" rows="2" placeholder="Mitä teit" style="margin-top:8px"></textarea>
+          <button id="addExp" type="button" style="margin-top:8px">Lisää tämä työkokemus</button>
+        </div>
+        <div class="q"><strong>Työnhakualue</strong><div id="regions" class="chips"></div></div>
+        <div class="q"><strong>Koulutus</strong>
+          <div id="education" class="chips"></div>
+          <input id="degree" placeholder="Tutkinnon nimi, esim. konetekniikka, DI" style="margin-top:8px" />
+        </div>
+        <div class="q"><strong>Kielitaito</strong><div id="languages" class="chips"></div></div>
+        <div class="q"><strong>Ajokortti</strong><div id="licenses" class="chips"></div></div>
+        <div class="q"><strong>Luvat ja kortit</strong><div id="permits" class="chips"></div></div>
+        <div class="q"><strong>Milloin voit aloittaa</strong><div id="start" class="chips"></div></div>
+        <button class="primary" id="saveBtn" type="button">Tallenna tämä vaihe</button>
+      </section>
+      <section>
+        <h2>3. Etsi töitä</h2>
+        <p>Haku ja hakemus toimivat jo sillä, mitä olet täyttänyt. Loput profiilista voit täydentää myöhemmin. Maksu tulee myöhemmässä vaiheessa.</p>
+        <div class="row">
+          <button class="primary" id="searchBtn" type="button">Etsi töitä</button>
+          <button id="logoutBtn" type="button">Kirjaudu ulos</button>
+        </div>
+        <p id="status"></p>
+      </section>
+      <section id="results" hidden>
+        <h2>Sopivat tehtävät</h2>
+        <p>Nämä eivät ole avoimia paikkoja. Hakulauseella etsit ilmoituksen itse, sitten hakemus kirjoitetaan siihen.</p>
+        <label>Liitä ilmoitus, jos se on jo löytynyt</label>
+        <textarea id="jobText" rows="5" placeholder="Työpaikkailmoituksen teksti"></textarea>
+        <div id="jobs"></div>
+      </section>
+    </div>
+  </main>
+
+  <script src="https://www.gstatic.com/firebasejs/10.11.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.11.1/firebase-auth-compat.js"></script>
+  <script>
+    firebase.initializeApp({
+      apiKey: "AIzaSyAnfsX522_ybXR7yhnAJbxDjuszVu4rZLE",
+      authDomain: "urapolku-7780a.firebaseapp.com",
+      projectId: "urapolku-7780a",
+      storageBucket: "urapolku-7780a.firebasestorage.app",
+      messagingSenderId: "314066598772",
+      appId: "1:314066598772:web:50183db006293290378a21"
+    });
+  </script>
+  <script>
+    const API = 'https://us-central1-urapolku-7780a.cloudfunctions.net/tyonhaku';
+    const regions = ['Uusimaa','Varsinais-Suomi','Satakunta','Kanta-Häme','Pirkanmaa','Päijät-Häme','Kymenlaakso','Etelä-Karjala','Etelä-Savo','Pohjois-Savo','Pohjois-Karjala','Keski-Suomi','Etelä-Pohjanmaa','Pohjanmaa','Keski-Pohjanmaa','Pohjois-Pohjanmaa','Kainuu','Lappi','Ahvenanmaa'];
+    const education = ['Ei tutkintoa','Peruskoulu','Ylioppilastutkinto','Ammatillinen perustutkinto','Ammattitutkinto','AMK','Yliopisto','Opiskelen vielä'];
+    const languages = ['Suomi – äidinkieli','Suomi – hyvä','Suomi – alkeet','Ruotsi – hyvä','Englanti – hyvä','Englanti – alkeet'];
+    const licenses = ['Ei ajokorttia','Henkilöauto (B)','Henkilöauto (BE)','Kuorma-auto (C)','Yhdistelmä (CE)'];
+    const permits = ['Työturvallisuuskortti','Tulityökortti','SFS 6002','Hygieniapassi','Ensiapukortti','Anniskelupassi'];
+    const starts = ['Heti','Kuukauden sisällä','Kolmen kuukauden sisällä'];
+    let questions = [];
+
+    const state = {
+      regions: new Set(), wishes: new Set(), occupations: new Set(), skills: new Set(),
+      education: '', degree: '', languages: new Set(), license: '', permits: new Set(),
+      start: '', lxp: {}, experience: [], intro: '', skillText: '', pendingLxp: ''
+    };
+    const lists = { wishes: [], occupations: [], skills: [] };
+    const pickers = {};
+
+    function chip(label, on, click) {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'chip' + (on ? ' on' : '');
+      b.textContent = label;
+      b.onclick = click;
+      return b;
+    }
+    function single(el, values, key) {
+      el.innerHTML = '';
+      values.forEach((value) => el.appendChild(chip(value, state[key] === value, () => { state[key] = value; single(el, values, key); })));
+    }
+    function multi(el, values, key, limit) {
+      el.innerHTML = '';
+      values.forEach((value) => el.appendChild(chip(value, state[key].has(value), () => {
+        if (state[key].has(value)) state[key].delete(value);
+        else if (!limit || state[key].size < limit) state[key].add(value);
+        multi(el, values, key, limit);
+      })));
+    }
+    function bindPicker(inputId, boxId, chosenId, listName, setName, limit) {
+      const input = document.getElementById(inputId);
+      const box = document.getElementById(boxId);
+      const chosen = document.getElementById(chosenId);
+      function draw() {
+        chosen.innerHTML = '';
+        [...state[setName]].forEach((value) => {
+          chosen.appendChild(chip(value + ' ×', true, () => { state[setName].delete(value); draw(); }));
+        });
+        const typed = input.value.trim();
+        const q = typed.toLowerCase();
+        box.innerHTML = '';
+        if (q.length < 2) return;
+        lists[listName].filter((title) => title.toLowerCase().includes(q)).slice(0, 24).forEach((title) => {
+          box.appendChild(chip(title, state[setName].has(title), () => {
+            if (state[setName].has(title)) state[setName].delete(title);
+            else if (state[setName].size < limit) state[setName].add(title);
+            draw();
+          }));
+        });
+        const exact = lists[listName].some((title) => title.toLowerCase() === q);
+        if (!exact && state[setName].size < limit) {
+          box.appendChild(chip('Lisää omana: ' + typed, false, () => {
+            state[setName].add(typed.slice(0, 80));
+            input.value = '';
+            draw();
+          }));
+        }
+      }
+      input.oninput = draw;
+      pickers[setName] = draw;
+      return draw;
+    }
+    function renderExperience() {
+      const box = document.getElementById('experienceList');
+      box.innerHTML = '';
+      state.experience.forEach((item, index) => {
+        const row = document.createElement('div');
+        row.className = 'job';
+        const text = [item.tehtava, item.tyonantaja, item.aika].filter(Boolean).join(', ');
+        row.textContent = text + (item.kuvaus ? '. ' + item.kuvaus : '');
+        const remove = document.createElement('button');
+        remove.type = 'button';
+        remove.textContent = 'Poista';
+        remove.onclick = () => { state.experience.splice(index, 1); renderExperience(); };
+        row.appendChild(remove);
+        box.appendChild(row);
+      });
+    }
+    function experienceLine(item) {
+      return [item.tehtava, item.tyonantaja, item.aika, item.kuvaus].map((part) => String(part || '').trim()).join(' | ');
+    }
+    function parseExperience(line) {
+      const parts = String(line || '').split(' | ');
+      if (parts.length >= 3) return { tehtava: parts[0] || '', tyonantaja: parts[1] || '', aika: parts[2] || '', kuvaus: parts.slice(3).join(' | ') };
+      return { tehtava: String(line || ''), tyonantaja: '', aika: '', kuvaus: '' };
+    }
+    function lxpKey() {
+      return questions.map((q, i) => state.lxp[q.id] ? (i + 1) + state.lxp[q.id].toUpperCase() : '').join('');
+    }
+    function renderLxp() {
+      const root = document.getElementById('lxp');
+      root.innerHTML = '';
+      questions.forEach((q) => {
+        const block = document.createElement('div');
+        block.className = 'q';
+        const title = document.createElement('strong');
+        title.textContent = q.text;
+        block.appendChild(title);
+        const row = document.createElement('div');
+        row.className = 'chips';
+        Object.entries(q.options).forEach(([letter, text]) => {
+          row.appendChild(chip(letter.toUpperCase() + '. ' + text, state.lxp[q.id] === letter, () => {
+            state.lxp[q.id] = letter;
+            renderLxp();
+          }));
+        });
+        block.appendChild(row);
+        root.appendChild(block);
+      });
+      document.getElementById('lxpKey').textContent = lxpKey() || '–';
+    }
+    function profileBody() {
+      const complete = questions.length === 10 && questions.every((q) => state.lxp[q.id]);
+      const degree = document.getElementById('degree').value.trim();
+      return {
+        LxP: complete ? lxpKey() : '',
+        tyotoiveet: [...state.wishes],
+        ammatit: [...state.occupations],
+        osaamiset: [...state.skills],
+        tyonhakualue: [...state.regions],
+        koulutus: [state.education, degree].filter(Boolean),
+        kielitaito: [...state.languages],
+        ajokortit: state.license && state.license !== 'Ei ajokorttia' ? [state.license] : [],
+        lupatiedot: [...state.permits],
+        aloitusajankohta: state.start ? [state.start] : [],
+        tyokokemus: state.experience.map(experienceLine).filter((line) => line.replace(/ \|/g, '').trim()),
+        esittely: document.getElementById('intro').value.trim(),
+        osaamisteksti: document.getElementById('skillText').value.trim()
+      };
+    }
+    function applyLxp(key) {
+      const parts = String(key || '').match(/\d+[A-E]/gi) || [];
+      parts.forEach((part) => {
+        const n = parseInt(part, 10);
+        const letter = part.replace(/\d+/, '').toLowerCase();
+        const question = questions[n - 1];
+        if (question) state.lxp[question.id] = letter;
+      });
+    }
+    function applyProfile(profile) {
+      const data = profile || {};
+      state.wishes = new Set(data.tyotoiveet || []);
+      state.occupations = new Set(data.ammatit || []);
+      state.skills = new Set(data.osaamiset || []);
+      state.regions = new Set(data.tyonhakualue || []);
+      state.languages = new Set(data.kielitaito || []);
+      state.permits = new Set(data.lupatiedot || []);
+      state.education = (data.koulutus || []).find((item) => education.includes(item)) || '';
+      state.degree = (data.koulutus || []).find((item) => !education.includes(item)) || '';
+      state.license = (data.ajokortit || [])[0] || '';
+      state.start = (data.aloitusajankohta || [])[0] || '';
+      state.intro = data.esittely || '';
+      state.skillText = data.osaamisteksti || '';
+      state.experience = (data.tyokokemus || []).map(parseExperience);
+      state.pendingLxp = data.LxP || '';
+      if (questions.length) applyLxp(state.pendingLxp);
+      document.getElementById('intro').value = state.intro;
+      document.getElementById('skillText').value = state.skillText;
+      document.getElementById('degree').value = state.degree;
+      refreshChoices();
+    }
+    function refreshChoices() {
+      multi(document.getElementById('regions'), regions, 'regions');
+      single(document.getElementById('education'), education, 'education');
+      multi(document.getElementById('languages'), languages, 'languages');
+      single(document.getElementById('licenses'), licenses, 'license');
+      multi(document.getElementById('permits'), permits, 'permits');
+      single(document.getElementById('start'), starts, 'start');
+      Object.values(pickers).forEach((draw) => draw());
+      renderExperience();
+      if (questions.length) renderLxp();
+    }
+    async function api(action, extra) {
+      const user = firebase.auth().currentUser;
+      const token = await user.getIdToken();
+      const response = await fetch(API, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token },
+        body: JSON.stringify({ action, profile: profileBody(), ...extra })
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(data.error || 'Pyyntö epäonnistui');
+      return data;
+    }
+    function setStatus(text, isError) {
+      const el = document.getElementById('status');
+      el.textContent = text;
+      el.className = isError ? 'error' : '';
+    }
+
+    function authFields() {
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value;
+      const error = document.getElementById('authError');
+      error.textContent = '';
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        error.textContent = 'Kirjoita ensin sähköposti kenttään, esimerkiksi nimi@osoite.fi. Paina Luo tili vasta sen jälkeen.';
+        return null;
+      }
+      if (password.length < 6) {
+        error.textContent = 'Kirjoita salasana, jossa on vähintään 6 merkkiä, ja paina sitten Luo tili.';
+        return null;
+      }
+      return { email, password };
+    }
+    function authFailure(error) {
+      const code = error && error.code;
+      const text = code === 'auth/email-already-in-use'
+        ? 'Tämä sähköposti on jo käytössä. Paina Kirjaudu.'
+        : code === 'auth/wrong-password' || code === 'auth/invalid-credential' || code === 'auth/user-not-found'
+          ? 'Sähköposti tai salasana ei täsmää. Uusi käyttäjä painaa Luo tili.'
+          : code === 'auth/weak-password'
+            ? 'Salasanassa pitää olla vähintään 6 merkkiä.'
+            : 'Tilin luonti ei onnistunut. Tarkista sähköposti ja salasana.';
+      document.getElementById('authError').textContent = text;
+    }
+    document.getElementById('loginBtn').onclick = async () => {
+      const fields = authFields();
+      if (!fields) return;
+      try { await firebase.auth().signInWithEmailAndPassword(fields.email, fields.password); }
+      catch (error) { authFailure(error); }
+    };
+    document.getElementById('registerBtn').onclick = async () => {
+      const fields = authFields();
+      if (!fields) return;
+      try { await firebase.auth().createUserWithEmailAndPassword(fields.email, fields.password); }
+      catch (error) { authFailure(error); }
+    };
+    document.getElementById('logoutBtn').onclick = () => firebase.auth().signOut();
+    document.getElementById('addExp').onclick = () => {
+      const item = {
+        tehtava: document.getElementById('expRole').value.trim(),
+        tyonantaja: document.getElementById('expEmployer').value.trim(),
+        aika: document.getElementById('expWhen').value.trim(),
+        kuvaus: document.getElementById('expText').value.trim()
+      };
+      if (!item.tehtava && !item.kuvaus) {
+        setStatus('Kirjoita ainakin tehtävä tai kuvaus.', true);
+        return;
+      }
+      if (state.experience.length >= 8) {
+        setStatus('Työkokemuksia voi lisätä kahdeksan. Poista yksi, jos haluat vaihtaa.', true);
+        return;
+      }
+      state.experience.push(item);
+      ['expRole', 'expEmployer', 'expWhen', 'expText'].forEach((id) => { document.getElementById(id).value = ''; });
+      renderExperience();
+      setStatus('Työkokemus lisätty. Tallenna tämä vaihe, niin se jää profiiliin.');
+    };
+    document.getElementById('saveBtn').onclick = async () => {
+      try { await api('tallenna'); setStatus('Tallennettu. Voit täydentää muita kohtia myöhemmin.'); }
+      catch (error) { setStatus(error.message, true); }
+    };
+    document.getElementById('searchBtn').onclick = async () => {
+      setStatus('Haetaan…');
+      try {
+        const data = await api('etsi');
+        const box = document.getElementById('jobs');
+        box.innerHTML = '';
+        (data.ehdotukset || []).forEach((job) => {
+          const div = document.createElement('div');
+          div.className = 'job';
+          div.innerHTML = '<strong></strong><p></p><p></p>';
+          div.querySelector('strong').textContent = job.nimike || '';
+          div.querySelectorAll('p')[0].textContent = job.miksi || '';
+          div.querySelectorAll('p')[1].textContent = job.hakulause || '';
+          const button = document.createElement('button');
+          button.className = 'primary';
+          button.type = 'button';
+          button.textContent = 'Kirjoita työhakemus';
+          button.onclick = async () => {
+            button.disabled = true;
+            try {
+              const letter = await api('hakemus', { nimike: job.nimike, jobText: document.getElementById('jobText').value });
+              const out = document.createElement('div');
+              out.className = 'letter';
+              out.textContent = letter.hakemus || '';
+              div.appendChild(out);
+            } catch (error) { setStatus(error.message, true); button.disabled = false; }
+          };
+          div.appendChild(button);
+          box.appendChild(div);
+        });
+        document.getElementById('results').hidden = false;
+        setStatus('Valitse tehtävä ja kirjoita hakemus. Puuttuvat profiilin kohdat voit täyttää myöhemmin.');
+      } catch (error) { setStatus(error.message, true); }
+    };
+
+    bindPicker('wishFilter', 'wishes', 'wishChosen', 'wishes', 'wishes', 12);
+    bindPicker('occupationFilter', 'occupations', 'occupationChosen', 'occupations', 'occupations', 12);
+    bindPicker('skillFilter', 'skills', 'skillChosen', 'skills', 'skills', 25);
+    multi(document.getElementById('regions'), regions, 'regions');
+    single(document.getElementById('education'), education, 'education');
+    multi(document.getElementById('languages'), languages, 'languages');
+    single(document.getElementById('licenses'), licenses, 'license');
+    multi(document.getElementById('permits'), permits, 'permits');
+    single(document.getElementById('start'), starts, 'start');
+    fetch('lxp-kysymykset.json').then((r) => r.json()).then((list) => {
+      questions = list;
+      if (state.pendingLxp) applyLxp(state.pendingLxp);
+      renderLxp();
+    });
+    Promise.all([
+      fetch('tyotoiveet-profiilit.json').then((r) => r.json()),
+      fetch('ammatit-profiilit.json').then((r) => r.json()),
+      fetch('osaamiset-profiilit.json').then((r) => r.json())
+    ]).then(([wishes, occupations, skills]) => {
+      lists.wishes = wishes;
+      lists.occupations = occupations;
+      lists.skills = skills;
+      Object.values(pickers).forEach((draw) => draw());
+    });
+
+    firebase.auth().onAuthStateChanged(async (user) => {
+      document.getElementById('authBox').hidden = !!user;
+      document.getElementById('app').hidden = !user;
+      if (!user) return;
+      try {
+        const data = await api('lataa');
+        applyProfile(data.profiili);
+      } catch (error) { setStatus(error.message, true); }
+    });
+  </script>
+</body>
+</html>
