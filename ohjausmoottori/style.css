@@ -337,6 +337,23 @@ body {
   margin-top: 24px;
 }
 
+.share-card-preview {
+  display: block;
+  width: 100%;
+  max-width: 640px;
+  height: auto;
+  border-radius: 16px;
+  border: 1px solid rgba(34, 211, 238, 0.35);
+  margin: 0 0 12px;
+}
+
+.share-social {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
 .btn-share-toggle {
   margin-top: 0;
 }

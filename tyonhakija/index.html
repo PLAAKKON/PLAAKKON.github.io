@@ -29,6 +29,9 @@
     .letter { white-space:pre-wrap; background:#0b0f1a; border-radius:10px; padding:12px; }
     .error { color:#fecaca; }
     #portrait p, #portrait li, #guidance p, #guidance li, #fitResult p, #fitResult li { color:var(--text); }
+    .fit-stop { font-size:1.15rem; color:#fecaca; margin:0 0 8px; }
+    .fit-promise { margin-top:8px; }
+    .fit-share { display:flex; flex-wrap:wrap; gap:8px; margin-top:12px; }
     #portrait { margin-top:14px; }
     a { color:var(--accent); }
   </style>
@@ -178,12 +181,14 @@
         skillTextPh: 'Osaaminen omin sanoin, vapaaehtoinen', experience: 'Työkokemus', rolePh: 'Tehtävä', employerPh: 'Työnantaja',
         whenPh: 'Ajankohta', didPh: 'Mitä teit', addExp: 'Lisää tämä työkokemus', region: 'Työnhakualue', education: 'Koulutus',
         degreePh: 'Tutkinnon nimi', language: 'Kielitaito', license: 'Ajokortti', permits: 'Luvat ja kortit', start: 'Milloin voit aloittaa',
-        save: 'Tallenna tämä vaihe', searchTitle: '4. Etsi töitä', searchLead: 'Haku toimii sillä, mitä olet täyttänyt. Hakemus kirjoitetaan ilmoituksen kielellä.',
-        fitTitle: 'Tarkista sopivuuteni johonkin työtehtävään', fitLead: 'Liitä ilmoitus. Tarkistus kertoo, mitä profiilista puuttuu.',
+        save: 'Tallenna tämä vaihe', searchTitle: '4. Etsi töitä',         searchLead: 'Haku toimii sillä, mitä olet täyttänyt. Tekoäly kirjoittaa hakemuksen vain niistä työtyylin kohdista, jotka sopivat tehtävään. Englanninkieliseen ilmoitukseen hakemus tulee englanniksi.',
+        fitTitle: 'Tarkista sopivuuteni johonkin työtehtävään', fitLead: 'Liitä ilmoitus. Tarkistus kertoo, mitä työnhakuprofiilista puuttuu, ja neuvoo olemaan lähettämättä hakemusta, jos tehtävä ei sovi.',
         jobPh: 'Työpaikkailmoituksen teksti', fitBtn: 'Tarkista sopivuuteni', searchBtn: 'Etsi töitä', logout: 'Kirjaudu ulos',
         resultsTitle: 'Sopivat tehtävät', resultsLead: 'Nämä eivät ole avoimia paikkoja. Hakulauseella etsit ilmoituksen itse.',
         addOwn: 'Lisää omana: ', remove: 'Poista', missing: 'Työnhakuprofiilistasi puuttuu', canApply: 'Voit hakea näillä tiedoilla.',
         doNotSend: 'Hakemusta ei kannata lähettää.', needJob: 'Liitä työpaikkailmoituksen teksti.', checking: 'Tarkistetaan sopivuutta…',
+        fitPromise: 'Tekoäly kirjoittaa työhakemuksen henkilökohtaisesta työtyylistä. Mukaan tulevat vain ne kohdat, jotka sopivat tähän tehtävään.',
+        shareLinkedIn: 'Jaa LinkedInissä', shareX: 'Jaa X:ssä', shareCopied: 'Teksti kopioitu. Liitä se julkaisuun.',
         fits: 'Tehtävä sopii profiiliin.', checked: 'Tarkistus valmis.', searching: 'Haetaan…', writeLetter: 'Kirjoita työhakemus',
         picked: 'Valitse tehtävä ja kirjoita hakemus. Puuttuvat kohdat voit täyttää myöhemmin.',
         needExp: 'Kirjoita ainakin tehtävä tai kuvaus.', expLimit: 'Työkokemuksia voi lisätä kahdeksan. Poista yksi, jos haluat vaihtaa.',
@@ -210,12 +215,14 @@
         skillTextPh: 'Skills in your own words, optional', experience: 'Work experience', rolePh: 'Role', employerPh: 'Employer',
         whenPh: 'When', didPh: 'What you did', addExp: 'Add this experience', region: 'Search area', education: 'Education',
         degreePh: 'Name of the degree', language: 'Languages', license: 'Driving licence', permits: 'Permits and cards', start: 'When you can start',
-        save: 'Save this step', searchTitle: '4. Look for work', searchLead: 'Search uses what you have filled in. The application is written in the language of the job ad.',
-        fitTitle: 'Check my fit for a job', fitLead: 'Paste an ad. The check lists what your profile is missing.',
+        save: 'Save this step', searchTitle: '4. Look for work', searchLead: 'Search uses what you have filled in. The AI writes the application only from the work-style points that fit the job. An English ad gets an English application.',
+        fitTitle: 'Check my fit for a job', fitLead: 'Paste an ad. The check says what the job-search profile is missing, and tells you not to send the application if the role does not fit.',
         jobPh: 'Job advertisement text', fitBtn: 'Check my fit', searchBtn: 'Look for work', logout: 'Log out',
         resultsTitle: 'Fitting roles', resultsLead: 'These are not open vacancies. Use the search phrase to find the ad yourself.',
         addOwn: 'Add your own: ', remove: 'Remove', missing: 'Your job-search profile is missing', canApply: 'You can apply with these facts.',
         doNotSend: 'Do not send this application.', needJob: 'Paste the job advertisement text.', checking: 'Checking fit…',
+        fitPromise: 'The AI writes the application from your personal work style. It includes only the points that fit this job.',
+        shareLinkedIn: 'Share on LinkedIn', shareX: 'Share on X', shareCopied: 'Text copied. Paste it into the post.',
         fits: 'The role fits the profile.', checked: 'Check complete.', searching: 'Searching…', writeLetter: 'Write the application',
         picked: 'Choose a role and write the application. You can fill in the rest of the profile later.',
         needExp: 'Write at least a role or a description.', expLimit: 'You can add eight experiences. Remove one to change them.',
@@ -679,16 +686,28 @@
       const view = window.lxpArvio ? window.lxpArvio(state.lxp) : { text: '', jobs: [] };
       return { jobText: jobText || '', lxpKuvaus: view.text || '', lxpYmparistot: view.jobs || [] };
     }
+    function fitShareText(data, missing) {
+      const verdict = data.suositus || (data.sopii ? t('canApply') : t('doNotSend'));
+      const gaps = missing.slice(0, 4).join(', ');
+      const gapLine = gaps ? (lang === 'en' ? `Missing: ${gaps}.` : `Puuttuu: ${gaps}.`) : '';
+      return [verdict, gapLine, t('fitPromise'), 'https://yoro.fi/tyonhakija/'].filter(Boolean).join('\n');
+    }
     function showFit(data) {
       const box = document.getElementById('fitResult');
       box.hidden = false;
       box.innerHTML = '';
       const missing = Array.isArray(data.puuttuu) ? data.puuttuu.filter(Boolean) : [];
+      const advice = document.createElement('p');
+      advice.className = data.sopii ? '' : 'fit-stop';
+      const strong = document.createElement('strong');
+      strong.textContent = data.suositus || (data.sopii ? t('canApply') : t('doNotSend'));
+      advice.appendChild(strong);
+      box.appendChild(advice);
       if (missing.length) {
         const title = document.createElement('p');
-        const strong = document.createElement('strong');
-        strong.textContent = t('missing');
-        title.appendChild(strong);
+        const label = document.createElement('strong');
+        label.textContent = t('missing');
+        title.appendChild(label);
         box.appendChild(title);
         const list = document.createElement('ul');
         missing.forEach((item) => {
@@ -703,10 +722,30 @@
         conflict.textContent = data.ristiriita;
         box.appendChild(conflict);
       }
-      const advice = document.createElement('p');
-      advice.innerHTML = '<strong></strong>';
-      advice.querySelector('strong').textContent = data.suositus || (data.sopii ? t('canApply') : t('doNotSend'));
-      box.appendChild(advice);
+      const promise = document.createElement('p');
+      promise.className = 'fit-promise';
+      promise.textContent = t('fitPromise');
+      box.appendChild(promise);
+      const post = fitShareText(data, missing);
+      const row = document.createElement('div');
+      row.className = 'fit-share';
+      const linkedIn = document.createElement('button');
+      linkedIn.type = 'button';
+      linkedIn.textContent = t('shareLinkedIn');
+      linkedIn.onclick = () => {
+        navigator.clipboard.writeText(post).catch(() => {});
+        linkedIn.textContent = t('shareCopied');
+        window.open('https://www.linkedin.com/sharing/share-offsite/?url=' + encodeURIComponent('https://yoro.fi/tyonhakija/'), '_blank', 'noopener');
+      };
+      const x = document.createElement('button');
+      x.type = 'button';
+      x.textContent = t('shareX');
+      x.onclick = () => {
+        window.open('https://twitter.com/intent/tweet?text=' + encodeURIComponent(post), '_blank', 'noopener');
+      };
+      row.appendChild(linkedIn);
+      row.appendChild(x);
+      box.appendChild(row);
     }
     document.getElementById('fitBtn').onclick = async () => {
       const jobText = document.getElementById('jobText').value.trim();

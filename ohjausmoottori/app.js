@@ -1360,7 +1360,10 @@ const COPY = {
   resumeResult: { fi: 'Palaa tulokseesi →', plain: 'Näytä tulos uudelleen →', en: 'Return to your result →' },
   copyResultLink: { fi: 'Kopioi linkki', plain: 'Kopioi linkki', en: 'Copy link' },
   shareToggle: { fi: 'Jaa tulos', plain: 'Jaa tulos', en: 'Share result' },
-  shareDownloadCard: { fi: 'Lataa jaettava kortti (PNG)', plain: 'Lataa kortti (PNG)', en: 'Download share card (PNG)' },
+  shareDownloadCard: { fi: 'Lataa kuva', plain: 'Lataa kuva', en: 'Download image' },
+  shareLinkedIn: { fi: 'Jaa LinkedInissä', plain: 'Jaa LinkedInissä', en: 'Share on LinkedIn' },
+  shareX: { fi: 'Jaa X:ssä', plain: 'Jaa X:ssä', en: 'Share on X' },
+  shareLinkedInCopied: { fi: 'Teksti kopioitu. Liitä se julkaisuun ja lisää kuva.', plain: 'Teksti kopioitu. Liitä se ja lisää kuva.', en: 'Text copied. Paste it into the post and add the image.' },
   shareText: { fi: 'Jaa tekstinä', plain: 'Jaa tekstinä', en: 'Share as text' },
   linkCopied: { fi: 'Linkki kopioitu!', plain: 'Kopioitu!', en: 'Link copied!' },
   plainToggle: { fi: 'Selkokieli', plain: 'Normaali kieli' },
@@ -2610,12 +2613,12 @@ function nextStepLabel() {
 }
 
 function shareText(archetype, paths) {
-  const top = paths[0] ? pathName(paths[0]) : (isEn() ? 'new paths' : 'uusia polkuja');
+  const top = paths[0] ? pathName(paths[0]) : (isEn() ? 'a path to try' : 'polku kokeiltavaksi');
   const url = state.screen === 'result' ? resultPageUrl() : 'https://yoro.fi/ohjausmoottori/';
   if (isEn()) {
-    return `My work style type is ${archetypeTitle(archetype)} ${archetype.emoji}\n\nYoro Ohjausmoottori suggested this path for me: ${top}\n\nThere is no single right career — try the test in about 10–12 min:\n${url}`;
+    return `My work style is ${archetypeTitle(archetype)} ${archetype.emoji}. Path: ${top}.\n\nThe AI writes the application only from the work-style points that fit the job. If the role does not fit, do not send the application.\n${url}`;
   }
-  return `Työtyylini on ${archetype.title} ${archetype.emoji}\n\nYoron ohjausmoottori ehdotti mulle polkua: ${top}\n\nEi yhtä oikeaa ammattia — kokeile noin 10–12 min:\n${url}`;
+  return `Työtyylini on ${archetypeTitle(archetype)} ${archetype.emoji}. Polku: ${top}.\n\nTekoäly kirjoittaa hakemuksen vain niistä työtyylin kohdista, jotka sopivat tehtävään. Jos tehtävä ei sovi, hakemusta ei kannata lähettää.\n${url}`;
 }
 
 function isValidEmail(email) {
@@ -3150,6 +3153,28 @@ function drawYoroMark(ctx, x, y) {
   ctx.restore();
 }
 
+function wrapCanvasLines(ctx, text, maxWidth, maxLines) {
+  const words = String(text || '').split(/\s+/).filter(Boolean);
+  const lines = [];
+  let line = '';
+  words.forEach((word) => {
+    const next = line ? `${line} ${word}` : word;
+    if (ctx.measureText(next).width > maxWidth && line) {
+      lines.push(line);
+      line = word;
+    } else {
+      line = next;
+    }
+  });
+  if (line) lines.push(line);
+  if (lines.length <= maxLines) return lines;
+  const kept = lines.slice(0, maxLines);
+  let last = kept[maxLines - 1];
+  while (last.length > 1 && ctx.measureText(`${last}…`).width > maxWidth) last = last.slice(0, -1);
+  kept[maxLines - 1] = `${last.replace(/[.,\s]+$/, '')}…`;
+  return kept;
+}
+
 function drawShareCard(archetype, topPath) {
   const canvas = document.createElement('canvas');
   canvas.width = 1200;
@@ -3159,60 +3184,89 @@ function drawShareCard(archetype, topPath) {
 
   ctx.fillStyle = '#0b0f1a';
   ctx.fillRect(0, 0, 1200, 630);
-
-  [
-    { x: 880, y: 140, r: 360, c: 'rgba(34, 211, 238, 0.16)' },
-    { x: 1020, y: 280, r: 300, c: 'rgba(167, 139, 250, 0.14)' },
-  ].forEach((g) => {
-    const glow = ctx.createRadialGradient(g.x, g.y, 0, g.x, g.y, g.r);
-    glow.addColorStop(0, g.c);
-    glow.addColorStop(1, 'rgba(11, 15, 26, 0)');
-    ctx.fillStyle = glow;
-    ctx.fillRect(0, 0, 1200, 630);
-  });
-
-  if (yoroLogoImage.complete && yoroLogoImage.naturalWidth) {
-    const decoH = 140;
-    const decoW = (yoroLogoImage.naturalWidth / yoroLogoImage.naturalHeight) * decoH;
-    ctx.globalAlpha = 0.12;
-    ctx.drawImage(yoroLogoImage, 820, 160, decoW, decoH);
-    ctx.globalAlpha = 1;
-  }
+  const glow = ctx.createRadialGradient(980, 120, 0, 980, 120, 420);
+  glow.addColorStop(0, 'rgba(34, 211, 238, 0.22)');
+  glow.addColorStop(1, 'rgba(11, 15, 26, 0)');
+  ctx.fillStyle = glow;
+  ctx.fillRect(0, 0, 1200, 630);
+  const bar = ctx.createLinearGradient(0, 0, 0, 630);
+  bar.addColorStop(0, '#22d3ee');
+  bar.addColorStop(1, '#8b5cf6');
+  ctx.fillStyle = bar;
+  ctx.fillRect(0, 0, 16, 630);
 
   ctx.textAlign = 'left';
   ctx.textBaseline = 'alphabetic';
-  ctx.fillStyle = '#f1f5f9';
-  ctx.font = 'bold 52px Inter, system-ui, sans-serif';
-  ctx.fillText(isEn() ? I18N_EN.shareCard.title : 'Millainen tekijä olet?', 72, 108);
-
-  ctx.font = '64px Inter, system-ui, sans-serif';
-  ctx.fillText(`${archetype.emoji}  ${archetypeTitle(archetype)}`, 72, 210);
-
-  ctx.fillStyle = '#94a3b8';
-  ctx.font = '28px Inter, system-ui, sans-serif';
-  const sc = isEn() ? I18N_EN.shareCard : null;
-  const pathLine = topPath
-    ? `${sc ? sc.pathPrefix : 'Polku:'} ${pathName(topPath)}`
-    : (sc ? sc.pathsFallback : '3 polkua kokeiltavaksi');
-  ctx.fillText(pathLine, 72, 278);
-
-  ctx.font = '36px Inter, system-ui, sans-serif';
-  ctx.fillText('🎯', 72, 338);
-  ctx.fillStyle = '#e2e8f0';
-  ctx.font = '26px Inter, system-ui, sans-serif';
-  ctx.fillText(sc ? sc.tryLabel : 'kokeiltavaksi', 118, 338);
-
-  ctx.fillStyle = '#64748b';
-  ctx.font = '22px Inter, system-ui, sans-serif';
-  ctx.fillText(sc ? sc.footer : 'Noin 10–12 min · ilmainen · ei uraennustetta', 72, 392);
-
   ctx.fillStyle = '#22d3ee';
-  ctx.font = '600 24px Inter, system-ui, sans-serif';
-  ctx.fillText('yoro.fi/ohjausmoottori', 72, 560);
+  ctx.font = '700 22px Inter, system-ui, sans-serif';
+  ctx.fillText(isEn() ? 'WORK STYLE' : 'TYÖTYYLI', 72, 86);
 
-  drawYoroMark(ctx, 980, 580);
+  ctx.fillStyle = '#f8fafc';
+  ctx.font = '800 72px Inter, system-ui, sans-serif';
+  const title = `${archetype.emoji}  ${archetypeTitle(archetype)}`;
+  wrapCanvasLines(ctx, title, 1040, 2).forEach((line, i) => {
+    ctx.fillText(line, 72, 180 + i * 82);
+  });
+
+  ctx.fillStyle = '#cbd5e1';
+  ctx.font = '400 30px Inter, system-ui, sans-serif';
+  wrapCanvasLines(ctx, archetypeTagline(archetype), 1000, 2).forEach((line, i) => {
+    ctx.fillText(line, 72, 360 + i * 40);
+  });
+
+  const pathLabel = topPath
+    ? (isEn() ? `Path  ${pathName(topPath)}` : `Polku  ${pathName(topPath)}`)
+    : (isEn() ? 'Paths to try' : 'Polkuja kokeiltavaksi');
+  ctx.font = '700 28px Inter, system-ui, sans-serif';
+  const pillText = wrapCanvasLines(ctx, pathLabel, 980, 1)[0];
+  const pillW = Math.min(1040, ctx.measureText(pillText).width + 48);
+  ctx.fillStyle = 'rgba(34, 211, 238, 0.14)';
+  ctx.beginPath();
+  if (ctx.roundRect) ctx.roundRect(72, 448, pillW, 54, 27);
+  else ctx.rect(72, 448, pillW, 54);
+  ctx.fill();
+  ctx.fillStyle = '#67e8f9';
+  ctx.fillText(pillText, 96, 484);
+
+  ctx.fillStyle = '#e2e8f0';
+  ctx.font = '500 24px Inter, system-ui, sans-serif';
+  const promise = isEn()
+    ? 'The application uses only the work-style points that fit the job.'
+    : 'Hakemus käyttää vain ne työtyylin kohdat, jotka sopivat tehtävään.';
+  ctx.fillText(promise, 72, 556);
+  ctx.fillStyle = '#94a3b8';
+  ctx.font = '600 22px Inter, system-ui, sans-serif';
+  ctx.fillText('yoro.fi/ohjausmoottori', 72, 598);
 
   return canvas;
+}
+
+function paintSharePreview(archetype, topPath) {
+  const show = () => {
+    const img = document.getElementById('shareCardPreview');
+    const canvas = drawShareCard(archetype, topPath);
+    if (img && canvas) img.src = canvas.toDataURL('image/png');
+  };
+  if (yoroLogoImage.complete) show();
+  else yoroLogoImage.addEventListener('load', show, { once: true });
+}
+
+function shareResultOn(network, archetype, paths) {
+  const text = shareText(archetype, paths);
+  const url = resultPageUrl();
+  track('share_social', { network });
+  if (network === 'x') {
+    window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`, '_blank', 'noopener');
+    return;
+  }
+  navigator.clipboard.writeText(text).catch(() => {});
+  const btn = document.getElementById('shareLinkedInBtn');
+  if (btn) {
+    const original = txt('shareLinkedIn');
+    btn.textContent = txt('shareLinkedInCopied');
+    setTimeout(() => { btn.textContent = original; }, 3500);
+  }
+  window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url)}`, '_blank', 'noopener');
 }
 
 function downloadShareCard(archetype, topPath) {
@@ -3752,6 +3806,12 @@ function render() {
       </div>
 
       <div class="share-section">
+        <img id="shareCardPreview" class="share-card-preview" alt="${archetypeTitle(archetype)}">
+        <div class="share-social">
+          <button type="button" class="btn btn-share btn-share-option" id="shareLinkedInBtn">${txt('shareLinkedIn')}</button>
+          <button type="button" class="btn btn-share btn-share-option" id="shareXBtn">${txt('shareX')}</button>
+          <button type="button" class="btn btn-share btn-share-option" id="downloadCardBtn">${txt('shareDownloadCard')}</button>
+        </div>
         <button type="button" class="btn btn-share btn-share-toggle" id="shareToggleBtn" aria-expanded="${state.shareOpen ? 'true' : 'false'}" aria-controls="shareOptions">
           ${txt('shareToggle')}${state.shareOpen ? ' ▴' : ' ▾'}
         </button>
@@ -3759,7 +3819,6 @@ function render() {
           <button type="button" class="btn btn-share btn-share-option" id="shareToCounselorBtn">${txt('shareToCounselor')}</button>
           <button type="button" class="btn btn-share btn-share-option" id="shareToFriendBtn">${txt('shareToFriend')}</button>
           <button type="button" class="btn btn-share btn-share-option" id="copyResultLinkBtn">${txt('copyResultLink')}</button>
-          <button type="button" class="btn btn-share btn-share-option" id="downloadCardBtn">${txt('shareDownloadCard')}</button>
           <button type="button" class="btn btn-share btn-share-option" id="shareBtn">${txt('shareText')}</button>
         </div>
       </div>
@@ -3791,6 +3850,9 @@ function render() {
 
     const downloadCardBtn = document.getElementById('downloadCardBtn');
     if (downloadCardBtn) downloadCardBtn.onclick = () => downloadShareCard(archetype, top);
+    paintSharePreview(archetype, top);
+    document.getElementById('shareLinkedInBtn')?.addEventListener('click', () => shareResultOn('linkedin', archetype, topPaths));
+    document.getElementById('shareXBtn')?.addEventListener('click', () => shareResultOn('x', archetype, topPaths));
 
     document.getElementById('copyResultLinkBtn').onclick = async () => {
       const url = resultPageUrl();
