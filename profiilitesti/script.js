@@ -353,7 +353,8 @@ function handleAnswer(qid, option) {
   if (currentQuestionIndex < questions.length) {
     showQuestion(); // Näytä seuraava kysymys
   } else {
-    showResults(); // Näytä tulokset, kun kaikki kysymykset on vastattu
+    rememberCompletedTest(answers);
+    showResults();
   }
 }
 
@@ -459,19 +460,55 @@ function answersComplete(map) {
   return questions.every((question) => map && map[question.id]);
 }
 
-function openSavedAnswers(map) {
-  Object.keys(answers).forEach((key) => delete answers[key]);
-  Object.assign(answers, map);
-  resetScores();
-  applyAnswerPoints();
-  applyExclusions();
-  applyComboRules();
+function normalizeAnswers(map) {
+  const out = {};
+  Object.entries(map || {}).forEach(([key, value]) => {
+    const letter = String(value || "").toLowerCase();
+    const number = String(key).replace(/\D/g, "");
+    if (number && letter) out["Q" + parseInt(number, 10)] = letter;
+  });
+  return out;
+}
+
+function rememberCompletedTest(map) {
+  const normalized = normalizeAnswers(map);
+  if (!answersComplete(normalized)) return null;
+  try { localStorage.setItem("yoroLxpAnswers", JSON.stringify(normalized)); } catch (e) { /* selain voi estää tallennuksen */ }
+  return normalized;
+}
+
+function savedKeyFromBrowser() {
+  const fromUrl = answersFromKey(new URLSearchParams(location.search).get("avain"));
+  if (answersComplete(fromUrl)) return rememberCompletedTest(fromUrl);
+  try {
+    const stored = normalizeAnswers(JSON.parse(localStorage.getItem("yoroLxpAnswers") || "{}"));
+    if (answersComplete(stored)) return stored;
+  } catch (e) { /* ei tallennetta */ }
+  return null;
+}
+
+function presentFeedback() {
   const toggle = document.getElementById("toggleButton");
   if (toggle) toggle.style.display = "none";
   const hero = document.querySelector(".hero");
   if (hero) hero.style.display = "none";
+  const questionsCard = document.getElementById("questionContainer");
+  if (questionsCard && questionsCard.closest("section")) questionsCard.closest("section").style.display = "none";
+  const title = document.querySelector("#resultsContainer h2");
+  if (title) title.textContent = "Palaute";
+  document.title = "Palaute – Yoro";
+}
+
+function openSavedAnswers(map) {
+  const normalized = rememberCompletedTest(map) || normalizeAnswers(map);
+  Object.keys(answers).forEach((key) => delete answers[key]);
+  Object.assign(answers, normalized);
+  resetScores();
+  applyAnswerPoints();
+  applyExclusions();
+  applyComboRules();
+  presentFeedback();
   showResults();
-  document.getElementById("resultsContainer").scrollIntoView({ behavior: "smooth", block: "start" });
 }
 
 async function savedAnswers(user) {
@@ -491,15 +528,17 @@ async function savedAnswers(user) {
     const data = await response.json();
     const profile = data.profiili || {};
     const fromKey = answersFromKey(profile.LxP);
-    if (answersComplete(fromKey)) return fromKey;
-    if (answersComplete(profile.lxpVastaukset)) return profile.lxpVastaukset;
+    if (answersComplete(fromKey)) return rememberCompletedTest(fromKey);
+    const savedMap = normalizeAnswers(profile.lxpVastaukset);
+    if (answersComplete(savedMap)) return rememberCompletedTest(savedMap);
   } catch (e) { /* kokeillaan vielä tietokantaa */ }
   try {
     const snap = await globalThis.firebase.firestore().collection("profiles").doc("oma_" + user.uid).get();
     const data = snap.data() || {};
-    const fromKey = answersFromKey(data.LxP);
-    if (answersComplete(fromKey)) return fromKey;
-    if (answersComplete(data.lxpVastaukset)) return data.lxpVastaukset;
+    const fromKey = answersFromKey(data.LxP || data.lxp);
+    if (answersComplete(fromKey)) return rememberCompletedTest(fromKey);
+    const savedMap = normalizeAnswers(data.lxpVastaukset);
+    if (answersComplete(savedMap)) return rememberCompletedTest(savedMap);
   } catch (e) { /* paikallinen tallennus riittää */ }
   return map;
 }
@@ -527,6 +566,8 @@ function showResults() {
     renderTeaserResults();
     return;
   }
+
+  if (answersComplete(answers)) presentFeedback();
 
   // ...olemassa oleva showResults-koodisi jatkuu tästä...
   const resultsList = document.createElement("ul");
@@ -592,21 +633,6 @@ function showResults() {
   if (hasNarratives) {
     writtenSummaryContainer.style.display = "block";
   }
-
-  // Lisää "Palaa alkuun" -nappi
-  const restartButton = document.createElement("button");
-  restartButton.textContent = "Palaa alkuun";
-  restartButton.style.marginTop = "20px";
-  restartButton.onclick = () => {
-    document.getElementById("resultsContainer").style.display = "none";
-    document.getElementById("toggleButton").style.display = "block";
-    document.getElementById("questionContainer").style.display = "none"; // Piilota kysymykset
-    currentQuestionIndex = 0;
-    Object.keys(answers).forEach(key => delete answers[key]);
-    Object.keys(results).forEach(key => results[key].score = 0); // Nollaa pisteet
-    writtenSummary.innerHTML = ""; // Tyhjennä sanallinen arvio
-  };
-  document.getElementById("resultsContainer").appendChild(restartButton);
 
   document.getElementById("resultsContainer").style.display = "block";
 }
@@ -677,7 +703,7 @@ async function restoreSavedTest(user) {
   userIsLoggedIn = !!user;
   if (loginOffer) loginOffer.style.display = user ? "none" : "block";
   if (!user || restoredSavedTest) return;
-  const map = await savedAnswers(user);
+  const map = savedKeyFromBrowser() || await savedAnswers(user);
   if (!answersComplete(map)) return;
   restoredSavedTest = true;
   openSavedAnswers(map);

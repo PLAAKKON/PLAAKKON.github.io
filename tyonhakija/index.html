@@ -244,7 +244,18 @@
     function lxpKey() {
       return questions.map((q, i) => state.lxp[q.id] ? (i + 1) + state.lxp[q.id].toUpperCase() : '').join('');
     }
+    function storedLxp() {
+      try { return JSON.parse(localStorage.getItem('yoroLxpAnswers') || '{}') || {}; }
+      catch (e) { return {}; }
+    }
+    let profileLoaded = false;
+    let serverLxp = '';
+    let lxpSavePending = false;
     function renderLxp() {
+      const stored = storedLxp();
+      Object.entries(stored).forEach(([id, letter]) => {
+        if (!state.lxp[id] && letter) state.lxp[id] = String(letter).toLowerCase();
+      });
       const root = document.getElementById('lxp');
       root.innerHTML = '';
       questions.forEach((q) => {
@@ -268,7 +279,17 @@
       try {
         const saved = {};
         questions.forEach((q) => { if (state.lxp[q.id]) saved[q.id] = state.lxp[q.id]; });
-        localStorage.setItem('yoroLxpAnswers', JSON.stringify(saved));
+        if (Object.keys(saved).length >= Object.keys(stored).length) {
+          localStorage.setItem('yoroLxpAnswers', JSON.stringify(saved));
+        }
+        const complete = questions.length === 10 && questions.every((q) => state.lxp[q.id]);
+        const link = document.getElementById('analysisLink');
+        if (link) link.href = complete ? '/profiilitesti/?avain=' + lxpKey() : '/profiilitesti/';
+        if (profileLoaded && complete && lxpKey() !== serverLxp && !lxpSavePending) {
+          lxpSavePending = true;
+          const key = lxpKey();
+          api('tallenna').then(() => { serverLxp = key; }).catch(() => {}).finally(() => { lxpSavePending = false; });
+        }
       } catch (e) { /* selain voi estää tallennuksen */ }
       renderPortrait();
     }
@@ -333,6 +354,8 @@
       state.intro = data.esittely || '';
       state.skillText = data.osaamisteksti || '';
       state.experience = (data.tyokokemus || []).map(parseExperience);
+      serverLxp = String(data.LxP || '');
+      profileLoaded = true;
       state.pendingLxp = data.LxP || '';
       if (questions.length) applyLxp(state.pendingLxp);
       document.getElementById('intro').value = state.intro;
