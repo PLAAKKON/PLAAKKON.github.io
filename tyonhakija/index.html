@@ -106,11 +106,10 @@
           <textarea id="skillText" rows="2" data-i18n-placeholder="skillTextPh" placeholder="Osaaminen omin sanoin, vapaaehtoinen" style="margin-top:8px"></textarea>
         </div>
         <div class="q">
-          <strong data-i18n="linkedinTitle">LinkedIn ja CV</strong>
-          <p data-i18n="linkedinLead">Lisää LinkedIn-osoite. Työkokemus täyttyy CV:stä tai LinkedInin omasta PDF:stä (profiilissa Lisää, Tallenna PDF-muodossa). Pelkkä osoite ei sisällä työkokemusta.</p>
-          <input id="linkedin" data-i18n-placeholder="linkedinPh" placeholder="https://www.linkedin.com/in/oma-profiili" />
-          <input id="cvFile" type="file" accept="application/pdf,.pdf" style="margin-top:8px" />
-          <button id="importCv" type="button" style="margin-top:8px" data-i18n="importCv">Poimi tiedot PDF:stä</button>
+          <strong data-i18n="pasteTitle">Kopioi LinkedInistä</strong>
+          <p data-i18n="pasteLead">Liitä työkokemus LinkedInistä tai vastaavasta. Sitä ei tarvitse kirjoittaa käsin.</p>
+          <textarea id="pasteProfile" rows="6" data-i18n-placeholder="pastePh" placeholder="Liitä tähän profiilin teksti" style="margin-top:8px"></textarea>
+          <button id="importPaste" type="button" style="margin-top:8px" data-i18n="importPaste">Poimi tiedot</button>
         </div>
         <div class="q"><strong data-i18n="experience">Työkokemus</strong>
           <div id="experienceList"></div>
@@ -167,7 +166,6 @@
       appId: "1:314066598772:web:50183db006293290378a21"
     });
   </script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
   <script src="/ohjausmoottori/i18n-en.js"></script>
   <script src="lxp-arvio.js"></script>
   <script>
@@ -178,11 +176,10 @@
         profileLabel: 'Oma profiili', authTitle: 'Tili', authLead: 'Kirjoita sähköposti ja salasana, vähintään 6 merkkiä. Paina sitten Luo tili.',
         email: 'Sähköposti', password: 'Salasana', emailPh: 'nimi@osoite.fi', passwordPh: 'vähintään 6 merkkiä', register: 'Luo tili', login: 'Kirjaudu',
         lead: 'Sopiiko tämä työ sinulle? Yoro vertaa profiiliasi avoimeen paikkaan ja kirjoittaa hakemuksen, jossa näkyvät vain ne vahvuutesi, joita tehtävä tarvitsee. Jos työ ei sovi, sen näkee ennen lähettämistä.',
-        linkedinTitle: 'LinkedIn ja CV', linkedinLead: 'Lisää LinkedIn-osoite. Työkokemus täyttyy CV:stä tai LinkedInin omasta PDF:stä (profiilissa Lisää, Tallenna PDF-muodossa). Pelkkä osoite ei sisällä työkokemusta.',
-        linkedinPh: 'https://www.linkedin.com/in/oma-profiili', importCv: 'Poimi tiedot PDF:stä',
-        readingFile: 'Luetaan tiedostoa…', imported: 'Tiedot poimittu. Tarkista ne ja paina Tallenna tämä vaihe.',
-        emptyPdf: 'Tiedostosta ei löytynyt tekstiä. Käytä PDF:ää, jossa teksti on valittavissa.',
-        badLinkedin: 'Kirjoita oma LinkedIn-osoite muotoon https://www.linkedin.com/in/oma-profiili',
+        pasteTitle: 'Kopioi LinkedInistä', pasteLead: 'Liitä työkokemus LinkedInistä tai vastaavasta. Sitä ei tarvitse kirjoittaa käsin.',
+        pastePh: 'Liitä tähän profiilin teksti', importPaste: 'Poimi tiedot',
+        readingPaste: 'Poimitaan tietoja…', imported: 'Tiedot poimittu. Tarkista ne ja paina Tallenna tämä vaihe.',
+        emptyPaste: 'Liitä ensin teksti LinkedInistä tai vastaavasta.',
         lxpTitle: '1. LxP', lxpLead: 'Kymmenen monivalintaa työtyylistä. Kun kaikki on valittu, kysymykset menevät piiloon.',
         showLxp: 'Näytä LxP', hideLxp: 'Piilota LxP', lxpPortrait: 'Näytä LxP-kuvaus', envTitle: 'Ympäristöjä, joissa viihtyisit',
         guideTitle: '2. Ohjausmoottori', guideEmpty: 'Sanallinen kuvaus tulee ohjausmoottorista, kun lisäkysymykset on vastattu.',
@@ -217,11 +214,10 @@
         profileLabel: 'My profile', authTitle: 'Account', authLead: 'Enter your email and a password of at least 6 characters, then press Create account.',
         email: 'Email', password: 'Password', emailPh: 'name@address.com', passwordPh: 'at least 6 characters', register: 'Create account', login: 'Log in',
         lead: 'Does this job fit you? Yoro compares your profile with the open role and writes an application that shows only the strengths this job needs. If it does not fit, you see that before you send it.',
-        linkedinTitle: 'LinkedIn and CV', linkedinLead: 'Add your LinkedIn address. Work experience is filled from a CV or from LinkedIn’s own PDF (on your profile: More, Save to PDF). The address alone does not include your experience.',
-        linkedinPh: 'https://www.linkedin.com/in/your-profile', importCv: 'Read details from the PDF',
-        readingFile: 'Reading the file…', imported: 'Details added. Check them and press Save this step.',
-        emptyPdf: 'No text was found in the file. Use a PDF where the text can be selected.',
-        badLinkedin: 'Enter your LinkedIn address as https://www.linkedin.com/in/your-profile',
+        pasteTitle: 'Copy from LinkedIn', pasteLead: 'Paste your experience from LinkedIn or a similar profile. You do not need to type it by hand.',
+        pastePh: 'Paste the profile text here', importPaste: 'Read the details',
+        readingPaste: 'Reading the details…', imported: 'Details added. Check them and press Save this step.',
+        emptyPaste: 'Paste text from LinkedIn or a similar profile first.',
         lxpTitle: '1. LxP', lxpLead: 'Ten questions about how you work. When all are answered, the questions hide.',
         showLxp: 'Show LxP', hideLxp: 'Hide LxP', lxpPortrait: 'Show the LxP description', envTitle: 'Environments where you would thrive',
         guideTitle: '2. Guidance engine', guideEmpty: 'The written description appears here after the extra guidance questions are answered.',
@@ -317,7 +313,7 @@
     const state = {
       regions: new Set(), wishes: new Set(), occupations: new Set(), skills: new Set(),
       education: '', degree: '', languages: new Set(), license: '', permits: new Set(),
-      start: '', lxp: {}, experience: [], intro: '', skillText: '', linkedin: '', pendingLxp: ''
+      start: '', lxp: {}, experience: [], intro: '', skillText: '', pendingLxp: ''
     };
     const lists = { wishes: [], occupations: [], skills: [] };
     const pickers = {};
@@ -551,8 +547,7 @@
         aloitusajankohta: state.start ? [state.start] : [],
         tyokokemus: state.experience.map(experienceLine).filter((line) => line.replace(/ \|/g, '').trim()),
         esittely: document.getElementById('intro').value.trim(),
-        osaamisteksti: document.getElementById('skillText').value.trim(),
-        linkedin: document.getElementById('linkedin').value.trim()
+        osaamisteksti: document.getElementById('skillText').value.trim()
       };
     }
     function applyLxp(key) {
@@ -579,7 +574,6 @@
       state.start = (data.aloitusajankohta || [])[0] || '';
       state.intro = data.esittely || '';
       state.skillText = data.osaamisteksti || '';
-      state.linkedin = data.linkedin || '';
       state.experience = (data.tyokokemus || []).map(parseExperience);
       serverLxp = String(data.LxP || '');
       profileLoaded = true;
@@ -587,7 +581,6 @@
       if (questions.length) applyLxp(state.pendingLxp);
       document.getElementById('intro').value = state.intro;
       document.getElementById('skillText').value = state.skillText;
-      document.getElementById('linkedin').value = state.linkedin;
       document.getElementById('degree').value = state.degree;
       refreshChoices();
     }
@@ -699,11 +692,6 @@
       renderExperience();
       setStatus(t('expAdded'));
     };
-    function linkedinOk(value) {
-      const url = String(value || '').trim();
-      if (!url) return true;
-      return /^https:\/\/(www\.)?linkedin\.com\/in\/[\w%-]+\/?$/i.test(url);
-    }
     function matchChoice(list, name) {
       const needle = String(name || '').trim().toLowerCase();
       if (!needle) return '';
@@ -751,29 +739,13 @@
       });
       refreshChoices();
     }
-    async function pdfText(file) {
-      if (!window.pdfjsLib) throw new Error(t('emptyPdf'));
-      pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-      const pdf = await pdfjsLib.getDocument({ data: new Uint8Array(await file.arrayBuffer()) }).promise;
-      let text = '';
-      const count = Math.min(pdf.numPages, 6);
-      for (let pageNumber = 1; pageNumber <= count; pageNumber += 1) {
-        const page = await pdf.getPage(pageNumber);
-        const content = await page.getTextContent();
-        text += content.items.map((item) => item.str).join(' ') + '\n';
-        if (text.length > 12000) break;
-      }
-      return text.slice(0, 12000);
-    }
-    document.getElementById('importCv').onclick = async () => {
-      const file = document.getElementById('cvFile').files[0];
-      if (!file) { setStatus(t('emptyPdf'), true); return; }
-      const button = document.getElementById('importCv');
+    document.getElementById('importPaste').onclick = async () => {
+      const text = document.getElementById('pasteProfile').value.trim().slice(0, 12000);
+      if (text.length < 40) { setStatus(t('emptyPaste'), true); return; }
+      const button = document.getElementById('importPaste');
       button.disabled = true;
-      setStatus(t('readingFile'));
+      setStatus(t('readingPaste'));
       try {
-        const text = await pdfText(file);
-        if (text.trim().length < 40) { setStatus(t('emptyPdf'), true); return; }
         const data = await api('poimi', { teksti: text });
         applyImport(data);
         setStatus(t('imported'));
@@ -784,10 +756,6 @@
       }
     };
     document.getElementById('saveBtn').onclick = async () => {
-      if (!linkedinOk(document.getElementById('linkedin').value)) {
-        setStatus(t('badLinkedin'), true);
-        return;
-      }
       try { await api('tallenna'); setStatus(t('saved')); }
       catch (error) { setStatus(error.message, true); }
     };
