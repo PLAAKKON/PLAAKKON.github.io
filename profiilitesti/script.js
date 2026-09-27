@@ -482,11 +482,24 @@ async function savedAnswers(user) {
     map = {};
   }
   try {
+    const token = await user.getIdToken();
+    const response = await fetch("https://us-central1-urapolku-7780a.cloudfunctions.net/tyonhaku", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: "Bearer " + token },
+      body: JSON.stringify({ action: "lataa" })
+    });
+    const data = await response.json();
+    const profile = data.profiili || {};
+    const fromKey = answersFromKey(profile.LxP);
+    if (answersComplete(fromKey)) return fromKey;
+    if (answersComplete(profile.lxpVastaukset)) return profile.lxpVastaukset;
+  } catch (e) { /* kokeillaan vielä tietokantaa */ }
+  try {
     const snap = await firebase.firestore().collection("profiles").doc("oma_" + user.uid).get();
     const data = snap.data() || {};
     const fromKey = answersFromKey(data.LxP);
     if (answersComplete(fromKey)) return fromKey;
-    if (data.lxpVastaukset && answersComplete(data.lxpVastaukset)) return data.lxpVastaukset;
+    if (answersComplete(data.lxpVastaukset)) return data.lxpVastaukset;
   } catch (e) { /* paikallinen tallennus riittää */ }
   return map;
 }
