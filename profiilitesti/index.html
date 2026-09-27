@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="fi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LxP Profiilitesti – Yoro Oy</title>
+
+  <!-- Firebase (compat) -->
+  <script src="https://www.gstatic.com/firebasejs/10.11.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.11.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.11.1/firebase-firestore-compat.js"></script>
+
+  <!-- Oma konfiguraatio (pidä nämä) -->
+  <script defer src="../firebaseConfig.js"></script>
+  <!-- Jos auth.js tekee jotain omaa, voit jättää sen. Ei pakollinen tämän toimimiselle. -->
+  <script defer src="../auth.js"></script>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+
+  <style>
+    :root {
+      --yoro-primary: #1b6cff;
+      --yoro-primary-600: #1553c8;
+      --yoro-primary-700: #0f3ea3;
+      --yoro-accent: #00b3c8;
+      --text: #0b1020;
+      --muted: #5b6477;
+      --bg: #0a0f1a;
+      --card: #0e1626;
+      --card-2: #0f1a2e;
+      --border: #22314f;
+      --success: #16a34a;
+      --warning: #f59e0b;
+      --danger: #d32f2f;
+      --radius-2xl: 20px;
+      --shadow-lg: 0 20px 40px rgba(0,0,0,0.35);
+      --shadow-md: 0 10px 20px rgba(0,0,0,0.28);
+      --shadow-sm: 0 6px 14px rgba(0,0,0,0.22);
+    }
+
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
+    body {
+      margin: 0;
+      font-family: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, 'Apple Color Emoji', 'Segoe UI Emoji';
+      color: #e9eefc;
+      background:
+        radial-gradient(1200px 600px at 80% -10%, rgba(27,108,255,0.25), transparent 60%),
+        radial-gradient(1000px 500px at -10% 10%, rgba(0,179,200,0.18), transparent 60%),
+        linear-gradient(180deg, #071022 0%, #0a0f1a 100%);
+    }
+
+    .site-header { position: sticky; top: 0; z-index: 50; background: rgba(10,15,26,0.7); backdrop-filter: saturate(140%) blur(10px); border-bottom: 1px solid var(--border); }
+    .nav { max-width: 1080px; margin: 0 auto; padding: 14px 20px; display: flex; align-items: center; justify-content: space-between; }
+    .brand { display: flex; align-items: center; gap: 12px; text-decoration: none; color: #eaf2ff; }
+    .brand-logo { width: 36px; height: 36px; border-radius: 12px; background:
+      radial-gradient(circle at 70% 30%, #b7e7ff 0 18%, transparent 19%),
+      radial-gradient(circle at 40% 80%, #a0f0ff 0 20%, transparent 21%),
+      linear-gradient(135deg, #1b6cff 0%, #00b3c8 100%);
+      box-shadow: inset 0 0 8px rgba(255,255,255,0.25), 0 6px 14px rgba(0,0,0,0.35); position: relative;
+    }
+    .brand-logo::after{ content: ""; position: absolute; right: -5px; top: 14px; width: 12px; height: 8px; background: linear-gradient(135deg, #00b3c8, #1b6cff);
+      border-radius: 2px 8px 8px 2px / 2px 8px 8px 2px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3)); }
+    .brand-title { font-weight: 700; letter-spacing: 0.2px; }
+    .brand-sub { opacity: 0.7; font-weight: 500; font-size: 0.9rem; }
+
+    .nav-cta { display: inline-flex; gap: 10px; align-items: center; }
+
+    .container { max-width: 980px; margin: 40px auto 80px; padding: 0 20px; }
+    .hero { background: linear-gradient(180deg, rgba(15,26,46,0.8), rgba(14,22,38,0.8)); border: 1px solid var(--border); box-shadow: var(--shadow-lg);
+      border-radius: var(--radius-2xl); padding: 28px; position: relative; overflow: hidden; }
+    .hero::before{ content: ""; position: absolute; inset: -2px; z-index: 0; background:
+      radial-gradient(600px 120px at 50% -20px, rgba(27,108,255,0.35), transparent 60%),
+      radial-gradient(400px 150px at 20% 120%, rgba(0,179,200,0.25), transparent 70%); pointer-events: none; }
+    .hero > * { position: relative; z-index: 1; }
+
+    h1 { margin: 0 0 10px; font-size: clamp(1.6rem, 2.2vw + 1rem, 2.4rem); line-height: 1.15; }
+    p { color: #c9d6fb; }
+
+    .meta-note{ display: inline-block; margin-top: 6px; font-size: 0.95rem; color: #a8b4d6; }
+
+    .card { background: linear-gradient(180deg, rgba(14,22,38,0.8), rgba(10,15,26,0.6)); border: 1px solid var(--border);
+      border-radius: var(--radius-2xl); padding: 22px; box-shadow: var(--shadow-md); }
+
+    .button, button { appearance: none; border: none; cursor: pointer; font: inherit; color: white; font-weight: 600;
+      background: linear-gradient(135deg, var(--yoro-primary), var(--yoro-accent)); padding: 12px 16px; border-radius: 999px;
+      box-shadow: 0 8px 18px rgba(27,108,255,0.35); transition: transform .15s ease, box-shadow .2s ease, filter .2s ease;
+      text-decoration: none; display: inline-flex; align-items: center; justify-content: center; }
+    .button:hover, button:hover { transform: translateY(-1px); box-shadow: 0 12px 28px rgba(27,108,255,0.42); }
+    .button:active, button:active { transform: translateY(0); box-shadow: 0 6px 14px rgba(27,108,255,0.35); }
+
+    .btn-secondary{ background: linear-gradient(135deg, #16233b, #0f1a2e); border: 1px solid var(--border); color: #d6e3ff; box-shadow: var(--shadow-sm); }
+    .btn-secondary:hover{ filter: brightness(1.06); }
+
+    .teaser { margin-top: 18px; padding: 14px 16px; text-align: center; border-radius: 14px; border: 1px dashed #3b4f7a;
+      background: linear-gradient(180deg, rgba(27,108,255,0.08), rgba(0,179,200,0.06)); box-shadow: inset 0 0 0 1px rgba(255,255,255,0.02); }
+    .teaser p { margin: 0; font-weight: 600; }
+    .teaser strong { color: #ffb86c; }
+
+    #resultsContainer h2 { margin-top: 0; }
+    #resultsList { list-style: none; padding-left: 0; margin: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; }
+    #resultsList li { background: linear-gradient(180deg, #0f1a2e, #0c1425); border: 1px solid var(--border); padding: 12px 14px; border-radius: 14px; box-shadow: var(--shadow-sm); }
+
+    #writtenSummaryContainer h3 { margin-bottom: 10px; }
+    #writtenSummary { color: #dbe6ff; }
+
+    .footer { margin-top: 28px; color: #9fb0d4; font-size: 0.9rem; display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; border-top: 1px solid var(--border); padding-top: 18px; }
+
+    .row { display: flex; gap: 10px; flex-wrap: wrap; }
+
+    @media (max-width: 640px){
+      .nav { padding: 12px 16px; }
+      .container { margin: 24px auto 64px; }
+    }
+    @media (prefers-reduced-motion: reduce){
+      .button, button { transition: none; }
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Header / Nav -->
+  <header class="site-header">
+    <nav class="nav">
+      <a href="https://yoro.fi" class="brand" aria-label="Yoro Oy etusivu">
+        <span class="brand-logo" aria-hidden="true"></span>
+        <span>
+          <span class="brand-title">Yoro Oy</span><br>
+          <span class="brand-sub">LxP – Profiilitesti</span>
+        </span>
+      </a>
+
+      <!-- Päivitetty: oikeat kirjautumisnapit -->
+      <div class="nav-cta" id="authCta">
+  <a class="button" href="#" target="_self" title="Sähköposti/salasana tms." onclick="redirectToLogin(event)">Kirjaudu sisään</a>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container">
+    <!-- Hero / Intro -->
+    <section class="hero">
+      <h1>Työ- ja opintopolun profiilitesti</h1>
+      <p>
+        LxP-profiilitesti on Yoro Oy:n kehittämä työkalu, joka tukee yksilöiden urasuunnittelua ja ammatillista suuntautumista. Testi soveltuu sekä opinto-ohjaukseen että työnvälityspalveluihin.
+      </p>
+      <p>
+        Vastaamalla 10 kysymykseen saat henkilökohtaisen profiilin ja suuntaa antavan arvion vahvuuksistasi ja sopivista työ- ja koulutusvaihtoehdoista.
+      </p>
+      <p class="meta-note">
+        Testi on tarkoitettu arviointikäyttöön ohjauksen tukena. Tuloksia ei tule käyttää ainoana perusteena koulutus- tai urapäätöksille.
+      </p>
+      <p class="meta-note">
+        <strong>Käyttöehdot:</strong> Katso lisenssi kohdasta
+        <a href="https://github.com/plaakkon/profiilitesti/blob/main/license.txt" target="_blank" style="text-decoration: underline; color: var(--yoro-accent);">license.txt</a>.
+      </p>
+    </section>
+
+    <!-- Auth state + actions -->
+    <section class="card" style="margin-top: 18px;">
+      <div class="row" id="testButtons">
+        <!-- Näkyvät nappulat kun ei-kirjautunut -->
+  <a class="button" href="#" target="_self" id="registerBtn" onclick="redirectToLogin(event)">Rekisteröidy käyttäjäksi</a>
+  <a class="button btn-secondary" href="#" target="_self" id="loginBtn" onclick="redirectToLogin(event)">Kirjaudu sisään</a>
+  <script>
+    // Ohjaa kirjautumissivulle ja lisää returnUrl nykyisestä sijainnista
+    function redirectToLogin(e) {
+      e.preventDefault();
+      var url = '/kirjaudu?returnUrl=' + encodeURIComponent(window.location.pathname + window.location.search + window.location.hash);
+      window.location.href = url;
+    }
+  </script>
+
+        <button id="homeBtn" class="btn-secondary" onclick="navigateToHome()">Palaa Yoro.fi etusivulle</button>
+
+        <!-- Näkyy vain kirjautuneelle -->
+        <button id="logoutBtn" class="btn-secondary" onclick="logoutUser()" style="display:none;">Kirjaudu ulos</button>
+      </div>
+
+      <p id="userEmailDisplay" class="meta-note" aria-live="polite"></p>
+
+      <div style="display:flex; gap:10px; margin-top: 8px; flex-wrap: wrap;">
+        <button id="toggleButton" type="button">Aloita kysely</button>
+      </div>
+
+      <div id="loginOffer" class="teaser" style="display:none;">
+        <p><strong>Huom!</strong> Kirjautumaton käyttäjä näkee vain osan tuloksista. Kirjaudu sisään nähdäksesi täydellisen profiiliarvion.</p>
+      </div>
+    </section>
+
+    <!-- Questions mount point -->
+    <section class="card" style="margin-top: 18px;">
+      <div id="questionContainer" style="min-height: 40px;"></div>
+    </section>
+
+    <!-- Results -->
+    <section id="resultsContainer" class="card" style="margin-top: 18px; display: none;">
+      <h2>Sinulle sopivat ammatit</h2>
+      <ul id="resultsList"></ul>
+
+      <div id="writtenSummaryContainer" style="margin-top: 18px; display: none;">
+        <h3>Sanallinen arvio profiilistasi</h3>
+        <div id="writtenSummary"></div>
+      </div>
+    </section>
+
+    <footer class="footer">
+      <span>© 2025 Yoro Oy</span>
+      <span>Versio: LxP Profiilitesti</span>
+    </footer>
+  </main>
+
+  <!-- App logic (voit pitää oman script.js:n) -->
+  <script src="script.js" type="module"></script>
+
+  <!-- Kirjautumislogiikka -->
+  <script>
+    // Odota että Firebase & firebaseConfig on ladattu (firebase.apps)
+    (function waitForFirebase(){
+      if (!window.firebase || !firebase.apps || !firebase.apps.length) {
+        return setTimeout(waitForFirebase, 50);
+      }
+
+      // 1) Tee kirjautumisesta pysyvä selaimen istuntojen yli
+      firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL).catch(console.error);
+
+      // 2) Valitse provider (Google tässä esimerkissä)
+      const provider = new firebase.auth.GoogleAuthProvider();
+
+      // 3) Globaalit funktiot napeille
+      window.loginWithGoogle = function(){
+        firebase.auth().signInWithPopup(provider).catch(err=>{
+          if (err && err.code === 'auth/popup-blocked') {
+            return firebase.auth().signInWithRedirect(provider);
+          }
+          alert('Kirjautuminen epäonnistui: ' + (err && err.message ? err.message : 'tuntematon virhe'));
+        });
+      };
+
+      window.logoutUser = function(){
+        firebase.auth().signOut().catch(console.error);
+      };
+
+      // 4) Auth-tilan kuuntelu → päivitä UI
+      firebase.auth().onAuthStateChanged(function(user){
+        const emailDisplay = document.getElementById('userEmailDisplay');
+        const logoutBtn = document.getElementById('logoutBtn');
+        const loginBtn = document.getElementById('loginBtn');
+        const registerBtn = document.getElementById('registerBtn');
+        const loginOffer = document.getElementById('loginOffer');
+
+        // Näytä sähköposti
+        if (emailDisplay) {
+          emailDisplay.textContent = user ? (user.email || user.displayName || '') : '';
+        }
+
+        // Näytä/piilota napit
+        if (logoutBtn) logoutBtn.style.display = user ? 'inline-flex' : 'none';
+        if (loginBtn) loginBtn.style.display = user ? 'none' : 'inline-flex';
+        if (registerBtn) registerBtn.style.display = user ? 'none' : 'inline-flex';
+
+        // Teaser vain kirjautumattomalle
+        if (loginOffer) loginOffer.style.display = user ? 'none' : 'block';
+      });
+
+    })();
+
+    // Etusivulle navigointi
+    function navigateToHome() {
+      window.location.href = "https://yoro.fi";
+    }
+  </script>
+</body>
+</html>
+

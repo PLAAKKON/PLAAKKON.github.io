@@ -60,6 +60,7 @@
         <p>Avain: <strong id="lxpKey">–</strong></p>
         <div id="lxp"></div>
         <button id="seeMe" type="button">Näytä millaisena tekijänä järjestelmä näkee minut</button>
+        <a id="analysisLink" href="/profiilitesti/">Avaa testin analyysisivu</a>
         <div id="portrait" hidden>
           <p id="portraitText"></p>
           <p><strong>Ympäristöjä, joissa viihtyisit</strong></p>
@@ -264,6 +265,11 @@
         root.appendChild(block);
       });
       document.getElementById('lxpKey').textContent = lxpKey() || '–';
+      try {
+        const saved = {};
+        questions.forEach((q) => { if (state.lxp[q.id]) saved[q.id] = state.lxp[q.id]; });
+        localStorage.setItem('yoroLxpAnswers', JSON.stringify(saved));
+      } catch (e) { /* selain voi estää tallennuksen */ }
       renderPortrait();
     }
     let portraitOpen = false;
