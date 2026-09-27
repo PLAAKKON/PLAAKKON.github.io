@@ -28,6 +28,8 @@
     .job { border-top:1px solid var(--line); padding-top:12px; margin-top:12px; }
     .letter { white-space:pre-wrap; background:#0b0f1a; border-radius:10px; padding:12px; }
     .error { color:#fecaca; }
+    #portrait p, #portrait li { color:var(--text); }
+    #portrait { margin-top:14px; }
     a { color:var(--accent); }
   </style>
 </head>
@@ -57,6 +59,13 @@
         <p>Samat 10 monivalintaa kuin <a href="https://yoro.fi/profiilitesti/">yoro.fi/profiilitesti</a>. Avain on kysymyksen numero ja vastauskirjain.</p>
         <p>Avain: <strong id="lxpKey">–</strong></p>
         <div id="lxp"></div>
+        <button id="seeMe" type="button">Näytä millaisena tekijänä järjestelmä näkee minut</button>
+        <div id="portrait" hidden>
+          <p id="portraitText"></p>
+          <p><strong>Ympäristöjä, joissa viihtyisit</strong></p>
+          <ul id="portraitJobs"></ul>
+          <p id="portraitNote"></p>
+        </div>
       </section>
       <section>
         <h2>2. Profiilikortti</h2>
@@ -130,6 +139,7 @@
       appId: "1:314066598772:web:50183db006293290378a21"
     });
   </script>
+  <script src="lxp-arvio.js"></script>
   <script>
     const API = 'https://us-central1-urapolku-7780a.cloudfunctions.net/tyonhaku';
     const regions = ['Uusimaa','Varsinais-Suomi','Satakunta','Kanta-Häme','Pirkanmaa','Päijät-Häme','Kymenlaakso','Etelä-Karjala','Etelä-Savo','Pohjois-Savo','Pohjois-Karjala','Keski-Suomi','Etelä-Pohjanmaa','Pohjanmaa','Keski-Pohjanmaa','Pohjois-Pohjanmaa','Kainuu','Lappi','Ahvenanmaa'];
@@ -249,6 +259,25 @@
         root.appendChild(block);
       });
       document.getElementById('lxpKey').textContent = lxpKey() || '–';
+      renderPortrait();
+    }
+    let portraitOpen = false;
+    function renderPortrait() {
+      const box = document.getElementById('portrait');
+      if (!portraitOpen) { box.hidden = true; return; }
+      const view = window.lxpArvio(state.lxp);
+      box.hidden = false;
+      document.getElementById('portraitText').textContent = view.text;
+      const list = document.getElementById('portraitJobs');
+      list.innerHTML = '';
+      view.jobs.forEach((name) => {
+        const item = document.createElement('li');
+        item.textContent = name;
+        list.appendChild(item);
+      });
+      document.getElementById('portraitJobs').hidden = view.jobs.length === 0;
+      document.getElementById('portraitJobs').previousElementSibling.hidden = view.jobs.length === 0;
+      document.getElementById('portraitNote').textContent = view.note;
     }
     function profileBody() {
       const complete = questions.length === 10 && questions.every((q) => state.lxp[q.id]);
@@ -368,6 +397,10 @@
       catch (error) { authFailure(error); }
     };
     document.getElementById('logoutBtn').onclick = () => firebase.auth().signOut();
+    document.getElementById('seeMe').onclick = () => {
+      portraitOpen = true;
+      renderPortrait();
+    };
     document.getElementById('addExp').onclick = () => {
       const item = {
         tehtava: document.getElementById('expRole').value.trim(),
