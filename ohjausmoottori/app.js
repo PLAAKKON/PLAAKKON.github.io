@@ -3223,6 +3223,7 @@ function bindFeedback(archetype, topPath) {
   card.querySelectorAll('[data-feedback]').forEach((btn) => {
     btn.addEventListener('click', () => {
       if (hasFeedbackForCurrentResult()) return;
+      card.querySelectorAll('[data-feedback]').forEach((b) => { b.disabled = true; });
       const rating = btn.dataset.feedback;
       const events = JSON.parse(sessionStorage.getItem(ANALYTICS_KEY) || '[]').slice(-20);
       const fps = feedbackFingerprintCandidates();
@@ -3244,10 +3245,9 @@ function bindFeedback(archetype, topPath) {
         all.push(entry);
         sessionStorage.setItem(FEEDBACK_KEY, JSON.stringify(all.slice(-50)));
       } catch (_) { /* ignore */ }
-      submitFeedbackPayload(entry);
       markFeedbackForCurrentResult();
+      submitFeedbackPayload(entry);
       track('feedback', { rating });
-      card.querySelectorAll('[data-feedback]').forEach((b) => { b.disabled = true; });
       const title = card.querySelector('.feedback-title');
       const btns = card.querySelector('.feedback-btns');
       if (title) title.hidden = true;
@@ -3833,13 +3833,55 @@ function render() {
   }
 }
 
+function lxpFromKey(key) {
+  const map = {};
+  String(key || '').match(/\d+[A-E]/gi)?.forEach((part) => {
+    const n = parseInt(part, 10);
+    const letter = part.replace(/\d+/, '').toLowerCase();
+    if (n >= 1 && n <= 10 && letter) map['q' + n] = letter;
+  });
+  return map;
+}
+
+function lxpAnswersComplete(map) {
+  return LXP_QUESTIONS.every((question) => map && map[question.id]);
+}
+
+function lxpFromBrowser() {
+  const fromUrl = lxpFromKey(new URLSearchParams(location.search).get('avain'));
+  if (lxpAnswersComplete(fromUrl)) return fromUrl;
+  try {
+    const stored = JSON.parse(localStorage.getItem('yoroLxpAnswers') || '{}');
+    const map = {};
+    Object.entries(stored || {}).forEach(([key, value]) => {
+      const n = parseInt(String(key).replace(/\D/g, ''), 10);
+      const letter = String(value || '').toLowerCase();
+      if (n >= 1 && n <= 10 && letter) map['q' + n] = letter;
+    });
+    if (lxpAnswersComplete(map)) return map;
+  } catch (_) { /* ei tallennetta */ }
+  return null;
+}
+
+function tryRestoreSavedFeedback() {
+  if (tryRestoreResultFromUrl()) return true;
+  const encoded = loadSavedResultEncoded();
+  const saved = encoded ? decodeResultPayload(encoded) : null;
+  if (saved) {
+    applyResultPayload(saved);
+    return true;
+  }
+  const lxp = lxpFromBrowser();
+  if (!lxp) return false;
+  state.lxp = lxp;
+  state.screen = 'result';
+  return true;
+}
+
 function initApp() {
   loadPreferences();
   bindAccessibilityControls();
-  if (tryRestoreResultFromUrl()) {
-    render();
-    return;
-  }
+  tryRestoreSavedFeedback();
   render();
 }
 

@@ -56,11 +56,11 @@
     <div id="app" hidden>
       <section>
         <h2>1. LxP-profiili</h2>
-        <p>Samat 10 monivalintaa kuin <a href="https://yoro.fi/profiilitesti/">yoro.fi/profiilitesti</a>. Avain on kysymyksen numero ja vastauskirjain.</p>
+        <p>Samat 10 monivalintaa kuin <a href="/ohjausmoottori/">Yoro Ohjausmoottorissa</a>. Avain on kysymyksen numero ja vastauskirjain. Valmis testi avaa polut ja Yoro-valmentajan.</p>
         <p>Avain: <strong id="lxpKey">–</strong></p>
         <div id="lxp"></div>
         <button id="seeMe" type="button">Näytä millaisena tekijänä järjestelmä näkee minut</button>
-        <a id="analysisLink" href="/profiilitesti/">Avaa testin analyysisivu</a>
+        <a id="analysisLink" href="/ohjausmoottori/">Avaa testin analyysisivu</a>
         <div id="portrait" hidden>
           <p id="portraitText"></p>
           <p><strong>Ympäristöjä, joissa viihtyisit</strong></p>
@@ -284,7 +284,7 @@
         }
         const complete = questions.length === 10 && questions.every((q) => state.lxp[q.id]);
         const link = document.getElementById('analysisLink');
-        if (link) link.href = complete ? '/profiilitesti/?avain=' + lxpKey() : '/profiilitesti/';
+        if (link) link.href = complete ? '/ohjausmoottori/?avain=' + lxpKey() : '/ohjausmoottori/';
         if (profileLoaded && complete && lxpKey() !== serverLxp && !lxpSavePending) {
           lxpSavePending = true;
           const key = lxpKey();
