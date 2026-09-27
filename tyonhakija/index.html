@@ -32,6 +32,7 @@
     .fit-stop { font-size:1.15rem; color:#fecaca; margin:0 0 8px; }
     .fit-promise { margin-top:8px; }
     .fit-share { display:flex; flex-wrap:wrap; gap:8px; margin-top:12px; }
+    .fit-card { width:100%; border-radius:12px; margin-top:12px; display:block; }
     #portrait { margin-top:14px; }
     a { color:var(--accent); }
   </style>
@@ -212,7 +213,8 @@
         addOwn: 'Lisää omana: ', remove: 'Poista', missing: 'Työnhakuprofiilistasi puuttuu', canApply: 'Voit hakea näillä tiedoilla.',
         doNotSend: 'Hakemusta ei kannata lähettää.', needJob: 'Liitä työpaikkailmoituksen teksti.', checking: 'Tarkistetaan sopivuutta…',
         fitPromise: 'Tekoäly kirjoittaa työhakemuksen henkilökohtaisesta työtyylistä. Mukaan tulevat vain ne kohdat, jotka sopivat tähän tehtävään.',
-        shareLinkedIn: 'Jaa LinkedInissä', shareX: 'Jaa X:ssä', shareCopied: 'Teksti kopioitu. Liitä se julkaisuun.',
+        shareLinkedIn: 'Jaa LinkedInissä', shareX: 'Jaa X:ssä', shareDownload: 'Lataa kuva',
+        shareCopied: 'Kuva ladattu. Liitä teksti ja lisää kuva julkaisuun.',
         fits: 'Tehtävä sopii profiiliin.', checked: 'Tarkistus valmis.', searching: 'Haetaan…', writeLetter: 'Kirjoita työhakemus',
         picked: 'Valitse tehtävä ja kirjoita hakemus. Puuttuvat kohdat voit täyttää myöhemmin.',
         needExp: 'Kirjoita ainakin tehtävä tai kuvaus.', expLimit: 'Työkokemuksia voi lisätä kahdeksan. Poista yksi, jos haluat vaihtaa.',
@@ -254,7 +256,8 @@
         addOwn: 'Add your own: ', remove: 'Remove', missing: 'Your job-search profile is missing', canApply: 'You can apply with these facts.',
         doNotSend: 'Do not send this application.', needJob: 'Paste the job advertisement text.', checking: 'Checking fit…',
         fitPromise: 'The AI writes the application from your personal work style. It includes only the points that fit this job.',
-        shareLinkedIn: 'Share on LinkedIn', shareX: 'Share on X', shareCopied: 'Text copied. Paste it into the post.',
+        shareLinkedIn: 'Share on LinkedIn', shareX: 'Share on X', shareDownload: 'Download image',
+        shareCopied: 'Image downloaded. Paste the text and add the image.',
         fits: 'The role fits the profile.', checked: 'Check complete.', searching: 'Searching…', writeLetter: 'Write the application',
         picked: 'Choose a role and write the application. You can fill in the rest of the profile later.',
         needExp: 'Write at least a role or a description.', expLimit: 'You can add eight experiences. Remove one to change them.',
@@ -828,6 +831,88 @@
       const view = window.lxpArvio ? window.lxpArvio(state.lxp) : { text: '', jobs: [] };
       return { jobText: jobText || '', lxpKuvaus: view.text || '', lxpYmparistot: view.jobs || [] };
     }
+    function wrapLines(ctx, text, maxWidth, maxLines) {
+      const words = String(text || '').split(/\s+/).filter(Boolean);
+      const lines = [];
+      let line = '';
+      words.forEach((word) => {
+        const next = line ? line + ' ' + word : word;
+        if (ctx.measureText(next).width <= maxWidth) line = next;
+        else {
+          if (line) lines.push(line);
+          line = word;
+        }
+      });
+      if (line) lines.push(line);
+      if (lines.length <= maxLines) return lines.length ? lines : [''];
+      const kept = lines.slice(0, maxLines);
+      let last = kept[maxLines - 1];
+      while (last.length > 1 && ctx.measureText(last + '…').width > maxWidth) last = last.slice(0, -1);
+      kept[maxLines - 1] = last.replace(/[,\s]+$/, '') + '…';
+      return kept;
+    }
+    function drawFitCard(data, missing) {
+      const canvas = document.createElement('canvas');
+      canvas.width = 1200;
+      canvas.height = 630;
+      const ctx = canvas.getContext('2d');
+      const stop = !data.sopii;
+      ctx.fillStyle = '#0b0f1a';
+      ctx.fillRect(0, 0, 1200, 630);
+      const glow = ctx.createRadialGradient(980, 80, 0, 980, 80, 460);
+      glow.addColorStop(0, stop ? 'rgba(248, 113, 113, 0.22)' : 'rgba(52, 211, 153, 0.2)');
+      glow.addColorStop(1, 'rgba(11, 15, 26, 0)');
+      ctx.fillStyle = glow;
+      ctx.fillRect(0, 0, 1200, 630);
+      const bar = ctx.createLinearGradient(0, 0, 0, 630);
+      bar.addColorStop(0, stop ? '#f87171' : '#34d399');
+      bar.addColorStop(1, stop ? '#f59e0b' : '#22d3ee');
+      ctx.fillStyle = bar;
+      ctx.fillRect(0, 0, 16, 630);
+      ctx.textAlign = 'left';
+      ctx.textBaseline = 'alphabetic';
+      ctx.fillStyle = stop ? '#fecaca' : '#6ee7b7';
+      ctx.font = '700 22px Segoe UI, Inter, sans-serif';
+      ctx.fillText(lang === 'en' ? 'FIT' : 'SOPIVUUS', 72, 78);
+      const verdict = data.suositus || (stop ? t('doNotSend') : t('canApply'));
+      ctx.fillStyle = '#f8fafc';
+      ctx.font = '800 52px Segoe UI, Inter, sans-serif';
+      const titleLines = wrapLines(ctx, verdict, 1040, 2);
+      titleLines.forEach((line, index) => ctx.fillText(line, 72, 158 + index * 62));
+      let y = 158 + titleLines.length * 62 + 28;
+      const items = missing.slice(0, 3);
+      if (items.length) {
+        ctx.fillStyle = '#94a3b8';
+        ctx.font = '700 24px Segoe UI, Inter, sans-serif';
+        ctx.fillText(t('missing'), 72, y);
+        y += 48;
+        ctx.fillStyle = '#e2e8f0';
+        ctx.font = '400 28px Segoe UI, Inter, sans-serif';
+        items.forEach((item) => {
+          ctx.fillText('•  ' + wrapLines(ctx, item, 960, 1)[0], 72, y);
+          y += 44;
+        });
+      }
+      if (data.ristiriita && y < 520) {
+        y += 8;
+        ctx.fillStyle = '#cbd5e1';
+        ctx.font = '400 26px Segoe UI, Inter, sans-serif';
+        wrapLines(ctx, data.ristiriita, 1040, 2).forEach((line) => {
+          ctx.fillText(line, 72, y);
+          y += 36;
+        });
+      }
+      ctx.fillStyle = '#94a3b8';
+      ctx.font = '600 22px Segoe UI, Inter, sans-serif';
+      ctx.fillText('yoro.fi', 72, 592);
+      return canvas;
+    }
+    function saveFitCard(canvas) {
+      const link = document.createElement('a');
+      link.download = 'yoro-sopivuus.png';
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+    }
     function fitShareText(data, missing) {
       const verdict = data.suositus || (data.sopii ? t('canApply') : t('doNotSend'));
       const gaps = missing.slice(0, 4).join(', ');
@@ -868,23 +953,36 @@
       promise.className = 'fit-promise';
       promise.textContent = t('fitPromise');
       box.appendChild(promise);
+      const canvas = drawFitCard(data, missing);
+      const preview = document.createElement('img');
+      preview.className = 'fit-card';
+      preview.alt = data.suositus || t('fitTitle');
+      preview.src = canvas.toDataURL('image/png');
+      box.appendChild(preview);
       const post = fitShareText(data, missing);
       const row = document.createElement('div');
       row.className = 'fit-share';
+      const download = document.createElement('button');
+      download.type = 'button';
+      download.textContent = t('shareDownload');
+      download.onclick = () => saveFitCard(canvas);
       const linkedIn = document.createElement('button');
       linkedIn.type = 'button';
       linkedIn.textContent = t('shareLinkedIn');
       linkedIn.onclick = () => {
+        window.open('https://www.linkedin.com/feed/?shareActive=true', '_blank', 'noopener');
+        saveFitCard(canvas);
         navigator.clipboard.writeText(post).catch(() => {});
         linkedIn.textContent = t('shareCopied');
-        window.open('https://www.linkedin.com/sharing/share-offsite/?url=' + encodeURIComponent('https://yoro.fi/tyonhakija/'), '_blank', 'noopener');
       };
       const x = document.createElement('button');
       x.type = 'button';
       x.textContent = t('shareX');
       x.onclick = () => {
+        saveFitCard(canvas);
         window.open('https://twitter.com/intent/tweet?text=' + encodeURIComponent(post), '_blank', 'noopener');
       };
+      row.appendChild(download);
       row.appendChild(linkedIn);
       row.appendChild(x);
       box.appendChild(row);
