@@ -61,7 +61,7 @@
     </section>
 
     <div id="app" hidden>
-      <p data-i18n="lead">Yoro tekee kaksi asiaa: kuvaa työtyylisi ja auttaa hakemaan siihen sopivaa työtä. Englanninkieliseen ilmoitukseen hakemus kirjoitetaan englanniksi.</p>
+      <p data-i18n="lead">Sopiiko tämä työ sinulle? Yoro vertaa profiiliasi avoimeen paikkaan ja kirjoittaa hakemuksen, jossa näkyvät vain ne vahvuutesi, joita tehtävä tarvitsee. Jos työ ei sovi, sen näkee ennen lähettämistä.</p>
       <section>
         <h2 data-i18n="lxpTitle">1. LxP</h2>
         <p id="lxpSummary">Avain: <strong id="lxpKey">–</strong></p>
@@ -128,10 +128,10 @@
         <h2 data-i18n="searchTitle">4. Etsi töitä</h2>
         <p data-i18n="searchLead">Haku toimii sillä, mitä olet täyttänyt. Hakemus kirjoitetaan ilmoituksen kielellä.</p>
         <div class="q">
-          <strong data-i18n="fitTitle">Tarkista sopivuuteni johonkin työtehtävään</strong>
-          <p data-i18n="fitLead">Liitä ilmoitus. Tarkistus kertoo, mitä profiilista puuttuu.</p>
+          <strong data-i18n="fitTitle">Sopiiko tämä työ sinulle?</strong>
+          <p data-i18n="fitLead">Liitä ilmoitus. Yoro vertaa profiiliasi paikkaan. Jos työ ei sovi, sen näkee ennen lähettämistä.</p>
           <textarea id="jobText" rows="8" data-i18n-placeholder="jobPh" placeholder="Työpaikkailmoituksen teksti"></textarea>
-          <button class="primary" id="fitBtn" type="button" style="margin-top:8px" data-i18n="fitBtn">Tarkista sopivuuteni</button>
+          <button class="primary" id="fitBtn" type="button" style="margin-top:8px" data-i18n="fitBtn">Tarkista sopivuus</button>
           <div id="fitResult" hidden></div>
         </div>
         <div class="row">
@@ -169,7 +169,7 @@
       fi: {
         profileLabel: 'Oma profiili', authTitle: 'Tili', authLead: 'Kirjoita sähköposti ja salasana, vähintään 6 merkkiä. Paina sitten Luo tili.',
         email: 'Sähköposti', password: 'Salasana', emailPh: 'nimi@osoite.fi', passwordPh: 'vähintään 6 merkkiä', register: 'Luo tili', login: 'Kirjaudu',
-        lead: 'Yoro tekee kaksi asiaa: kuvaa työtyylisi ja auttaa hakemaan siihen sopivaa työtä. Englanninkieliseen ilmoitukseen hakemus kirjoitetaan englanniksi.',
+        lead: 'Sopiiko tämä työ sinulle? Yoro vertaa profiiliasi avoimeen paikkaan ja kirjoittaa hakemuksen, jossa näkyvät vain ne vahvuutesi, joita tehtävä tarvitsee. Jos työ ei sovi, sen näkee ennen lähettämistä.',
         lxpTitle: '1. LxP', lxpLead: 'Kymmenen monivalintaa työtyylistä. Kun kaikki on valittu, kysymykset menevät piiloon.',
         showLxp: 'Näytä LxP', hideLxp: 'Piilota LxP', lxpPortrait: 'Näytä LxP-kuvaus', envTitle: 'Ympäristöjä, joissa viihtyisit',
         guideTitle: '2. Ohjausmoottori', guideEmpty: 'Sanallinen kuvaus tulee ohjausmoottorista, kun lisäkysymykset on vastattu.',
@@ -182,8 +182,8 @@
         whenPh: 'Ajankohta', didPh: 'Mitä teit', addExp: 'Lisää tämä työkokemus', region: 'Työnhakualue', education: 'Koulutus',
         degreePh: 'Tutkinnon nimi', language: 'Kielitaito', license: 'Ajokortti', permits: 'Luvat ja kortit', start: 'Milloin voit aloittaa',
         save: 'Tallenna tämä vaihe', searchTitle: '4. Etsi töitä',         searchLead: 'Haku toimii sillä, mitä olet täyttänyt. Tekoäly kirjoittaa hakemuksen vain niistä työtyylin kohdista, jotka sopivat tehtävään. Englanninkieliseen ilmoitukseen hakemus tulee englanniksi.',
-        fitTitle: 'Tarkista sopivuuteni johonkin työtehtävään', fitLead: 'Liitä ilmoitus. Tarkistus kertoo, mitä työnhakuprofiilista puuttuu, ja neuvoo olemaan lähettämättä hakemusta, jos tehtävä ei sovi.',
-        jobPh: 'Työpaikkailmoituksen teksti', fitBtn: 'Tarkista sopivuuteni', searchBtn: 'Etsi töitä', logout: 'Kirjaudu ulos',
+        fitTitle: 'Sopiiko tämä työ sinulle?', fitLead: 'Liitä ilmoitus. Yoro vertaa profiiliasi paikkaan. Jos työ ei sovi, sen näkee ennen lähettämistä.',
+        jobPh: 'Työpaikkailmoituksen teksti', fitBtn: 'Tarkista sopivuus', searchBtn: 'Etsi töitä', logout: 'Kirjaudu ulos',
         resultsTitle: 'Sopivat tehtävät', resultsLead: 'Nämä eivät ole avoimia paikkoja. Hakulauseella etsit ilmoituksen itse.',
         addOwn: 'Lisää omana: ', remove: 'Poista', missing: 'Työnhakuprofiilistasi puuttuu', canApply: 'Voit hakea näillä tiedoilla.',
         doNotSend: 'Hakemusta ei kannata lähettää.', needJob: 'Liitä työpaikkailmoituksen teksti.', checking: 'Tarkistetaan sopivuutta…',
@@ -203,7 +203,7 @@
       en: {
         profileLabel: 'My profile', authTitle: 'Account', authLead: 'Enter your email and a password of at least 6 characters, then press Create account.',
         email: 'Email', password: 'Password', emailPh: 'name@address.com', passwordPh: 'at least 6 characters', register: 'Create account', login: 'Log in',
-        lead: 'Yoro does two things: it describes how you work, and it helps you apply for work that fits. An English job ad gets an English application.',
+        lead: 'Does this job fit you? Yoro compares your profile with the open role and writes an application that shows only the strengths this job needs. If it does not fit, you see that before you send it.',
         lxpTitle: '1. LxP', lxpLead: 'Ten questions about how you work. When all are answered, the questions hide.',
         showLxp: 'Show LxP', hideLxp: 'Hide LxP', lxpPortrait: 'Show the LxP description', envTitle: 'Environments where you would thrive',
         guideTitle: '2. Guidance engine', guideEmpty: 'The written description appears here after the extra guidance questions are answered.',
@@ -216,8 +216,8 @@
         whenPh: 'When', didPh: 'What you did', addExp: 'Add this experience', region: 'Search area', education: 'Education',
         degreePh: 'Name of the degree', language: 'Languages', license: 'Driving licence', permits: 'Permits and cards', start: 'When you can start',
         save: 'Save this step', searchTitle: '4. Look for work', searchLead: 'Search uses what you have filled in. The AI writes the application only from the work-style points that fit the job. An English ad gets an English application.',
-        fitTitle: 'Check my fit for a job', fitLead: 'Paste an ad. The check says what the job-search profile is missing, and tells you not to send the application if the role does not fit.',
-        jobPh: 'Job advertisement text', fitBtn: 'Check my fit', searchBtn: 'Look for work', logout: 'Log out',
+        fitTitle: 'Does this job fit you?', fitLead: 'Paste the ad. Yoro compares your profile with the role. If it does not fit, you see that before you send it.',
+        jobPh: 'Job advertisement text', fitBtn: 'Check the fit', searchBtn: 'Look for work', logout: 'Log out',
         resultsTitle: 'Fitting roles', resultsLead: 'These are not open vacancies. Use the search phrase to find the ad yourself.',
         addOwn: 'Add your own: ', remove: 'Remove', missing: 'Your job-search profile is missing', canApply: 'You can apply with these facts.',
         doNotSend: 'Do not send this application.', needJob: 'Paste the job advertisement text.', checking: 'Checking fit…',
