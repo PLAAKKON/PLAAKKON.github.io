@@ -28,7 +28,7 @@
     .job { border-top:1px solid var(--line); padding-top:12px; margin-top:12px; }
     .letter { white-space:pre-wrap; background:#0b0f1a; border-radius:10px; padding:12px; }
     .error { color:#fecaca; }
-    #portrait p, #portrait li { color:var(--text); }
+    #portrait p, #portrait li, #fitResult p, #fitResult li { color:var(--text); }
     #portrait { margin-top:14px; }
     a { color:var(--accent); }
   </style>
@@ -111,6 +111,13 @@
       <section>
         <h2>3. Etsi töitä</h2>
         <p>Haku ja hakemus toimivat jo sillä, mitä olet täyttänyt. Loput profiilista voit täydentää myöhemmin. Maksu tulee myöhemmässä vaiheessa.</p>
+        <div class="q">
+          <strong>Tarkista sopivuuteni johonkin työtehtävään</strong>
+          <p>Liitä ilmoitus. Tarkistus kertoo, mitä työnhakuprofiilistasi puuttuu tähän tehtävään.</p>
+          <textarea id="jobText" rows="8" placeholder="Työpaikkailmoituksen teksti"></textarea>
+          <button class="primary" id="fitBtn" type="button" style="margin-top:8px">Tarkista sopivuuteni</button>
+          <div id="fitResult" hidden></div>
+        </div>
         <div class="row">
           <button class="primary" id="searchBtn" type="button">Etsi töitä</button>
           <button id="logoutBtn" type="button">Kirjaudu ulos</button>
@@ -119,9 +126,7 @@
       </section>
       <section id="results" hidden>
         <h2>Sopivat tehtävät</h2>
-        <p>Nämä eivät ole avoimia paikkoja. Hakulauseella etsit ilmoituksen itse, sitten hakemus kirjoitetaan siihen.</p>
-        <label>Liitä ilmoitus, jos se on jo löytynyt</label>
-        <textarea id="jobText" rows="5" placeholder="Työpaikkailmoituksen teksti"></textarea>
+        <p>Nämä eivät ole avoimia paikkoja. Hakulauseella etsit ilmoituksen itse. Sopivuus tarkistetaan yllä olevalla ilmoituksella.</p>
         <div id="jobs"></div>
       </section>
     </div>
@@ -425,10 +430,54 @@
       try { await api('tallenna'); setStatus('Tallennettu. Voit täydentää muita kohtia myöhemmin.'); }
       catch (error) { setStatus(error.message, true); }
     };
+    function lxpExtra(jobText) {
+      const view = window.lxpArvio ? window.lxpArvio(state.lxp) : { text: '', jobs: [] };
+      return { jobText: jobText || '', lxpKuvaus: view.text || '', lxpYmparistot: view.jobs || [] };
+    }
+    function showFit(data) {
+      const box = document.getElementById('fitResult');
+      box.hidden = false;
+      box.innerHTML = '';
+      const missing = Array.isArray(data.puuttuu) ? data.puuttuu.filter(Boolean) : [];
+      if (missing.length) {
+        const title = document.createElement('p');
+        title.innerHTML = '<strong>Työnhakuprofiilistasi puuttuu</strong>';
+        box.appendChild(title);
+        const list = document.createElement('ul');
+        missing.forEach((item) => {
+          const li = document.createElement('li');
+          li.textContent = item;
+          list.appendChild(li);
+        });
+        box.appendChild(list);
+      }
+      if (data.ristiriita) {
+        const conflict = document.createElement('p');
+        conflict.textContent = data.ristiriita;
+        box.appendChild(conflict);
+      }
+      const advice = document.createElement('p');
+      advice.innerHTML = '<strong></strong>';
+      advice.querySelector('strong').textContent = data.suositus || (data.sopii ? 'Voit hakea näillä tiedoilla.' : 'Hakemusta ei kannata lähettää.');
+      box.appendChild(advice);
+    }
+    document.getElementById('fitBtn').onclick = async () => {
+      const jobText = document.getElementById('jobText').value.trim();
+      if (jobText.length < 40) {
+        setStatus('Liitä työpaikkailmoituksen teksti.', true);
+        return;
+      }
+      setStatus('Tarkistetaan sopivuutta…');
+      try {
+        const data = await api('sopivuus', lxpExtra(jobText));
+        showFit(data);
+        setStatus(data.sopii ? 'Tehtävä sopii profiiliin.' : 'Tarkistus valmis.');
+      } catch (error) { setStatus(error.message, true); }
+    };
     document.getElementById('searchBtn').onclick = async () => {
       setStatus('Haetaan…');
       try {
-        const data = await api('etsi');
+        const data = await api('etsi', lxpExtra(''));
         const box = document.getElementById('jobs');
         box.innerHTML = '';
         (data.ehdotukset || []).forEach((job) => {
@@ -445,7 +494,7 @@
           button.onclick = async () => {
             button.disabled = true;
             try {
-              const letter = await api('hakemus', { nimike: job.nimike, jobText: document.getElementById('jobText').value });
+              const letter = await api('hakemus', Object.assign({ nimike: job.nimike }, lxpExtra(document.getElementById('jobText').value)));
               const out = document.createElement('div');
               out.className = 'letter';
               out.textContent = letter.hakemus || '';
