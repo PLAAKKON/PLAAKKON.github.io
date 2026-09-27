@@ -214,7 +214,7 @@
   </main>
 
   <!-- App logic (voit pitää oman script.js:n) -->
-  <script src="script.js" type="module"></script>
+  <script src="script.js"></script>
 
   <!-- Kirjautumislogiikka -->
   <script>
@@ -264,6 +264,7 @@
 
         // Teaser vain kirjautumattomalle
         if (loginOffer) loginOffer.style.display = user ? 'none' : 'block';
+        if (user && window.yoroRestoreTest) window.yoroRestoreTest(user);
       });
 
     })();

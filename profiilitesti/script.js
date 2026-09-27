@@ -495,7 +495,7 @@ async function savedAnswers(user) {
     if (answersComplete(profile.lxpVastaukset)) return profile.lxpVastaukset;
   } catch (e) { /* kokeillaan vielä tietokantaa */ }
   try {
-    const snap = await firebase.firestore().collection("profiles").doc("oma_" + user.uid).get();
+    const snap = await globalThis.firebase.firestore().collection("profiles").doc("oma_" + user.uid).get();
     const data = snap.data() || {};
     const fromKey = answersFromKey(data.LxP);
     if (answersComplete(fromKey)) return fromKey;
@@ -672,7 +672,7 @@ function flashInstructionWarning() {
 }
 
 let restoredSavedTest = false;
-firebase.auth().onAuthStateChanged(async (user) => {
+async function restoreSavedTest(user) {
   const loginOffer = document.getElementById("loginOffer");
   userIsLoggedIn = !!user;
   if (loginOffer) loginOffer.style.display = user ? "none" : "block";
@@ -681,4 +681,8 @@ firebase.auth().onAuthStateChanged(async (user) => {
   if (!answersComplete(map)) return;
   restoredSavedTest = true;
   openSavedAnswers(map);
-});
+}
+globalThis.yoroRestoreTest = restoreSavedTest;
+try {
+  globalThis.firebase.auth().onAuthStateChanged(restoreSavedTest);
+} catch (e) { /* sivu kutsuu yoroRestoreTest kun Firebase on valmis */ }
