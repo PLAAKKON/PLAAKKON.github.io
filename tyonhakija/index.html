@@ -3,7 +3,13 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Yoro — oma profiili ja työnhaku</title>
+  <title>Yoro — sopiiko tämä työ sinulle?</title>
+  <meta name="description" content="Yoro vertaa profiiliasi avoimeen paikkaan. Jos työ ei sovi, sen näkee ennen lähettämistä." />
+  <meta property="og:title" content="Sopiiko tämä työ sinulle?" />
+  <meta property="og:description" content="Yoro vertaa profiiliasi avoimeen paikkaan. Jos työ ei sovi, sen näkee ennen lähettämistä." />
+  <meta property="og:url" content="https://yoro.fi/tyonhakija/" />
+  <meta property="og:type" content="website" />
+  <meta property="og:image" content="https://yoro.fi/yoro-logo.png" />
   <style>
     :root { --bg:#0b0f1a; --card:#141b2d; --line:rgba(148,163,184,.25); --text:#f1f5f9; --muted:#94a3b8; --accent:#22d3ee; --ok:#34d399; }
     * { box-sizing: border-box; }
@@ -893,7 +899,7 @@
           y += 44;
         });
       }
-      if (data.ristiriita && y < 520) {
+      if (data.ristiriita && y < 470) {
         y += 8;
         ctx.fillStyle = '#cbd5e1';
         ctx.font = '400 26px Segoe UI, Inter, sans-serif';
@@ -903,8 +909,11 @@
         });
       }
       ctx.fillStyle = '#94a3b8';
-      ctx.font = '600 22px Segoe UI, Inter, sans-serif';
-      ctx.fillText('yoro.fi', 72, 592);
+      ctx.font = '600 20px Segoe UI, Inter, sans-serif';
+      ctx.fillText(lang === 'en' ? 'Check yours' : 'Tarkista omasi', 72, 548);
+      ctx.fillStyle = '#67e8f9';
+      ctx.font = '700 28px Segoe UI, Inter, sans-serif';
+      ctx.fillText('yoro.fi/tyonhakija', 72, 588);
       return canvas;
     }
     function saveFitCard(canvas) {
@@ -970,7 +979,7 @@
       linkedIn.type = 'button';
       linkedIn.textContent = t('shareLinkedIn');
       linkedIn.onclick = () => {
-        window.open('https://www.linkedin.com/feed/?shareActive=true', '_blank', 'noopener');
+        window.open('https://www.linkedin.com/sharing/share-offsite/?url=' + encodeURIComponent('https://yoro.fi/tyonhakija/'), '_blank', 'noopener');
         saveFitCard(canvas);
         navigator.clipboard.writeText(post).catch(() => {});
         linkedIn.textContent = t('shareCopied');
