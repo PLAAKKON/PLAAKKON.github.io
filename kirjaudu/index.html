@@ -56,6 +56,7 @@
         function setLanguage(lang) {
             currentLanguage = lang;
             localStorage.setItem('preferredLanguage', lang);
+            localStorage.setItem('preferred-language', lang);
             
             // Update language buttons
             document.querySelectorAll('.lang-btn').forEach(btn => btn.classList.remove('active'));
@@ -77,7 +78,7 @@
 
         // Initialize language on page load
         document.addEventListener('DOMContentLoaded', function() {
-            const savedLang = localStorage.getItem('preferredLanguage') || 'fi';
+            const savedLang = localStorage.getItem('preferred-language') || localStorage.getItem('preferredLanguage') || 'fi';
             setLanguage(savedLang);
         });
     </script>

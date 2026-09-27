@@ -18,7 +18,7 @@
     button.primary { background:#0891b2; border-color:#0891b2; color:white; border-radius:10px; font-weight:650; }
     button:disabled { opacity:.5; cursor:not-allowed; }
     .chips { display:flex; flex-wrap:wrap; gap:8px; }
-    .chip.on { background:#155e75; border-color:var(--accent); }
+    button.on, .chip.on { background:#155e75; border-color:var(--accent); }
     label { display:block; margin:10px 0 4px; color:var(--muted); font-size:.9rem; }
     input, textarea { width:100%; padding:10px; border-radius:10px; border:1px solid var(--line); background:#0b0f1a; color:var(--text); }
     .q { margin:14px 0; }
@@ -36,105 +36,110 @@
 <body>
   <header>
     <h1>Yoro</h1>
-    <div id="payState" class="saldo">Oma profiili</div>
+    <div class="row">
+      <button type="button" id="langFi">FI</button>
+      <button type="button" id="langEn">EN</button>
+      <div id="payState" class="saldo" data-i18n="profileLabel">Oma profiili</div>
+    </div>
   </header>
   <main>
     <section id="authBox">
-      <h2>Työttömän tili</h2>
-      <p>Kirjoita sähköposti ja salasana, vähintään 6 merkkiä. Paina sitten <strong>Luo tili</strong>. Sen jälkeen pääset omalle sivulle ja voit täyttää profiilin osissa. Maksu tulee myöhemmin.</p>
-      <label for="email">Sähköposti</label>
-      <input id="email" type="email" autocomplete="email" placeholder="nimi@osoite.fi" />
-      <label for="password">Salasana</label>
-      <input id="password" type="password" autocomplete="new-password" placeholder="vähintään 6 merkkiä" />
+      <h2 data-i18n="authTitle">Tili</h2>
+      <p data-i18n="authLead">Kirjoita sähköposti ja salasana, vähintään 6 merkkiä. Paina sitten Luo tili.</p>
+      <label for="email" data-i18n="email">Sähköposti</label>
+      <input id="email" type="email" autocomplete="email" data-i18n-placeholder="emailPh" placeholder="nimi@osoite.fi" />
+      <label for="password" data-i18n="password">Salasana</label>
+      <input id="password" type="password" autocomplete="new-password" data-i18n-placeholder="passwordPh" placeholder="vähintään 6 merkkiä" />
       <div class="row" style="margin-top:12px">
-        <button class="primary" id="registerBtn" type="button">Luo tili</button>
-        <button id="loginBtn" type="button">Kirjaudu</button>
+        <button class="primary" id="registerBtn" type="button" data-i18n="register">Luo tili</button>
+        <button id="loginBtn" type="button" data-i18n="login">Kirjaudu</button>
       </div>
       <p id="authError" class="error"></p>
     </section>
 
     <div id="app" hidden>
+      <p data-i18n="lead">Yoro tekee kaksi asiaa: kuvaa työtyylisi ja auttaa hakemaan siihen sopivaa työtä. Englanninkieliseen ilmoitukseen hakemus kirjoitetaan englanniksi.</p>
       <section>
-        <h2>1. LxP</h2>
+        <h2 data-i18n="lxpTitle">1. LxP</h2>
         <p id="lxpSummary">Avain: <strong id="lxpKey">–</strong></p>
         <button id="lxpToggle" type="button" hidden>Näytä LxP</button>
         <div id="lxpPanel">
-          <p>Kymmenen monivalintaa. Avain on kysymyksen numero ja vastauskirjain. Kun kaikki on valittu, tämä osio menee piiloon.</p>
+          <p data-i18n="lxpLead">Kymmenen monivalintaa työtyylistä. Kun kaikki on valittu, kysymykset menevät piiloon.</p>
           <div id="lxp"></div>
-          <button id="seeMe" type="button">Näytä LxP-kuvaus</button>
+          <button id="seeMe" type="button" data-i18n="lxpPortrait">Näytä LxP-kuvaus</button>
           <div id="portrait" hidden>
             <p id="portraitText"></p>
-            <p><strong>Ympäristöjä, joissa viihtyisit</strong></p>
+            <p><strong data-i18n="envTitle">Ympäristöjä, joissa viihtyisit</strong></p>
             <ul id="portraitJobs"></ul>
             <p id="portraitNote"></p>
           </div>
         </div>
       </section>
       <section>
-        <h2>2. Ohjausmoottori</h2>
+        <h2 data-i18n="guideTitle">2. Ohjausmoottori</h2>
         <div id="guidance"></div>
         <a id="analysisLink" href="/ohjausmoottori/">Avaa ohjausmoottori</a>
       </section>
       <section>
-        <h2>3. Profiilikortti</h2>
-        <p>Voit täyttää kohdat missä järjestyksessä tahansa ja palata myöhemmin. Vaihtoehdot ovat samat kuin muissa profiileissa. Hae nimikkeellä, esimerkiksi tuotekehitys. Jos oikeaa ei löydy, lisää se omana.</p>
-        <div class="q"><strong>Esittely</strong>
-          <textarea id="intro" rows="3" placeholder="Lyhyt esittely, vapaaehtoinen"></textarea>
+        <h2 data-i18n="cardTitle">3. Profiilikortti</h2>
+        <p data-i18n="cardLead">Täytä kohdat missä järjestyksessä tahansa. Ammattien ja osaamisten nimet ovat samat kuin muissa profiileissa.</p>
+        <div class="q"><strong data-i18n="intro">Esittely</strong>
+          <textarea id="intro" rows="3" data-i18n-placeholder="introPh" placeholder="Lyhyt esittely, vapaaehtoinen"></textarea>
         </div>
-        <div class="q"><strong>Työtoiveet</strong>
+        <div class="q"><strong data-i18n="wishes">Työtoiveet</strong>
           <div id="wishChosen" class="chips"></div>
-          <input id="wishFilter" placeholder="Hae työtoivetta, esim. tuotekehitys" style="margin-top:8px" />
+          <input id="wishFilter" data-i18n-placeholder="wishPh" placeholder="Hae työtoivetta" style="margin-top:8px" />
           <div id="wishes" class="chips" style="margin-top:10px"></div>
         </div>
-        <div class="q"><strong>Ammatit, joissa olet työskennellyt</strong>
+        <div class="q"><strong data-i18n="occupations">Ammatit, joissa olet työskennellyt</strong>
           <div id="occupationChosen" class="chips"></div>
-          <input id="occupationFilter" placeholder="Hae ammattia" style="margin-top:8px" />
+          <input id="occupationFilter" data-i18n-placeholder="occupationPh" placeholder="Hae ammattia" style="margin-top:8px" />
           <div id="occupations" class="chips" style="margin-top:10px"></div>
         </div>
-        <div class="q"><strong>Osaamiset</strong>
+        <div class="q"><strong data-i18n="skills">Osaamiset</strong>
           <div id="skillChosen" class="chips"></div>
-          <input id="skillFilter" placeholder="Hae osaamista, esim. projektinhallinta" style="margin-top:8px" />
+          <input id="skillFilter" data-i18n-placeholder="skillPh" placeholder="Hae osaamista" style="margin-top:8px" />
           <div id="skills" class="chips" style="margin-top:10px"></div>
-          <textarea id="skillText" rows="2" placeholder="Osaaminen omin sanoin, vapaaehtoinen" style="margin-top:8px"></textarea>
+          <textarea id="skillText" rows="2" data-i18n-placeholder="skillTextPh" placeholder="Osaaminen omin sanoin, vapaaehtoinen" style="margin-top:8px"></textarea>
         </div>
-        <div class="q"><strong>Työkokemus</strong>
+        <div class="q"><strong data-i18n="experience">Työkokemus</strong>
           <div id="experienceList"></div>
-          <input id="expRole" placeholder="Tehtävä, esim. tuotekehitysinsinööri" style="margin-top:8px" />
-          <input id="expEmployer" placeholder="Työnantaja" style="margin-top:8px" />
-          <input id="expWhen" placeholder="Ajankohta, esim. 2018–2024" style="margin-top:8px" />
-          <textarea id="expText" rows="2" placeholder="Mitä teit" style="margin-top:8px"></textarea>
-          <button id="addExp" type="button" style="margin-top:8px">Lisää tämä työkokemus</button>
+          <input id="expRole" data-i18n-placeholder="rolePh" placeholder="Tehtävä" style="margin-top:8px" />
+          <input id="expEmployer" data-i18n-placeholder="employerPh" placeholder="Työnantaja" style="margin-top:8px" />
+          <input id="expWhen" data-i18n-placeholder="whenPh" placeholder="Ajankohta" style="margin-top:8px" />
+          <textarea id="expText" rows="2" data-i18n-placeholder="didPh" placeholder="Mitä teit" style="margin-top:8px"></textarea>
+          <button id="addExp" type="button" style="margin-top:8px" data-i18n="addExp">Lisää tämä työkokemus</button>
         </div>
-        <div class="q"><strong>Työnhakualue</strong><div id="regions" class="chips"></div></div>
-        <div class="q"><strong>Koulutus</strong>
+        <div class="q"><strong data-i18n="region">Työnhakualue</strong><div id="regions" class="chips"></div></div>
+        <div class="q"><strong data-i18n="education">Koulutus</strong>
           <div id="education" class="chips"></div>
-          <input id="degree" placeholder="Tutkinnon nimi, esim. konetekniikka, DI" style="margin-top:8px" />
+          <input id="degree" data-i18n-placeholder="degreePh" placeholder="Tutkinnon nimi" style="margin-top:8px" />
         </div>
-        <div class="q"><strong>Kielitaito</strong><div id="languages" class="chips"></div></div>
-        <div class="q"><strong>Ajokortti</strong><div id="licenses" class="chips"></div></div>
-        <div class="q"><strong>Luvat ja kortit</strong><div id="permits" class="chips"></div></div>
-        <div class="q"><strong>Milloin voit aloittaa</strong><div id="start" class="chips"></div></div>
-        <button class="primary" id="saveBtn" type="button">Tallenna tämä vaihe</button>
+        <div class="q"><strong data-i18n="language">Kielitaito</strong><div id="languages" class="chips"></div></div>
+        <div class="q"><strong data-i18n="license">Ajokortti</strong><div id="licenses" class="chips"></div></div>
+        <div class="q"><strong data-i18n="permits">Luvat ja kortit</strong><div id="permits" class="chips"></div></div>
+        <div class="q"><strong data-i18n="start">Milloin voit aloittaa</strong><div id="start" class="chips"></div></div>
+        <button class="primary" id="saveBtn" type="button" data-i18n="save">Tallenna tämä vaihe</button>
       </section>
       <section>
-        <h2>4. Etsi töitä</h2>
-        <p>Haku ja hakemus toimivat jo sillä, mitä olet täyttänyt. Loput profiilista voit täydentää myöhemmin. Maksu tulee myöhemmässä vaiheessa.</p>
+        <h2 data-i18n="searchTitle">4. Etsi töitä</h2>
+        <p data-i18n="searchLead">Haku toimii sillä, mitä olet täyttänyt. Hakemus kirjoitetaan ilmoituksen kielellä.</p>
         <div class="q">
-          <strong>Tarkista sopivuuteni johonkin työtehtävään</strong>
-          <p>Liitä ilmoitus. Tarkistus kertoo, mitä työnhakuprofiilistasi puuttuu tähän tehtävään.</p>
-          <textarea id="jobText" rows="8" placeholder="Työpaikkailmoituksen teksti"></textarea>
-          <button class="primary" id="fitBtn" type="button" style="margin-top:8px">Tarkista sopivuuteni</button>
+          <strong data-i18n="fitTitle">Tarkista sopivuuteni johonkin työtehtävään</strong>
+          <p data-i18n="fitLead">Liitä ilmoitus. Tarkistus kertoo, mitä profiilista puuttuu.</p>
+          <textarea id="jobText" rows="8" data-i18n-placeholder="jobPh" placeholder="Työpaikkailmoituksen teksti"></textarea>
+          <button class="primary" id="fitBtn" type="button" style="margin-top:8px" data-i18n="fitBtn">Tarkista sopivuuteni</button>
           <div id="fitResult" hidden></div>
         </div>
         <div class="row">
-          <button class="primary" id="searchBtn" type="button">Etsi töitä</button>
-          <button id="logoutBtn" type="button">Kirjaudu ulos</button>
+          <button class="primary" id="searchBtn" type="button" data-i18n="searchBtn">Etsi töitä</button>
+          <button id="logoutBtn" type="button" data-i18n="logout">Kirjaudu ulos</button>
         </div>
         <p id="status"></p>
       </section>
       <section id="results" hidden>
-        <h2>Sopivat tehtävät</h2>
-        <p>Nämä eivät ole avoimia paikkoja. Hakulauseella etsit ilmoituksen itse. Sopivuus tarkistetaan yllä olevalla ilmoituksella.</p>
+        <h2 data-i18n="resultsTitle">Sopivat tehtävät</h2>
+        <p data-i18n="resultsLead">Nämä eivät ole avoimia paikkoja. Hakulauseella etsit ilmoituksen itse.</p>
         <div id="jobs"></div>
       </section>
     </div>
@@ -152,15 +157,136 @@
       appId: "1:314066598772:web:50183db006293290378a21"
     });
   </script>
+  <script src="/ohjausmoottori/i18n-en.js"></script>
   <script src="lxp-arvio.js"></script>
   <script>
     const API = 'https://us-central1-urapolku-7780a.cloudfunctions.net/tyonhaku';
+    let lang = (localStorage.getItem('preferred-language') || localStorage.getItem('preferredLanguage') || 'fi') === 'en' ? 'en' : 'fi';
+    const TEXT = {
+      fi: {
+        profileLabel: 'Oma profiili', authTitle: 'Tili', authLead: 'Kirjoita sähköposti ja salasana, vähintään 6 merkkiä. Paina sitten Luo tili.',
+        email: 'Sähköposti', password: 'Salasana', emailPh: 'nimi@osoite.fi', passwordPh: 'vähintään 6 merkkiä', register: 'Luo tili', login: 'Kirjaudu',
+        lead: 'Yoro tekee kaksi asiaa: kuvaa työtyylisi ja auttaa hakemaan siihen sopivaa työtä. Englanninkieliseen ilmoitukseen hakemus kirjoitetaan englanniksi.',
+        lxpTitle: '1. LxP', lxpLead: 'Kymmenen monivalintaa työtyylistä. Kun kaikki on valittu, kysymykset menevät piiloon.',
+        showLxp: 'Näytä LxP', hideLxp: 'Piilota LxP', lxpPortrait: 'Näytä LxP-kuvaus', envTitle: 'Ympäristöjä, joissa viihtyisit',
+        guideTitle: '2. Ohjausmoottori', guideEmpty: 'Sanallinen kuvaus tulee ohjausmoottorista, kun lisäkysymykset on vastattu.',
+        continueGuide: 'Jatka ohjausmoottorin lisäkysymyksiin', openFull: 'Avaa koko palaute ja valmentaja',
+        strengths: 'Vahvuutesi työssä', style: 'Työtyylisi lyhyesti', motivation: 'Motivaatio', paths: 'Polut',
+        cardTitle: '3. Profiilikortti', cardLead: 'Täytä kohdat missä järjestyksessä tahansa. Ammattien ja osaamisten nimet ovat samat kuin muissa profiileissa.',
+        intro: 'Esittely', introPh: 'Lyhyt esittely, vapaaehtoinen', wishes: 'Työtoiveet', wishPh: 'Hae työtoivetta',
+        occupations: 'Ammatit, joissa olet työskennellyt', occupationPh: 'Hae ammattia', skills: 'Osaamiset', skillPh: 'Hae osaamista',
+        skillTextPh: 'Osaaminen omin sanoin, vapaaehtoinen', experience: 'Työkokemus', rolePh: 'Tehtävä', employerPh: 'Työnantaja',
+        whenPh: 'Ajankohta', didPh: 'Mitä teit', addExp: 'Lisää tämä työkokemus', region: 'Työnhakualue', education: 'Koulutus',
+        degreePh: 'Tutkinnon nimi', language: 'Kielitaito', license: 'Ajokortti', permits: 'Luvat ja kortit', start: 'Milloin voit aloittaa',
+        save: 'Tallenna tämä vaihe', searchTitle: '4. Etsi töitä', searchLead: 'Haku toimii sillä, mitä olet täyttänyt. Hakemus kirjoitetaan ilmoituksen kielellä.',
+        fitTitle: 'Tarkista sopivuuteni johonkin työtehtävään', fitLead: 'Liitä ilmoitus. Tarkistus kertoo, mitä profiilista puuttuu.',
+        jobPh: 'Työpaikkailmoituksen teksti', fitBtn: 'Tarkista sopivuuteni', searchBtn: 'Etsi töitä', logout: 'Kirjaudu ulos',
+        resultsTitle: 'Sopivat tehtävät', resultsLead: 'Nämä eivät ole avoimia paikkoja. Hakulauseella etsit ilmoituksen itse.',
+        addOwn: 'Lisää omana: ', remove: 'Poista', missing: 'Työnhakuprofiilistasi puuttuu', canApply: 'Voit hakea näillä tiedoilla.',
+        doNotSend: 'Hakemusta ei kannata lähettää.', needJob: 'Liitä työpaikkailmoituksen teksti.', checking: 'Tarkistetaan sopivuutta…',
+        fits: 'Tehtävä sopii profiiliin.', checked: 'Tarkistus valmis.', searching: 'Haetaan…', writeLetter: 'Kirjoita työhakemus',
+        picked: 'Valitse tehtävä ja kirjoita hakemus. Puuttuvat kohdat voit täyttää myöhemmin.',
+        needExp: 'Kirjoita ainakin tehtävä tai kuvaus.', expLimit: 'Työkokemuksia voi lisätä kahdeksan. Poista yksi, jos haluat vaihtaa.',
+        expAdded: 'Työkokemus lisätty. Tallenna tämä vaihe, niin se jää profiiliin.', saved: 'Tallennettu. Voit täydentää muita kohtia myöhemmin.',
+        failed: 'Pyyntö epäonnistui', badEmail: 'Kirjoita ensin sähköposti, esimerkiksi nimi@osoite.fi. Paina Luo tili vasta sen jälkeen.',
+        shortPassword: 'Kirjoita salasana, jossa on vähintään 6 merkkiä, ja paina sitten Luo tili.',
+        emailUsed: 'Tämä sähköposti on jo käytössä. Paina Kirjaudu.',
+        badLogin: 'Sähköposti tai salasana ei täsmää. Uusi käyttäjä painaa Luo tili.',
+        weakPassword: 'Salasanassa pitää olla vähintään 6 merkkiä.',
+        authFailed: 'Tilin luonti ei onnistunut. Tarkista sähköposti ja salasana.'
+      },
+      en: {
+        profileLabel: 'My profile', authTitle: 'Account', authLead: 'Enter your email and a password of at least 6 characters, then press Create account.',
+        email: 'Email', password: 'Password', emailPh: 'name@address.com', passwordPh: 'at least 6 characters', register: 'Create account', login: 'Log in',
+        lead: 'Yoro does two things: it describes how you work, and it helps you apply for work that fits. An English job ad gets an English application.',
+        lxpTitle: '1. LxP', lxpLead: 'Ten questions about how you work. When all are answered, the questions hide.',
+        showLxp: 'Show LxP', hideLxp: 'Hide LxP', lxpPortrait: 'Show the LxP description', envTitle: 'Environments where you would thrive',
+        guideTitle: '2. Guidance engine', guideEmpty: 'The written description appears here after the extra guidance questions are answered.',
+        continueGuide: 'Continue to the extra questions', openFull: 'Open the full feedback and coach',
+        strengths: 'Your strengths at work', style: 'Your work style', motivation: 'Motivation', paths: 'Paths',
+        cardTitle: '3. Profile card', cardLead: 'Fill the fields in any order. Occupation and skill names match the other profiles.',
+        intro: 'Introduction', introPh: 'Short introduction, optional', wishes: 'Job wishes', wishPh: 'Search a job wish',
+        occupations: 'Occupations you have worked in', occupationPh: 'Search an occupation', skills: 'Skills', skillPh: 'Search a skill',
+        skillTextPh: 'Skills in your own words, optional', experience: 'Work experience', rolePh: 'Role', employerPh: 'Employer',
+        whenPh: 'When', didPh: 'What you did', addExp: 'Add this experience', region: 'Search area', education: 'Education',
+        degreePh: 'Name of the degree', language: 'Languages', license: 'Driving licence', permits: 'Permits and cards', start: 'When you can start',
+        save: 'Save this step', searchTitle: '4. Look for work', searchLead: 'Search uses what you have filled in. The application is written in the language of the job ad.',
+        fitTitle: 'Check my fit for a job', fitLead: 'Paste an ad. The check lists what your profile is missing.',
+        jobPh: 'Job advertisement text', fitBtn: 'Check my fit', searchBtn: 'Look for work', logout: 'Log out',
+        resultsTitle: 'Fitting roles', resultsLead: 'These are not open vacancies. Use the search phrase to find the ad yourself.',
+        addOwn: 'Add your own: ', remove: 'Remove', missing: 'Your job-search profile is missing', canApply: 'You can apply with these facts.',
+        doNotSend: 'Do not send this application.', needJob: 'Paste the job advertisement text.', checking: 'Checking fit…',
+        fits: 'The role fits the profile.', checked: 'Check complete.', searching: 'Searching…', writeLetter: 'Write the application',
+        picked: 'Choose a role and write the application. You can fill in the rest of the profile later.',
+        needExp: 'Write at least a role or a description.', expLimit: 'You can add eight experiences. Remove one to change them.',
+        expAdded: 'Experience added. Save this step to keep it on the profile.', saved: 'Saved. You can complete the other fields later.',
+        failed: 'The request failed', badEmail: 'Enter an email first, for example name@address.com, then press Create account.',
+        shortPassword: 'Enter a password of at least 6 characters, then press Create account.',
+        emailUsed: 'This email is already in use. Press Log in.',
+        badLogin: 'The email or password does not match. A new user presses Create account.',
+        weakPassword: 'The password must be at least 6 characters.',
+        authFailed: 'The account could not be created. Check the email and password.'
+      }
+    };
+    function t(key) { return (TEXT[lang] && TEXT[lang][key]) || TEXT.fi[key] || key; }
+    function questionLabel(q) {
+      const en = lang === 'en' && window.I18N_EN && I18N_EN.questions[String(q.id).toLowerCase()];
+      return en && en.text ? en.text : q.text;
+    }
+    function optionLabel(q, letter, fallback) {
+      const en = lang === 'en' && window.I18N_EN && I18N_EN.questions[String(q.id).toLowerCase()];
+      return en && en.options && en.options[letter] ? en.options[letter] : fallback;
+    }
+    function applyTexts() {
+      document.documentElement.lang = lang;
+      document.querySelectorAll('[data-i18n]').forEach((el) => { el.textContent = t(el.dataset.i18n); });
+      document.querySelectorAll('[data-i18n-placeholder]').forEach((el) => { el.placeholder = t(el.dataset.i18nPlaceholder); });
+      const fi = document.getElementById('langFi');
+      const en = document.getElementById('langEn');
+      if (fi) fi.classList.toggle('on', lang === 'fi');
+      if (en) en.classList.toggle('on', lang === 'en');
+    }
+    function choiceLabel(item) { return typeof item === 'string' ? item : (lang === 'en' ? item.en : item.fi); }
+    function choiceValue(item) { return typeof item === 'string' ? item : item.fi; }
     const regions = ['Uusimaa','Varsinais-Suomi','Satakunta','Kanta-Häme','Pirkanmaa','Päijät-Häme','Kymenlaakso','Etelä-Karjala','Etelä-Savo','Pohjois-Savo','Pohjois-Karjala','Keski-Suomi','Etelä-Pohjanmaa','Pohjanmaa','Keski-Pohjanmaa','Pohjois-Pohjanmaa','Kainuu','Lappi','Ahvenanmaa'];
-    const education = ['Ei tutkintoa','Peruskoulu','Ylioppilastutkinto','Ammatillinen perustutkinto','Ammattitutkinto','AMK','Yliopisto','Opiskelen vielä'];
-    const languages = ['Suomi – äidinkieli','Suomi – hyvä','Suomi – alkeet','Ruotsi – hyvä','Englanti – hyvä','Englanti – alkeet'];
-    const licenses = ['Ei ajokorttia','Henkilöauto (B)','Henkilöauto (BE)','Kuorma-auto (C)','Yhdistelmä (CE)'];
-    const permits = ['Työturvallisuuskortti','Tulityökortti','SFS 6002','Hygieniapassi','Ensiapukortti','Anniskelupassi'];
-    const starts = ['Heti','Kuukauden sisällä','Kolmen kuukauden sisällä'];
+    const education = [
+      { fi: 'Ei tutkintoa', en: 'No degree' },
+      { fi: 'Peruskoulu', en: 'Comprehensive school' },
+      { fi: 'Ylioppilastutkinto', en: 'Upper secondary school' },
+      { fi: 'Ammatillinen perustutkinto', en: 'Vocational qualification' },
+      { fi: 'Ammattitutkinto', en: 'Further vocational qualification' },
+      { fi: 'AMK', en: 'University of applied sciences' },
+      { fi: 'Yliopisto', en: 'University' },
+      { fi: 'Opiskelen vielä', en: 'Still studying' }
+    ];
+    const languages = [
+      { fi: 'Suomi – äidinkieli', en: 'Finnish – native' },
+      { fi: 'Suomi – hyvä', en: 'Finnish – good' },
+      { fi: 'Suomi – alkeet', en: 'Finnish – basic' },
+      { fi: 'Ruotsi – hyvä', en: 'Swedish – good' },
+      { fi: 'Englanti – hyvä', en: 'English – good' },
+      { fi: 'Englanti – alkeet', en: 'English – basic' }
+    ];
+    const licenses = [
+      { fi: 'Ei ajokorttia', en: 'No driving licence' },
+      { fi: 'Henkilöauto (B)', en: 'Car (B)' },
+      { fi: 'Henkilöauto (BE)', en: 'Car with trailer (BE)' },
+      { fi: 'Kuorma-auto (C)', en: 'Lorry (C)' },
+      { fi: 'Yhdistelmä (CE)', en: 'Lorry with trailer (CE)' }
+    ];
+    const permits = [
+      { fi: 'Työturvallisuuskortti', en: 'Occupational safety card' },
+      { fi: 'Tulityökortti', en: 'Hot work card' },
+      { fi: 'SFS 6002', en: 'SFS 6002 electrical safety' },
+      { fi: 'Hygieniapassi', en: 'Hygiene passport' },
+      { fi: 'Ensiapukortti', en: 'First aid card' },
+      { fi: 'Anniskelupassi', en: 'Alcohol serving passport' }
+    ];
+    const starts = [
+      { fi: 'Heti', en: 'Immediately' },
+      { fi: 'Kuukauden sisällä', en: 'Within a month' },
+      { fi: 'Kolmen kuukauden sisällä', en: 'Within three months' }
+    ];
     let questions = [];
 
     const state = {
@@ -181,15 +307,21 @@
     }
     function single(el, values, key) {
       el.innerHTML = '';
-      values.forEach((value) => el.appendChild(chip(value, state[key] === value, () => { state[key] = value; single(el, values, key); })));
+      values.forEach((item) => {
+        const value = choiceValue(item);
+        el.appendChild(chip(choiceLabel(item), state[key] === value, () => { state[key] = value; single(el, values, key); }));
+      });
     }
     function multi(el, values, key, limit) {
       el.innerHTML = '';
-      values.forEach((value) => el.appendChild(chip(value, state[key].has(value), () => {
-        if (state[key].has(value)) state[key].delete(value);
-        else if (!limit || state[key].size < limit) state[key].add(value);
-        multi(el, values, key, limit);
-      })));
+      values.forEach((item) => {
+        const value = choiceValue(item);
+        el.appendChild(chip(choiceLabel(item), state[key].has(value), () => {
+          if (state[key].has(value)) state[key].delete(value);
+          else if (!limit || state[key].size < limit) state[key].add(value);
+          multi(el, values, key, limit);
+        }));
+      });
     }
     function bindPicker(inputId, boxId, chosenId, listName, setName, limit) {
       const input = document.getElementById(inputId);
@@ -213,7 +345,7 @@
         });
         const exact = lists[listName].some((title) => title.toLowerCase() === q);
         if (!exact && state[setName].size < limit) {
-          box.appendChild(chip('Lisää omana: ' + typed, false, () => {
+          box.appendChild(chip(t('addOwn') + typed, false, () => {
             state[setName].add(typed.slice(0, 80));
             input.value = '';
             draw();
@@ -234,7 +366,7 @@
         row.textContent = text + (item.kuvaus ? '. ' + item.kuvaus : '');
         const remove = document.createElement('button');
         remove.type = 'button';
-        remove.textContent = 'Poista';
+        remove.textContent = t('remove');
         remove.onclick = () => { state.experience.splice(index, 1); renderExperience(); };
         row.appendChild(remove);
         box.appendChild(row);
@@ -269,12 +401,12 @@
         const block = document.createElement('div');
         block.className = 'q';
         const title = document.createElement('strong');
-        title.textContent = q.text;
+        title.textContent = questionLabel(q);
         block.appendChild(title);
         const row = document.createElement('div');
         row.className = 'chips';
         Object.entries(q.options).forEach(([letter, text]) => {
-          row.appendChild(chip(letter.toUpperCase() + '. ' + text, state.lxp[q.id] === letter, () => {
+          row.appendChild(chip(letter.toUpperCase() + '. ' + optionLabel(q, letter, text), state.lxp[q.id] === letter, () => {
             state.lxp[q.id] = letter;
             renderLxp();
           }));
@@ -314,7 +446,7 @@
       if (panel) panel.hidden = complete && !lxpOpen;
       if (toggle) {
         toggle.hidden = !complete;
-        toggle.textContent = lxpOpen ? 'Piilota LxP' : 'Näytä LxP';
+        toggle.textContent = lxpOpen ? t('hideLxp') : t('showLxp');
       }
     }
     function addGuidanceList(box, title, items) {
@@ -342,9 +474,9 @@
       box.innerHTML = '';
       if (!data || !data.hero) {
         const note = document.createElement('p');
-        note.textContent = 'Sanallinen kuvaus tulee ohjausmoottorista. Se näkyy tässä, kun uraohjaus, motivaatio, aineet ja kiinnostus on vastattu.';
+        note.textContent = t('guideEmpty');
         box.appendChild(note);
-        if (link) link.textContent = 'Jatka ohjausmoottorin lisäkysymyksiin';
+        if (link) link.textContent = t('continueGuide');
         return;
       }
       const title = document.createElement('p');
@@ -355,11 +487,11 @@
       const hero = document.createElement('p');
       hero.textContent = data.hero;
       box.appendChild(hero);
-      addGuidanceList(box, 'Vahvuutesi työssä', data.strengths);
-      addGuidanceList(box, 'Työtyylisi lyhyesti', data.style);
-      addGuidanceList(box, 'Motivaatio', data.motivation);
-      addGuidanceList(box, 'Polut', data.paths);
-      if (link) link.textContent = 'Avaa koko palaute ja valmentaja';
+      addGuidanceList(box, t('strengths'), data.strengths);
+      addGuidanceList(box, t('style'), data.style);
+      addGuidanceList(box, t('motivation'), data.motivation);
+      addGuidanceList(box, t('paths'), data.paths);
+      if (link) link.textContent = t('openFull');
     }
     function renderPortrait() {
       const box = document.getElementById('portrait');
@@ -414,8 +546,9 @@
       state.regions = new Set(data.tyonhakualue || []);
       state.languages = new Set(data.kielitaito || []);
       state.permits = new Set(data.lupatiedot || []);
-      state.education = (data.koulutus || []).find((item) => education.includes(item)) || '';
-      state.degree = (data.koulutus || []).find((item) => !education.includes(item)) || '';
+      const educationValues = education.map(choiceValue);
+      state.education = (data.koulutus || []).find((item) => educationValues.includes(item)) || '';
+      state.degree = (data.koulutus || []).find((item) => !educationValues.includes(item)) || '';
       state.license = (data.ajokortit || [])[0] || '';
       state.start = (data.aloitusajankohta || [])[0] || '';
       state.intro = data.esittely || '';
@@ -447,10 +580,10 @@
       const response = await fetch(API, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token },
-        body: JSON.stringify({ action, profile: profileBody(), ...extra })
+        body: JSON.stringify({ action, profile: profileBody(), kieli: lang, ...extra })
       });
       const data = await response.json().catch(() => ({}));
-      if (!response.ok) throw new Error(data.error || 'Pyyntö epäonnistui');
+      if (!response.ok) throw new Error(data.error || t('failed'));
       return data;
     }
     function setStatus(text, isError) {
@@ -465,11 +598,11 @@
       const error = document.getElementById('authError');
       error.textContent = '';
       if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-        error.textContent = 'Kirjoita ensin sähköposti kenttään, esimerkiksi nimi@osoite.fi. Paina Luo tili vasta sen jälkeen.';
+        error.textContent = t('badEmail');
         return null;
       }
       if (password.length < 6) {
-        error.textContent = 'Kirjoita salasana, jossa on vähintään 6 merkkiä, ja paina sitten Luo tili.';
+        error.textContent = t('shortPassword');
         return null;
       }
       return { email, password };
@@ -477,14 +610,26 @@
     function authFailure(error) {
       const code = error && error.code;
       const text = code === 'auth/email-already-in-use'
-        ? 'Tämä sähköposti on jo käytössä. Paina Kirjaudu.'
+        ? t('emailUsed')
         : code === 'auth/wrong-password' || code === 'auth/invalid-credential' || code === 'auth/user-not-found'
-          ? 'Sähköposti tai salasana ei täsmää. Uusi käyttäjä painaa Luo tili.'
+          ? t('badLogin')
           : code === 'auth/weak-password'
-            ? 'Salasanassa pitää olla vähintään 6 merkkiä.'
-            : 'Tilin luonti ei onnistunut. Tarkista sähköposti ja salasana.';
+            ? t('weakPassword')
+            : t('authFailed');
       document.getElementById('authError').textContent = text;
     }
+    document.getElementById('langFi').onclick = () => setPageLang('fi');
+    document.getElementById('langEn').onclick = () => setPageLang('en');
+    function setPageLang(next) {
+      lang = next === 'en' ? 'en' : 'fi';
+      localStorage.setItem('preferred-language', lang);
+      localStorage.setItem('preferredLanguage', lang);
+      applyTexts();
+      refreshChoices();
+      renderGuidance();
+      renderLxpChrome();
+    }
+    applyTexts();
     document.getElementById('loginBtn').onclick = async () => {
       const fields = authFields();
       if (!fields) return;
@@ -514,20 +659,20 @@
         kuvaus: document.getElementById('expText').value.trim()
       };
       if (!item.tehtava && !item.kuvaus) {
-        setStatus('Kirjoita ainakin tehtävä tai kuvaus.', true);
+        setStatus(t('needExp'), true);
         return;
       }
       if (state.experience.length >= 8) {
-        setStatus('Työkokemuksia voi lisätä kahdeksan. Poista yksi, jos haluat vaihtaa.', true);
+        setStatus(t('expLimit'), true);
         return;
       }
       state.experience.push(item);
       ['expRole', 'expEmployer', 'expWhen', 'expText'].forEach((id) => { document.getElementById(id).value = ''; });
       renderExperience();
-      setStatus('Työkokemus lisätty. Tallenna tämä vaihe, niin se jää profiiliin.');
+      setStatus(t('expAdded'));
     };
     document.getElementById('saveBtn').onclick = async () => {
-      try { await api('tallenna'); setStatus('Tallennettu. Voit täydentää muita kohtia myöhemmin.'); }
+      try { await api('tallenna'); setStatus(t('saved')); }
       catch (error) { setStatus(error.message, true); }
     };
     function lxpExtra(jobText) {
@@ -541,7 +686,9 @@
       const missing = Array.isArray(data.puuttuu) ? data.puuttuu.filter(Boolean) : [];
       if (missing.length) {
         const title = document.createElement('p');
-        title.innerHTML = '<strong>Työnhakuprofiilistasi puuttuu</strong>';
+        const strong = document.createElement('strong');
+        strong.textContent = t('missing');
+        title.appendChild(strong);
         box.appendChild(title);
         const list = document.createElement('ul');
         missing.forEach((item) => {
@@ -558,24 +705,24 @@
       }
       const advice = document.createElement('p');
       advice.innerHTML = '<strong></strong>';
-      advice.querySelector('strong').textContent = data.suositus || (data.sopii ? 'Voit hakea näillä tiedoilla.' : 'Hakemusta ei kannata lähettää.');
+      advice.querySelector('strong').textContent = data.suositus || (data.sopii ? t('canApply') : t('doNotSend'));
       box.appendChild(advice);
     }
     document.getElementById('fitBtn').onclick = async () => {
       const jobText = document.getElementById('jobText').value.trim();
       if (jobText.length < 40) {
-        setStatus('Liitä työpaikkailmoituksen teksti.', true);
+        setStatus(t('needJob'), true);
         return;
       }
-      setStatus('Tarkistetaan sopivuutta…');
+      setStatus(t('checking'));
       try {
         const data = await api('sopivuus', lxpExtra(jobText));
         showFit(data);
-        setStatus(data.sopii ? 'Tehtävä sopii profiiliin.' : 'Tarkistus valmis.');
+        setStatus(data.sopii ? t('fits') : t('checked'));
       } catch (error) { setStatus(error.message, true); }
     };
     document.getElementById('searchBtn').onclick = async () => {
-      setStatus('Haetaan…');
+      setStatus(t('searching'));
       try {
         const data = await api('etsi', lxpExtra(''));
         const box = document.getElementById('jobs');
@@ -590,7 +737,7 @@
           const button = document.createElement('button');
           button.className = 'primary';
           button.type = 'button';
-          button.textContent = 'Kirjoita työhakemus';
+          button.textContent = t('writeLetter');
           button.onclick = async () => {
             button.disabled = true;
             try {
@@ -605,7 +752,7 @@
           box.appendChild(div);
         });
         document.getElementById('results').hidden = false;
-        setStatus('Valitse tehtävä ja kirjoita hakemus. Puuttuvat profiilin kohdat voit täyttää myöhemmin.');
+        setStatus(t('picked'));
       } catch (error) { setStatus(error.message, true); }
     };
 
