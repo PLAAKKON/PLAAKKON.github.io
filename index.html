@@ -331,7 +331,10 @@
     @media (max-width:680px){
       .engine-box{max-width:100%; min-width:100%}
     }
-    .intro{color: var(--muted); margin: 0 0 24px}
+    .intro{color: var(--muted); margin: 0 0 24px; max-width: 62ch}
+    .plain-list{margin: 8px 0 0; padding-left: 1.15rem; color: var(--muted)}
+    .plain-list li{margin: 6px 0}
+    .later{color: var(--muted); max-width: 62ch; margin: 0 0 8px}
 
     .grid{
       display:grid; gap: 20px; grid-template-columns: repeat(3, 1fr);
@@ -423,6 +426,7 @@
     /* Language switching */
     .lang-content{display:none}
     .lang-content.active{display:block}
+    a.btn.lang-content.active{display:inline-flex}
     
     /* Contact section responsive */
     @media (max-width: 900px) {
@@ -469,16 +473,14 @@
         </a>
       </div>
       <nav class="topnav lang-content active" data-lang="fi" aria-label="Sivusto">
-        <a href="#miksi-lxp">Työnhaku</a>
-        <a href="#en-tieda">En tiedä</a>
+        <a href="#aloita">Aloita</a>
         <a href="#kaavio">LxP</a>
-        <a href="#tyokalut">Työkalut</a>
+        <a href="#yhteys">Yhteys</a>
       </nav>
       <nav class="topnav lang-content" data-lang="en" aria-label="Site">
-        <a href="#miksi-lxp">Job search</a>
-        <a href="#en-tieda">I don't know</a>
+        <a href="#aloita">Start</a>
         <a href="#kaavio">LxP</a>
-        <a href="#tyokalut">Tools</a>
+        <a href="#yhteys">Contact</a>
       </nav>
       <div class="topbar-end">
         <div class="lang">
@@ -496,18 +498,18 @@
       <div>
         <!-- FI hero -->
         <div class="lang-content active" data-lang="fi">
-          <span class="badge">Työnhakijalle</span>
+          <span class="badge">Työnhakijalle ja työnantajalle</span>
           <h1>Näe, miten työskentelet, ja hae siihen sopivaa työtä</h1>
-          <p class="sub">Yorolla on kaksi askelta. Ohjausmoottori kertoo työtyylisi ja polut. Oma profiili lisää kokemuksesi ja kirjoittaa hakemuksen. Englanninkieliseen ilmoitukseen hakemus tulee englanniksi.</p>
+          <p class="sub">Jos ala on selvä, täytä profiili ja hae. Jos et tiedä, kysely näyttää seuraavan askeleen. Hakemus käyttää vain ne työtyylin kohdat, jotka sopivat kyseiseen tehtävään.</p>
           <div class="cta">
             <a class="btn primary" href="/tyonhakija/">Etsi työtä</a>
             <a class="btn" href="/ohjausmoottori/">En tiedä vielä alaa</a>
           </div>
         </div>
         <div class="lang-content" data-lang="en">
-          <span class="badge">For job seekers</span>
+          <span class="badge">For job seekers and employers</span>
           <h1>See how you work, then apply for work that fits</h1>
-          <p class="sub">Yoro has two steps. The guidance engine describes your work style and paths. Your profile adds your experience and writes the application. An English job ad gets an English application.</p>
+          <p class="sub">If the field is clear, fill in your profile and apply. If you don't know yet, the survey shows a next step. The application uses only the work-style points that fit that job.</p>
           <div class="cta">
             <a class="btn primary" href="/tyonhakija/">Look for work</a>
             <a class="btn" href="/ohjausmoottori/">I don't know the field yet</a>
@@ -531,137 +533,75 @@
 
   <main>
     <div class="wrap">
-      <section class="section section-alt" id="miksi-lxp">
-        <h2 class="h2 lang-content active" data-lang="fi">Työnhaku lähtee työtyylistä</h2>
-        <h2 class="h2 lang-content" data-lang="en">Job search starts from how you work</h2>
-        <p class="intro lang-content active" data-lang="fi">Tekoäly kirjoittaa työhakemuksen, joka on kytketty henkilön omaan työtyyliin. Mukaan tulevat vain ne kohdat, jotka sopivat kyseiseen tehtävään.</p>
-        <p class="intro lang-content" data-lang="en">The AI writes an application tied to the person's own work style. It includes only the points that fit that particular job.</p>
-        <div class="grid-2">
+      <section class="section" id="aloita">
+        <h2 class="h2 lang-content active" data-lang="fi">Kolme aloitusta</h2>
+        <h2 class="h2 lang-content" data-lang="en">Three ways to start</h2>
+        <div class="grid">
           <div class="card card-accent">
-            <h3 class="lang-content active" data-lang="fi">Hakemus tehtävään, ei kaikesta</h3>
-            <h3 class="lang-content" data-lang="en">An application for the job, not for everything</h3>
-            <p class="lang-content active" data-lang="fi">Yksilöllisistä ominaisuuksista poimitaan ne, jotka tukevat haettavaa työtä. Englanninkieliseen ilmoitukseen hakemus kirjoitetaan englanniksi.</p>
-            <p class="lang-content" data-lang="en">From a person's traits, only those that support the role are used. An English job ad gets an English application.</p>
+            <h3 class="lang-content active" data-lang="fi">Etsi työtä</h3>
+            <h3 class="lang-content" data-lang="en">Look for work</h3>
+            <ul class="plain-list lang-content active" data-lang="fi">
+              <li>Kymmenen kysymystä ja profiilikortti, jonka voi täyttää osissa.</li>
+              <li>Hakemus käyttää vain tehtävään sopivat työtyylin kohdat. Englanninkieliseen ilmoitukseen hakemus tulee englanniksi.</li>
+              <li>Sopivuus kertoo, mitä profiilista puuttuu, ja neuvoo olemaan lähettämättä, jos tehtävä ei sovi.</li>
+            </ul>
+            <ul class="plain-list lang-content" data-lang="en">
+              <li>Ten questions and a profile card you can fill in parts.</li>
+              <li>The application uses only the work-style points that fit the job. An English ad gets an English application.</li>
+              <li>The fit check says what the profile is missing, and advises you not to send it if the role does not fit.</li>
+            </ul>
+            <p style="margin-top:14px"><a class="btn primary lang-content active" data-lang="fi" href="/tyonhakija/">Etsi työtä</a><a class="btn primary lang-content" data-lang="en" href="/tyonhakija/">Look for work</a></p>
+          </div>
+          <div class="card">
+            <h3 class="lang-content active" data-lang="fi">En tiedä alaa</h3>
+            <h3 class="lang-content" data-lang="en">I don't know the field</h3>
+            <ul class="plain-list lang-content active" data-lang="fi">
+              <li>Kysely nuorille ja aikuisille uranvaihdossa, kun suunta ei ole vielä selvä.</li>
+              <li>Tulos on työtyylikuvaus, polkuja ja linkki Opintopolkuun, TET-jaksolle tai Ohjaamoon.</li>
+              <li>Yoro Valmentaja on tekoäly. Se tuntee vastaukset, mutta ei ole virallinen ohjaus eikä uraennuste.</li>
+            </ul>
+            <ul class="plain-list lang-content" data-lang="en">
+              <li>A survey for young people and adults changing careers, when the direction is not clear yet.</li>
+              <li>The result is a work-style description, paths, and a link to Studyinfo, a TET placement, or Ohjaamo.</li>
+              <li>Yoro Valmentaja is an AI. It knows the answers, but it is not official guidance and not a career forecast.</li>
+            </ul>
+            <p style="margin-top:14px"><a class="btn primary lang-content active" data-lang="fi" href="/ohjausmoottori/">Aloita kysely</a><a class="btn primary lang-content" data-lang="en" href="/ohjausmoottori/">Start the survey</a></p>
           </div>
           <div class="card card-green">
-            <h3 class="lang-content active" data-lang="fi">Sopivuus ennen lähettämistä</h3>
-            <h3 class="lang-content" data-lang="en">Fit, before you send</h3>
-            <p class="lang-content active" data-lang="fi">Työkalu analysoi, sopiiko tehtävä. Se kertoo, mitä työnhakuprofiilista puuttuu, ja neuvoo olemaan lähettämättä hakemusta, jos tehtävä ei sovi.</p>
-            <p class="lang-content" data-lang="en">A tool checks whether the role fits. It says what the job-search profile is missing, and advises you not to send the application when the job does not fit.</p>
+            <h3 class="lang-content active" data-lang="fi">Etsi kandidaatteja</h3>
+            <h3 class="lang-content" data-lang="en">Find candidates</h3>
+            <ul class="plain-list lang-content active" data-lang="fi">
+              <li>Lukee ilmoituksen ja nostaa ihmiset, jotka haluavat työn ja ovat seudulla.</li>
+              <li>Samassa työkalussa hakutyypiksi voi valita Kohdenna koulutuskurssi.</li>
+              <li>Kieli, ajokortti ja koulutus ovat ehtoja vain, jos ilmoitus niitä vaatii. Matalapalkassa valmis korkeakoulututkinto jää pois.</li>
+              <li>Kriitikko kertoo, miksi joku ei sovi. Työkalu on suomeksi. <a href="https://yoro.fi/profiiliselain/">Profiiliselain</a> on erillinen sivu.</li>
+            </ul>
+            <ul class="plain-list lang-content" data-lang="en">
+              <li>Reads the ad and ranks people who want the job and are in the area.</li>
+              <li>In the same tool, the search type can be set to target a training course.</li>
+              <li>Language, a driving licence, and education count only when the ad requires them. A completed higher degree is left out of low-wage work.</li>
+              <li>A critic says why someone does not fit. The tool is in Finnish. The <a href="https://yoro.fi/profiiliselain/">profile browser</a> is a separate page.</li>
+            </ul>
+            <p style="margin-top:14px"><a class="btn primary lang-content active" data-lang="fi" href="https://lxp.yoro.fi/test-workflow.html?mode=hire" target="_blank" rel="noopener noreferrer">Etsi kandidaatteja</a><a class="btn primary lang-content" data-lang="en" href="https://lxp.yoro.fi/test-workflow.html?mode=hire" target="_blank" rel="noopener noreferrer">Find candidates</a></p>
           </div>
         </div>
       </section>
 
-      <section class="section" id="en-tieda">
-        <h2 class="h2 lang-content active" data-lang="fi">Kun vastaus on “en tiedä”</h2>
-        <h2 class="h2 lang-content" data-lang="en">When the answer is “I don't know”</h2>
-        <p class="intro lang-content active" data-lang="fi">Moni nuori ja moni aikuinen uranvaihdossa vastaa koulutusta, työtä tai suuntaa koskeviin kysymyksiin: en tiedä. Haasteena ei useinkaan ole motivaation puute, vaan se, ettei tiedetä mistä aloittaa tai mikä palvelu auttaisi juuri omassa tilanteessa.</p>
-        <p class="intro lang-content" data-lang="en">Many young people, and many adults changing careers, answer questions about education, work, or direction with “I don't know.” The difficulty is often not a lack of motivation. It is not knowing where to start, or which service would help in this situation.</p>
-        <div class="grid-2">
-          <div class="card">
-            <h3 class="lang-content active" data-lang="fi">Ensimmäinen askel, ei valmis ura</h3>
-            <h3 class="lang-content" data-lang="en">A first step, not a finished career</h3>
-            <p class="lang-content active" data-lang="fi">Ohjausmoottori muuttaa “en tiedä” ensimmäiseksi askeleeksi kohti koulutusta, työllistymistä tai uutta uraa. Käyttäjän ei tarvitse tietää oikeaa vastausta etukäteen.</p>
-            <p class="lang-content" data-lang="en">The guidance engine turns “I don't know” into a first step toward education, employment, or a new career. You do not need to know the right answer in advance.</p>
-          </div>
-          <div class="card">
-            <h3 class="lang-content active" data-lang="fi">Ohjaus oikeaan palveluun</h3>
-            <h3 class="lang-content" data-lang="en">Guidance to the right service</h3>
-            <p class="lang-content active" data-lang="fi">Kartoituksen perusteella henkilö ohjataan esimerkiksi Opintopolkuun etsimään koulutusta, TET-jaksolle tutustumaan työhön käytännössä tai Ohjaamoon saamaan henkilökohtaista tukea.</p>
-            <p class="lang-content" data-lang="en">From the survey, a person can be directed to Studyinfo to look for education, to a TET placement to try work in practice, or to Ohjaamo for personal support.</p>
-          </div>
-        </div>
-      </section>
-
-      <section class="section" id="kaavio">
+      <section class="section section-alt" id="kaavio">
         <h2 class="h2 lang-content active" data-lang="fi">Mikä on LxP?</h2>
         <h2 class="h2 lang-content" data-lang="en">What is LxP?</h2>
-        <p class="intro lang-content active" data-lang="fi">LxP on kymmenen kysymyksen mittari työympäristöstä: itsenäisyys, tiimityö, rytmi, digitaaliset työkalut ja oppiminen. Se on kyselyn tulos, ei arvio. Sama tieto kulkee ohjauksesta työnhakuun. Työtoiveet ilmaistaan TE24-ammateilla.</p>
-        <p class="intro lang-content" data-lang="en">LxP is a ten-question measure of the work environment: independence, teamwork, rhythm, digital tools, and learning. It is a questionnaire result, not an opinion. The same information runs from guidance into job search. Job wishes use TE24 occupations.</p>
-        <p class="intro lang-content active" data-lang="fi">Ohjausmoottori kysyy näiden lisäksi aineita, uraohjausta ja motivaatiota. Tuloksena on työtyylikuvaus, kokeiltavia polkuja ja linkki esimerkiksi Opintopolkuun, TET-jaksolle tai Ohjaamoon. Tuloksen voi jakaa. Yoro Valmentaja on tekoäly, joka tuntee vastaukset: se ei korvaa ihmisohjaajaa eikä ennusta uraa.</p>
-        <p class="intro lang-content" data-lang="en">The guidance engine also asks about subjects, career guidance, and motivation. The result is a work-style description, paths to try, and a link such as Studyinfo, a TET placement, or Ohjaamo. The result can be shared. Yoro Valmentaja is an AI that knows the answers: it does not replace a human counsellor and it does not forecast a career.</p>
-        <p style="margin-top:16px">
-          <a class="btn primary lang-content active" data-lang="fi" href="https://yoro.fi/ohjausmoottori/" style="display:inline-flex;text-decoration:none">Aloita kysely</a>
-          <a class="btn primary lang-content" data-lang="en" href="https://yoro.fi/ohjausmoottori/" style="display:inline-flex;text-decoration:none">Start the survey</a>
-        </p>
+        <p class="intro lang-content active" data-lang="fi">LxP on kymmenen kysymyksen mittari työympäristöstä: itsenäisyys, tiimityö, rytmi, digitaaliset työkalut ja oppiminen. Se on kyselyn tulos. Työtoiveet ilmaistaan TE24-ammateilla. Sama tieto kulkee ohjauksesta työnhakuun.</p>
+        <p class="intro lang-content" data-lang="en">LxP is a ten-question measure of the work environment: independence, teamwork, rhythm, digital tools, and learning. It is a questionnaire result. Job wishes use TE24 occupations. The same information runs from guidance into job search.</p>
       </section>
 
-      <!-- Audiences -->
       <section class="section">
-        <h2 class="h2 lang-content active" data-lang="fi">Kenelle</h2>
-        <h2 class="h2 lang-content" data-lang="en">Who it is for</h2>
-        <p class="intro lang-content active" data-lang="fi">Työnhaku, ohjaus ja profiiliselain ovat käytössä. Työnantajan haku on suomeksi. Kuntanäkymä ei ole vielä työkalu.</p>
-        <p class="intro lang-content" data-lang="en">Job search, guidance, and the profile browser are live. Employer search is in Finnish. The municipal view is not a tool yet.</p>
-        <div class="grid">
-          <div class="card card-accent">
-            <h3 class="lang-content active" data-lang="fi">Työttömät</h3>
-            <h3 class="lang-content" data-lang="en">Unemployed job seekers</h3>
-            <p class="lang-content active" data-lang="fi">Tee LxP ja täytä profiilikortti osissa. Hakemus käyttää vain tähän tehtävään sopivia työtyylin kohtia. Sopivuustyökalu kertoo, mitä puuttuu, ja neuvoo olemaan lähettämättä hakemusta, jos tehtävä ei sovi. Maksu tulee myöhemmin.</p>
-            <p class="lang-content" data-lang="en">Create an LxP and fill the profile card in parts. The application uses only the work-style points that fit this job. The fit check says what is missing, and advises you not to send the application if the role does not fit. Payment comes later.</p>
-          </div>
-          <div class="card card-green">
-            <h3 class="lang-content active" data-lang="fi">Työnantajat ja rekrytoijat</h3>
-            <h3 class="lang-content" data-lang="en">Employers & recruiters</h3>
-            <p class="lang-content active" data-lang="fi">Etsi kandidaatteja lukee ilmoituksen ja nostaa ihmiset, jotka haluavat sen työn ja ovat sillä seudulla. Samassa työkalussa hakutyypiksi voi valita Kohdenna koulutuskurssi. Kieli, ajokortti ja koulutustaso ovat ehtoja vain, jos ilmoitus niitä vaatii. Matalapalkkaisessa työssä valmis korkeakoulututkinto jää pois. LxP järjestää yhtä pätevät työympäristön sopivuuden mukaan. Kriitikko käy listan ja kertoo, miksi joku ei sovi.</p>
-            <p class="lang-content" data-lang="en">Find candidates reads the ad and ranks people who want that job and are in that area. In the same tool you can set the search type to target a training course. Language, a driving licence, and education level count only when the ad requires them. A completed higher degree is left out of low-wage roles. LxP then orders equally qualified people by work-environment fit. A critic reviews the list and states why someone does not fit.</p>
-          </div>
-          <div class="card card-warn">
-            <h3 class="lang-content active" data-lang="fi">Kunnat ja alueet</h3>
-            <h3 class="lang-content" data-lang="en">Municipalities & regions</h3>
-            <p class="lang-content active" data-lang="fi">Tavoite myöhemmin: nähdä valmistuneiden määrä, työttömyys ja työllistyminen rinnakkain. Tätä näkymää ei vielä ole.</p>
-            <p class="lang-content" data-lang="en">A later aim: see graduate numbers, unemployment, and employment side by side. That view does not exist yet.</p>
-          </div>
-        </div>
+        <p class="later lang-content active" data-lang="fi">Etsi työtä, ohjausmoottori ja profiiliselain toimivat myös englanniksi. Etsi kandidaatteja on suomeksi. Maksu tulee myöhemmin.</p>
+        <p class="later lang-content" data-lang="en">Look for work, the guidance engine, and the profile browser also work in English. Find candidates is in Finnish. Payment comes later.</p>
+        <p class="later lang-content active" data-lang="fi">Työllistymisen todennäköisyyksiä, samankaltaisten hakijoiden määrää ja kuntien työvoimanäkymää ei vielä lasketa.</p>
+        <p class="later lang-content" data-lang="en">Employment probabilities, counts of similar job seekers, and a municipal labour outlook are not calculated yet.</p>
       </section>
 
-      <section class="section section-alt" id="kunnat">
-        <h2 class="h2 lang-content active" data-lang="fi">Myöhemmin datasta</h2>
-        <h2 class="h2 lang-content" data-lang="en">Later, from the data</h2>
-        <p class="intro lang-content active" data-lang="fi">Anonymisoidusta profiili- ja työmarkkinatiedosta halutaan myöhemmin nähdä työllistymisen todennäköisyys, kuinka moni etsii töitä samankaltaisella profiililla ja mitkä ominaisuudet ovat harvinaisempia. Näitä lukuja ei vielä lasketa. Tavoite on, että sopiva työ kestää pidempään ja kohtaanto paranee.</p>
-        <p class="intro lang-content" data-lang="en">From anonymized profile and labour-market data, the later aim is to see an employment probability, how many people with a similar profile are searching, and which traits are rarer. Those figures are not calculated yet. The goal is that a fitting job lasts longer and matching improves.</p>
-      </section>
-
-      <!-- Live tools -->
-      <section class="section section-alt" id="tyokalut">
-        <h2 class="h2 lang-content active" data-lang="fi">Käytössä nyt</h2>
-        <h2 class="h2 lang-content" data-lang="en">Available now</h2>
-        <p class="intro lang-content active" data-lang="fi">Nämä ovat auki nyt: työnhaku, ohjausmoottori ja Yoro Valmentaja, etsi kandidaatteja ja <a href="https://yoro.fi/profiiliselain/">profiiliselain</a>. Koulutuksen kohdistus on sama työkalu: hakutyypiksi valitaan Kohdenna koulutuskurssi.</p>
-        <p class="intro lang-content" data-lang="en">These are open now: job search, the guidance engine and Yoro Valmentaja, find candidates, and the <a href="https://yoro.fi/profiiliselain/">profile browser</a>. Targeting a course is the same tool: set the search type to target a training course.</p>
-        <div class="tools-bar">
-            <a class="btn primary lang-content active" data-lang="fi" href="/tyonhakija/">Etsi työtä</a>
-            <a class="btn primary lang-content" data-lang="en" href="/tyonhakija/">Job search</a>
-            <a class="btn primary lang-content active" data-lang="fi" href="/ohjausmoottori/">Ohjausmoottori</a>
-            <a class="btn primary lang-content" data-lang="en" href="/ohjausmoottori/">Guidance engine</a>
-          <a class="btn primary lang-content active" data-lang="fi" href="https://lxp.yoro.fi/test-workflow.html?mode=hire" target="_blank">Etsi kandidaatteja</a>
-          <a class="btn primary lang-content" data-lang="en" href="https://lxp.yoro.fi/test-workflow.html?mode=hire" target="_blank">Find candidates <span class="ui-lang-note">(Finnish only)</span></a>
-          <a class="btn primary lang-content active" data-lang="fi" href="https://yoro.fi/profiiliselain/">Profiiliselain</a>
-          <a class="btn primary lang-content" data-lang="en" href="https://yoro.fi/profiiliselain/">Profile browser</a>
-        </div>
-        <p class="translation-services-note lang-content" data-lang="en">Job search, the guidance engine, and the profile browser work in English. An English job ad gets an English application. Find candidates is still Finnish, including the choice to target a training course.</p>
-      </section>
-
-      <!-- FAQ -->
-      <section class="section">
-        <h2 class="h2 lang-content active" data-lang="fi">Usein kysyttyä</h2>
-        <h2 class="h2 lang-content" data-lang="en">FAQ</h2>
-        <div class="grid">
-          <div class="card">
-            <h3 class="lang-content active" data-lang="fi">Mitä haku oikeasti katsoo?</h3>
-            <h3 class="lang-content" data-lang="en">What does search actually use?</h3>
-            <p class="lang-content active" data-lang="fi">Työnhaussa: oma kortti, työtoive ja LxP. Työnantajan haussa: ilmoitus, työtoive, ammatti, seutu, koulutus, kokemus ja LxP. Kieli, ajokortti ja koulutustaso ovat ehtoja vain, jos ilmoitus niitä vaatii. Matalapalkkaisessa työssä valmis korkeakoulututkinto jää pois. Kriitikko voi kertoa, miksi joku ei sovi.</p>
-            <p class="lang-content" data-lang="en">In job search: your card, job wish, and LxP. In employer search: the ad, job wish, occupation, area, education, experience, and LxP. Language, a driving licence, and education level count only when the ad requires them. A completed higher degree is left out of low-wage work. A critic can say why someone does not fit.</p>
-          </div>
-          <div class="card">
-            <h3 class="lang-content active" data-lang="fi">Mikä on Yoro Valmentaja?</h3>
-            <h3 class="lang-content" data-lang="en">What is Yoro Valmentaja?</h3>
-            <p class="lang-content active" data-lang="fi">Tulossivun tekoäly. Se tuntee testivastaukset ja auttaa miettimään seuraavaa askelta. Se ei ole virallinen ohjaus eikä uraennuste.</p>
-            <p class="lang-content" data-lang="en">An AI on the result page. It knows the test answers and helps think about the next step. It is not official guidance and not a career forecast.</p>
-          </div>
-        </div>
-      </section>
-
-      <!-- Contact section -->
-      <section class="section">
+      <section class="section" id="yhteys">
         <h2 class="h2 lang-content active" data-lang="fi">Ota yhteyttä</h2>
         <h2 class="h2 lang-content" data-lang="en">Contact us</h2>
         
