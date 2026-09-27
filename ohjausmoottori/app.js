@@ -1781,6 +1781,19 @@ function applyResultPayload(data) {
   syncLangToggle();
 }
 
+function saveSeekerGuidance(archetype, heroSentence, narrative, motivationLines, topPaths) {
+  const summary = {
+    title: archetypeTitle(archetype),
+    emoji: archetype.emoji || '',
+    hero: heroSentence,
+    strengths: archetypeStrengths(archetype),
+    style: narrative.slice(0, 4),
+    motivation: motivationLines,
+    paths: topPaths.slice(0, 3).map((path) => pathName(path)),
+  };
+  try { localStorage.setItem('yoroOhjausKuvaus', JSON.stringify(summary)); } catch (_) { /* selain voi estää tallennuksen */ }
+}
+
 function persistResult() {
   const encoded = encodeResultPayload(serializeResultState());
   localStorage.setItem(RESULT_STORAGE_KEY, encoded);
@@ -3671,6 +3684,7 @@ function render() {
     const motivationLines = buildMotivationNarrative(state.motivation);
     const top = topPaths[0];
     const heroSentence = buildHeroSentence(archetype, state.tyoohjaus, top);
+    saveSeekerGuidance(archetype, heroSentence, narrative, motivationLines, topPaths);
     const cta = primaryCta(state.interest, top, answers);
     const higherEdNote = hasHigherEdBackground(answers)
       ? `<p class="trust-inline">${isEn() ? 'Higher education background noted — occupation lists focus on degree-level roles.' : 'Korkeakoulutaso huomioitu — ammattilistat näyttävät vain korkeamman tason tehtäviä.'}</p>`

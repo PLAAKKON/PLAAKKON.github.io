@@ -28,7 +28,7 @@
     .job { border-top:1px solid var(--line); padding-top:12px; margin-top:12px; }
     .letter { white-space:pre-wrap; background:#0b0f1a; border-radius:10px; padding:12px; }
     .error { color:#fecaca; }
-    #portrait p, #portrait li, #fitResult p, #fitResult li { color:var(--text); }
+    #portrait p, #portrait li, #guidance p, #guidance li, #fitResult p, #fitResult li { color:var(--text); }
     #portrait { margin-top:14px; }
     a { color:var(--accent); }
   </style>
@@ -55,21 +55,28 @@
 
     <div id="app" hidden>
       <section>
-        <h2>1. LxP-profiili</h2>
-        <p>Samat 10 monivalintaa kuin <a href="/ohjausmoottori/">Yoro Ohjausmoottorissa</a>. Avain on kysymyksen numero ja vastauskirjain. Sen jälkeen tulevat ohjausmoottorin lisäkysymykset: uraohjaus, motivaatio, aineet ja kiinnostus. Palaute ja Yoro-valmentaja aukeavat, kun nekin on vastattu.</p>
-        <p>Avain: <strong id="lxpKey">–</strong></p>
-        <div id="lxp"></div>
-        <button id="seeMe" type="button">Näytä millaisena tekijänä järjestelmä näkee minut</button>
-        <a id="analysisLink" href="/ohjausmoottori/">Avaa testin analyysisivu</a>
-        <div id="portrait" hidden>
-          <p id="portraitText"></p>
-          <p><strong>Ympäristöjä, joissa viihtyisit</strong></p>
-          <ul id="portraitJobs"></ul>
-          <p id="portraitNote"></p>
+        <h2>1. LxP</h2>
+        <p id="lxpSummary">Avain: <strong id="lxpKey">–</strong></p>
+        <button id="lxpToggle" type="button" hidden>Näytä LxP</button>
+        <div id="lxpPanel">
+          <p>Kymmenen monivalintaa. Avain on kysymyksen numero ja vastauskirjain. Kun kaikki on valittu, tämä osio menee piiloon.</p>
+          <div id="lxp"></div>
+          <button id="seeMe" type="button">Näytä LxP-kuvaus</button>
+          <div id="portrait" hidden>
+            <p id="portraitText"></p>
+            <p><strong>Ympäristöjä, joissa viihtyisit</strong></p>
+            <ul id="portraitJobs"></ul>
+            <p id="portraitNote"></p>
+          </div>
         </div>
       </section>
       <section>
-        <h2>2. Profiilikortti</h2>
+        <h2>2. Ohjausmoottori</h2>
+        <div id="guidance"></div>
+        <a id="analysisLink" href="/ohjausmoottori/">Avaa ohjausmoottori</a>
+      </section>
+      <section>
+        <h2>3. Profiilikortti</h2>
         <p>Voit täyttää kohdat missä järjestyksessä tahansa ja palata myöhemmin. Vaihtoehdot ovat samat kuin muissa profiileissa. Hae nimikkeellä, esimerkiksi tuotekehitys. Jos oikeaa ei löydy, lisää se omana.</p>
         <div class="q"><strong>Esittely</strong>
           <textarea id="intro" rows="3" placeholder="Lyhyt esittely, vapaaehtoinen"></textarea>
@@ -110,7 +117,7 @@
         <button class="primary" id="saveBtn" type="button">Tallenna tämä vaihe</button>
       </section>
       <section>
-        <h2>3. Etsi töitä</h2>
+        <h2>4. Etsi töitä</h2>
         <p>Haku ja hakemus toimivat jo sillä, mitä olet täyttänyt. Loput profiilista voit täydentää myöhemmin. Maksu tulee myöhemmässä vaiheessa.</p>
         <div class="q">
           <strong>Tarkista sopivuuteni johonkin työtehtävään</strong>
@@ -292,8 +299,68 @@
         }
       } catch (e) { /* selain voi estää tallennuksen */ }
       renderPortrait();
+      renderLxpChrome();
+      renderGuidance();
     }
+    let lxpOpen = false;
     let portraitOpen = false;
+    function lxpIsComplete() {
+      return questions.length === 10 && questions.every((q) => state.lxp[q.id]);
+    }
+    function renderLxpChrome() {
+      const complete = lxpIsComplete();
+      const panel = document.getElementById('lxpPanel');
+      const toggle = document.getElementById('lxpToggle');
+      if (panel) panel.hidden = complete && !lxpOpen;
+      if (toggle) {
+        toggle.hidden = !complete;
+        toggle.textContent = lxpOpen ? 'Piilota LxP' : 'Näytä LxP';
+      }
+    }
+    function addGuidanceList(box, title, items) {
+      const list = (items || []).filter(Boolean);
+      if (!list.length) return;
+      const heading = document.createElement('p');
+      const strong = document.createElement('strong');
+      strong.textContent = title;
+      heading.appendChild(strong);
+      box.appendChild(heading);
+      const ul = document.createElement('ul');
+      list.forEach((item) => {
+        const li = document.createElement('li');
+        li.textContent = item;
+        ul.appendChild(li);
+      });
+      box.appendChild(ul);
+    }
+    function renderGuidance() {
+      const box = document.getElementById('guidance');
+      const link = document.getElementById('analysisLink');
+      if (!box) return;
+      let data = null;
+      try { data = JSON.parse(localStorage.getItem('yoroOhjausKuvaus') || 'null'); } catch (e) { data = null; }
+      box.innerHTML = '';
+      if (!data || !data.hero) {
+        const note = document.createElement('p');
+        note.textContent = 'Sanallinen kuvaus tulee ohjausmoottorista. Se näkyy tässä, kun uraohjaus, motivaatio, aineet ja kiinnostus on vastattu.';
+        box.appendChild(note);
+        if (link) link.textContent = 'Jatka ohjausmoottorin lisäkysymyksiin';
+        return;
+      }
+      const title = document.createElement('p');
+      const strong = document.createElement('strong');
+      strong.textContent = [data.emoji, data.title].filter(Boolean).join(' ');
+      title.appendChild(strong);
+      box.appendChild(title);
+      const hero = document.createElement('p');
+      hero.textContent = data.hero;
+      box.appendChild(hero);
+      addGuidanceList(box, 'Vahvuutesi työssä', data.strengths);
+      addGuidanceList(box, 'Työtyylisi lyhyesti', data.style);
+      addGuidanceList(box, 'Motivaatio', data.motivation);
+      addGuidanceList(box, 'Polut', data.paths);
+      if (link) link.textContent = 'Avaa koko palaute ja valmentaja';
+    }
     function renderPortrait() {
       const box = document.getElementById('portrait');
       if (!portraitOpen) { box.hidden = true; return; }
@@ -431,6 +498,10 @@
       catch (error) { authFailure(error); }
     };
     document.getElementById('logoutBtn').onclick = () => firebase.auth().signOut();
+    document.getElementById('lxpToggle').onclick = () => {
+      lxpOpen = !lxpOpen;
+      renderLxpChrome();
+    };
     document.getElementById('seeMe').onclick = () => {
       portraitOpen = true;
       renderPortrait();
