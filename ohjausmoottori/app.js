@@ -3863,18 +3863,58 @@ function lxpFromBrowser() {
   return null;
 }
 
+function extrasComplete() {
+  if (!TYOOHJAUS_QUESTIONS.every((question) => state.tyoohjaus[question.id])) return false;
+  if (!MOTIVATION_Q.every((_, index) => motivationStepValid(index))) return false;
+  if (state.subjects.size < 1) return false;
+  if (!interestStepValid() || !exploreStepValid()) return false;
+  return true;
+}
+
+function resumeAfterLxp() {
+  const missingGuidance = TYOOHJAUS_QUESTIONS.findIndex((question) => !state.tyoohjaus[question.id]);
+  if (missingGuidance >= 0) {
+    state.screen = 'tyoohjaus';
+    state.tyoohjausIndex = missingGuidance;
+    return;
+  }
+  const missingMotivation = MOTIVATION_Q.findIndex((_, index) => !motivationStepValid(index));
+  if (missingMotivation >= 0) {
+    state.screen = 'motivation';
+    state.motivationIndex = missingMotivation;
+    return;
+  }
+  if (state.subjects.size < 1) {
+    state.screen = 'subjects';
+    return;
+  }
+  if (!interestStepValid()) {
+    state.screen = 'interest';
+    return;
+  }
+  if (!exploreStepValid()) {
+    state.screen = 'explore';
+    return;
+  }
+  state.screen = 'result';
+}
+
 function tryRestoreSavedFeedback() {
-  if (tryRestoreResultFromUrl()) return true;
+  if (tryRestoreResultFromUrl()) {
+    if (!extrasComplete()) resumeAfterLxp();
+    return true;
+  }
   const encoded = loadSavedResultEncoded();
   const saved = encoded ? decodeResultPayload(encoded) : null;
   if (saved) {
     applyResultPayload(saved);
+    if (!extrasComplete()) resumeAfterLxp();
     return true;
   }
   const lxp = lxpFromBrowser();
   if (!lxp) return false;
   state.lxp = lxp;
-  state.screen = 'result';
+  resumeAfterLxp();
   return true;
 }
 
