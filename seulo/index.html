@@ -53,7 +53,7 @@
     </section>
 
     <div id="app" hidden>
-      <p>Liitä avoin tehtävä. Yoro päättelee siitä työtyylin. Jos jokin kohta puuttuu, se kysytään monivalintana. Sitten voit lisätä kymmenen hakijaa, kuhunkin enintään kaksi PDF-tiedostoa. Parhaiten sopiva nousee ensimmäiseksi.</p>
+      <p>Liitä avoin tehtävä. Yoro päättelee siitä työtyylin. Jos jokin kohta puuttuu, se kysytään monivalintana. Sen jälkeen riittää kaksi hakijaa, ja mukaan mahtuu kymmenen. Kuhunkin enintään kaksi PDF-tiedostoa. Parhaiten sopiva nousee ensimmäiseksi.</p>
       <p id="status"></p>
       <section>
         <h2>Avoin tehtävä</h2>
@@ -63,8 +63,9 @@
       </section>
       <section id="people" hidden>
         <h2>Hakijat</h2>
-        <p>Kymmenen paikkaa. Yhteen paikkaan enintään kaksi PDF:ää. LxP päätellään vain, jos dokumentti tukee valintaa.</p>
+        <p>Kaksi hakijaa riittää. Paikkoja voi olla enintään kymmenen. Tyhjä paikka jätetään pois. Yhteen paikkaan enintään kaksi PDF:ää.</p>
         <div id="slots" class="slots"></div>
+        <button id="addSlot" type="button" style="margin-top:12px">Lisää hakija</button>
         <button class="primary" id="screenBtn" type="button" style="margin-top:12px">Seulo hakijoista</button>
         <div id="results"></div>
       </section>
@@ -85,6 +86,7 @@
     pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
     const API = "https://us-central1-urapolku-7780a.cloudfunctions.net/tyonhaku";
     const slots = Array.from({ length: 10 }, () => ({ nimi: "", files: [] }));
+    let slotCount = 2;
     let jobKey = "";
     let jobText = "";
 
@@ -118,7 +120,7 @@
     function renderSlots() {
       const box = document.getElementById("slots");
       box.replaceChildren();
-      slots.forEach((slot, index) => {
+      slots.slice(0, slotCount).forEach((slot, index) => {
         const card = document.createElement("div");
         card.className = "slot";
         const title = document.createElement("strong");
@@ -234,22 +236,19 @@
       }
     };
     document.getElementById("screenBtn").onclick = async () => {
-      const ready = slots.map((slot, index) => ({
+      const filled = slots.slice(0, slotCount).map((slot, index) => ({
         nimi: (slot.nimi || "").trim() || ("Hakija " + (index + 1)),
         teksti: slot.files.map((file) => file.text).filter(Boolean).join("\n").slice(0, 8000),
         hasFile: slot.files.length > 0
       })).filter((slot) => slot.hasFile);
+      const ready = filled.filter((slot) => slot.teksti.length >= 40);
+      const skipped = filled.filter((slot) => slot.teksti.length < 40);
       if (!jobKey) {
         setStatus("Lue ensin ilmoitus ja täydennä puuttuvat kohdat.", true);
         return;
       }
       if (!ready.length) {
-        setStatus("Lisää ainakin yhden hakijan PDF.", true);
-        return;
-      }
-      const empty = ready.find((slot) => slot.teksti.length < 40);
-      if (empty) {
-        setStatus(empty.nimi + ": PDF:stä ei löytynyt tekstiä. Tiedosto voi olla kuva.", true);
+        setStatus("Lisää PDF ainakin kahdelle hakijalle. Tyhjät paikat eivät estä seulontaa.", true);
         return;
       }
       document.getElementById("screenBtn").disabled = true;
@@ -292,7 +291,8 @@
           }
           results.appendChild(card);
         });
-        setStatus("Valmis. Parhaiten sopiva on ensimmäisenä.");
+        const note = skipped.length ? " Ohitettiin " + skipped.map((slot) => slot.nimi).join(", ") + ", koska PDF:stä ei löytynyt tekstiä." : "";
+        setStatus("Valmis. " + ready.length + " hakijaa seulottiin. Parhaiten sopiva on ensimmäisenä." + note);
       } catch (error) {
         setStatus(error.message, true);
       } finally {
@@ -309,6 +309,12 @@
       } catch (error) {
         document.getElementById("authError").textContent = "Sähköposti tai salasana ei täsmää.";
       }
+    };
+    document.getElementById("addSlot").onclick = () => {
+      if (slotCount >= 10) return;
+      slotCount += 1;
+      renderSlots();
+      document.getElementById("addSlot").hidden = slotCount >= 10;
     };
     firebase.auth().onAuthStateChanged((user) => {
       document.getElementById("authBox").hidden = !!user;
