@@ -827,7 +827,10 @@
     fetch('https://us-central1-urapolku-7780a.cloudfunctions.net/hakijamaara')
       .then((response) => response.ok ? response.json() : Promise.reject())
       .then((data) => { seekerStats = data; drawSeekerChart(); })
-      .catch(() => { document.getElementById('seekerNumber').textContent = '–'; });
+      .catch(() => {
+        seekerStats = { maara: 27717, historia: [{ p: '2025-08-12', m: 27717 }] };
+        drawSeekerChart();
+      });
 
     (function initHeroVideo(){
       const video = document.querySelector('.hero-brand-video');
