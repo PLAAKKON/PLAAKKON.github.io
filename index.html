@@ -438,6 +438,8 @@
       }
     }
 
+    .seeker-count { font-size: clamp(2.4rem, 6vw, 3.4rem); font-weight: 800; color: var(--text); margin: 8px 0 0; letter-spacing: -0.03em; }
+    .seeker-chart { width: 100%; height: auto; display: block; margin-top: 8px; }
     @media (max-width: 640px) {
       .wrap{padding:0 14px}
       .topbar .inner{padding:8px 0; gap:6px; min-height:48px}
@@ -533,6 +535,15 @@
 
   <main>
     <div class="wrap">
+      <section class="section" id="ilmoittaudu">
+        <h2 class="h2 lang-content active" data-lang="fi">Hae työtä uudella inhimillisemmällä tavalla.</h2>
+        <h2 class="h2 lang-content" data-lang="en">Look for work in a more human way.</h2>
+        <p style="margin-top:14px"><a class="btn primary lang-content active" data-lang="fi" href="/tyonhakija/">Ilmoittaudu työnhakijaksi</a><a class="btn primary lang-content" data-lang="en" href="/tyonhakija/">Register as a job seeker</a></p>
+        <p class="seeker-count" id="seekerNumber">…</p>
+        <p class="lang-content active" data-lang="fi" id="seekerCaption">hakijaa järjestelmässä</p>
+        <p class="lang-content" data-lang="en">job seekers in the system</p>
+        <svg id="seekerChart" class="seeker-chart" viewBox="0 0 640 220" role="img" aria-labelledby="seekerCaption"></svg>
+      </section>
       <section class="section" id="aloita">
         <h2 class="h2 lang-content active" data-lang="fi">Kolme tapaa aloittaa</h2>
         <h2 class="h2 lang-content" data-lang="en">Three ways to start</h2>
@@ -769,11 +780,54 @@
       document.documentElement.lang = lang;
       localStorage.setItem('preferred-language', lang);
       localStorage.setItem('preferredLanguage', lang);
+      if (window.drawSeekerChart) window.drawSeekerChart();
     }
     (function initLang(){
       const saved = localStorage.getItem('preferred-language');
       if(saved && saved!=='fi') switchLang(saved);
     })();
+
+    let seekerStats = null;
+    function drawSeekerChart() {
+      if (!seekerStats) return;
+      const en = document.documentElement.lang === 'en';
+      const number = document.getElementById('seekerNumber');
+      const svg = document.getElementById('seekerChart');
+      const rows = Array.isArray(seekerStats.historia) ? seekerStats.historia : [];
+      number.textContent = new Intl.NumberFormat(en ? 'en' : 'fi').format(seekerStats.maara || 0);
+      svg.setAttribute('aria-label', en ? 'Job seekers in the system' : 'Hakijoita järjestelmässä');
+      svg.replaceChildren();
+      if (!rows.length) return;
+      const ns = 'http://www.w3.org/2000/svg';
+      const width = 640;
+      const height = 220;
+      const pad = { l: 56, r: 12, t: 16, b: 36 };
+      const max = Math.max(...rows.map((row) => row.m), 1);
+      const innerW = width - pad.l - pad.r;
+      const innerH = height - pad.t - pad.b;
+      const barW = Math.min(42, (innerW / rows.length) * 0.55);
+      const add = (name, attrs) => {
+        const node = document.createElementNS(ns, name);
+        Object.entries(attrs).forEach(([key, value]) => node.setAttribute(key, value));
+        svg.appendChild(node);
+        return node;
+      };
+      add('line', { x1: pad.l, y1: pad.t + innerH, x2: width - pad.r, y2: pad.t + innerH, stroke: 'rgba(148,163,184,.35)' });
+      add('text', { x: 4, y: pad.t + 10, fill: '#94a3b8', 'font-size': '12' }).textContent = new Intl.NumberFormat(en ? 'en' : 'fi').format(max);
+      rows.forEach((row, index) => {
+        const barH = Math.max(2, (row.m / max) * innerH);
+        const x = pad.l + ((index + 0.5) * innerW) / rows.length - barW / 2;
+        const y = pad.t + innerH - barH;
+        add('rect', { x, y, width: barW, height: barH, rx: 6, fill: '#22d3ee' });
+        const label = rows.length > 8 ? String(row.p).slice(5) : String(row.p);
+        add('text', { x: x + barW / 2, y: height - 12, 'text-anchor': 'middle', fill: '#94a3b8', 'font-size': '11' }).textContent = label;
+      });
+    }
+    window.drawSeekerChart = drawSeekerChart;
+    fetch('https://us-central1-urapolku-7780a.cloudfunctions.net/hakijamaara')
+      .then((response) => response.ok ? response.json() : Promise.reject())
+      .then((data) => { seekerStats = data; drawSeekerChart(); })
+      .catch(() => { document.getElementById('seekerNumber').textContent = '–'; });
 
     (function initHeroVideo(){
       const video = document.querySelector('.hero-brand-video');
