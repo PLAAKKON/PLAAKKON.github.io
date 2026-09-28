@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="fi">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Yoro — seulo hakijoista</title>
+  <style>
+    :root { --bg:#0b0f1a; --card:#141b2d; --line:rgba(148,163,184,.28); --text:#f8fafc; --muted:#94a3b8; --accent:#22d3ee; }
+    * { box-sizing: border-box; }
+    body { margin:0; font-family: Inter, Segoe UI, sans-serif; background:var(--bg); color:var(--text); }
+    header { position:sticky; top:0; z-index:2; background:rgba(11,15,26,.92); border-bottom:1px solid var(--line); padding:12px 16px; display:flex; justify-content:space-between; align-items:center; }
+    main { max-width:980px; margin:0 auto; padding:16px; }
+    h1 { font-size:1.2rem; margin:0; }
+    h2 { font-size:1.05rem; margin:0 0 8px; }
+    p { color:var(--muted); }
+    a { color:var(--accent); }
+    section { background:linear-gradient(160deg, rgba(34,211,238,.08), rgba(20,27,45,.95) 40%); border:1px solid var(--line); border-radius:16px; padding:16px; margin:12px 0; }
+    button { border:1px solid var(--line); background:#1c2640; color:var(--text); border-radius:10px; padding:8px 12px; cursor:pointer; }
+    button.primary { background:#0891b2; border-color:#0891b2; color:white; font-weight:650; }
+    button:disabled { opacity:.5; cursor:not-allowed; }
+    input, textarea { width:100%; padding:10px; border-radius:10px; border:1px solid var(--line); background:#0b0f1a; color:var(--text); }
+    label { display:block; margin:10px 0 4px; color:var(--muted); }
+    .row { display:flex; gap:8px; flex-wrap:wrap; }
+    .error { color:#fecaca; }
+    .slots { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+    @media (max-width:720px) { .slots { grid-template-columns:1fr; } }
+    .slot { border:1px dashed rgba(34,211,238,.45); border-radius:12px; padding:12px; background:rgba(11,15,26,.45); }
+    .slot.over { border-color:var(--accent); box-shadow:0 0 18px rgba(34,211,238,.25); }
+    .choice { display:flex; gap:8px; align-items:flex-start; margin:8px 0; color:var(--text); }
+    .choice input { width:auto; margin-top:3px; }
+    .rank { border-top:1px solid var(--line); padding-top:12px; margin-top:12px; }
+    .rank h3 { margin:0 0 6px; }
+    .score { color:var(--accent); }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Seulo hakijoista</h1>
+    <a href="/">Etusivu</a>
+  </header>
+  <main>
+    <section id="authBox">
+      <h2>Tili</h2>
+      <p>Kirjaudu työnantajan tilillä.</p>
+      <label for="email">Sähköposti</label>
+      <input id="email" type="email" autocomplete="username" />
+      <label for="password">Salasana</label>
+      <input id="password" type="password" autocomplete="current-password" />
+      <div class="row" style="margin-top:12px">
+        <button class="primary" id="loginBtn" type="button">Kirjaudu</button>
+      </div>
+      <p id="authError" class="error"></p>
+    </section>
+
+    <div id="app" hidden>
+      <p>Liitä avoin tehtävä. Yoro päättelee siitä työtyylin. Jos jokin kohta puuttuu, se kysytään monivalintana. Sitten voit lisätä kymmenen hakijaa, kuhunkin enintään kaksi PDF-tiedostoa. Parhaiten sopiva nousee ensimmäiseksi.</p>
+      <p id="status"></p>
+      <section>
+        <h2>Avoin tehtävä</h2>
+        <textarea id="jobText" rows="8" placeholder="Työpaikkailmoituksen teksti"></textarea>
+        <button class="primary" id="readJob" type="button" style="margin-top:8px">Lue ilmoitus</button>
+        <div id="jobGaps"></div>
+      </section>
+      <section id="people" hidden>
+        <h2>Hakijat</h2>
+        <p>Kymmenen paikkaa. Yhteen paikkaan enintään kaksi PDF:ää. LxP päätellään vain, jos dokumentti tukee valintaa.</p>
+        <div id="slots" class="slots"></div>
+        <button class="primary" id="screenBtn" type="button" style="margin-top:12px">Seulo hakijoista</button>
+        <div id="results"></div>
+      </section>
+    </div>
+  </main>
+  <script src="https://www.gstatic.com/firebasejs/10.11.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.11.1/firebase-auth-compat.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+  <script>
+    firebase.initializeApp({
+      apiKey: "AIzaSyAnfsX522_ybXR7yhnAJbxDjuszVu4rZLE",
+      authDomain: "urapolku-7780a.firebaseapp.com",
+      projectId: "urapolku-7780a",
+      storageBucket: "urapolku-7780a.firebasestorage.app",
+      messagingSenderId: "314066598772",
+      appId: "1:314066598772:web:50183db006293290378a21"
+    });
+    pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+    const API = "https://us-central1-urapolku-7780a.cloudfunctions.net/tyonhaku";
+    const slots = Array.from({ length: 10 }, () => ({ nimi: "", files: [] }));
+    let jobKey = "";
+    let jobText = "";
+
+    function setStatus(text, isError) {
+      const node = document.getElementById("status");
+      node.textContent = text || "";
+      node.className = isError ? "error" : "";
+    }
+    async function api(action, extra) {
+      const token = await firebase.auth().currentUser.getIdToken();
+      const response = await fetch(API, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: "Bearer " + token },
+        body: JSON.stringify({ action, kieli: "fi", ...extra })
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(data.error || "Pyyntö epäonnistui");
+      return data;
+    }
+    async function pdfText(file) {
+      const pdf = await pdfjsLib.getDocument({ data: await file.arrayBuffer() }).promise;
+      const pages = Math.min(pdf.numPages, 8);
+      let text = "";
+      for (let i = 1; i <= pages; i += 1) {
+        const page = await pdf.getPage(i);
+        const content = await page.getTextContent();
+        text += content.items.map((item) => item.str || "").join(" ") + "\n";
+      }
+      return text.replace(/\s+/g, " ").trim();
+    }
+    function renderSlots() {
+      const box = document.getElementById("slots");
+      box.replaceChildren();
+      slots.forEach((slot, index) => {
+        const card = document.createElement("div");
+        card.className = "slot";
+        const title = document.createElement("strong");
+        title.textContent = "Hakija " + (index + 1);
+        const name = document.createElement("input");
+        name.placeholder = "Nimi, vapaaehtoinen";
+        name.value = slot.nimi || "";
+        name.style.marginTop = "8px";
+        name.oninput = () => { slot.nimi = name.value; };
+        const drop = document.createElement("p");
+        drop.textContent = "Raahaa PDF tähän tai valitse tiedosto.";
+        const input = document.createElement("input");
+        input.type = "file";
+        input.accept = "application/pdf,.pdf";
+        input.multiple = true;
+        const list = document.createElement("div");
+        slot.files.forEach((file, fileIndex) => {
+          const line = document.createElement("p");
+          line.textContent = file.name + (file.text ? "" : " — ei tekstiä");
+          const remove = document.createElement("button");
+          remove.type = "button";
+          remove.textContent = "Poista";
+          remove.style.marginLeft = "8px";
+          remove.onclick = () => { slot.files.splice(fileIndex, 1); renderSlots(); };
+          line.appendChild(remove);
+          list.appendChild(line);
+        });
+        async function take(fileList) {
+          const incoming = [...fileList].filter((file) => /pdf$/i.test(file.type) || /\.pdf$/i.test(file.name));
+          for (const file of incoming) {
+            if (slot.files.length >= 2) break;
+            const text = await pdfText(file).catch(() => "");
+            slot.files.push({ name: file.name, text: text.slice(0, 4000) });
+          }
+          renderSlots();
+        }
+        input.onchange = () => take(input.files || []);
+        card.ondragover = (event) => { event.preventDefault(); card.classList.add("over"); };
+        card.ondragleave = () => card.classList.remove("over");
+        card.ondrop = (event) => {
+          event.preventDefault();
+          card.classList.remove("over");
+          take(event.dataTransfer.files);
+        };
+        card.append(title, name, drop, input, list);
+        box.appendChild(card);
+      });
+    }
+    function showGaps(kohdat) {
+      const box = document.getElementById("jobGaps");
+      box.replaceChildren();
+      const missing = kohdat.filter((item) => !item.kirjaimet);
+      const known = kohdat.length - missing.length;
+      if (known) {
+        const done = document.createElement("p");
+        done.textContent = "Ilmoituksesta saatiin " + known + " työtyylin kohtaa. Täydennä loput.";
+        box.appendChild(done);
+      }
+      missing.forEach((item) => {
+        const block = document.createElement("div");
+        const heading = document.createElement("strong");
+        heading.textContent = item.otsikko + ". " + item.teksti;
+        block.appendChild(heading);
+        item.vaihtoehdot.forEach((option) => {
+          const label = document.createElement("label");
+          label.className = "choice";
+          const radio = document.createElement("input");
+          radio.type = "radio";
+          radio.name = "gap" + item.n;
+          radio.value = option.k;
+          label.append(radio, document.createTextNode(option.k + ". " + option.teksti));
+          block.appendChild(label);
+        });
+        box.appendChild(block);
+      });
+      const next = document.createElement("button");
+      next.className = "primary";
+      next.type = "button";
+      next.textContent = "Jatka hakijoihin";
+      next.style.marginTop = "8px";
+      next.onclick = () => {
+        const parts = {};
+        kohdat.forEach((item) => {
+          const picked = item.kirjaimet || (document.querySelector('input[name="gap' + item.n + '"]:checked') || {}).value || "";
+          if (picked) parts[item.n] = picked;
+        });
+        if ([1, 2, 3, 4, 5, 6, 7, 8, 9, 10].some((n) => !parts[n])) {
+          setStatus("Valitse puuttuviin kohtiin yksi vaihtoehto.", true);
+          return;
+        }
+        jobKey = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((n) => n + parts[n]).join("");
+        document.getElementById("people").hidden = false;
+        setStatus("");
+      };
+      box.appendChild(next);
+    }
+    document.getElementById("readJob").onclick = async () => {
+      jobText = document.getElementById("jobText").value.trim();
+      if (jobText.length < 40) {
+        setStatus("Liitä työpaikkailmoituksen teksti.", true);
+        return;
+      }
+      document.getElementById("readJob").disabled = true;
+      setStatus("Luetaan ilmoitusta…");
+      try {
+        const data = await api("tyopaikka", { ilmoitus: jobText });
+        showGaps(data.kohdat || []);
+        setStatus("");
+      } catch (error) {
+        setStatus(error.message, true);
+      } finally {
+        document.getElementById("readJob").disabled = false;
+      }
+    };
+    document.getElementById("screenBtn").onclick = async () => {
+      const ready = slots.map((slot, index) => ({
+        nimi: (slot.nimi || "").trim() || ("Hakija " + (index + 1)),
+        teksti: slot.files.map((file) => file.text).filter(Boolean).join("\n").slice(0, 8000),
+        hasFile: slot.files.length > 0
+      })).filter((slot) => slot.hasFile);
+      if (!jobKey) {
+        setStatus("Lue ensin ilmoitus ja täydennä puuttuvat kohdat.", true);
+        return;
+      }
+      if (!ready.length) {
+        setStatus("Lisää ainakin yhden hakijan PDF.", true);
+        return;
+      }
+      const empty = ready.find((slot) => slot.teksti.length < 40);
+      if (empty) {
+        setStatus(empty.nimi + ": PDF:stä ei löytynyt tekstiä. Tiedosto voi olla kuva.", true);
+        return;
+      }
+      document.getElementById("screenBtn").disabled = true;
+      const results = document.getElementById("results");
+      results.replaceChildren();
+      const found = [];
+      try {
+        for (let i = 0; i < ready.length; i += 1) {
+          setStatus("Seulotaan hakijaa " + (i + 1) + "/" + ready.length + "…");
+          found.push(await api("seulo", { avain: jobKey, ilmoitus: jobText, nimi: ready[i].nimi, teksti: ready[i].teksti }));
+        }
+        found.sort((a, b) => b.osuneet - a.osuneet || b.paatetyt - a.paatetyt);
+        found.forEach((item, index) => {
+          const card = document.createElement("div");
+          card.className = "rank";
+          const heading = document.createElement("h3");
+          heading.textContent = (index + 1) + ". " + item.nimi + " — " + item.osuneet + "/10";
+          heading.className = "score";
+          const key = document.createElement("p");
+          key.textContent = "LxP " + (item.lxp || "—") + ". Dokumenteista pääteltiin " + item.paatetyt + "/10 kohtaa.";
+          card.append(heading, key);
+          if (item.yhteenveto) {
+            const line = document.createElement("p");
+            line.textContent = item.yhteenveto;
+            card.appendChild(line);
+          }
+          if (item.puuttuu && item.puuttuu.length) {
+            const list = document.createElement("ul");
+            item.puuttuu.forEach((gap) => {
+              const li = document.createElement("li");
+              li.textContent = gap;
+              list.appendChild(li);
+            });
+            card.appendChild(list);
+          }
+          if (item.erot && item.erot.length) {
+            const diff = document.createElement("p");
+            diff.textContent = "Työtyyli eroaa: " + item.erot.map((row) => row.otsikko + " " + row.henkilo + " / tehtävä " + row.tehtava).join(", ") + ".";
+            card.appendChild(diff);
+          }
+          results.appendChild(card);
+        });
+        setStatus("Valmis. Parhaiten sopiva on ensimmäisenä.");
+      } catch (error) {
+        setStatus(error.message, true);
+      } finally {
+        document.getElementById("screenBtn").disabled = false;
+      }
+    };
+    document.getElementById("loginBtn").onclick = async () => {
+      document.getElementById("authError").textContent = "";
+      try {
+        await firebase.auth().signInWithEmailAndPassword(
+          document.getElementById("email").value.trim(),
+          document.getElementById("password").value
+        );
+      } catch (error) {
+        document.getElementById("authError").textContent = "Sähköposti tai salasana ei täsmää.";
+      }
+    };
+    firebase.auth().onAuthStateChanged((user) => {
+      document.getElementById("authBox").hidden = !!user;
+      document.getElementById("app").hidden = !user;
+      if (user) renderSlots();
+    });
+  </script>
+</body>
+</html>
